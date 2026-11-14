@@ -70,6 +70,15 @@ const SIMBOLOS = {
   /* INVENTÁRIO/AUDITORIA — PROVISÓRIO (prancheta com lupa) até o desenho definitivo: troque só aqui.
      O index.html usa esta mesma definição (injetarSimbolo). */
   "i-inventario-auditoria": '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/><path d="M16 4h2a2 2 0 0 1 2 2v5"/><path d="M8 10h6M8 14h3"/><circle cx="17" cy="17" r="3"/><path d="m21 21-1.8-1.8"/>',
+  /* Mapas de Ajuda (mapas.html) */
+  "i-mapa": '<path d="M14.1 4.6 9.9 2.4a2 2 0 0 0-1.8 0L3.6 4.7A1 1 0 0 0 3 5.6v14.8a1 1 0 0 0 1.4.9l3.7-1.9a2 2 0 0 1 1.8 0l4.2 2.2a2 2 0 0 0 1.8 0l4.5-2.3a1 1 0 0 0 .6-.9V3.6a1 1 0 0 0-1.4-.9l-3.7 1.9a2 2 0 0 1-1.8 0z"/><path d="M15 5v16M9 2.5v16"/>',
+  "i-servidor": '<rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01M6 18h.01"/>',
+  "i-grafo": '<circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7.2 7.4 10.6 16M16.8 7.4 13.4 16M7.5 6h9"/>',
+  "i-arvore": '<rect width="6" height="5" x="2" y="9.5" rx="1"/><rect width="6" height="5" x="16" y="3" rx="1"/><rect width="6" height="5" x="16" y="16" rx="1"/><path d="M8 12h4M12 5.5v13M12 5.5h4M12 18.5h4"/>',
+  "i-alvo": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>',
+  "i-ajustar": '<path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/>',
+  "i-menos": '<path d="M5 12h14"/>',
+  "i-roteiro": '<path d="M9 18h11M9 12h11M9 6h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11"/><circle cx="4.5" cy="18" r="1.5"/>',
   "i-vazio": ""
 };
 /* Um símbolo só, para páginas que têm o próprio conjunto de ícones (ex.: index.html) */

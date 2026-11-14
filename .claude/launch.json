@@ -4,7 +4,7 @@
     {
       "name": "suporte-n2",
       "runtimeExecutable": "py",
-      "runtimeArgs": ["-m", "http.server", "5500", "--bind", "127.0.0.1"],
+      "runtimeArgs": ["dev/servidor-sem-cache.py", "5500"],
       "port": 5500
     }
   ]

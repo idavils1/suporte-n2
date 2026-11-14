@@ -152,6 +152,61 @@ service cloud.firestore {
         ])
         || contatosAbertos();
     }
+    // Mapas de Ajuda (mapas.html): administradoras + EDITORES_MAPAS. Mantenha esta lista igual a
+    // EDITORES_MAPAS no comum/mapas.js (e-mails em minúsculas). Para trocar a política, mude só aqui e lá.
+    function podeEditarMapas() {
+      return ehAdmin()
+        || (request.auth != null && request.auth.token.email in [
+          // 'nome.sobrenome@valid.com',
+        ]);
+    }
+    function idMapa(id) {
+      return id.matches('^[a-z0-9-]{1,60}$');
+    }
+    function mapaValido() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['nome', 'descricao', 'icone', 'cor', 'layout', 'tags', 'criadoEm', 'criadoPor', 'atualizadoEm', 'atualizadoPor', 'excluidoEm'])
+        && d.nome is string && d.nome.size() > 0 && d.nome.size() <= 80
+        && textoAte(d.get('descricao', ''), 500)
+        && textoAte(d.icone, 40) && d.icone.matches('^i-[a-z-]{1,36}$')
+        && d.cor in ['roxo', 'azul', 'verde', 'laranja', 'amarelo', 'vermelho', 'cinza']
+        && d.get('layout', 'arvore') in ['arvore', 'grafo']
+        && d.get('tags', []) is list && d.get('tags', []).size() <= 20
+        && d.criadoEm is timestamp && textoAte(d.criadoPor, 80)
+        && (d.get('excluidoEm', null) == null || d.excluidoEm is timestamp)
+        && request.auth != null && d.atualizadoPor == request.auth.token.email && d.atualizadoEm == request.time;
+    }
+    function noMapaValido() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['tipo', 'titulo', 'descricao', 'paiId', 'ordem', 'tags', 'recolhido', 'pos', 'campos', 'ligacoes', 'revisadoEm', 'atualizadoEm', 'atualizadoPor'])
+        && d.tipo in ['sistema', 'sintoma', 'teste', 'contato', 'solucao', 'link', 'nota']
+        && d.titulo is string && d.titulo.size() > 0 && d.titulo.size() <= 120
+        && textoAte(d.get('descricao', ''), 20000)
+        && (d.get('paiId', null) == null || (d.paiId is string && d.paiId.matches('^[a-z0-9-]{1,60}$')))
+        && d.ordem is number
+        && d.get('tags', []) is list && d.get('tags', []).size() <= 20
+        && d.get('recolhido', false) is bool
+        && (d.get('pos', null) == null || (d.pos is map && d.pos.keys().hasOnly(['x', 'y', 'v']) && d.pos.x is number && d.pos.y is number && d.pos.get('v', 'arvore') in ['arvore', 'grafo']))
+        && d.get('campos', {}) is map && d.get('campos', {}).size() <= 20
+        && d.get('campos', {}).keys().hasOnly(['url', 'dono', 'criticidade', 'palavrasChave', 'frequencia', 'impacto', 'passos', 'esperado', 'tempo',
+            'nome', 'area', 'canal', 'email', 'telefone', 'horario', 'sla', 'nivel', 'observacoes', 'natureza'])
+        && d.get('ligacoes', []) is list && d.get('ligacoes', []).size() <= 20
+        && textoAte(d.get('revisadoEm', ''), 30)
+        && request.auth != null && d.atualizadoPor == request.auth.token.email && d.atualizadoEm == request.time;
+    }
+    // "Registrar atendimento" no modo Roteiro: qualquer pessoa cria (assina com o nome, como a Galeria);
+    // não dá para editar; só quem edita os mapas apaga.
+    function usoMapaValido() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['sintomaId', 'resultado', 'resolvidoNo', 'contatoId', 'testes', 'em', 'por'])
+        && d.sintomaId is string && d.sintomaId.matches('^[a-z0-9-]{1,60}$')
+        && d.resultado in ['resolvido', 'escalado', 'sem-solucao']
+        && textoAte(d.resolvidoNo, 60) && textoAte(d.contatoId, 60)
+        && d.testes is list && d.testes.size() <= 60
+        && d.em == request.time
+        && autorValido(d.por);
+    }
+
     // LGPD: só dados corporativos. Não existem (e são recusados) campos de CPF, RG, endereço
     // residencial, data de nascimento, celular pessoal ou saúde: hasOnly() abaixo.
     function contatoValido() {
@@ -344,6 +399,7 @@ service cloud.firestore {
           || (ehAdmin() && request.resource.data.porEmail == request.auth.token.email)
           || (podeEditarCaderno() && request.resource.data.alvo == 'caderno' && request.resource.data.porEmail == request.auth.token.email)
           || (request.auth != null && podeEditarContatos() && request.resource.data.alvo == 'contatos' && request.resource.data.porEmail == request.auth.token.email)
+          || (request.auth != null && podeEditarMapas() && request.resource.data.alvo == 'mapas' && request.resource.data.porEmail == request.auth.token.email)
         );
       allow update, delete: if false;
     }
@@ -2172,6 +2228,37 @@ service cloud.firestore {
     }
     match /cadeias-lixeira/{id} {
       allow read, write: if adminCadeias();
+    }
+
+    // Mapas de Ajuda (mapas.html). Leitura livre, como o resto da Central; escrita: podeEditarMapas().
+    // Um documento por nó (mapas/{id}/nos/{noId}); ligações extras ficam no campo "ligacoes" do nó de origem.
+    match /mapas/{mapaId} {
+      allow read: if true;
+      allow create, update: if podeEditarMapas() && idMapa(mapaId) && mapaValido();
+      allow delete: if podeEditarMapas();
+      match /nos/{noId} {
+        allow read: if true;
+        allow create, update: if podeEditarMapas() && idMapa(noId) && noMapaValido();
+        allow delete: if podeEditarMapas();
+      }
+      match /usos/{usoId} {
+        allow read: if true;
+        allow create: if usoId.matches('^[a-z0-9]{1,40}$') && usoMapaValido();
+        allow update: if false;
+        allow delete: if podeEditarMapas();
+      }
+    }
+    // Lixeira dos mapas: mapas e ramos removidos (Restaurar ou Excluir de vez)
+    match /mapas-lixeira/{itemId} {
+      allow read, delete: if podeEditarMapas();
+      allow create: if podeEditarMapas() && itemId.matches('^[A-Za-z0-9_-]{1,100}$')
+        && request.resource.data.keys().hasOnly(['tipo', 'mapaId', 'nome', 'dados', 'removidoEm', 'removidoPor'])
+        && request.resource.data.tipo in ['mapa', 'no']
+        && request.resource.data.mapaId is string && request.resource.data.mapaId.matches('^[a-z0-9-]{1,60}$')
+        && textoAte(request.resource.data.nome, 120)
+        && request.resource.data.dados is map
+        && request.resource.data.removidoEm == request.time && request.resource.data.removidoPor == request.auth.token.email;
+      allow update: if false;
     }
 
     // Esta regra fica sempre por último: o que não foi liberado acima é negado.

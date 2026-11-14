@@ -1104,6 +1104,10 @@
       <a class="btn-tema" href="https://inventario-equipamentos-vcert.web.app/" id="btn-inventario-auditoria" aria-label="Inventário/Auditoria" title="INVENTÁRIO/AUDITORIA">
         <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-inventario-auditoria"/></svg>
       </a>
+      <!-- AJUDA: abre os Mapas de Ajuda (mapas.html: mapas de diagnóstico por sistema) na mesma aba. -->
+      <a class="btn-tema" href="mapas.html" id="btn-ajuda" aria-label="Mapas de Ajuda" title="Ajuda: mapas de diagnóstico">
+        <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ajuda"/></svg>
+      </a>
       <button class="btn-tema" type="button" id="btn-tema" aria-label="Tema escuro" aria-pressed="false" title="Mudar para tema escuro">
         <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lua"/></svg>
       </button>
@@ -1606,6 +1610,7 @@
 <script type="module">
   import { injetarSimbolo } from "./comum/icones.js";
   injetarSimbolo("i-inventario-auditoria", document.getElementById("icones-index"));
+  injetarSimbolo("i-ajuda", document.getElementById("icones-index"));
 </script>
 
 <!--

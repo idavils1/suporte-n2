@@ -34,6 +34,10 @@
           "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
         },
         {
+          "source": "/mapas.html",
+          "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+        },
+        {
           "source": "/contatos.html",
           "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
         },
