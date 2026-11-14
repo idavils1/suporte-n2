@@ -1045,6 +1045,36 @@
     .barra-status { font-size: 11px; padding: 4px 8px; }
   }
 
+  /* Duas categorias lado a lado (PARES_CATEGORIAS) */
+  .par-caixas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
+  .caixa-categoria {
+    min-width: 0; padding: 24px;
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-md);
+    scroll-margin-top: calc(var(--altura-header) + 24px);
+  }
+  .caixa-categoria .secao-topo { margin-bottom: 18px; }
+  .caixa-categoria .secao-topo h2 { font-size: 22px; }
+  /* Meia largura: menos colunas dentro de cada caixa */
+  .caixa-categoria .grade-itens { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .caixa-categoria .grade-itens:not(.duas) .item { padding: 14px; gap: 10px; }
+  .caixa-categoria .item .nome { overflow-wrap: break-word; hyphens: auto; }
+  .caixa-categoria .grade-itens.duas,
+  body.editando .caixa-categoria .grade-itens { grid-template-columns: minmax(0, 1fr); }
+  .caixa-categoria .grade-itens.duas .item { padding: 18px 20px; }
+  body.editando .caixa-categoria .grade-itens.duas .item { padding-right: 156px; }
+  .caixa-categoria .card-destaque { grid-template-columns: auto minmax(0, 1fr); padding: 22px; gap: 16px 20px; }
+  .caixa-categoria .destaque-acao { grid-column: 1 / -1; }
+  .caixa-categoria .destaque-icone { width: 60px; height: 60px; }
+  .caixa-categoria .destaque-texto h3 { font-size: 19px; }
+  @media (max-width: 1024px) {
+    .par-caixas { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .caixa-categoria { padding: 18px 16px; }
+    .caixa-categoria .grade-itens { grid-template-columns: minmax(0, 1fr); }
+    .caixa-categoria .card-destaque { grid-template-columns: minmax(0, 1fr); padding: 20px; }
+  }
+
   /* Cinco ícones no topo (Comunicados, Inventário/Auditoria, tema, login, menu) */
   @media (max-width: 400px) {
     .acoes-header { gap: 4px; }
@@ -2314,7 +2344,12 @@
       </div>`;
   }
 
-  function htmlSecaoCategoria(cat, itens, reais, termo, posicao) {
+  /* Categorias exibidas lado a lado: [esquerda, direita]. Se só uma do par
+     aparecer (busca ou categoria vazia), ela volta a ocupar a largura total. */
+  const PARES_CATEGORIAS = [["sistemas", "ferramentas"], ["guias", "aprendizagem"], ["downloads", "contatos"]];
+
+  /* Cabeçalho (título, contagem, controles) + corpo (subgrupos e itens) de uma categoria */
+  function htmlConteudoCategoria(cat, itens, reais, termo, posicao) {
     const classeLista = cat.layout === "lista" ? "lista" : cat.layout === "duas" ? "grade-itens duas" : cat.layout === "destaque" ? "lista-destaque" : cat.layout === "compacto" ? "grade-itens compacto" : "grade-itens";
     const ordem = itensOrdenados(cat);
     const total = dadosSite.categorias.length;
@@ -2351,8 +2386,6 @@
       corpo = itens.length ? htmlLista(itens, "") : `<p class="vazio-admin">Nenhum item nesta categoria. Use “+ Item” para adicionar.</p>`;
     }
     return `
-      <section class="secao secao-conteudo" id="${escapar(cat.id)}" aria-labelledby="titulo-${escapar(cat.id)}">
-        <div class="container">
           <div class="secao-topo">
             <h2 id="titulo-${escapar(cat.id)}">${escapar(cat.titulo)}</h2>
             <div class="secao-topo-dir">
@@ -2368,7 +2401,29 @@
               </div>` : ""}
             </div>
           </div>
-          ${corpo}
+          ${corpo}`;
+  }
+
+  /* Categoria em largura total (uma seção própria) */
+  function htmlSecaoCategoria(cat, itens, reais, termo, posicao) {
+    return `
+      <section class="secao secao-conteudo" id="${escapar(cat.id)}" aria-labelledby="titulo-${escapar(cat.id)}">
+        <div class="container">
+          ${htmlConteudoCategoria(cat, itens, reais, termo, posicao)}
+        </div>
+      </section>`;
+  }
+
+  /* Duas categorias lado a lado numa mesma seção */
+  function htmlSecaoPar(esquerda, direita) {
+    const caixa = (c) => `
+          <div class="caixa-categoria" id="${escapar(c.cat.id)}" role="region" aria-labelledby="titulo-${escapar(c.cat.id)}">
+            ${htmlConteudoCategoria(c.cat, c.itens, c.reais, c.termo, c.posicao)}
+          </div>`;
+    return `
+      <section class="secao secao-par">
+        <div class="container">
+          <div class="par-caixas">${caixa(esquerda)}${caixa(direita)}</div>
         </div>
       </section>`;
   }
@@ -2468,6 +2523,7 @@
     if (termo) totalEncontrado += itensHoje.length;
     if (!termo || itensHoje.length) html += htmlSecaoHoje(itensHoje, termo);
 
+    const visiveis = new Map();
     dadosSite.categorias.forEach((cat, posicao) => {
       const categoriaCorresponde = termo && corresponde(termo, cat.titulo, cat.tituloCard);
       const itens = itensOrdenados(cat).filter((i) => !(termo && i.emBreve) && (categoriaCorresponde || corresponde(termo, i.nome, i.descricao, nomeSubDoItem(cat, i))));
@@ -2475,7 +2531,21 @@
       contagens[cat.id] = reais;
       totalEncontrado += reais;
       if (!itens.length && !(estado.editando && !termo)) return;
-      html += htmlSecaoCategoria(cat, itens, reais, termo, posicao);
+      visiveis.set(cat.id, { cat, itens, reais, termo, posicao });
+    });
+    /* O par aparece na posição da primeira das duas categorias; se só uma estiver visível, ela fica em largura total */
+    const jaExibidas = new Set();
+    visiveis.forEach((c, id) => {
+      if (jaExibidas.has(id)) return;
+      const par = PARES_CATEGORIAS.find((p) => p.includes(id));
+      const outra = par && visiveis.get(par[0] === id ? par[1] : par[0]);
+      if (outra && !jaExibidas.has(outra.cat.id)) {
+        html += par[0] === id ? htmlSecaoPar(c, outra) : htmlSecaoPar(outra, c);
+        jaExibidas.add(outra.cat.id);
+      } else {
+        html += htmlSecaoCategoria(c.cat, c.itens, c.reais, c.termo, c.posicao);
+      }
+      jaExibidas.add(id);
     });
 
     const grupos = dadosSite.time
@@ -2487,7 +2557,7 @@
     if (grupos.length) html += htmlSecaoTime(grupos, pessoasEncontradas, termo);
 
     $("#secoes").innerHTML = html;
-    $$(".secao-conteudo").forEach((s, i) => s.classList.toggle("quente", i % 2 === 0));
+    $$("#secoes > .secao").forEach((s, i) => s.classList.toggle("quente", i % 2 === 0));
 
     $("#sem-resultado").classList.toggle("visivel", totalEncontrado === 0 && !!termo);
     $("#busca-status").textContent = termo
@@ -2502,15 +2572,17 @@
   let observador;
   function observarSecoes() {
     if (observador) observador.disconnect();
-    const linksNav = $(".nav a");
+    const linksNav = $$(".nav a");
     observador = new IntersectionObserver((entradas) => {
       entradas.forEach((e) => {
         if (!e.isIntersecting) return;
-        const id = e.target.id;
-        linksNav.forEach((a) => a.classList.toggle("ativo", a.getAttribute("href") === "#" + id));
+        /* Numa linha com duas caixas, as duas categorias ficam destacadas juntas */
+        const par = e.target.closest(".par-caixas");
+        const ids = par ? $$(".caixa-categoria", par).map((c) => "#" + c.id) : ["#" + e.target.id];
+        linksNav.forEach((a) => a.classList.toggle("ativo", ids.includes(a.getAttribute("href"))));
       });
     }, { rootMargin: "-40% 0px -55% 0px" });
-    $$(".secao-conteudo").forEach((sec) => observador.observe(sec));
+    $$(".secao-conteudo, .caixa-categoria").forEach((sec) => observador.observe(sec));
   }
 
   /* Aviso */
