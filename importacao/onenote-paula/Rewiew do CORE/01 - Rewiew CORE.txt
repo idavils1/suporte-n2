@@ -1,0 +1,73 @@
+Comunicado para a rede sobre os dois websockets  
+
+2.0.0 > 64 bits 
+
+2.0.6 > 32 bits 
+
+ 
+
+Match simplificado: 
+
+Duplo match biométrico > ao acusar cadastro no CPF que está sendo validado, antes coletava se apenas os dedos apontados no sistema, agora será solicitado também coleta da foto para gerar o PDF de confere. 
+
+ 
+
+Emissão simplificada > teclado virtual para cadastro de senha 
+
+ 
+
+26785387871 
+
+ 
+
+ 
+
+ 
+
+GMUD > VC IVS 
+
+Cenários de testes: 
+
+Emissão coleta biométrica > presencial 
+
+Emissão match biométrico > presencial 
+
+Emissão dupla checagem > videoconferência. 
+
+  
+
+Ticket: 57490125020 
+
+Emissão coleta biométrica > presencial 
+
+  
+
+Ticket: 60067673886 
+
+Emissão match biométrico > presencial 
+
+  
+
+Ticket: 19729862420 
+
+Emissão dupla checagem > videoconferência. 
+
+02573663698 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 

@@ -1,0 +1,34 @@
+Configuração de maquina 
+
+  
+
+Cadastro de biometria - AGR 
+
+Vcivs BIO 
+
+VAGENT 
+
+Gerenciador do safe 
+
+JAVA 8-441/431 
+
+Fultronic - driver da leitora 
+
+Visuais 2010 até 15/22 86x 
+
+ 
+
+Usuário de AGR - obrigatoriamente ser configurável pelo prestador. 
+ 
+ 
+ 
+
+
+ 
+AVAST - impacta na emissão do certificado  e execução do Vagent. 
+
+ 
+
+680617100868 
+
+68061710868 

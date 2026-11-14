@@ -1,0 +1,74 @@
+Ata de reunião: 
+
+ 
+
+Todo e qualquer acionamento é necessário confirmar se o ticket reclamante pertence à algum PROJETO. 
+
+ 
+
+Processo de auditoria: Possíveis mudanças devido a IN31. 
+
+Fazer o rodizio de atuação em diferentes níveis de suporte. 
+
+ 
+
+Ingrid - médica  
+ 
+ 
+Problemas de emissão Vcrypto : Esse erro iniciou no TJSP: após digitar a senha PIN retorna “Erro ao gerar o certificado”, Código 2, porém, não tem relação com a senha. 
+Ação paliativa: troca de versões, reinstalação do VAgent e limpeza do cache, reinicia e a agente tenta novamente; 
+Porém essa semana tivemos cerca de 60 acionamentos na etapa de login e as ações paliativas irreversíveis, única solução concedendo certificado em nuvem (VIDaaS). 
+Solução: em andamento o desenvolvimento de um novo Vagent (websocket). 
+Técnico responsável por acompanhamento : @Caique Camargo Santos Souza e @Paula Katiele Soares Grande 
+O que foi feito para avanço: Realizado aberto chamado para Produtos no qual resulto um procedimento paliativo, porém ainda há casos reincidentes.  
+ 
+ 
+Java versão 451: Última versão é incompatível com o nosso módulo de biometria. Não tem a biblioteca JAVAFX que é responsável por "rodar" o Módulo de coleta Biométrica (JNLP); 
+Solução: Homologação e desenvolvimento do novo Websocket 
+Técnico responsável por acompanhamento : @Paula Katiele Soares Grande e @Caique Camargo Santos Souza 
+O que foi feito para avanço: Aguardando lançamento do novo Vagent/Websocket até o momento sem prazo 
+ 
+Vagent CNX: Questionamentos sobre a integridade do software reconhecendo como “Malware”. 
+
+Solução: Homologação e desenvolvimento do novo Websocket 
+Técnico responsável por acompanhamento : @Guilherme Matos, @Paula Katiele Soares Grande e @Caique Camargo Santos Souza 
+
+O que foi feito para avanço: Aguardando lançamento do novo Vagent/Websocket até o momento sem prazo. 
+ 
+Banrisul: Migração da linha 155 para 159, diariamente estamos cobrando o parceiro para essa migração. 
+
+Técnico responsável por acompanhamento : @Caique Camargo Santos Souza e @Paula Katiele Soares Grande 
+
+O que foi feito para avanço: Avanço dos teste impactados devido o erro 3 Vcrypto, porém grande parte dos teste com demais agencias do Banrisul tiverem êxito, ficamos de ter uma call para o 27/10 para demais auxilio e definição de um data para virada do SAR 159 deles.  
+ 
+ 
+ 
+
+Reunião - 24.10 
+
+Sempre que acionar áreas correlacionadas questionar qual era a causa raiz do erro e como foi a atuação do responsável. 
+
+Perguntar o pq do erro/ bug/ anomalia. 
+ 
+_________________________________________________________________ 
+ 
+Reunião - 1707 
+Monitoria nos atendimentos - CALLBOX paypper 
+Escrita 
+Orientações 
+Cordialidade 
+__________________________________________________________________ 
+Ter um controle monitorado sobre as demandas das quais estamos responsáveis. 
+Ex.: QW / Produtos / DEV. 
+ 
+__________________________________________________________________ 
+Organização do suporte corporativo -TRF3 
+- abertura de chamados (LOCALWEB). 
+__________________________________________________________________ 
+Respeitar o horário de almoço, bem como entrada e saída. 
+__________________________________________________________________ 
+ 
+ 
+ 
+
+ 

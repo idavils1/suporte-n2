@@ -1,0 +1,3482 @@
+{
+ "lidoEm": "2026-11-12T14:33:14.846Z",
+ "versao": 4,
+ "idsPublicados": [
+  "anatomia-certificado",
+  "api",
+  "assinatura-digital-eletronica",
+  "cadeia-certificacao",
+  "campo-aia",
+  "campo-algoritmo-assinatura",
+  "campo-cdp",
+  "campo-chave-publica",
+  "campo-emissor",
+  "campo-identificador-chave",
+  "campo-impressao-digital",
+  "campo-numero-serie",
+  "campo-politicas",
+  "campo-restricoes-basicas",
+  "campo-san",
+  "campo-uso-avancado",
+  "campo-uso-chave",
+  "campo-validade-requerente",
+  "campo-versao",
+  "certificado-digital",
+  "certificado-tipos",
+  "criptografia",
+  "ga-alem-do-rest",
+  "ga-arquitetura",
+  "ga-autenticacao",
+  "ga-boas-praticas",
+  "ga-brasil-ia",
+  "ga-checklist",
+  "ga-cliente-servidor-http",
+  "ga-codigos-status",
+  "ga-comparativo",
+  "ga-consumindo",
+  "ga-criando",
+  "ga-formatos-dados",
+  "ga-historia",
+  "ga-metodos-http",
+  "ga-o-que-e",
+  "ga-observabilidade",
+  "ga-openapi",
+  "ga-performance",
+  "ga-referencias",
+  "ga-rest",
+  "ga-revisao",
+  "ga-seguranca-owasp",
+  "ga-testando",
+  "ga-tipos-api",
+  "hash-sha",
+  "https",
+  "icp-brasil",
+  "ii-causa-raiz",
+  "ii-codigos-erro",
+  "ii-como-usar",
+  "ii-conceitos",
+  "ii-datadog",
+  "ii-diagnostico",
+  "ii-escalonamento",
+  "ii-faq-autenticacao",
+  "ii-faq-lote",
+  "ii-faq-pdf",
+  "ii-fluxo",
+  "ii-limites",
+  "ii-pendencias",
+  "integracao",
+  "pki",
+  "revogacao",
+  "rsa",
+  "rsa-matematica",
+  "ssl",
+  "utc",
+  "vidaas",
+  "vidaas-connect",
+  "vs-ambientes",
+  "vs-conceitos",
+  "vs-fluxo",
+  "vs-oauth",
+  "vs-objetivos",
+  "vs-passo-1-cadastro",
+  "vs-passo-2-discovery",
+  "vs-passo-3-autorizacao",
+  "vs-passo-4-token",
+  "vs-passo-5-assinatura",
+  "vs-postman",
+  "vs-produtos",
+  "vs-roteiro",
+  "vs-seguranca",
+  "vs-sgact",
+  "vs-troubleshooting"
+ ],
+ "trilhasDoc": {
+  "name": "projects/suporte-n2/databases/(default)/documents/conhecimento-config/trilhas",
+  "fields": {
+   "lista": {
+    "arrayValue": {
+     "values": [
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "certificacao"
+         },
+         "nome": {
+          "stringValue": "Certificação digital"
+         },
+         "descricao": {
+          "stringValue": "O que é um certificado digital, os tipos (A1, A3 e nuvem), a ICP-Brasil, a cadeia, a criptografia e cada campo do certificado."
+         },
+         "icone": {
+          "stringValue": "i-certificado"
+         },
+         "ordem": {
+          "integerValue": "1"
+         },
+         "categoria": {
+          "stringValue": "certificacao"
+         },
+         "modulos": {
+          "arrayValue": {}
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "destaque": {
+          "integerValue": "0"
+         },
+         "cor": {
+          "stringValue": "roxo"
+         },
+         "capa": {
+          "nullValue": null
+         },
+         "nivel": {
+          "stringValue": "Básico"
+         },
+         "tempo": {
+          "integerValue": "0"
+         },
+         "aviso": {
+          "nullValue": null
+         },
+         "fontes": {
+          "stringValue": ""
+         },
+         "atualizadoEm": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "vidaas"
+         },
+         "nome": {
+          "stringValue": "VIDaaS"
+         },
+         "descricao": {
+          "stringValue": "O aplicativo da Valid para certificado em nuvem e o VIDaaS Connect, que leva o certificado aos sistemas do computador."
+         },
+         "icone": {
+          "stringValue": "i-telefone"
+         },
+         "ordem": {
+          "integerValue": "2"
+         },
+         "categoria": {
+          "stringValue": "produtos"
+         },
+         "modulos": {
+          "arrayValue": {
+           "values": [
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "conteudo"
+               },
+               "nome": {
+                "stringValue": "Conteúdo"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "1"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            }
+           ]
+          }
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "destaque": {
+          "integerValue": "0"
+         },
+         "cor": {
+          "stringValue": "azul"
+         },
+         "capa": {
+          "nullValue": null
+         },
+         "nivel": {
+          "stringValue": "Básico"
+         },
+         "tempo": {
+          "integerValue": "0"
+         },
+         "aviso": {
+          "nullValue": null
+         },
+         "fontes": {
+          "stringValue": ""
+         },
+         "atualizadoEm": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "vidaas-sgact"
+         },
+         "nome": {
+          "stringValue": "VIDaaS e Carimbo do Tempo (SGACT) — suporte a parceiros"
+         },
+         "descricao": {
+          "stringValue": "Para atender desenvolvedores parceiros que integram com a API do Valid PSC: VIDaaS (assinatura com certificado em nuvem) e SGACT (carimbo do tempo)."
+         },
+         "icone": {
+          "stringValue": "i-plug"
+         },
+         "ordem": {
+          "integerValue": "3"
+         },
+         "categoria": {
+          "stringValue": "produtos"
+         },
+         "modulos": {
+          "arrayValue": {
+           "values": [
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "visao-geral"
+               },
+               "nome": {
+                "stringValue": "Visão geral"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "1"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "fundamentos"
+               },
+               "nome": {
+                "stringValue": "Fundamentos"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "2"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "fluxo-vidaas"
+               },
+               "nome": {
+                "stringValue": "O fluxo VIDaaS em 5 passos"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "3"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "carimbo-tempo"
+               },
+               "nome": {
+                "stringValue": "Carimbo do tempo (SGACT/TST)"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "4"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "ferramentas"
+               },
+               "nome": {
+                "stringValue": "Ferramentas: collection Postman"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "5"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "atendimento"
+               },
+               "nome": {
+                "stringValue": "Atendimento"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "6"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            }
+           ]
+          }
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "destaque": {
+          "integerValue": "0"
+         },
+         "cor": {
+          "stringValue": "azul"
+         },
+         "capa": {
+          "nullValue": null
+         },
+         "nivel": {
+          "stringValue": "Intermediário"
+         },
+         "tempo": {
+          "integerValue": "0"
+         },
+         "aviso": {
+          "nullValue": null
+         },
+         "fontes": {
+          "stringValue": "Manual VIDaaS v1.5 · Manual SGACT/TST v1.02 · Postman Collection PSC API v1.4 (material de capacitação do Suporte N1/N2)"
+         },
+         "atualizadoEm": {
+          "stringValue": "2026-11-05T10:00:00.000Z"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "integracoes"
+         },
+         "nome": {
+          "stringValue": "Integrações"
+         },
+         "descricao": {
+          "stringValue": "API, endpoints e integrações entre sistemas, com exemplos do dia a dia."
+         },
+         "icone": {
+          "stringValue": "i-plug"
+         },
+         "ordem": {
+          "integerValue": "4"
+         },
+         "categoria": {
+          "stringValue": "integracoes"
+         },
+         "modulos": {
+          "arrayValue": {}
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "destaque": {
+          "integerValue": "0"
+         },
+         "cor": {
+          "stringValue": "verde"
+         },
+         "capa": {
+          "nullValue": null
+         },
+         "nivel": {
+          "stringValue": "Básico"
+         },
+         "tempo": {
+          "integerValue": "0"
+         },
+         "aviso": {
+          "nullValue": null
+         },
+         "fontes": {
+          "stringValue": ""
+         },
+         "atualizadoEm": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "integraicp-v3"
+         },
+         "nome": {
+          "stringValue": "IntegraICP API v3 — Playbook de suporte"
+         },
+         "descricao": {
+          "stringValue": "Respostas prontas para as dúvidas mais comuns de quem integra o IntegraICP, com o selo de confiabilidade de cada uma."
+         },
+         "icone": {
+          "stringValue": "i-plug"
+         },
+         "ordem": {
+          "integerValue": "5"
+         },
+         "categoria": {
+          "stringValue": "integracoes"
+         },
+         "modulos": {
+          "arrayValue": {
+           "values": [
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "como-usar"
+               },
+               "nome": {
+                "stringValue": "Como usar este playbook"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "1"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "fluxo-conceitos"
+               },
+               "nome": {
+                "stringValue": "Fluxo e conceitos"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "2"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "faq"
+               },
+               "nome": {
+                "stringValue": "Perguntas frequentes"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "3"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "referencia"
+               },
+               "nome": {
+                "stringValue": "Referência rápida"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "4"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "investigacao"
+               },
+               "nome": {
+                "stringValue": "Investigação (N2) — USO INTERNO"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "5"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "escalonamento"
+               },
+               "nome": {
+                "stringValue": "Escalonamento"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "6"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "pendencias"
+               },
+               "nome": {
+                "stringValue": "Pendências"
+               },
+               "descricao": {
+                "stringValue": ""
+               },
+               "ordem": {
+                "integerValue": "7"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            }
+           ]
+          }
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "destaque": {
+          "integerValue": "0"
+         },
+         "cor": {
+          "stringValue": "verde"
+         },
+         "capa": {
+          "nullValue": null
+         },
+         "nivel": {
+          "stringValue": "Avançado"
+         },
+         "tempo": {
+          "integerValue": "0"
+         },
+         "aviso": {
+          "mapValue": {
+           "fields": {
+            "texto": {
+             "stringValue": "Playbook em validação: 7 pendências com o time do IntegraICP"
+            },
+            "aula": {
+             "stringValue": "ii-pendencias"
+            }
+           }
+          }
+         },
+         "fontes": {
+          "stringValue": "Documentação da API v3 (rev. 22/05/2024) · Q&A interno de 23/10/2026 · logs e APM do VIDaaS no Datadog (30 dias) · Playbook Nov/2026"
+         },
+         "atualizadoEm": {
+          "stringValue": "2026-11-05T10:00:00.000Z"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "seguranca"
+         },
+         "nome": {
+          "stringValue": "Segurança e web"
+         },
+         "descricao": {
+          "stringValue": "SSL/TLS e HTTPS: como um site prova quem é e protege a conexão."
+         },
+         "icone": {
+          "stringValue": "i-escudo"
+         },
+         "ordem": {
+          "integerValue": "6"
+         },
+         "categoria": {
+          "stringValue": "seguranca"
+         },
+         "modulos": {
+          "arrayValue": {}
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "destaque": {
+          "integerValue": "0"
+         },
+         "cor": {
+          "stringValue": "laranja"
+         },
+         "capa": {
+          "nullValue": null
+         },
+         "nivel": {
+          "stringValue": "Intermediário"
+         },
+         "tempo": {
+          "integerValue": "0"
+         },
+         "aviso": {
+          "nullValue": null
+         },
+         "fontes": {
+          "stringValue": ""
+         },
+         "atualizadoEm": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "guia-apis"
+         },
+         "nome": {
+          "stringValue": "API — O Guia Completo"
+         },
+         "descricao": {
+          "stringValue": "Do garçom ao OAuth: o que é uma API, HTTP, métodos e códigos de status, REST e outros estilos, segurança, boas práticas, testes e APIs no mundo real."
+         },
+         "icone": {
+          "stringValue": "i-livro"
+         },
+         "ordem": {
+          "integerValue": "7"
+         },
+         "categoria": {
+          "stringValue": "integracoes"
+         },
+         "modulos": {
+          "arrayValue": {
+           "values": [
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "fundamentos"
+               },
+               "nome": {
+                "stringValue": "Parte I · Fundamentos"
+               },
+               "descricao": {
+                "stringValue": "O que é uma API, a história, o HTTP, os métodos, os códigos de status e os formatos de dados."
+               },
+               "ordem": {
+                "integerValue": "1"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "estilos"
+               },
+               "nome": {
+                "stringValue": "Parte II · Estilos e arquiteturas"
+               },
+               "descricao": {
+                "stringValue": "Tipos de API, REST a fundo, SOAP, GraphQL, gRPC, WebSocket, SSE, webhooks e como escolher."
+               },
+               "ordem": {
+                "integerValue": "2"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "seguranca"
+               },
+               "nome": {
+                "stringValue": "Parte III · Segurança"
+               },
+               "descricao": {
+                "stringValue": "Autenticação, autorização, OAuth 2.0, JWT e o OWASP API Security Top 10."
+               },
+               "ordem": {
+                "integerValue": "3"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "design"
+               },
+               "nome": {
+                "stringValue": "Parte IV · Design profissional"
+               },
+               "descricao": {
+                "stringValue": "Boas práticas, paginação, erros, versionamento, cache, rate limiting e OpenAPI."
+               },
+               "ordem": {
+                "integerValue": "4"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "pratica"
+               },
+               "nome": {
+                "stringValue": "Parte V · Mão na massa"
+               },
+               "descricao": {
+                "stringValue": "Consumir, criar e testar APIs com curl, JavaScript, Python, Express e FastAPI."
+               },
+               "ordem": {
+                "integerValue": "5"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "mundo-real"
+               },
+               "nome": {
+                "stringValue": "Parte VI · APIs no mundo real"
+               },
+               "descricao": {
+                "stringValue": "Gateways, microsserviços, observabilidade, Pix, Open Finance e APIs na era da IA."
+               },
+               "ordem": {
+                "integerValue": "6"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            },
+            {
+             "mapValue": {
+              "fields": {
+               "id": {
+                "stringValue": "apendices"
+               },
+               "nome": {
+                "stringValue": "Apêndices"
+               },
+               "descricao": {
+                "stringValue": "Checklist da API perfeita, perguntas de revisão e referências."
+               },
+               "ordem": {
+                "integerValue": "7"
+               },
+               "oculto": {
+                "booleanValue": false
+               },
+               "icone": {
+                "stringValue": ""
+               },
+               "cor": {
+                "stringValue": ""
+               }
+              }
+             }
+            }
+           ]
+          }
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "destaque": {
+          "integerValue": "0"
+         },
+         "cor": {
+          "stringValue": "verde"
+         },
+         "capa": {
+          "nullValue": null
+         },
+         "nivel": {
+          "stringValue": "Básico"
+         },
+         "tempo": {
+          "integerValue": "0"
+         },
+         "aviso": {
+          "nullValue": null
+         },
+         "fontes": {
+          "stringValue": "Guia Completo de APIs (edição 2026): 21 capítulos e 4 apêndices"
+         },
+         "atualizadoEm": {
+          "stringValue": "2026-11-06T10:00:00.000Z"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "ferramentas"
+         },
+         "nome": {
+          "stringValue": "Ferramentas do time"
+         },
+         "descricao": {
+          "stringValue": "Os sistemas que o Suporte N2 usa no dia a dia. Em breve."
+         },
+         "icone": {
+          "stringValue": "i-ferramenta"
+         },
+         "ordem": {
+          "integerValue": "8"
+         },
+         "categoria": {
+          "stringValue": "ferramentas"
+         },
+         "modulos": {
+          "arrayValue": {}
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "destaque": {
+          "integerValue": "0"
+         },
+         "cor": {
+          "stringValue": "cinza"
+         },
+         "capa": {
+          "nullValue": null
+         },
+         "nivel": {
+          "stringValue": "Básico"
+         },
+         "tempo": {
+          "integerValue": "0"
+         },
+         "aviso": {
+          "nullValue": null
+         },
+         "fontes": {
+          "stringValue": ""
+         },
+         "atualizadoEm": {
+          "stringValue": ""
+         }
+        }
+       }
+      }
+     ]
+    }
+   },
+   "atualizadoEm": {
+    "timestampValue": "2026-11-06T20:22:18.044Z"
+   },
+   "versao": {
+    "integerValue": "4"
+   },
+   "atualizadoPor": {
+    "stringValue": "lays.almeida@valid.com"
+   }
+  },
+  "createTime": "2026-11-05T11:24:02.179686Z",
+  "updateTime": "2026-11-06T20:22:18.635694Z"
+ },
+ "glossarioDoc": {
+  "name": "projects/suporte-n2/databases/(default)/documents/conhecimento-config/glossario",
+  "fields": {
+   "termos": {
+    "arrayValue": {
+     "values": [
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "A1"
+         },
+         "definicao": {
+          "stringValue": "Certificado digital cuja chave privada fica em um arquivo no computador (geralmente .pfx ou .p12)."
+         },
+         "tema": {
+          "stringValue": "certificado-tipos"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "A3"
+         },
+         "definicao": {
+          "stringValue": "Certificado digital cuja chave privada é gerada e fica protegida em hardware criptográfico: token, cartão inteligente ou HSM na nuvem. Validade de até 5 anos, conforme o DOC-ICP-04."
+         },
+         "tema": {
+          "stringValue": "certificado-tipos"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "AIA"
+         },
+         "definicao": {
+          "stringValue": "Authority Information Access: extensão com os endereços para baixar o certificado da AC (cadeia) e consultar o OCSP."
+         },
+         "tema": {
+          "stringValue": "campo-aia"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "AKI"
+         },
+         "definicao": {
+          "stringValue": "Authority Key Identifier: identificador (hash SHA-1) da chave da AC que assinou o certificado."
+         },
+         "tema": {
+          "stringValue": "campo-identificador-chave"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "API"
+         },
+         "definicao": {
+          "stringValue": "Conjunto de regras que permite que um programa peça dados ou serviços a outro."
+         },
+         "tema": {
+          "stringValue": "api"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Assinatura digital"
+         },
+         "definicao": {
+          "stringValue": "Assinatura feita com a chave privada de um certificado; qualquer pessoa confere com a chave pública."
+         },
+         "tema": {
+          "stringValue": "assinatura-digital-eletronica"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Autoridade Certificadora (AC)"
+         },
+         "definicao": {
+          "stringValue": "Entidade credenciada que emite, assina e revoga certificados digitais."
+         },
+         "tema": {
+          "stringValue": "pki"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Autoridade de Registro (AR)"
+         },
+         "definicao": {
+          "stringValue": "Entidade que atende o cliente, confere identidade e documentos e encaminha o pedido para a AC."
+         },
+         "tema": {
+          "stringValue": "icp-brasil"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Cadeia de certificados"
+         },
+         "definicao": {
+          "stringValue": "Sequência que liga o certificado do titular à AC que emitiu e à AC Raiz; precisa estar instalada para o certificado ser reconhecido."
+         },
+         "tema": {
+          "stringValue": "cadeia-certificacao"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Certificado digital"
+         },
+         "definicao": {
+          "stringValue": "Identidade eletrônica de uma pessoa (e-CPF) ou empresa (e-CNPJ), emitida por uma AC."
+         },
+         "tema": {
+          "stringValue": "certificado-digital"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Certificado em nuvem"
+         },
+         "definicao": {
+          "stringValue": "Certificado A3 cuja chave fica em ambiente seguro na nuvem; o uso é autorizado por aplicativo, como o VIDaaS."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Chave privada"
+         },
+         "definicao": {
+          "stringValue": "Parte secreta do par de chaves; só o titular tem e é com ela que se assina ou se decifra."
+         },
+         "tema": {
+          "stringValue": "criptografia"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Chave pública"
+         },
+         "definicao": {
+          "stringValue": "Parte do par de chaves que vai dentro do certificado; serve para conferir assinaturas."
+         },
+         "tema": {
+          "stringValue": "campo-chave-publica"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "CN (Common Name)"
+         },
+         "definicao": {
+          "stringValue": "Nome principal de um certificado SSL, normalmente o domínio do site."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "CRL"
+         },
+         "definicao": {
+          "stringValue": "Certificate Revocation List (na ICP-Brasil, LCR): lista assinada pela AC com os números de série dos certificados revogados."
+         },
+         "tema": {
+          "stringValue": "revogacao"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "CSR"
+         },
+         "definicao": {
+          "stringValue": "Pedido de certificado (Certificate Signing Request) com a chave pública e os dados do domínio, gerado no servidor."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Direito de uso"
+         },
+         "definicao": {
+          "stringValue": "Período em que um certificado em nuvem pode ser usado, conforme o produto contratado."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "DV"
+         },
+         "definicao": {
+          "stringValue": "Certificado SSL de validação de domínio: confere só que o domínio pertence a quem pediu."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "e-CNPJ"
+         },
+         "definicao": {
+          "stringValue": "Certificado digital de pessoa jurídica (empresa)."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "e-CPF"
+         },
+         "definicao": {
+          "stringValue": "Certificado digital de pessoa física."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "ECC"
+         },
+         "definicao": {
+          "stringValue": "Criptografia de curvas elípticas: chaves menores que as do RSA com segurança equivalente (ECC de 256 bits ≈ RSA de 3072 bits)."
+         },
+         "tema": {
+          "stringValue": "criptografia"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "EKU"
+         },
+         "definicao": {
+          "stringValue": "Extended Key Usage (Uso avançado de chave): em quais aplicações o certificado pode ser usado, como Autenticação de Cliente e E-mail Seguro."
+         },
+         "tema": {
+          "stringValue": "campo-uso-avancado"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Endpoint"
+         },
+         "definicao": {
+          "stringValue": "Endereço (URL) onde uma API recebe pedidos."
+         },
+         "tema": {
+          "stringValue": "ga-o-que-e"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "EV"
+         },
+         "definicao": {
+          "stringValue": "Certificado SSL de validação estendida, com a verificação mais rigorosa da organização."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "GET"
+         },
+         "definicao": {
+          "stringValue": "Método HTTP para buscar dados sem alterar nada; os parâmetros vão na URL."
+         },
+         "tema": {
+          "stringValue": "ga-metodos-http"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Hash"
+         },
+         "definicao": {
+          "stringValue": "Resumo de tamanho fixo calculado a partir de um conteúdo (ex.: SHA-256); qualquer mudança no conteúdo muda o hash por completo."
+         },
+         "tema": {
+          "stringValue": "hash-sha"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "HSM"
+         },
+         "definicao": {
+          "stringValue": "Hardware Security Module: equipamento seguro que guarda chaves criptográficas, usado nos certificados em nuvem."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "HTTPS"
+         },
+         "definicao": {
+          "stringValue": "HTTP protegido por TLS; é o que faz aparecer o cadeado no navegador."
+         },
+         "tema": {
+          "stringValue": "https"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "ICP-Brasil"
+         },
+         "definicao": {
+          "stringValue": "Infraestrutura de Chaves Públicas Brasileira: o sistema oficial de certificação digital do país."
+         },
+         "tema": {
+          "stringValue": "icp-brasil"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "ITI"
+         },
+         "definicao": {
+          "stringValue": "Instituto Nacional de Tecnologia da Informação, a AC Raiz da ICP-Brasil."
+         },
+         "tema": {
+          "stringValue": "icp-brasil"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "JSON"
+         },
+         "definicao": {
+          "stringValue": "Formato de texto com pares \"nome\": valor, muito usado nas respostas de API."
+         },
+         "tema": {
+          "stringValue": "ga-formatos-dados"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Key Usage"
+         },
+         "definicao": {
+          "stringValue": "Uso da chave: operações criptográficas que a chave pode fazer, como Assinatura Digital, Não-Recusa e Criptografia de Chaves."
+         },
+         "tema": {
+          "stringValue": "campo-uso-chave"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "OCSP"
+         },
+         "definicao": {
+          "stringValue": "Online Certificate Status Protocol: consulta em tempo real se um certificado está válido, revogado ou desconhecido."
+         },
+         "tema": {
+          "stringValue": "revogacao"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "OID"
+         },
+         "definicao": {
+          "stringValue": "Object Identifier: número único em formato de galhos (ex.: 2.16.76.1.2.3.36) que identifica políticas, algoritmos e campos."
+         },
+         "tema": {
+          "stringValue": "campo-politicas"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "OV"
+         },
+         "definicao": {
+          "stringValue": "Certificado SSL que valida o domínio e a organização (CNPJ e razão social)."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "PFX"
+         },
+         "definicao": {
+          "stringValue": "Arquivo que junta o certificado e a chave privada, protegido por senha (também chamado .p12)."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "PIN"
+         },
+         "definicao": {
+          "stringValue": "Senha de uso de um token ou cartão inteligente."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "PKCS#11"
+         },
+         "definicao": {
+          "stringValue": "Padrão técnico para sistemas conversarem com tokens e cartões criptográficos."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "PKI"
+         },
+         "definicao": {
+          "stringValue": "Public Key Infrastructure (Infraestrutura de Chaves Públicas): o conjunto de regras, ACs e sistemas que dá confiança aos certificados."
+         },
+         "tema": {
+          "stringValue": "pki"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "POST"
+         },
+         "definicao": {
+          "stringValue": "Método HTTP para enviar dados e criar algo novo."
+         },
+         "tema": {
+          "stringValue": "ga-metodos-http"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "PUK"
+         },
+         "definicao": {
+          "stringValue": "Código para desbloquear um token ou cartão travado por erros de PIN."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "RSA"
+         },
+         "definicao": {
+          "stringValue": "Algoritmo de criptografia de chave pública; o número (2048, 4096) é o tamanho da chave."
+         },
+         "tema": {
+          "stringValue": "rsa"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "SAN"
+         },
+         "definicao": {
+          "stringValue": "Subject Alternative Name (Nome alternativo do requerente): identificações extras do titular, como e-mail e, na ICP-Brasil, CPF e CNPJ por OID."
+         },
+         "tema": {
+          "stringValue": "campo-san"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "SKI"
+         },
+         "definicao": {
+          "stringValue": "Subject Key Identifier: identificador (hash) da chave pública do próprio certificado; liga-se ao AKI dos certificados que ele assina."
+         },
+         "tema": {
+          "stringValue": "campo-identificador-chave"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "SSL/TLS"
+         },
+         "definicao": {
+          "stringValue": "Tecnologia que cria a conexão criptografada entre navegador e site; TLS é a versão moderna do SSL."
+         },
+         "tema": {
+          "stringValue": "ssl"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Thumbprint"
+         },
+         "definicao": {
+          "stringValue": "Impressão digital: hash do certificado inteiro, usado para identificar exatamente um certificado."
+         },
+         "tema": {
+          "stringValue": "campo-impressao-digital"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Token"
+         },
+         "definicao": {
+          "stringValue": "Dispositivo USB que guarda a chave privada de um certificado A3."
+         },
+         "tema": {
+          "stringValue": ""
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "UTC"
+         },
+         "definicao": {
+          "stringValue": "Tempo Universal Coordenado: referência de horário usada nas datas de validade dos certificados."
+         },
+         "tema": {
+          "stringValue": "utc"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "VIDaaS"
+         },
+         "definicao": {
+          "stringValue": "Aplicativo da Valid para certificado digital em nuvem."
+         },
+         "tema": {
+          "stringValue": "vidaas"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "VIDaaS Connect"
+         },
+         "definicao": {
+          "stringValue": "Programa que liga o certificado em nuvem do VIDaaS aos sistemas do computador."
+         },
+         "tema": {
+          "stringValue": "vidaas-connect"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "X.509"
+         },
+         "definicao": {
+          "stringValue": "Padrão internacional que define o formato dos certificados digitais (a versão atual, v3, permite extensões)."
+         },
+         "tema": {
+          "stringValue": "anatomia-certificado"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "OAuth 2.0"
+         },
+         "definicao": {
+          "stringValue": "Padrão de autorização (o mesmo do “Entrar com Google”): a aplicação recebe um token sem ver a senha nem a chave privada do titular."
+         },
+         "tema": {
+          "stringValue": "vs-oauth"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "client_id"
+         },
+         "definicao": {
+          "stringValue": "Identificador da aplicação do parceiro, gerado no cadastro; vale para um só ambiente."
+         },
+         "tema": {
+          "stringValue": "vs-passo-1-cadastro"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "client_secret"
+         },
+         "definicao": {
+          "stringValue": "Segredo da aplicação, gerado junto com o client_id. Confidencial: nunca pode aparecer em chamado."
+         },
+         "tema": {
+          "stringValue": "vs-seguranca"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "PKCE"
+         },
+         "definicao": {
+          "stringValue": "Proteção do OAuth (RFC 7636): a aplicação envia o code_challenge na autorização e prova o code_verifier original ao pedir o token."
+         },
+         "tema": {
+          "stringValue": "vs-oauth"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "code_verifier"
+         },
+         "definicao": {
+          "stringValue": "Valor secreto gerado pela aplicação no PKCE; é enviado ao pedir o token (no IntegraICP, nos passos 5 e 6)."
+         },
+         "tema": {
+          "stringValue": "vs-passo-4-token"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "code_challenge"
+         },
+         "definicao": {
+          "stringValue": "Resumo (S256) do code_verifier, enviado na autorização (no IntegraICP, no passo 1)."
+         },
+         "tema": {
+          "stringValue": "vs-oauth"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "redirect_uri"
+         },
+         "definicao": {
+          "stringValue": "Endereço para onde a autorização volta; precisa ser igual (ou contido) ao cadastrado. push://… faz a autorização por notificação."
+         },
+         "tema": {
+          "stringValue": "vs-passo-1-cadastro"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "user-discovery"
+         },
+         "definicao": {
+          "stringValue": "Chamada que verifica se o CPF/CNPJ tem certificado no Valid PSC e lista os slots; status “N” = sem certificado."
+         },
+         "tema": {
+          "stringValue": "vs-passo-2-discovery"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Slot"
+         },
+         "definicao": {
+          "stringValue": "Cada certificado disponível do titular no Valid PSC (slot_alias + label, ex.: “e-CPF A3 em nuvem gold”)."
+         },
+         "tema": {
+          "stringValue": "vs-passo-2-discovery"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Escopo"
+         },
+         "definicao": {
+          "stringValue": "O que o token pode fazer (scope): single_signature, multi_signature, signature_session ou authentication_session."
+         },
+         "tema": {
+          "stringValue": "vs-passo-3-autorizacao"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Access token"
+         },
+         "definicao": {
+          "stringValue": "Token temporário (Bearer) entregue no passo do token; expira (ex.: 900 s = 15 min)."
+         },
+         "tema": {
+          "stringValue": "vs-passo-4-token"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Bearer"
+         },
+         "definicao": {
+          "stringValue": "Forma de enviar o access token no cabeçalho: Authorization: Bearer <access_token>."
+         },
+         "tema": {
+          "stringValue": "vs-passo-5-assinatura"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "PSC"
+         },
+         "definicao": {
+          "stringValue": "Prestador de Serviço de Confiança: guarda a chave privada do titular na nuvem; o uso é autorizado pelo app VIDaaS."
+         },
+         "tema": {
+          "stringValue": "vs-conceitos"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "SGACT"
+         },
+         "definicao": {
+          "stringValue": "Serviço de carimbo do tempo da Valid (TST, RFC 3161), acessado por mTLS."
+         },
+         "tema": {
+          "stringValue": "vs-sgact"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "TST"
+         },
+         "definicao": {
+          "stringValue": "Time-Stamp Token: o carimbo do tempo devolvido pelo SGACT (status 0 = sucesso)."
+         },
+         "tema": {
+          "stringValue": "vs-sgact"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "TSR"
+         },
+         "definicao": {
+          "stringValue": "TimeStamp Request: o pedido de carimbo do tempo, com o hash do dado."
+         },
+         "tema": {
+          "stringValue": "vs-sgact"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "RFC 3161"
+         },
+         "definicao": {
+          "stringValue": "Padrão do carimbo do tempo (Time-Stamp Protocol) seguido pelo SGACT."
+         },
+         "tema": {
+          "stringValue": "vs-sgact"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "mTLS"
+         },
+         "definicao": {
+          "stringValue": "TLS mútuo: cliente e servidor apresentam certificado; no SGACT, o certificado ICP-Brasil precisa estar cadastrado."
+         },
+         "tema": {
+          "stringValue": "vs-sgact"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Postman"
+         },
+         "definicao": {
+          "stringValue": "Ferramenta para montar e repetir chamadas de API; a collection “PSC API Integração V1.4” é a ferramenta do N2."
+         },
+         "tema": {
+          "stringValue": "vs-postman"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Channel"
+         },
+         "definicao": {
+          "stringValue": "No IntegraICP, a API-Key da aplicação; define os provedores. Channel errado → 400101."
+         },
+         "tema": {
+          "stringValue": "ii-conceitos"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Clearance"
+         },
+         "definicao": {
+          "stringValue": "No IntegraICP, o provedor apto a autenticar o titular (não é a lista de todo o mercado)."
+         },
+         "tema": {
+          "stringValue": "ii-conceitos"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "subject_key"
+         },
+         "definicao": {
+          "stringValue": "No IntegraICP, o CPF do titular, só números (sem máscara)."
+         },
+         "tema": {
+          "stringValue": "ii-conceitos"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "credentialId"
+         },
+         "definicao": {
+          "stringValue": "No IntegraICP, o ID devolvido na callback_uri; reusar após expirar → 403."
+         },
+         "tema": {
+          "stringValue": "ii-conceitos"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "contentDigest"
+         },
+         "definicao": {
+          "stringValue": "No IntegraICP, o SHA-256 em Base64 padrão (44 caracteres); hex ou Base64 URL-safe → 400204."
+         },
+         "tema": {
+          "stringValue": "ii-conceitos"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "CMS"
+         },
+         "definicao": {
+          "stringValue": "Formato de assinatura (PKCS#7) que embrulha a assinatura com o certificado; é o que se insere no PDF."
+         },
+         "tema": {
+          "stringValue": "ii-faq-pdf"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "PAdES"
+         },
+         "definicao": {
+          "stringValue": "Perfil de assinatura digital para PDF (ex.: PAdES_AD_RT, PAdES_AD_RB)."
+         },
+         "tema": {
+          "stringValue": "ii-faq-pdf"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "CAdES"
+         },
+         "definicao": {
+          "stringValue": "Perfil de assinatura digital sobre CMS (ex.: CAdES_AD_RT, CAdES_AD_RB)."
+         },
+         "tema": {
+          "stringValue": "ii-faq-pdf"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Rate limit"
+         },
+         "definicao": {
+          "stringValue": "Limite de chamadas num intervalo; acima dele a resposta é HTTP 429 (Too many requests)."
+         },
+         "tema": {
+          "stringValue": "ii-limites"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Idempotência"
+         },
+         "definicao": {
+          "stringValue": "Repetir uma chamada sem efeito duplicado. No IntegraICP não existe: um reenvio gera nova assinatura e nova cobrança."
+         },
+         "tema": {
+          "stringValue": "ii-faq-lote"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "trace_id"
+         },
+         "definicao": {
+          "stringValue": "Identificador de uma chamada nos logs (Datadog); registre no chamado antes de escalar."
+         },
+         "tema": {
+          "stringValue": "ii-datadog"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "API Gateway"
+         },
+         "definicao": {
+          "stringValue": "Ponto único de entrada que roteia, autentica e limita chamadas para vários serviços (a “portaria do condomínio”)."
+         },
+         "tema": {
+          "stringValue": "ga-arquitetura"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "API Key"
+         },
+         "definicao": {
+          "stringValue": "Chave secreta que identifica a aplicação que está chamando a API (não necessariamente o usuário)."
+         },
+         "tema": {
+          "stringValue": "ga-autenticacao"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Autenticação"
+         },
+         "definicao": {
+          "stringValue": "Provar quem você é (“Quem é você?”). Falta de autenticação → HTTP 401."
+         },
+         "tema": {
+          "stringValue": "ga-autenticacao"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Autorização"
+         },
+         "definicao": {
+          "stringValue": "Definir o que você pode fazer (“O que você pode fazer?”). Autenticado, mas sem permissão → HTTP 403."
+         },
+         "tema": {
+          "stringValue": "ga-autenticacao"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Backoff"
+         },
+         "definicao": {
+          "stringValue": "Aumentar o tempo de espera entre retentativas (1 s, 2 s, 4 s...), de preferência com um pouco de aleatoriedade (jitter)."
+         },
+         "tema": {
+          "stringValue": "ga-performance"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "BFF"
+         },
+         "definicao": {
+          "stringValue": "Backend For Frontend: back-end dedicado a um tipo de cliente (ex.: um para o app, outro para o site)."
+         },
+         "tema": {
+          "stringValue": "ga-arquitetura"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "BOLA"
+         },
+         "definicao": {
+          "stringValue": "Broken Object Level Authorization: falha em verificar se o usuário pode acessar aquele objeto específico. Risco nº 1 do OWASP API Top 10."
+         },
+         "tema": {
+          "stringValue": "ga-seguranca-owasp"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Cache"
+         },
+         "definicao": {
+          "stringValue": "Cópia temporária de uma resposta para evitar refazer o trabalho; controlada pelo cabeçalho Cache-Control."
+         },
+         "tema": {
+          "stringValue": "ga-performance"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Circuit breaker"
+         },
+         "definicao": {
+          "stringValue": "Como o disjuntor de casa: se um serviço falha muito, para de chamá-lo por um tempo para evitar efeito cascata."
+         },
+         "tema": {
+          "stringValue": "ga-performance"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Content-Type"
+         },
+         "definicao": {
+          "stringValue": "Cabeçalho que diz o formato do corpo enviado, como application/json."
+         },
+         "tema": {
+          "stringValue": "ga-formatos-dados"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "CORS"
+         },
+         "definicao": {
+          "stringValue": "Cross-Origin Resource Sharing: mecanismo do navegador que controla chamadas entre origens diferentes. Não substitui autenticação."
+         },
+         "tema": {
+          "stringValue": "ga-seguranca-owasp"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "CRUD"
+         },
+         "definicao": {
+          "stringValue": "Create, Read, Update, Delete: as quatro operações básicas (POST, GET, PUT/PATCH, DELETE)."
+         },
+         "tema": {
+          "stringValue": "ga-metodos-http"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "curl"
+         },
+         "definicao": {
+          "stringValue": "Ferramenta de linha de comando para fazer chamadas HTTP; curl -v mostra a conversa inteira."
+         },
+         "tema": {
+          "stringValue": "ga-consumindo"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "DELETE"
+         },
+         "definicao": {
+          "stringValue": "Método HTTP para remover um recurso; é idempotente."
+         },
+         "tema": {
+          "stringValue": "ga-metodos-http"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "ETag"
+         },
+         "definicao": {
+          "stringValue": "Identificador da versão de um recurso; com If-None-Match, o servidor responde 304 se nada mudou."
+         },
+         "tema": {
+          "stringValue": "ga-performance"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "GraphQL"
+         },
+         "definicao": {
+          "stringValue": "Linguagem de consulta em que o cliente escolhe os campos que quer, em um único endpoint."
+         },
+         "tema": {
+          "stringValue": "ga-alem-do-rest"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "gRPC"
+         },
+         "definicao": {
+          "stringValue": "Framework de chamadas remotas binárias (Protocol Buffers) sobre HTTP/2, muito usado entre microsserviços."
+         },
+         "tema": {
+          "stringValue": "ga-alem-do-rest"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "HATEOAS"
+         },
+         "definicao": {
+          "stringValue": "Respostas com links para as próximas ações possíveis (nível 3 do Modelo de Maturidade de Richardson)."
+         },
+         "tema": {
+          "stringValue": "ga-rest"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Header"
+         },
+         "definicao": {
+          "stringValue": "Cabeçalho: metadado de uma requisição ou resposta HTTP, no formato chave: valor (ex.: Authorization, Content-Type)."
+         },
+         "tema": {
+          "stringValue": "ga-cliente-servidor-http"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "HTTP"
+         },
+         "definicao": {
+          "stringValue": "O protocolo que cliente e servidor usam para conversar na web: requisição (método + URL + cabeçalhos + corpo) e resposta (código de status + cabeçalhos + corpo)."
+         },
+         "tema": {
+          "stringValue": "ga-cliente-servidor-http"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "JWT"
+         },
+         "definicao": {
+          "stringValue": "JSON Web Token: token assinado em três partes (header, payload e assinatura). É assinado, não criptografado: não leva dados sensíveis."
+         },
+         "tema": {
+          "stringValue": "ga-autenticacao"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Latência"
+         },
+         "definicao": {
+          "stringValue": "Tempo entre enviar a requisição e receber a resposta; costuma ser medida no p95, não na média."
+         },
+         "tema": {
+          "stringValue": "ga-observabilidade"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "MCP"
+         },
+         "definicao": {
+          "stringValue": "Model Context Protocol: padrão aberto para conectar aplicações de IA a ferramentas e APIs."
+         },
+         "tema": {
+          "stringValue": "ga-brasil-ia"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Mock"
+         },
+         "definicao": {
+          "stringValue": "Simulação de uma API para testes ou desenvolvimento, inclusive de respostas de erro e de lentidão."
+         },
+         "tema": {
+          "stringValue": "ga-testando"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "OpenAPI"
+         },
+         "definicao": {
+          "stringValue": "Especificação padrão (antiga Swagger) para descrever APIs REST em YAML ou JSON; gera documentação, SDKs e mocks."
+         },
+         "tema": {
+          "stringValue": "ga-openapi"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "OpenID Connect"
+         },
+         "definicao": {
+          "stringValue": "Camada sobre o OAuth 2.0 que adiciona autenticação: devolve um id_token (JWT) dizendo quem é o usuário."
+         },
+         "tema": {
+          "stringValue": "ga-autenticacao"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "OWASP"
+         },
+         "definicao": {
+          "stringValue": "Organização aberta de segurança de aplicações; mantém o API Security Top 10 (2023)."
+         },
+         "tema": {
+          "stringValue": "ga-seguranca-owasp"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "PATCH"
+         },
+         "definicao": {
+          "stringValue": "Método HTTP para alterar só parte de um recurso."
+         },
+         "tema": {
+          "stringValue": "ga-metodos-http"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Payload"
+         },
+         "definicao": {
+          "stringValue": "O conteúdo “útil” de uma mensagem (o corpo da requisição ou da resposta)."
+         },
+         "tema": {
+          "stringValue": "ga-cliente-servidor-http"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Polling"
+         },
+         "definicao": {
+          "stringValue": "Perguntar repetidamente se algo mudou (“já chegou?”); o webhook é a alternativa."
+         },
+         "tema": {
+          "stringValue": "ga-alem-do-rest"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Problem Details"
+         },
+         "definicao": {
+          "stringValue": "Formato padrão de erro em APIs (RFC 9457): type, title, status, detail e instance, com Content-Type application/problem+json."
+         },
+         "tema": {
+          "stringValue": "ga-boas-praticas"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "PUT"
+         },
+         "definicao": {
+          "stringValue": "Método HTTP para substituir um recurso por completo; é idempotente. Campos não enviados são removidos."
+         },
+         "tema": {
+          "stringValue": "ga-metodos-http"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Query string"
+         },
+         "definicao": {
+          "stringValue": "Parte da URL depois do “?” (ex.: ?cor=azul&ordenar=preco), usada para filtrar, ordenar ou paginar."
+         },
+         "tema": {
+          "stringValue": "ga-cliente-servidor-http"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Refresh token"
+         },
+         "definicao": {
+          "stringValue": "Token de vida longa do OAuth, usado só para obter novos access tokens sem pedir login de novo."
+         },
+         "tema": {
+          "stringValue": "ga-autenticacao"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "REST"
+         },
+         "definicao": {
+          "stringValue": "Estilo arquitetural baseado em recursos (URIs) e na semântica do HTTP; o padrão mais popular das Web APIs."
+         },
+         "tema": {
+          "stringValue": "ga-rest"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "SDK"
+         },
+         "definicao": {
+          "stringValue": "Software Development Kit: biblioteca pronta que facilita o uso de uma API."
+         },
+         "tema": {
+          "stringValue": "ga-o-que-e"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Serialização"
+         },
+         "definicao": {
+          "stringValue": "Converter objetos da memória em texto ou bytes para transmissão (ex.: JSON.stringify); o inverso é a desserialização."
+         },
+         "tema": {
+          "stringValue": "ga-formatos-dados"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "SLA"
+         },
+         "definicao": {
+          "stringValue": "Acordo de nível de serviço: a promessa contratual ao cliente (ex.: 99,5% de disponibilidade ao mês). SLI é o que se mede; SLO, a meta interna."
+         },
+         "tema": {
+          "stringValue": "ga-observabilidade"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "SOAP"
+         },
+         "definicao": {
+          "stringValue": "Protocolo de mensagens XML com contrato WSDL; comum em bancos e governo (ex.: NF-e)."
+         },
+         "tema": {
+          "stringValue": "ga-alem-do-rest"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "SSE"
+         },
+         "definicao": {
+          "stringValue": "Server-Sent Events: conexão HTTP em que só o servidor envia eventos, um atrás do outro."
+         },
+         "tema": {
+          "stringValue": "ga-alem-do-rest"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Stateless"
+         },
+         "definicao": {
+          "stringValue": "Sem estado: o servidor não guarda sessão entre requisições; cada chamada traz tudo o que precisa (inclusive o token)."
+         },
+         "tema": {
+          "stringValue": "ga-rest"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Status HTTP"
+         },
+         "definicao": {
+          "stringValue": "Código de três dígitos da resposta: 2xx sucesso, 3xx redirecionamento, 4xx erro do cliente, 5xx erro do servidor."
+         },
+         "tema": {
+          "stringValue": "ga-codigos-status"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Throughput"
+         },
+         "definicao": {
+          "stringValue": "Quantidade de requisições processadas por unidade de tempo."
+         },
+         "tema": {
+          "stringValue": "ga-observabilidade"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Web Service"
+         },
+         "definicao": {
+          "stringValue": "Termo mais antigo para “API acessível pela rede”, muito associado ao SOAP."
+         },
+         "tema": {
+          "stringValue": "ga-o-que-e"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "Webhook"
+         },
+         "definicao": {
+          "stringValue": "Chamada HTTP que um serviço faz para avisar você de um evento (“não me ligue, eu te ligo”)."
+         },
+         "tema": {
+          "stringValue": "ga-alem-do-rest"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "WebSocket"
+         },
+         "definicao": {
+          "stringValue": "Conexão persistente e bidirecional entre cliente e servidor, para tempo real (chat, jogos)."
+         },
+         "tema": {
+          "stringValue": "ga-alem-do-rest"
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "termo": {
+          "stringValue": "XML"
+         },
+         "definicao": {
+          "stringValue": "Formato de dados com marcações (<tag>), esquemas rígidos e namespaces; usado no SOAP e na NF-e."
+         },
+         "tema": {
+          "stringValue": "ga-formatos-dados"
+         }
+        }
+       }
+      }
+     ]
+    }
+   },
+   "atualizadoPor": {
+    "stringValue": "lays.almeida@valid.com"
+   },
+   "atualizadoEm": {
+    "timestampValue": "2026-11-06T20:22:18.044Z"
+   }
+  },
+  "createTime": "2026-11-05T11:24:02.179686Z",
+  "updateTime": "2026-11-06T20:22:18.635694Z"
+ },
+ "categoriasDoc": {
+  "name": "projects/suporte-n2/databases/(default)/documents/conhecimento-config/categorias",
+  "fields": {
+   "lista": {
+    "arrayValue": {
+     "values": [
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "certificacao"
+         },
+         "nome": {
+          "stringValue": "Certificação digital"
+         },
+         "descricao": {
+          "stringValue": "Certificado digital, ICP-Brasil, cadeia, criptografia e cada campo do certificado."
+         },
+         "icone": {
+          "stringValue": "i-certificado"
+         },
+         "cor": {
+          "stringValue": "roxo"
+         },
+         "ordem": {
+          "integerValue": "1"
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "capa": {
+          "nullValue": null
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "produtos"
+         },
+         "nome": {
+          "stringValue": "VIDaaS"
+         },
+         "descricao": {
+          "stringValue": "VIDaaS, VIDaaS Connect e o suporte a parceiros que integram com o Valid PSC."
+         },
+         "icone": {
+          "stringValue": "i-telefone"
+         },
+         "cor": {
+          "stringValue": "azul"
+         },
+         "ordem": {
+          "integerValue": "2"
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "capa": {
+          "nullValue": null
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "integracoes"
+         },
+         "nome": {
+          "stringValue": "Integrações e APIs"
+         },
+         "descricao": {
+          "stringValue": "API, endpoints e integrações entre sistemas, com o playbook do IntegraICP."
+         },
+         "icone": {
+          "stringValue": "i-plug"
+         },
+         "cor": {
+          "stringValue": "verde"
+         },
+         "ordem": {
+          "integerValue": "3"
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "capa": {
+          "nullValue": null
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "seguranca"
+         },
+         "nome": {
+          "stringValue": "Segurança e web"
+         },
+         "descricao": {
+          "stringValue": "SSL/TLS e HTTPS: como um site prova quem é e protege a conexão."
+         },
+         "icone": {
+          "stringValue": "i-escudo"
+         },
+         "cor": {
+          "stringValue": "laranja"
+         },
+         "ordem": {
+          "integerValue": "4"
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "capa": {
+          "nullValue": null
+         }
+        }
+       }
+      },
+      {
+       "mapValue": {
+        "fields": {
+         "id": {
+          "stringValue": "ferramentas"
+         },
+         "nome": {
+          "stringValue": "Ferramentas do time"
+         },
+         "descricao": {
+          "stringValue": "Os sistemas que o Suporte N2 usa no dia a dia."
+         },
+         "icone": {
+          "stringValue": "i-ferramenta"
+         },
+         "cor": {
+          "stringValue": "cinza"
+         },
+         "ordem": {
+          "integerValue": "5"
+         },
+         "oculto": {
+          "booleanValue": false
+         },
+         "capa": {
+          "nullValue": null
+         }
+        }
+       }
+      }
+     ]
+    }
+   },
+   "atualizadoEm": {
+    "timestampValue": "2026-11-06T20:22:18.044Z"
+   },
+   "atualizadoPor": {
+    "stringValue": "lays.almeida@valid.com"
+   }
+  },
+  "createTime": "2026-11-05T11:24:02.179686Z",
+  "updateTime": "2026-11-06T20:22:18.635694Z"
+ },
+ "sslDoc": {
+  "name": "projects/suporte-n2/databases/(default)/documents/conhecimento/ssl",
+  "fields": {
+   "nivel": {
+    "stringValue": "Intermediário"
+   },
+   "trilha": {
+    "stringValue": "seguranca"
+   },
+   "modulo": {
+    "stringValue": ""
+   },
+   "secoes": {
+    "mapValue": {
+     "fields": {
+      "saibaMais": {
+       "stringValue": ""
+      },
+      "funciona": {
+       "stringValue": "1. O cliente gera, **no próprio servidor**, um par de chaves e uma **CSR** (o pedido do certificado, com a chave pública e os dados do domínio, como o **CN**).\n2. A certificadora valida e emite o certificado (arquivo **.cer/.crt**).\n3. O certificado é instalado no servidor **junto com a chave privada** que ficou lá.\n4. Quando alguém acessa o site, o navegador confere: foi emitido por uma AC confiável? O domínio bate? Está na validade? Se sim, a conexão é criptografada.\n\n**Tipos de validação:**\n\n- **DV** — valida só o **domínio** (ex.: que o domínio pertence a quem pediu).\n- **OV** — valida o domínio **e a organização** (CNPJ e razão social).\n- **EV** — validação estendida, a mais rigorosa.\n\n**PFX:** para gerar um arquivo .pfx, é preciso juntar a **chave privada** (de onde a CSR foi gerada) com o **.cer** emitido."
+      },
+      "frase": {
+       "stringValue": "**SSL/TLS** é a tecnologia que cria um \"túnel\" protegido entre o navegador e o site. O **certificado SSL** prova que o site é mesmo quem diz ser."
+      },
+      "duvidas": {
+       "stringValue": "### O que é o CN?\nÉ o **Common Name**, o nome principal do certificado — normalmente o domínio (ex.: `www.exemplo.com.br`).\n\n### O cliente perdeu a chave privada. Dá para recuperar?\nNão. A chave privada só existe no servidor onde a CSR foi gerada. Sem ela não é possível montar o PFX; o caminho é gerar uma nova CSR.\n\n> [!atencao] A confirmar com o time\n> Como funciona a reemissão nesse caso.\n\n### RSA 2048 ou 4096?\nO número é o tamanho da chave. A 4096 é mais forte, mas mais lenta. A 2048 continua sendo um padrão muito usado."
+      },
+      "exemplo": {
+       "stringValue": "**Anotações do time sobre SSL** (conferir se continuam valendo):\n\n> [!atencao] A confirmar com o time\n> - Certificados **OV e DV** são internacionais (Sectigo); o **EV** é emitido na cadeia Brasil.\n> - Erro registrado em validação **SSL EV**: CSR gerada com **SHA-256**, mas a categoria do produto usa **SHA-512**.\n> - As emissões usam chave **RSA 2048** (o sistema de emissão não aceitava 4096).\n> - **Certificado internacional:** antes da validação, é preciso enviar para a Sectigo definir o **domínio primário**.\n> - **Redefinição de senha** dos produtos SSL funciona quando feita pelo responsável pelo CNPJ.\n\n**Conferir uma CSR:** use um decodificador de CSR para ver o CN (domínio) e os dados antes de seguir com a emissão."
+      },
+      "simples": {
+       "stringValue": "É como um envelope lacrado com o crachá de quem enviou. O lacre (criptografia) impede que alguém leia no caminho; o crachá (certificado) mostra que o remetente é verdadeiro.\n\nO nome certo hoje é **TLS** (a versão moderna), mas todo mundo ainda fala \"SSL\"."
+      },
+      "termos": {
+       "stringValue": "https, CSR, Chave privada, PFX, CN (Common Name), DV, OV, EV, RSA"
+      }
+     }
+    }
+   },
+   "resumo": {
+    "stringValue": "O certificado que prova a identidade de um site e permite a conexão criptografada."
+   },
+   "capa": {
+    "nullValue": null
+   },
+   "blocos": {
+    "arrayValue": {}
+   },
+   "palavrasChave": {
+    "arrayValue": {
+     "values": [
+      {
+       "stringValue": "ssl"
+      },
+      {
+       "stringValue": "tls"
+      },
+      {
+       "stringValue": "csr"
+      },
+      {
+       "stringValue": "pfx"
+      },
+      {
+       "stringValue": "chave privada"
+      },
+      {
+       "stringValue": "dv"
+      },
+      {
+       "stringValue": "ov"
+      },
+      {
+       "stringValue": "ev"
+      },
+      {
+       "stringValue": "sectigo"
+      },
+      {
+       "stringValue": "rsa"
+      },
+      {
+       "stringValue": "sha"
+      }
+     ]
+    }
+   },
+   "ocultaPropria": {
+    "booleanValue": false
+   },
+   "titulo": {
+    "stringValue": "SSL/TLS"
+   },
+   "tempo": {
+    "integerValue": "0"
+   },
+   "icone": {
+    "stringValue": ""
+   },
+   "destaque": {
+    "integerValue": "0"
+   },
+   "atualizadoEm": {
+    "timestampValue": "2026-11-06T20:22:18.044Z"
+   },
+   "atualizadoPor": {
+    "stringValue": "lays.almeida@valid.com"
+   },
+   "ordem": {
+    "integerValue": "1"
+   },
+   "oculto": {
+    "booleanValue": false
+   },
+   "revisarEm": {
+    "stringValue": ""
+   },
+   "cor": {
+    "stringValue": ""
+   },
+   "paiId": {
+    "nullValue": null
+   }
+  },
+  "createTime": "2026-11-05T11:24:02.179686Z",
+  "updateTime": "2026-11-06T20:22:18.635694Z"
+ },
+ "httpsDoc": {
+  "name": "projects/suporte-n2/databases/(default)/documents/conhecimento/https",
+  "fields": {
+   "capa": {
+    "nullValue": null
+   },
+   "nivel": {
+    "stringValue": "Básico"
+   },
+   "ocultaPropria": {
+    "booleanValue": false
+   },
+   "modulo": {
+    "stringValue": ""
+   },
+   "revisarEm": {
+    "stringValue": ""
+   },
+   "paiId": {
+    "nullValue": null
+   },
+   "resumo": {
+    "stringValue": "O HTTP com proteção: o cadeado do navegador e os avisos de segurança."
+   },
+   "destaque": {
+    "integerValue": "0"
+   },
+   "ordem": {
+    "integerValue": "2"
+   },
+   "blocos": {
+    "arrayValue": {}
+   },
+   "palavrasChave": {
+    "arrayValue": {
+     "values": [
+      {
+       "stringValue": "https"
+      },
+      {
+       "stringValue": "http"
+      },
+      {
+       "stringValue": "cadeado"
+      },
+      {
+       "stringValue": "443"
+      },
+      {
+       "stringValue": "aviso"
+      },
+      {
+       "stringValue": "conexão não é particular"
+      }
+     ]
+    }
+   },
+   "cor": {
+    "stringValue": ""
+   },
+   "tempo": {
+    "integerValue": "0"
+   },
+   "atualizadoEm": {
+    "timestampValue": "2026-11-06T20:22:18.044Z"
+   },
+   "atualizadoPor": {
+    "stringValue": "lays.almeida@valid.com"
+   },
+   "titulo": {
+    "stringValue": "HTTPS"
+   },
+   "secoes": {
+    "mapValue": {
+     "fields": {
+      "exemplo": {
+       "stringValue": "**Cliente diz que um site mostra aviso de segurança.** Antes de tudo, confira a **data e a hora** do computador dele. Depois, veja se o endereço digitado é exatamente o do certificado. Se o site é do cliente (certificado SSL dele), confira validade e cadeia instalada no servidor."
+      },
+      "funciona": {
+       "stringValue": "- Endereços com `https://` usam a porta **443** por padrão (o HTTP comum usa a **80**).\n- Antes de trocar qualquer dado, o navegador confere o **certificado SSL** do site.\n- Se algo não bate, o navegador mostra um aviso como \"Sua conexão não é particular\".\n\n**Causas comuns de aviso:**\n\n- Certificado **vencido**.\n- O endereço acessado é **diferente** do domínio do certificado (ex.: com e sem `www`).\n- **Cadeia** de certificados incompleta no servidor.\n- **Data e hora erradas** no computador de quem acessa."
+      },
+      "duvidas": {
+       "stringValue": "### O cadeado garante que o site é honesto?\nNão. Garante que a conexão é protegida e que o certificado é daquele domínio. Um site falso também pode ter cadeado.\n\n### Por que alguns sites redirecionam do HTTP para o HTTPS?\nPara que ninguém use a versão sem proteção por engano."
+      },
+      "simples": {
+       "stringValue": "HTTP sem o S é como mandar um cartão-postal: qualquer um no caminho consegue ler. HTTPS é como uma carta registrada e lacrada: só o destinatário abre."
+      },
+      "termos": {
+       "stringValue": "ssl, SSL/TLS, Cadeia de certificados"
+      },
+      "saibaMais": {
+       "stringValue": "- [MDN — HTTP (Mozilla)](https://developer.mozilla.org/pt-BR/docs/Web/HTTP)"
+      },
+      "frase": {
+       "stringValue": "**HTTPS** é o HTTP (o \"idioma\" da web) **com a proteção do TLS**: é o que faz aparecer o cadeado ao lado do endereço do site."
+      }
+     }
+    }
+   },
+   "trilha": {
+    "stringValue": "seguranca"
+   },
+   "oculto": {
+    "booleanValue": false
+   },
+   "icone": {
+    "stringValue": ""
+   }
+  },
+  "createTime": "2026-11-05T11:24:02.179686Z",
+  "updateTime": "2026-11-06T20:22:18.635694Z"
+ }
+}

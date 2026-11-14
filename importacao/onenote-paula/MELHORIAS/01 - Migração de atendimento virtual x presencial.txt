@@ -1,0 +1,55 @@
+O sistema precisa barrar a migração desnecessária de um atendimento para o outro. 
+
+Ex.: Migrar somente se o processo for revisado; 
+
+Em caso de migração de ponto, recoletar d biometria (essa não deve ser reposta, ou seja, manter dois arquivos de biometrias com legendas e renomeadas (bio presenciaol e bio conferencia); 
+
+Incluir na trilha data e horario em que os matchs foram realizados; 
+
+ 
+
+_____________________________________________________________________________________ 
+
+ 
+
+Regras CV: 
+
+ 
+
+Presencial > primaria 
+
+Coleta 4 dedos + fotos e gera Datavalid  score alto  (0.85 acima) > verificação automatica > score baixo (0.01 / 0.84) analise manual CV; 
+
+ 
+
+Presencial > com PSBio 
+
+Match pelo finger > analise automática; 
+
+Coleta 4 dedos + foto > gera Datavalid e substitui o cadastro na base local; 
+
+ 
+
+ 
+
+Videoconferência > primária 
+
+Gera arquivo de Biometria (cadastro) e Datavalid score alto  (0.85 acima) > verificação automática > score baixo (0.01 / 0.84) analise manual CV; 
+
+ 
+
+Videoconferência > PSBio 
+
+Match com a foto > não gera Datavalid > CV automática; 
+
+Não match com a foto > 1º gera o Datavalid core alto  (0.85 acima) > verificação automática > score baixo (0.01 / 0.84) encaminha para o presencial > coleta 4 dedos + foto e substitui cadastro no PSBio; 
+
+ 
+
+ 
+
+Legendas PSBio 
+
+ 
+
+ 

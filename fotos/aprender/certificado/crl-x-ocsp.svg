@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 440" width="860" height="440" role="img" aria-labelledby="t d" font-family="Segoe UI, Arial, Helvetica, sans-serif">
+  <title id="t">Revogação: CRL × OCSP</title><desc id="d">Esquerda: CRL, o sistema baixa a lista no endereço do campo CDP e procura o número de série. Direita: OCSP, o sistema pergunta ao respondedor do campo AIA e recebe Good, Revoked ou Unknown. Embaixo: OCSP Stapling, o servidor entrega a resposta junto com o certificado.</desc>
+  <defs><marker id="ponta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6b4c9a"/></marker></defs>
+  <rect x="0.5" y="0.5" width="859" height="439" rx="14" fill="#ffffff" stroke="#c9b8e6"/>
+  <text x="24" y="34" font-size="17" font-weight="700" fill="#6b4c9a">Revogação: CRL × OCSP</text>
+  
+  <text x="40" y="74" font-size="15" font-weight="700" fill="#6b4c9a">CRL · lista de revogação (LCR)</text>
+  <g><rect x="40" y="90" width="170" height="58" rx="10" fill="#f3eefb" stroke="#6b4c9a" stroke-width="1.6"/>
+  <text x="125" y="116" text-anchor="middle" font-size="15" font-weight="700" fill="#111212">Sistema</text>
+  <text x="125" y="134" text-anchor="middle" font-size="12" fill="#5a5a5a">Windows, leitor de PDF…</text></g>
+  <g><line x1="210" y1="119" x2="262" y2="119" stroke="#6b4c9a" stroke-width="2" marker-end="url(#ponta)"/>
+  </g>
+  <g><rect x="266" y="90" width="150" height="58" rx="10" fill="#fde9d4" stroke="#b45309" stroke-width="1.6"/>
+  <text x="341" y="116" text-anchor="middle" font-size="15" font-weight="700" fill="#111212">Baixa a lista</text>
+  <text x="341" y="134" text-anchor="middle" font-size="12" fill="#5a5a5a">URL do campo CDP</text></g>
+  <g><line x1="341" y1="148" x2="341" y2="186" stroke="#6b4c9a" stroke-width="2" marker-end="url(#ponta)"/>
+  </g>
+  <g><rect x="220" y="190" width="242" height="58" rx="10" fill="#f3eefb" stroke="#6b4c9a" stroke-width="1.6"/>
+  <text x="341" y="216" text-anchor="middle" font-size="15" font-weight="700" fill="#111212">Procura o nº de série</text>
+  <text x="341" y="234" text-anchor="middle" font-size="12" fill="#5a5a5a">achou = revogado</text></g>
+  <text x="40" y="282" font-size="12" fill="#5a5a5a">• Lista inteira, atualizada de tempos em tempos</text>
+  <text x="40" y="300" font-size="12" fill="#5a5a5a">• Funciona off-line depois de baixada</text>
+  <text x="40" y="318" font-size="12" fill="#5a5a5a">• Pode ficar grande e ter "janela" até a próxima lista</text>
+  <line x1="440" y1="60" x2="440" y2="340" stroke="#c9b8e6" stroke-dasharray="4 4"/>
+  <text x="470" y="74" font-size="15" font-weight="700" fill="#6b4c9a">OCSP · consulta on-line</text>
+  <g><rect x="470" y="90" width="150" height="58" rx="10" fill="#f3eefb" stroke="#6b4c9a" stroke-width="1.6"/>
+  <text x="545" y="124" text-anchor="middle" font-size="15" font-weight="700" fill="#111212">Sistema</text>
+  </g>
+  <g><line x1="620" y1="106" x2="672" y2="106" stroke="#6b4c9a" stroke-width="2" marker-end="url(#ponta)"/>
+  <text x="654" y="110" font-size="11.5" fill="#5a5a5a">nº de série</text></g>
+  <g><rect x="676" y="90" width="160" height="58" rx="10" fill="#dbeafe" stroke="#1565c0" stroke-width="1.6"/>
+  <text x="756" y="116" text-anchor="middle" font-size="15" font-weight="700" fill="#111212">Respondedor OCSP</text>
+  <text x="756" y="134" text-anchor="middle" font-size="12" fill="#5a5a5a">URL do campo AIA</text></g>
+  <g><line x1="672" y1="134" x2="620" y2="134" stroke="#6b4c9a" stroke-width="2" marker-end="url(#ponta)"/>
+  </g>
+  <g><rect x="470" y="190" width="366" height="58" rx="10" fill="#f3eefb" stroke="#6b4c9a" stroke-width="1.6"/>
+  <text x="653" y="216" text-anchor="middle" font-size="15" font-weight="700" fill="#111212">Resposta assinada pela AC</text>
+  <text x="653" y="234" text-anchor="middle" font-size="12" fill="#5a5a5a">Good · Revoked · Unknown</text></g>
+  <text x="470" y="282" font-size="12" fill="#5a5a5a">• Pergunta só sobre um certificado (pacote pequeno)</text>
+  <text x="470" y="300" font-size="12" fill="#5a5a5a">• Status no momento da consulta</text>
+  <text x="470" y="318" font-size="12" fill="#5a5a5a">• A AC fica sabendo o que foi consultado</text>
+  <rect x="40" y="356" width="796" height="62" rx="10" fill="#dff3e0" stroke="#2e7d32"/>
+  <text x="58" y="382" font-size="13.5" font-weight="700" fill="#111212">OCSP Stapling ("grampeamento")</text>
+  <text x="58" y="402" font-size="12" fill="#5a5a5a">O próprio servidor consulta o OCSP de tempos em tempos e entrega a resposta assinada junto com o certificado: mais rápido e mais privado.</text>
+</svg>

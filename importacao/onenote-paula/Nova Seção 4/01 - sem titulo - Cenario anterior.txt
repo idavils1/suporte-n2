@@ -1,0 +1,43 @@
+Cenário anterior: 
+
+ 
+
+Conseguia coletar foto de 3 na liveness 
+
+ 
+
+ 
+
+ 
+
+Cenário corrigido - presencial > não é obrigatório coletar a liveness. 
+
+Traduziu o comando de voz; 
+
+Melhorou o desempenho (velocidade); 
+
+Faz comparativo com a foto no IVS - caso não tenha, retorna com mensagem de erro; 
+
+ 
+
+ 
+
+Cenário videoconferencia > match na video > prossegui, senão vai para o presencial. 
+
+ 
+
+ 
+
+https://share-validcertificadora.s3.sa-est-1amazonaws.com 
+
+ 
+
+ 
+
+ 
+
+Estamos com instabilidade na comunicação entre o SAR e o VC IVS, impactando atendimentos por videoconferência e validação biométrica do agente de registro. 
+
+ 
+
+Afetando o processo de captura de foto do requerente (vídeoconferencia e presencial) e a validação biométrica do AGR 

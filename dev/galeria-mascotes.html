@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Galeria dos mascotes (só para conferir; não vai para o ar)</title>
+<style>
+  body { margin: 16px; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; background: #f6f6f8; color: #1b1d26; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  .apoio { color: #6b6b78; margin: 0 0 12px; }
+  .controles { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; }
+  .tema { padding: 12px; border-radius: 12px; margin-bottom: 18px; overflow-x: auto; background: #ffffff; border: 1px solid #e3e3ea; }
+  .tema[data-tema="escuro"] { background: #1b1d26; color: #e9e9ef; border-color: #2c2f3a; --superficie: #232631; --cor-acao: #e9e9ef; --borda-forte: #3a3e4c; --texto-secundario: #9ea3b5; }
+  .tema h2 { font-size: 15px; margin: 0 0 8px; }
+  table { border-collapse: collapse; }
+  th { font-size: 11px; font-weight: 600; padding: 2px 6px; text-align: center; white-space: nowrap; }
+  th.nome { text-align: left; font-size: 13px; }
+  td { padding: 0 6px; }
+  .quadro { position: relative; width: 56px; height: 48px; margin: 22px auto 6px; }
+  .tema[data-tema="escuro"] .quadro { box-shadow: 0 1px 0 #3a3e4c; }
+  .tema[data-tema="claro"] .quadro { box-shadow: 0 1px 0 #d6d6de; }
+  /* Na galeria o bicho fica parado no quadro e as animações de uma vez repetem sem parar */
+  .galeria .mascote { position: absolute; left: 0; top: 0; transform: none !important; opacity: 1 !important; pointer-events: none; }
+  .galeria .mascote.pulando .m-pulo, .galeria .mascote.especial *, .galeria .mascote.especial .m-pulo { animation-iteration-count: infinite !important; }
+</style>
+<script src="../comum/mascote.js" data-prefixo="galeria-dev" data-grade="#nao-existe" data-galeria></script>
+</head>
+<body>
+<h1>Galeria dos mascotes</h1>
+<p class="apoio">Todos os bichos em todas as poses, para olhada à mão (nenhuma parte pode "soltar" do corpo). Abra pelo servidor de teste da Central: <code>/dev/galeria-mascotes.html</code>.</p>
+<div class="controles">
+  <label><input type="checkbox" id="esquerda"> Olhando para a esquerda (espelhado)</label>
+  <label><input type="checkbox" id="carinho-pupilas" checked> Pupilas deslocadas no "carinho"</label>
+</div>
+<div id="galeria" class="galeria"></div>
+<script>
+  const g = window.__mascoteGaleria;
+  const POSES = [
+    ["andando", "andando"], ["sentado", "sentado"], ["olhando", "olhando"], ["lambendo", "lambendo"], ["bocejando", "bocejando"],
+    ["dormindo", "dormindo"], ["carinho", "carinho"], ["preocupado", "preocupado"], ["pulando", "pulando"], ["miando", "miando"], ["especial", "especial"]
+  ];
+  function quadro(id, pose) {
+    const a = g.animais[id];
+    const classes = ["mascote", `a-${id}`];
+    if (a.andar === "bipede") classes.push("bipede");
+    if (a.ginga) classes.push("ginga");
+    if (pose === "especial") { if (!a.especial) return `<div class="quadro"></div>`; classes.push("especial", a.especial.classe, ...(a.especial.poses || [])); }
+    else classes.push(pose);
+    const zzz = pose === "dormindo" ? '<span class="mascote-zzz">z</span><span class="mascote-zzz">z</span><span class="mascote-zzz">z</span>' : "";
+    return `<div class="quadro"><div class="${classes.join(" ")}" style="--vel:${a.velocidade};--m-escala:${a.escala}" aria-hidden="true">${zzz}<div class="m-pulo">${g.svg(id)}</div></div></div>`;
+  }
+  function tabela(tema) {
+    return `<section class="tema" data-tema="${tema}"><h2>Tema ${tema}</h2><table><thead><tr><th class="nome">Bicho</th>${POSES.map(([, r]) => `<th>${r}</th>`).join("")}</tr></thead><tbody>`
+      + g.ordem.map((id) => `<tr><th class="nome">${g.animais[id].nome}${g.animais[id].especial ? `<br><span style="font-weight:400;opacity:.7">${g.animais[id].especial.classe}</span>` : ""}</th>${POSES.map(([p]) => `<td>${quadro(id, p)}</td>`).join("")}</tr>`).join("")
+      + `</tbody></table></section>`;
+  }
+  const raiz = document.getElementById("galeria");
+  raiz.innerHTML = tabela("claro") + tabela("escuro");
+  const espelhar = () => raiz.querySelectorAll(".mascote").forEach((m) => m.classList.toggle("esquerda", document.getElementById("esquerda").checked));
+  const pupilas = () => raiz.querySelectorAll(".mascote.carinho .m-pupilas").forEach((p) => { p.style.transform = document.getElementById("carinho-pupilas").checked ? "translate(1px, -.8px)" : ""; });
+  document.getElementById("esquerda").addEventListener("change", espelhar);
+  document.getElementById("carinho-pupilas").addEventListener("change", pupilas);
+  pupilas();
+</script>
+</body>
+</html>

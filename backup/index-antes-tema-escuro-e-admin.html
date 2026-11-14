@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Central do Suporte N2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cor-acao: #111212;
+    --superficie-quente: #f3eefb;
+    --superficie: #ffffff;
+    --superficie-suave: #f4f2f8;
+    --texto-secundario: #5a5a5a;
+    --cor-icone: #6b4c9a;
+    --borda: #e5e1ec;
+    --borda-forte: #c9b8e6;
+    --lilas: #9b7fd4;
+    --lilas-destaque: #e4d8f7;
+
+    --raio-sm: 4px;
+    --raio-md: 8px;
+    --largura-max: 1100px;
+    --altura-header: 68px;
+    --transicao: 150ms ease;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+
+  body {
+    margin: 0;
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+    font-optical-sizing: auto;
+    color: var(--cor-acao);
+    background: var(--superficie);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+  h2 { font-size: 26px; }
+  p { margin: 0; }
+  button { font: inherit; color: inherit; }
+
+  :focus-visible {
+    outline: 2px solid var(--cor-acao);
+    outline-offset: 2px;
+    border-radius: var(--raio-sm);
+  }
+
+  .container {
+    max-width: var(--largura-max);
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  .rotulo {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-stretch: 80%;
+    font-variation-settings: "wdth" 80;
+  }
+
+  .apoio { font-size: 14px; color: var(--texto-secundario); line-height: 1.6; }
+
+  .icone { width: 20px; height: 20px; stroke: var(--cor-icone); fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  .pular-conteudo {
+    position: absolute; left: 16px; top: -48px;
+    background: var(--cor-acao); color: #fff; padding: 8px 14px;
+    border-radius: var(--raio-sm); z-index: 100; text-decoration: none; font-size: 14px;
+  }
+  .pular-conteudo:focus { top: 12px; }
+
+  /* Botões */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 42px; padding: 0 20px;
+    border-radius: var(--raio-sm);
+    border: 1px solid var(--cor-acao);
+    background: var(--cor-acao); color: #fff;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    transition: background-color var(--transicao), color var(--transicao), border-color var(--transicao);
+  }
+  .btn:hover { background: #2b2c2c; border-color: #2b2c2c; }
+  .btn-secundario { background: var(--superficie); color: var(--cor-acao); border-color: var(--borda); }
+  .btn-secundario:hover { background: var(--superficie-quente); border-color: var(--borda-forte); }
+
+  /* Cabeçalho */
+  .header {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--superficie);
+    border-bottom: 1px solid var(--borda);
+  }
+  .header .container {
+    height: var(--altura-header);
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  }
+  .marca { display: flex; align-items: center; text-decoration: none; color: inherit; }
+  .marca .rotulo { font-size: 22px; font-weight: 700; letter-spacing: 0.04em; color: var(--cor-acao); }
+
+  .nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px; }
+  .nav a {
+    display: block; padding: 8px 12px;
+    color: var(--texto-secundario); text-decoration: none;
+    border-radius: var(--raio-sm);
+    transition: color var(--transicao), background-color var(--transicao);
+  }
+  .nav a:hover { color: var(--cor-acao); background: var(--superficie-suave); }
+  .nav a.ativo { color: var(--cor-icone); background: var(--superficie-quente); }
+
+  .btn-menu {
+    display: none;
+    width: 36px; height: 36px; align-items: center; justify-content: center;
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-sm);
+    cursor: pointer;
+  }
+  .btn-menu .icone { stroke: var(--cor-acao); }
+  .acoes-header { display: flex; align-items: center; gap: 8px; }
+  .btn-header { height: 36px; padding: 0 14px; font-size: 13px; }
+  .btn-login { gap: 6px; }
+
+  /* Faixa de destaque */
+  .hero {
+    position: relative; isolation: isolate;
+    padding: 96px 0 88px; text-align: center;
+    background: var(--superficie-quente) url("fotos/banner-time.jpg") center 30% / cover no-repeat;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: radial-gradient(ellipse 55% 75% at 50% 50%, rgba(243, 238, 251, 0.93) 0%, rgba(243, 238, 251, 0.8) 55%, rgba(243, 238, 251, 0.5) 100%);
+  }
+  .ver-banner {
+    position: absolute; right: 16px; bottom: 16px;
+    width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.8); border: 1px solid var(--borda); border-radius: var(--raio-sm);
+    cursor: zoom-in; transition: background-color var(--transicao);
+  }
+  .ver-banner:hover { background: var(--superficie); }
+  .ver-banner .icone { width: 15px; height: 15px; stroke: var(--cor-acao); }
+
+  .visualizador {
+    max-width: min(1100px, calc(100% - 32px)); max-height: calc(100% - 32px);
+    padding: 0; border: 0; background: transparent; overflow: visible;
+  }
+  .visualizador::backdrop { background: rgba(17, 18, 18, 0.8); }
+  .visualizador[open] { animation: subir 220ms ease-out; }
+  .visualizador img { display: block; max-width: 100%; max-height: calc(100vh - 64px); border-radius: var(--raio-md); }
+
+  .hero .rotulo { color: var(--cor-icone); }
+  .hero h1 { font-size: 40px; margin: 12px 0 12px; }
+  .hero .apoio { font-size: 16px; color: #3f3f3f; }
+
+  .busca { position: relative; max-width: 440px; margin: 28px auto 0; }
+  .busca .icone { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); stroke: var(--texto-secundario); pointer-events: none; }
+  .busca input {
+    width: 100%; height: 48px;
+    padding: 0 84px 0 44px;
+    font: inherit; font-size: 15px; color: var(--cor-acao);
+    background: var(--superficie);
+    border: 1px solid var(--borda); border-radius: var(--raio-sm);
+    transition: border-color var(--transicao);
+  }
+  .busca input::placeholder { color: #8a8a8a; }
+  .busca input:hover { border-color: var(--borda-forte); }
+  .busca input:focus { outline: none; border-color: var(--lilas); box-shadow: 0 0 0 3px var(--lilas-destaque); }
+  .busca input::-webkit-search-cancel-button { display: none; }
+  .busca-atalho, .busca-limpar {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  }
+  .busca-atalho {
+    font-size: 12px; color: var(--texto-secundario);
+    border: 1px solid var(--borda); border-radius: var(--raio-sm);
+    padding: 2px 7px; background: var(--superficie-suave); pointer-events: none;
+  }
+  .busca-limpar {
+    display: none; width: 30px; height: 30px; align-items: center; justify-content: center;
+    background: none; border: 0; border-radius: var(--raio-sm); cursor: pointer;
+  }
+  .busca-limpar:hover { background: var(--superficie-suave); }
+  .busca-limpar .icone { position: static; transform: none; width: 16px; height: 16px; stroke: var(--cor-acao); }
+  .busca.preenchida .busca-atalho { display: none; }
+  .busca.preenchida .busca-limpar { display: inline-flex; }
+  .busca-status { min-height: 22px; margin-top: 12px; font-size: 14px; color: var(--texto-secundario); }
+
+  /* Seções */
+  .secao { padding: 56px 0; scroll-margin-top: var(--altura-header); }
+  .secao.quente { background: var(--superficie-quente); }
+  .secao-topo { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+  .secao-topo .apoio { white-space: nowrap; }
+
+  /* Categorias */
+  .grade-categorias { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .card-categoria {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    padding: 28px 16px; text-align: center;
+    background: var(--superficie);
+    border: 1px solid var(--borda); border-radius: var(--raio-md);
+    text-decoration: none; color: inherit; cursor: pointer;
+    transition: background-color var(--transicao), border-color var(--transicao);
+  }
+  .card-categoria:hover, .card-categoria.ativo { background: var(--superficie-quente); border-color: var(--borda-forte); }
+  .card-categoria .icone { width: 28px; height: 28px; }
+  .card-categoria strong { font-size: 16px; font-weight: 600; line-height: 1.25; }
+  .card-categoria .apoio { line-height: 1.2; }
+  .card-categoria.vazio { opacity: .45; }
+
+  /* Listas */
+  .lista {
+    list-style: none; margin: 0; padding: 0;
+    background: var(--superficie);
+    border: 1px solid var(--borda); border-radius: var(--raio-md);
+    overflow: hidden;
+  }
+  .lista li + li { border-top: 1px solid var(--borda); }
+
+  .item {
+    display: flex; align-items: center; gap: 14px;
+    width: 100%; padding: 16px 20px;
+    background: transparent; border: 0; text-align: left;
+    font-size: 15px; font-weight: 500; color: var(--cor-acao); text-decoration: none;
+    cursor: pointer;
+    transition: background-color var(--transicao);
+  }
+  .item:hover { background: var(--superficie-quente); }
+  .item:focus-visible { outline-offset: -2px; border-radius: 0; }
+  .item .nome { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .item .seta { color: var(--texto-secundario); font-size: 20px; line-height: 1; transition: color var(--transicao); }
+  .item:hover .seta { color: var(--cor-acao); }
+  .item .icone-box {
+    width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+    background: var(--superficie-suave); border-radius: var(--raio-sm); flex-shrink: 0;
+  }
+  .item .icone-box .icone { width: 16px; height: 16px; }
+  .item[aria-disabled="true"] { cursor: default; color: var(--texto-secundario); }
+  .item[aria-disabled="true"]:hover { background: transparent; }
+  .selo {
+    font-size: 11px; padding: 3px 8px; border-radius: 999px;
+    background: var(--superficie-suave); color: var(--texto-secundario);
+  }
+
+  /* Grade de cards compactos */
+  .grade-itens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; list-style: none; margin: 0; padding: 0; }
+  .grade-itens.duas { grid-template-columns: repeat(2, 1fr); }
+  .grade-itens .item {
+    background: var(--superficie);
+    border: 1px solid var(--borda); border-radius: var(--raio-md);
+    transition: background-color var(--transicao), border-color var(--transicao);
+  }
+  .grade-itens .item:hover { background: var(--superficie-quente); border-color: var(--borda-forte); }
+  .grade-itens .item:focus-visible { outline-offset: 2px; border-radius: var(--raio-md); }
+  .grade-itens.duas .item { padding: 22px 24px; }
+  .item .descricao { display: block; font-size: 13px; font-weight: 400; color: var(--texto-secundario); margin-top: 2px; }
+
+  mark { background: var(--lilas-destaque); color: inherit; border-radius: 2px; padding: 0 1px; }
+
+  /* Time */
+  .subgrupo + .subgrupo { margin-top: 36px; }
+  .subgrupo > .rotulo { display: block; color: var(--texto-secundario); margin-bottom: 14px; }
+  .grade-time { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; list-style: none; margin: 0; padding: 0; }
+  .pessoa {
+    display: flex; align-items: center; gap: 14px;
+    width: 100%; height: 100%;
+    padding: 16px 18px; text-align: left;
+    border: 1px solid var(--borda); border-radius: var(--raio-md);
+    background: var(--superficie);
+    cursor: pointer;
+    transition: background-color var(--transicao), border-color var(--transicao);
+  }
+  .pessoa:hover { background: var(--superficie-quente); border-color: var(--borda-forte); }
+  .pessoa:focus-visible { border-radius: var(--raio-md); }
+  .pessoa-texto { flex: 1; min-width: 0; }
+  .pessoa .seta { color: var(--texto-secundario); font-size: 20px; line-height: 1; transition: color var(--transicao); }
+  .pessoa:hover .seta { color: var(--cor-icone); }
+  .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--lilas-destaque); color: var(--cor-icone);
+    font-weight: 600; font-size: 15px; flex-shrink: 0;
+    overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .pessoa strong { display: block; font-size: 15px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+  .pessoa .apoio { display: block; line-height: 1.4; }
+  .selo-lilas { background: var(--lilas-destaque); color: var(--cor-icone); font-weight: 600; white-space: nowrap; }
+
+  /* Perfil */
+  .perfil {
+    width: min(520px, calc(100% - 32px));
+    max-height: calc(100% - 32px);
+    padding: 0; border: 0; border-radius: 12px;
+    background: var(--superficie); color: var(--cor-acao);
+    overflow: auto;
+  }
+  .perfil::backdrop { background: rgba(17, 18, 18, 0.45); }
+  .perfil[open] { animation: subir 220ms ease-out; }
+  .perfil[open]::backdrop { animation: escurecer 220ms ease-out; }
+  @keyframes subir { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes escurecer { from { opacity: 0; } to { opacity: 1; } }
+
+  .perfil-capa { height: 104px; background: #e4e4e4; border-bottom: 1px solid #d6d6d6; }
+  .perfil-fechar {
+    position: absolute; top: 12px; right: 12px;
+    width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-sm);
+    cursor: pointer; transition: background-color var(--transicao);
+  }
+  .perfil-fechar:hover { background: var(--superficie-suave); }
+  .perfil-fechar .icone { stroke: var(--cor-acao); width: 18px; height: 18px; }
+
+  .perfil-corpo { padding: 0 28px 28px; text-align: center; }
+  .perfil-foto {
+    width: 140px; height: 140px; margin: -70px auto 16px;
+    font-size: 44px; font-weight: 700;
+    border: 5px solid var(--superficie);
+    outline: 1px solid var(--borda-forte);
+    position: relative; z-index: 1;
+    transform-origin: center top;
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+  .perfil-foto { cursor: zoom-in; }
+  @media (hover: hover) {
+    .perfil-foto:hover { transform: scale(1.8); box-shadow: 0 10px 28px rgba(17, 18, 18, 0.18); }
+  }
+  .perfil-foto.ampliada { transform: scale(1.8); box-shadow: 0 10px 28px rgba(17, 18, 18, 0.18); cursor: zoom-out; }
+  .perfil h2 { font-size: 24px; overflow-wrap: anywhere; }
+  .perfil-cargo { margin-top: 6px; }
+  .perfil-grupo { display: inline-block; margin-top: 10px; color: var(--cor-icone); font-size: 11px; }
+
+  .perfil-dados { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0 0; text-align: left; }
+  .perfil-dado {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 14px 16px;
+    border: 1px solid var(--borda); border-radius: var(--raio-md);
+  }
+  .perfil-dado .icone-box {
+    width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;
+    background: var(--superficie-quente); border-radius: var(--raio-sm); flex-shrink: 0;
+  }
+  .perfil-dado .icone-box .icone { width: 18px; height: 18px; }
+  .perfil-dado dt { font-size: 11px; color: var(--texto-secundario); }
+  .perfil-dado dd { margin: 2px 0 0; font-size: 16px; font-weight: 600; line-height: 1.3; }
+  .perfil-dado dd small { display: block; font-size: 12px; font-weight: 400; color: var(--texto-secundario); margin-top: 2px; }
+  .perfil-dado .vazio-txt { font-weight: 400; color: var(--texto-secundario); font-size: 14px; }
+
+  .perfil-sobre { margin-top: 12px; padding: 16px 18px; text-align: left; background: var(--superficie-suave); border-radius: var(--raio-md); }
+  .perfil-sobre .rotulo { display: block; font-size: 11px; color: var(--texto-secundario); margin-bottom: 6px; }
+  .perfil-sobre p { font-size: 15px; line-height: 1.6; white-space: pre-line; overflow-wrap: anywhere; }
+  .perfil-sobre p.vazio-txt { color: var(--texto-secundario); font-style: italic; font-size: 14px; }
+
+  .perfil-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 20px; }
+  .perfil-nav .btn { height: 38px; padding: 0 14px; }
+  .perfil-nav .apoio { font-size: 13px; }
+
+  /* Hoje */
+  .btn .icone { width: 16px; height: 16px; stroke: currentColor; }
+
+  .card-hoje {
+    grid-column: 1 / -1;
+    flex-direction: row; justify-content: flex-start; gap: 18px;
+    padding: 22px 26px; text-align: left;
+    background: var(--superficie-quente); border-color: var(--borda-forte);
+  }
+  .card-hoje:hover, .card-hoje.ativo { background: var(--lilas-destaque); }
+  .card-hoje-texto { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .card-hoje-texto strong { font-size: 20px; }
+  .card-hoje-relogio { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
+  .card-hoje-relogio .relogio-data { font-size: 14px; color: var(--texto-secundario); }
+  .card-hoje-relogio .relogio-hora { flex: none; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+
+  .hoje-topo { align-items: center; flex-wrap: wrap; }
+  .hoje-titulo { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .relogio {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px;
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: 999px;
+    font-size: 14px; color: var(--texto-secundario);
+  }
+  .relogio .icone { width: 16px; height: 16px; }
+  .relogio .relogio-hora { color: var(--cor-acao); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .relogio-sep { color: var(--borda-forte); }
+  .hoje-acoes { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hoje-acoes .btn, .hoje-rascunho .btn, .recado-acoes .btn { height: 38px; padding: 0 14px; font-size: 13px; }
+
+  .hoje-rascunho {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 14px 18px; margin-bottom: 16px;
+    background: var(--superficie); border: 1px dashed var(--lilas); border-radius: var(--raio-md);
+  }
+  .hoje-rascunho strong { display: block; font-size: 15px; }
+  .hoje-rascunho .apoio { display: block; max-width: 560px; }
+  .hoje-rascunho-acoes { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .recados { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .recado {
+    display: flex; gap: 16px; align-items: flex-start;
+    padding: 18px 20px;
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-md);
+  }
+  .recado.importante { border-left: 3px solid var(--lilas); }
+  .recado > .icone-box {
+    width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;
+    background: var(--superficie-quente); border-radius: var(--raio-sm); flex-shrink: 0;
+  }
+  .recado-corpo { flex: 1; min-width: 0; }
+  .recado-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+  .recado-meta .rotulo { font-size: 11px; color: var(--cor-icone); }
+  .recado-meta .apoio { font-size: 13px; }
+  .recado h3 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; overflow-wrap: anywhere; }
+  .recado p { margin-top: 6px; font-size: 15px; line-height: 1.6; white-space: pre-line; overflow-wrap: anywhere; }
+  .recado-acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .recado-acoes .btn { max-width: 100%; overflow: hidden; text-overflow: ellipsis; text-decoration: none; }
+  .recado-edicao { display: flex; gap: 6px; }
+  .btn-icone {
+    width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-sm);
+    cursor: pointer; transition: background-color var(--transicao);
+  }
+  .btn-icone:hover { background: var(--superficie-suave); }
+  .btn-icone .icone { width: 16px; height: 16px; }
+  .hoje-vazio {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 40px 20px; text-align: center;
+    background: var(--superficie); border: 1px dashed var(--borda-forte); border-radius: var(--raio-md);
+  }
+  .hoje-vazio .icone { width: 28px; height: 28px; margin-bottom: 6px; }
+
+  /* Formulário do "Hoje" */
+  .form-dialog { width: min(560px, calc(100% - 32px)); }
+  .form-hoje { display: grid; gap: 16px; padding: 24px 28px 28px; }
+  .form-topo { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .form-topo .perfil-fechar { position: static; }
+  .campo { display: grid; gap: 6px; }
+  .campo .rotulo { font-size: 11px; color: var(--texto-secundario); }
+  .campo input[type="text"], .campo input[type="url"], .campo textarea {
+    width: 100%; padding: 10px 12px;
+    font: inherit; font-size: 15px; color: var(--cor-acao);
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-sm);
+    transition: border-color var(--transicao);
+  }
+  .campo textarea { resize: vertical; min-height: 96px; }
+  .campo input:focus, .campo textarea:focus { outline: none; border-color: var(--lilas); box-shadow: 0 0 0 3px var(--lilas-destaque); }
+  .campo input[type="file"] { font: inherit; font-size: 14px; }
+  .tipos { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tipos label {
+    position: relative; display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; font-size: 14px; font-weight: 500;
+    border: 1px solid var(--borda); border-radius: var(--raio-sm); cursor: pointer;
+    transition: background-color var(--transicao), border-color var(--transicao);
+  }
+  .tipos input { position: absolute; opacity: 0; pointer-events: none; }
+  .tipos label:has(input:checked) { background: var(--superficie-quente); border-color: var(--lilas); }
+  .tipos label:has(input:focus-visible) { outline: 2px solid var(--cor-acao); outline-offset: 2px; }
+  .tipos .icone { width: 16px; height: 16px; }
+  .check { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
+  .check input { width: 18px; height: 18px; accent-color: var(--cor-icone); }
+  .arquivo-atual { font-size: 13px; color: var(--texto-secundario); }
+  .arquivo-atual:empty { display: none; }
+  .arquivo-atual button { padding: 0; margin-left: 6px; background: none; border: 0; color: var(--cor-icone); text-decoration: underline; cursor: pointer; font-size: 13px; }
+  .form-erro { color: #a12a2a; font-size: 14px; }
+  .form-erro:empty { display: none; }
+  .form-botoes { display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* Login */
+  .login-dialog { width: min(420px, calc(100% - 32px)); }
+  .form-login { display: grid; gap: 16px; padding: 28px; }
+  .form-login h2 { font-size: 26px; }
+  .campo input[type="password"] {
+    width: 100%; padding: 10px 12px;
+    font: inherit; font-size: 15px; color: var(--cor-acao);
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-sm);
+    transition: border-color var(--transicao);
+  }
+  .campo input[aria-invalid="true"] { border-color: #c0392b; }
+  .campo-senha { position: relative; }
+  .campo-senha input { padding-right: 46px !important; }
+  .btn-ver-senha {
+    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
+    background: none; border: 0; border-radius: var(--raio-sm); cursor: pointer;
+    transition: background-color var(--transicao);
+  }
+  .btn-ver-senha:hover { background: var(--superficie-suave); }
+  .btn-ver-senha .icone { width: 18px; height: 18px; stroke: var(--texto-secundario); }
+  .btn-largo { width: 100%; height: 44px; }
+  .divisor { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--texto-secundario); }
+  .divisor::before, .divisor::after { content: ""; flex: 1; height: 1px; background: var(--borda); }
+  .logo-google { width: 18px; height: 18px; flex-shrink: 0; }
+  .login-msg { padding: 10px 12px; border-radius: var(--raio-sm); font-size: 14px; line-height: 1.5; }
+  .login-msg:empty { display: none; }
+  .login-msg[data-tipo="erro"] { color: #a12a2a; background: #fbeeee; }
+  .login-msg[data-tipo="info"] { color: var(--cor-icone); background: var(--superficie-quente); }
+
+  /* Vazio */
+  .sem-resultado { display: none; text-align: center; padding: 72px 0; }
+  .sem-resultado.visivel { display: block; }
+  .sem-resultado h2 { margin-bottom: 8px; }
+
+  /* Rodapé */
+  .rodape { border-top: 1px solid var(--borda); padding: 20px 0; font-size: 13px; color: var(--texto-secundario); }
+  .rodape .container { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  /* Aviso (toast) */
+  .aviso {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+    max-width: calc(100% - 32px);
+    background: var(--cor-acao); color: #fff;
+    padding: 12px 18px; border-radius: var(--raio-sm);
+    font-size: 14px; z-index: 80;
+    opacity: 0; pointer-events: none;
+    transition: opacity var(--transicao);
+  }
+  .aviso.visivel { opacity: 1; }
+
+  /* Voltar ao topo */
+  .topo {
+    position: fixed; right: 24px; bottom: 24px; z-index: 60;
+    width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-sm);
+    cursor: pointer; opacity: 0; pointer-events: none;
+    transition: opacity var(--transicao), background-color var(--transicao);
+  }
+  .topo.visivel { opacity: 1; pointer-events: auto; }
+  .topo:hover { background: var(--superficie-quente); }
+  .topo .icone { stroke: var(--cor-acao); }
+
+  /* Responsivo */
+  @media (max-width: 1024px) {
+    .container { padding: 0 24px; }
+    .nav a { padding: 8px 8px; }
+    .grade-categorias { grid-template-columns: repeat(2, 1fr); }
+    .grade-time { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 900px) {
+    .btn-menu { display: inline-flex; }
+    .nav {
+      display: none;
+      position: absolute; top: var(--altura-header); left: 0; right: 0;
+      background: var(--superficie); border-bottom: 1px solid var(--borda);
+      padding: 8px 16px 16px;
+    }
+    .nav.aberto { display: block; }
+    .nav ul { flex-direction: column; }
+    .nav a { padding: 14px 12px; }
+    .grade-itens { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 0 16px; }
+    .marca .rotulo { font-size: 18px; }
+    .header .btn { padding: 0 12px; }
+    .header .btn-login { width: 36px; padding: 0; }
+    .btn-login span { display: none; }
+    .hero { padding: 64px 0 56px; }
+    .hero::before { background: rgba(243, 238, 251, 0.85); }
+    .hero h1 { font-size: 30px; }
+    .secao { padding: 44px 0; }
+    .secao-topo { flex-direction: column; gap: 6px; }
+    .grade-categorias, .grade-itens, .grade-itens.duas, .grade-time { grid-template-columns: 1fr; }
+    .card-categoria { flex-direction: row; padding: 18px 20px; text-align: left; gap: 16px; }
+    .card-categoria .icone { width: 24px; height: 24px; }
+    .card-categoria strong { flex: 1; }
+    .busca-atalho { display: none; }
+    .topo { right: 16px; bottom: 16px; }
+    .perfil { width: 100%; max-width: none; max-height: 92vh; margin: auto 0 0; border-radius: 16px 16px 0 0; }
+    .perfil-corpo { padding: 0 20px 24px; }
+    .perfil-foto { width: 120px; height: 120px; margin-top: -60px; font-size: 38px; }
+    .perfil-dados { grid-template-columns: 1fr; }
+    .card-hoje { flex-wrap: wrap; padding: 18px 20px; }
+    .card-hoje-relogio { width: 100%; align-items: flex-start; text-align: left; padding-left: 40px; }
+    .card-hoje-relogio .relogio-hora { font-size: 22px; }
+    .relogio { flex-wrap: wrap; border-radius: var(--raio-md); }
+    .recado { padding: 16px; gap: 12px; }
+    .recado > .icone-box { display: none; }
+    .form-hoje, .form-login { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="header">
+  <div class="container">
+    <a class="marca" href="#topo" aria-label="Suporte N2, voltar ao início">
+      <span class="rotulo">Suporte N2</span>
+    </a>
+
+    <nav class="nav rotulo" id="nav" aria-label="Seções">
+      <ul>
+        <li><a href="#hoje">Hoje</a></li>
+        <li><a href="#sistemas">Sistemas</a></li>
+        <li><a href="#ferramentas">Ferramentas</a></li>
+        <li><a href="#relatorios">Relatórios</a></li>
+        <li><a href="#procedimentos">Procedimentos</a></li>
+        <li><a href="#time">Nosso time</a></li>
+      </ul>
+    </nav>
+
+    <div class="acoes-header">
+      <button class="btn btn-header" type="button" data-acao="Abrir chamado">Abrir chamado</button>
+      <button class="btn btn-secundario btn-header btn-login" type="button" id="btn-login" aria-label="Login" aria-haspopup="dialog">
+        <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-usuario"/></svg>
+        <span>Login</span>
+      </button>
+      <button class="btn-menu" type="button" id="btn-menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav">
+        <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-menu"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="conteudo">
+  <section class="hero" id="topo">
+    <div class="container">
+      <span class="rotulo">Suporte N2</span>
+      <h1>Central do Suporte N2</h1>
+      <p class="apoio">Sistemas, ferramentas, relatórios e procedimentos da equipe em um só lugar.</p>
+
+      <div class="busca" id="busca" role="search">
+        <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-busca"/></svg>
+        <input type="search" id="campo-busca" placeholder="Buscar sistema, ferramenta ou relatório" aria-label="Buscar sistema, ferramenta, relatório ou pessoa" autocomplete="off">
+        <kbd class="busca-atalho" aria-hidden="true">/</kbd>
+        <button class="busca-limpar" type="button" id="limpar-busca" aria-label="Limpar busca">
+          <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-x"/></svg>
+        </button>
+      </div>
+      <p class="busca-status" id="busca-status" aria-live="polite"></p>
+    </div>
+    <button class="ver-banner" type="button" id="btn-ver-banner" aria-label="Ver imagem do banner" title="Ver imagem" aria-haspopup="dialog">
+      <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-imagem"/></svg>
+    </button>
+  </section>
+
+  <section class="secao" id="categorias" aria-labelledby="titulo-categorias">
+    <div class="container">
+      <div class="secao-topo"><h2 id="titulo-categorias">Categorias</h2></div>
+      <div class="grade-categorias" id="grade-categorias"></div>
+    </div>
+  </section>
+
+  <div id="secoes"></div>
+
+  <section class="sem-resultado" id="sem-resultado" aria-live="polite">
+    <div class="container">
+      <h2>Nenhum resultado</h2>
+      <p class="apoio">Tente outro termo ou <button type="button" class="btn-secundario btn" id="limpar-vazio" style="height:34px;margin-left:6px">limpe a busca</button></p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="rodape">
+  <div class="container">
+    <span>© Valid · Suporte N2 · Uso interno</span>
+    <span>Atalho: pressione <kbd>/</kbd> para buscar</span>
+  </div>
+</footer>
+
+<dialog class="perfil" id="perfil" aria-labelledby="perfil-nome">
+  <div class="perfil-capa"></div>
+  <button class="perfil-fechar" type="button" id="perfil-fechar" aria-label="Fechar perfil">
+    <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-x"/></svg>
+  </button>
+  <div class="perfil-corpo" id="perfil-corpo"></div>
+</dialog>
+
+<dialog class="perfil form-dialog" id="dialog-hoje" aria-labelledby="titulo-form-hoje">
+  <form class="form-hoje" id="form-hoje" novalidate>
+    <div class="form-topo">
+      <h2 id="titulo-form-hoje">Novo item</h2>
+      <button class="perfil-fechar" type="button" data-fechar-form aria-label="Fechar">
+        <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-x"/></svg>
+      </button>
+    </div>
+
+    <div class="campo">
+      <span class="rotulo" id="rotulo-tipo">Tipo</span>
+      <div class="tipos" role="radiogroup" aria-labelledby="rotulo-tipo">
+        <label><input type="radio" name="tipo" value="recado" checked><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-megafone"/></svg>Recado</label>
+        <label><input type="radio" name="tipo" value="relatorio"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-grafico"/></svg>Relatório</label>
+        <label><input type="radio" name="tipo" value="anexo"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-clipe"/></svg>Anexo</label>
+      </div>
+    </div>
+
+    <label class="campo">
+      <span class="rotulo">Título *</span>
+      <input type="text" name="titulo" maxlength="120" required>
+    </label>
+
+    <label class="campo">
+      <span class="rotulo">Mensagem</span>
+      <textarea name="texto" rows="4"></textarea>
+    </label>
+
+    <label class="campo">
+      <span class="rotulo">Link (opcional)</span>
+      <input type="url" name="link" placeholder="https://...">
+    </label>
+
+    <div class="campo">
+      <label class="rotulo" for="campo-arquivo">Anexo (opcional, até 3 MB)</label>
+      <input type="file" name="arquivo" id="campo-arquivo">
+      <div class="arquivo-atual" id="arquivo-atual"></div>
+    </div>
+
+    <label class="check"><input type="checkbox" name="importante"> Marcar como importante</label>
+
+    <p class="form-erro" id="form-erro" role="alert"></p>
+
+    <div class="form-botoes">
+      <button class="btn btn-secundario" type="button" data-fechar-form>Cancelar</button>
+      <button class="btn" type="submit">Publicar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="perfil login-dialog" id="dialog-login" aria-labelledby="titulo-login">
+  <form class="form-login" id="form-login" novalidate>
+    <div class="form-topo">
+      <h2 id="titulo-login">Entrar</h2>
+      <button class="perfil-fechar" type="button" data-fechar-login aria-label="Fechar">
+        <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-x"/></svg>
+      </button>
+    </div>
+
+    <label class="campo">
+      <span class="rotulo">Usuário</span>
+      <input type="text" name="usuario" autocomplete="username" placeholder="nome.sobrenome">
+    </label>
+
+    <div class="campo">
+      <label class="rotulo" for="login-senha">Senha</label>
+      <div class="campo-senha">
+        <input type="password" id="login-senha" name="senha" autocomplete="current-password">
+        <button class="btn-ver-senha" type="button" id="btn-ver-senha" aria-label="Mostrar senha" aria-pressed="false">
+          <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-olho"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <p class="login-msg" id="login-msg" role="alert"></p>
+
+    <button class="btn btn-largo" type="submit">Entrar</button>
+
+    <div class="divisor" aria-hidden="true">ou</div>
+
+    <button class="btn btn-secundario btn-largo" type="button" id="btn-google">
+      <svg class="logo-google" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+        <path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
+        <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
+        <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+      </svg>
+      Entrar com Google
+    </button>
+  </form>
+</dialog>
+
+<dialog class="visualizador" id="dialog-banner" aria-label="Imagem do banner">
+  <img src="fotos/banner-time.jpg" alt="Ilustração da equipe do Suporte N2">
+  <button class="perfil-fechar" type="button" data-fechar-banner aria-label="Fechar imagem">
+    <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-x"/></svg>
+  </button>
+</dialog>
+
+<div class="aviso" id="aviso" role="status" aria-live="polite"></div>
+
+<button class="topo" type="button" id="btn-topo" aria-label="Voltar ao topo">
+  <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-seta-cima"/></svg>
+</button>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-servidor" viewBox="0 0 24 24"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01M6 18h.01"/></symbol>
+  <symbol id="i-headset" viewBox="0 0 24 24"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"/><path d="M21 16v2a4 4 0 0 1-4 4h-5"/></symbol>
+  <symbol id="i-grafico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></symbol>
+  <symbol id="i-documento" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></symbol>
+  <symbol id="i-balanca" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></symbol>
+  <symbol id="i-telefone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+  <symbol id="i-pessoas" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-busca" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-seta-cima" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M12 19V5"/></symbol>
+  <symbol id="i-bolo" viewBox="0 0 24 24"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20M7 8v3M12 8v3M17 8v3M7 4h.01M12 4h.01M17 4h.01"/></symbol>
+  <symbol id="i-usuario" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></symbol>
+  <symbol id="i-relogio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-imagem" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol>
+  <symbol id="i-olho" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-olho-fechado" viewBox="0 0 24 24"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61M2 2l20 20"/></symbol>
+  <symbol id="i-calendario" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-megafone" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
+  <symbol id="i-clipe" viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol>
+  <symbol id="i-lapis" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></symbol>
+  <symbol id="i-lixeira" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+  <symbol id="i-mais" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+  <symbol id="i-externo" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+</svg>
+
+<!-- Conteúdo publicado na seção "Hoje". Gerado pelo botão "Baixar site atualizado"; não precisa editar à mão. -->
+<script type="application/json" id="dados-hoje">
+{"itens":[]}
+</script>
+
+<script>
+  const HTML_ORIGINAL = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+
+  /*
+   * Dados do portal. Para ativar um item, preencha "url" (ex.: url: "https://...").
+   * Itens sem url mostram um aviso ao clicar; itens com emBreve: true ficam desabilitados.
+   * layout: "grade" (3 colunas), "duas" (2 cards lado a lado) ou "lista".
+   */
+  const CATEGORIAS = [
+    {
+      id: "sistemas", titulo: "Sistemas V/Cert", tituloCard: "Sistemas V/Cert", icone: "i-servidor", layout: "grade",
+      itens: ["SAR ADMIN", "SAR OPER", "SAT", "SGS", "Commercial", "SIG", "Renovar", "VC IVS", "Partner Center", "Cadastro DNA", "VQUEUE", "Link de Renovação TEC-D"]
+    },
+    {
+      id: "ferramentas", titulo: "Ferramentas de atendimento Suporte N2", tituloCard: "Ferramentas de atendimento", icone: "i-headset", layout: "grade",
+      itens: ["Callbox", "GLPI", "OTRS", "Plusoft OMNI", "Lecom", "ADP", "RD Station", "Digisac"]
+    },
+    {
+      id: "relatorios", titulo: "Relatórios diários", tituloCard: "Relatórios diários", icone: "i-grafico", layout: "lista",
+      itens: ["Banco de Tickets", "Vouchers Vidaas", "Diário de instabilidades", "Inventário de Ativos", "Inativar Nuvem", "Gravações Acessos Remoto", "Indicadores N2", "DataPrev - Relatórios", "Pendências N3", "Chamados SAC/N1"]
+    },
+    {
+      id: "procedimentos", titulo: "Procedimentos", tituloCard: "Procedimentos", icone: "i-documento", layout: "lista",
+      itens: ["Vídeos e Procedimentos", "Certificado SSL", "VIDaaS", "Downloads", "Cursos", "Instalando os gerenciadores no MacOS"]
+    },
+    {
+      id: "guias", titulo: "Guias de procedimentos corporativos", tituloCard: "Guias corporativos", icone: "i-balanca", layout: "duas",
+      itens: [
+        { nome: "CFM", descricao: "Conselho Federal de Medicina" },
+        { nome: "TJSP", descricao: "Tribunal de Justiça de SP" }
+      ]
+    },
+    {
+      id: "downloads", titulo: "Downloads e acessos", tituloCard: "Downloads e acessos", icone: "i-download", layout: "lista",
+      itens: ["Links e Acessos", "Downloads", { nome: "Em breve", emBreve: true }, { nome: "Em breve", emBreve: true }]
+    },
+    {
+      id: "contatos", titulo: "Contatos importantes", tituloCard: "Contatos importantes", icone: "i-telefone", layout: "duas",
+      itens: [
+        { nome: "Contatos dos Gestores", descricao: "Liderança e gestão da equipe" },
+        { nome: "Gather", descricao: "Escritório virtual da equipe" }
+      ]
+    }
+  ];
+
+  /*
+   * Perfil de cada pessoa:
+   *   nascimento: "AAAA-MM-DD" (a idade é calculada automaticamente)
+   *   foto: caminho da imagem, ex.: "fotos/davi.jpg" (sem foto, aparecem as iniciais)
+   *   descricao: texto escrito pela própria pessoa
+   */
+  const TIME = [
+    { grupo: "Liderança", pessoas: [
+      { nome: "Lays Santos Almeida de Farias", cargo: "Líder de Suporte", nascimento: "", foto: "fotos/lays.png", descricao: "" }
+    ]},
+    { grupo: "Equipe Suporte N2", pessoas: [
+      { nome: "Paula Katiele Soares", cargo: "Técnico de Suporte I", nascimento: "", foto: "fotos/paula.png", descricao: "" },
+      { nome: "David Nunes Bezerra", cargo: "Técnico de Suporte I", nascimento: "", foto: "fotos/david.png", descricao: "" },
+      { nome: "Guilherme da Silva Bezerra", cargo: "Técnico de Suporte I", nascimento: "", foto: "fotos/guilherme.png", descricao: "" },
+      { nome: "Isaque Dias Pereira", cargo: "Técnico de Suporte I", nascimento: "", foto: "fotos/isaque.png", descricao: "" },
+      { nome: "Fabiana Cristina dos Santos", cargo: "Técnico de Suporte I", nascimento: "", foto: "fotos/fabiana.png", descricao: "" }
+    ]},
+    { grupo: "Equipe CFM / COFEN e Projetos VIDaaS", pessoas: [
+      { nome: "Anderson Araujo Leite", cargo: "Auxiliar de Informática", nascimento: "1998-01-17", foto: "fotos/anderson.png", descricao: "Meu nome é Anderson Leite, tenho 28 anos e faço parte da Valid desde 2017. Ao longo dessa trajetória, tive a oportunidade de atuar em diferentes áreas da empresa, iniciando no atendimento do Poupatempo, onde desenvolvi habilidades de relacionamento com o público e resolução de demandas. Posteriormente, trabalhei como Agente de Registro no projeto TJSP, adquirindo experiência em processos de identificação e certificação digital.\n\nAtualmente, atuo como Auxiliar de Informática, prestando suporte técnico em um projeto que atende médicos e profissionais da saúde que utilizam certificados da Valid.\n\nNo âmbito pessoal, sou apaixonado por esportes, especialmente futebol, e torcedor do São Paulo Futebol Clube. Valorizo muito os momentos em família e acredito que equilíbrio, dedicação e comprometimento são pilares essenciais tanto na vida pessoal quanto na profissional. Atualmente, vivo um dos momentos mais marcantes da minha vida: a experiência de ser pai de primeira viagem, um desafio que tem fortalecido ainda mais meu senso de responsabilidade, aprendizado e evolução constante." },
+      { nome: "Davi Lopes Dos Santos", cargo: "Auxiliar de Informática", nascimento: "", foto: "fotos/davi.png", descricao: "" },
+      { nome: "Maria Luisa Da Silva Chaves", cargo: "Auxiliar de Informática", nascimento: "1997-01-23", foto: "fotos/maria-luisa.png", descricao: "Sou aquariana, tenho 29 anos, sou formada em Sistemas para Internet e busco constante aprimoramento pessoal e profissional. Minha trajetória na Valid começou no Poupatempo entre 2018 e 2021, e atualmente retornei à empresa como auxiliar de informática. No dia a dia, valorizo momentos com a família, curtir músicas e séries, além de gostar de aprender e fazer novas amizades." }
+    ]}
+  ];
+
+  const $ = (sel, raiz = document) => raiz.querySelector(sel);
+  const $$ = (sel, raiz = document) => [...raiz.querySelectorAll(sel)];
+
+  const normalizar = (texto) => texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const escapar = (texto) => texto.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const svg = (id, classe = "icone") => `<svg class="${classe}" viewBox="0 0 24 24" aria-hidden="true"><use href="#${id}"/></svg>`;
+
+  const iniciais = (nome) => {
+    const partes = nome.split(/\s+/).filter((p) => !/^(d[aeo]s?|e)$/i.test(p));
+    return (partes[0][0] + (partes.length > 1 ? partes[partes.length - 1][0] : "")).toUpperCase();
+  };
+
+  const contarTexto = (n, singular, plural) => `${n} ${n === 1 ? singular : plural}`;
+
+  const ordemAlfabetica = (a, b) => a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" });
+
+  CATEGORIAS.forEach((cat) => {
+    cat.itens = cat.itens
+      .map((item) => (typeof item === "string" ? { nome: item } : item))
+      .sort((a, b) => (a.emBreve === b.emBreve ? ordemAlfabetica(a, b) : a.emBreve ? 1 : -1));
+  });
+  TIME.forEach((g) => g.pessoas.sort(ordemAlfabetica));
+  const PESSOAS = TIME.flatMap((g) => g.pessoas.map((p) => ({ ...p, grupo: g.grupo })));
+  PESSOAS.forEach((p, i) => (p.id = i));
+  TIME.forEach((g) => (g.pessoas = PESSOAS.filter((p) => p.grupo === g.grupo)));
+  const totalPessoas = PESSOAS.length;
+
+  const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+
+  function lerData(texto) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(texto || "");
+    return m ? { ano: +m[1], mes: +m[2], dia: +m[3] } : null;
+  }
+
+  function calcularIdade(n) {
+    const hoje = new Date();
+    const mes = hoje.getMonth() + 1;
+    let idade = hoje.getFullYear() - n.ano;
+    if (mes < n.mes || (mes === n.mes && hoje.getDate() < n.dia)) idade--;
+    return idade;
+  }
+
+  function diasAteAniversario(n) {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    let proximo = new Date(hoje.getFullYear(), n.mes - 1, n.dia);
+    if (proximo < hoje) proximo = new Date(hoje.getFullYear() + 1, n.mes - 1, n.dia);
+    return Math.round((proximo - hoje) / 864e5);
+  }
+
+  function htmlAvatar(p, classe = "avatar") {
+    const letras = iniciais(p.nome);
+    if (!p.foto) return `<span class="${classe}" aria-hidden="true">${letras}</span>`;
+    return `<span class="${classe}" aria-hidden="true"><img src="${escapar(p.foto)}" alt="" onerror="this.replaceWith('${letras}')"></span>`;
+  }
+
+  /* Hoje: data/hora de Brasília e mural da liderança */
+  const FUSO = "America/Sao_Paulo";
+  const fmtDataLonga = new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const fmtHora = new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const fmtHoraCurta = new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, hour: "2-digit", minute: "2-digit" });
+  const fmtDiaMes = new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, day: "2-digit", month: "2-digit" });
+  const fmtChaveDia = new Intl.DateTimeFormat("en-CA", { timeZone: FUSO, year: "numeric", month: "2-digit", day: "2-digit" });
+  const chaveDia = (data) => fmtChaveDia.format(data);
+
+  const TIPOS_HOJE = {
+    recado: { nome: "Recado", icone: "i-megafone" },
+    relatorio: { nome: "Relatório", icone: "i-grafico" },
+    anexo: { nome: "Anexo", icone: "i-clipe" }
+  };
+  const LIMITE_ANEXO = 3 * 1024 * 1024;
+  const CHAVE_RASCUNHO = "suporte-n2-hoje-rascunho";
+  const dadosPublicados = JSON.stringify(JSON.parse($("#dados-hoje").textContent.trim() || '{"itens":[]}'));
+  let dadosHoje = JSON.parse(dadosPublicados);
+  let temRascunho = false;
+  let modoEdicao = false;
+
+  try {
+    const rascunho = localStorage.getItem(CHAVE_RASCUNHO);
+    if (rascunho && rascunho !== dadosPublicados) {
+      dadosHoje = JSON.parse(rascunho);
+      temRascunho = true;
+    } else {
+      localStorage.removeItem(CHAVE_RASCUNHO);
+    }
+  } catch (e) {}
+
+  function salvarRascunho() {
+    const atual = JSON.stringify(dadosHoje);
+    temRascunho = atual !== dadosPublicados;
+    try {
+      if (temRascunho) localStorage.setItem(CHAVE_RASCUNHO, atual);
+      else localStorage.removeItem(CHAVE_RASCUNHO);
+    } catch (e) {
+      mostrarAviso("Não deu para guardar o rascunho neste navegador. Baixe o site atualizado agora para não perder as alterações.");
+    }
+  }
+
+  function atualizarRelogio() {
+    const agora = new Date();
+    const data = fmtDataLonga.format(agora);
+    const dataFormatada = data.charAt(0).toUpperCase() + data.slice(1);
+    $$(".relogio-data").forEach((el) => (el.textContent = dataFormatada));
+    $$(".relogio-hora").forEach((el) => (el.textContent = fmtHora.format(agora)));
+  }
+
+  function quandoPublicado(iso) {
+    const data = new Date(iso);
+    const hora = fmtHoraCurta.format(data);
+    return chaveDia(data) === chaveDia(new Date()) ? `Hoje às ${hora}` : `${fmtDiaMes.format(data)} às ${hora}`;
+  }
+
+  function ordenarHoje(itens) {
+    return [...itens].sort((a, b) => (b.importante - a.importante) || b.criadoEm.localeCompare(a.criadoEm));
+  }
+
+  function htmlRecado(item, termo) {
+    const tipo = TIPOS_HOJE[item.tipo] || TIPOS_HOJE.recado;
+    const acoes = [];
+    if (item.link) {
+      acoes.push(`<a class="btn btn-secundario" href="${escapar(item.link)}" target="_blank" rel="noopener">${svg("i-externo")}Abrir link</a>`);
+    }
+    if (item.arquivo) {
+      acoes.push(`<a class="btn btn-secundario" href="${escapar(item.arquivo.dados)}" download="${escapar(item.arquivo.nome)}">${svg("i-download")}${escapar(item.arquivo.nome)}</a>`);
+    }
+    return `
+      <li class="recado${item.importante ? " importante" : ""}">
+        <span class="icone-box">${svg(tipo.icone)}</span>
+        <div class="recado-corpo">
+          <div class="recado-meta">
+            <span class="rotulo">${tipo.nome}</span>
+            ${item.importante ? '<span class="selo selo-lilas">Importante</span>' : ""}
+            <span class="apoio">${quandoPublicado(item.criadoEm)}</span>
+          </div>
+          <h3>${destacar(item.titulo, termo)}</h3>
+          ${item.texto ? `<p>${destacar(item.texto, termo)}</p>` : ""}
+          ${acoes.length ? `<div class="recado-acoes">${acoes.join("")}</div>` : ""}
+        </div>
+        ${modoEdicao ? `
+        <div class="recado-edicao">
+          <button class="btn-icone" type="button" data-editar-recado="${item.id}" aria-label="Editar ${escapar(item.titulo)}">${svg("i-lapis")}</button>
+          <button class="btn-icone" type="button" data-excluir-recado="${item.id}" aria-label="Excluir ${escapar(item.titulo)}">${svg("i-lixeira")}</button>
+        </div>` : ""}
+      </li>`;
+  }
+
+  function htmlSecaoHoje(itens, termo) {
+    const hoje = chaveDia(new Date());
+    const temAntigos = dadosHoje.itens.some((i) => chaveDia(new Date(i.criadoEm)) !== hoje);
+    return `
+      <section class="secao secao-conteudo" id="hoje" aria-labelledby="titulo-hoje">
+        <div class="container">
+          <div class="secao-topo hoje-topo">
+            <div class="hoje-titulo">
+              <h2 id="titulo-hoje">Hoje</h2>
+              <span class="relogio" title="Horário de Brasília">
+                ${svg("i-relogio")}
+                <span class="relogio-hora"></span>
+                <span class="relogio-sep" aria-hidden="true">|</span>
+                <span class="relogio-data"></span>
+              </span>
+            </div>
+            <div class="hoje-acoes">
+              ${modoEdicao && temAntigos ? '<button class="btn btn-secundario" type="button" data-hoje="limpar">Remover itens antigos</button>' : ""}
+              ${modoEdicao ? `<button class="btn btn-secundario" type="button" data-hoje="novo">${svg("i-mais")}Novo item</button>` : ""}
+              <button class="btn${modoEdicao ? "" : " btn-secundario"}" type="button" data-hoje="editar" aria-pressed="${modoEdicao}">
+                ${modoEdicao ? "Concluir edição" : `${svg("i-lapis")}Editar`}
+              </button>
+            </div>
+          </div>
+          ${temRascunho ? `
+          <div class="hoje-rascunho" role="status">
+            <div>
+              <strong>Alterações ainda não publicadas</strong>
+              <span class="apoio">Elas estão salvas só neste navegador. Baixe o site atualizado e substitua o index.html compartilhado para que toda a equipe veja.</span>
+            </div>
+            <div class="hoje-rascunho-acoes">
+              <button class="btn btn-secundario" type="button" data-hoje="descartar">Descartar</button>
+              <button class="btn" type="button" data-hoje="baixar">${svg("i-download")}Baixar site atualizado</button>
+            </div>
+          </div>` : ""}
+          ${itens.length
+            ? `<ul class="recados">${itens.map((i) => htmlRecado(i, termo)).join("")}</ul>`
+            : `<div class="hoje-vazio">
+                ${svg("i-megafone")}
+                <strong>Nenhum recado por enquanto</strong>
+                <span class="apoio">${modoEdicao
+                  ? "Use “Novo item” para publicar um recado, relatório ou anexo."
+                  : "Quando a Lays publicar recados, relatórios ou anexos, eles aparecem aqui."}</span>
+              </div>`}
+        </div>
+      </section>`;
+  }
+
+  function destacar(texto, termo) {
+    if (!termo) return escapar(texto);
+    const alvo = normalizar(texto);
+    const i = alvo.indexOf(termo);
+    if (i < 0) return escapar(texto);
+    return escapar(texto.slice(0, i)) + "<mark>" + escapar(texto.slice(i, i + termo.length)) + "</mark>" + escapar(texto.slice(i + termo.length));
+  }
+
+  function htmlItem(item, cat, termo) {
+    const nome = destacar(item.nome, termo);
+    const descricao = item.descricao ? `<span class="descricao">${destacar(item.descricao, termo)}</span>` : "";
+    const icone = `<span class="icone-box">${svg(item.emBreve ? "i-relogio" : cat.icone)}</span>`;
+    const conteudo = `${icone}<span class="nome">${nome}${descricao}</span>`;
+
+    if (item.emBreve) {
+      return `<span class="item" aria-disabled="true">${conteudo}<span class="selo">Em breve</span></span>`;
+    }
+    if (item.url) {
+      return `<a class="item" href="${escapar(item.url)}" target="_blank" rel="noopener">${conteudo}<span class="seta" aria-hidden="true">›</span></a>`;
+    }
+    return `<button class="item" type="button" data-acao="${escapar(item.nome)}">${conteudo}<span class="seta" aria-hidden="true">›</span></button>`;
+  }
+
+  function corresponde(termo, ...campos) {
+    return !termo || campos.some((c) => c && normalizar(c).includes(termo));
+  }
+
+  function renderizar(termo = "") {
+    let totalEncontrado = 0;
+    const contagens = {};
+    let html = "";
+
+    const hojeCorresponde = termo && corresponde(termo, "Hoje");
+    const itensHoje = ordenarHoje(dadosHoje.itens.filter((i) =>
+      hojeCorresponde || corresponde(termo, i.titulo, i.texto, i.arquivo && i.arquivo.nome)));
+    contagens.hoje = itensHoje.length;
+    if (termo) totalEncontrado += itensHoje.length;
+    if (!termo || itensHoje.length) html += htmlSecaoHoje(itensHoje, termo);
+
+    CATEGORIAS.forEach((cat) => {
+      const categoriaCorresponde = termo && corresponde(termo, cat.titulo, cat.tituloCard);
+      const itens = cat.itens.filter((i) => !(termo && i.emBreve) && (categoriaCorresponde || corresponde(termo, i.nome, i.descricao)));
+      const reais = itens.filter((i) => !i.emBreve).length;
+      contagens[cat.id] = reais;
+      totalEncontrado += reais;
+      if (!itens.length) return;
+
+      const classeLista = cat.layout === "lista" ? "lista" : cat.layout === "duas" ? "grade-itens duas" : "grade-itens";
+      html += `
+        <section class="secao secao-conteudo" id="${cat.id}" aria-labelledby="titulo-${cat.id}">
+          <div class="container">
+            <div class="secao-topo">
+              <h2 id="titulo-${cat.id}">${escapar(cat.titulo)}</h2>
+              <span class="apoio">${contarTexto(reais, "link", "links")}</span>
+            </div>
+            <ul class="${classeLista}">
+              ${itens.map((i) => `<li>${htmlItem(i, cat, termo)}</li>`).join("")}
+            </ul>
+          </div>
+        </section>`;
+    });
+
+    const grupos = TIME.map((g) => ({ ...g, pessoas: corresponde(termo, g.grupo) ? g.pessoas : g.pessoas.filter((p) => corresponde(termo, p.nome, p.cargo)) }))
+      .filter((g) => g.pessoas.length);
+    const pessoasEncontradas = grupos.reduce((s, g) => s + g.pessoas.length, 0);
+    contagens.time = pessoasEncontradas;
+    totalEncontrado += pessoasEncontradas;
+
+    if (grupos.length) {
+      html += `
+        <section class="secao secao-conteudo" id="time" aria-labelledby="titulo-time">
+          <div class="container">
+            <div class="secao-topo">
+              <h2 id="titulo-time">Conheça nosso time</h2>
+              <span class="apoio">${contarTexto(pessoasEncontradas, "pessoa", "pessoas")}</span>
+            </div>
+            ${grupos.map((g) => `
+              <div class="subgrupo">
+                <span class="rotulo">${escapar(g.grupo)}</span>
+                <ul class="grade-time">
+                  ${g.pessoas.map((p) => {
+                    const nasc = lerData(p.nascimento);
+                    const aniversarioHoje = nasc && diasAteAniversario(nasc) === 0;
+                    return `
+                    <li>
+                      <button class="pessoa" type="button" data-pessoa="${p.id}" aria-haspopup="dialog" aria-label="Ver perfil de ${escapar(p.nome)}">
+                        ${htmlAvatar(p)}
+                        <span class="pessoa-texto"><strong>${destacar(p.nome, termo)}</strong><span class="apoio">${destacar(p.cargo, termo)}</span></span>
+                        ${aniversarioHoje ? '<span class="selo selo-lilas">Aniversário hoje</span>' : '<span class="seta" aria-hidden="true">›</span>'}
+                      </button>
+                    </li>`;
+                  }).join("")}
+                </ul>
+              </div>`).join("")}
+          </div>
+        </section>`;
+    }
+
+    $("#secoes").innerHTML = html;
+    $$(".secao-conteudo").forEach((s, i) => s.classList.toggle("quente", i % 2 === 0));
+
+    renderizarCategorias(contagens, termo);
+
+    $("#sem-resultado").classList.toggle("visivel", totalEncontrado === 0);
+    $("#busca-status").textContent = termo
+      ? (totalEncontrado ? contarTexto(totalEncontrado, "resultado encontrado", "resultados encontrados") : "Nenhum resultado")
+      : "";
+
+    atualizarRelogio();
+    observarSecoes();
+  }
+
+  function renderizarCategorias(contagens, termo) {
+    const cards = [
+      ...CATEGORIAS.map((c) => ({ id: c.id, titulo: c.tituloCard, icone: c.icone, n: contagens[c.id], txt: contarTexto(contagens[c.id], "link", "links") })),
+      { id: "time", titulo: "Nosso time", icone: "i-pessoas", n: contagens.time, txt: contarTexto(termo ? contagens.time : totalPessoas, "pessoa", "pessoas") }
+    ];
+    const hojeVazio = termo && contagens.hoje === 0;
+    const cardHoje = `
+      <a class="card-categoria card-hoje${hojeVazio ? " vazio" : ""}" href="#hoje" data-categoria="hoje"${hojeVazio ? ' aria-disabled="true" tabindex="-1"' : ""}>
+        ${svg("i-calendario")}
+        <span class="card-hoje-texto">
+          <strong>Hoje</strong>
+          <span class="apoio">${contarTexto(contagens.hoje, "item publicado", "itens publicados")}</span>
+        </span>
+        <span class="card-hoje-relogio" aria-label="Data e horário de Brasília">
+          <span class="relogio-data"></span>
+          <strong class="relogio-hora"></strong>
+        </span>
+      </a>`;
+    $("#grade-categorias").innerHTML = cardHoje + cards.map((c) => `
+      <a class="card-categoria${c.n === 0 ? " vazio" : ""}" href="#${c.id}" data-categoria="${c.id}"${c.n === 0 ? ' aria-disabled="true" tabindex="-1"' : ""}>
+        ${svg(c.icone)}
+        <strong>${escapar(c.titulo)}</strong>
+        <span class="apoio">${c.txt}</span>
+      </a>`).join("");
+  }
+
+  /* Menu ativo conforme a rolagem */
+  let observador;
+  function observarSecoes() {
+    if (observador) observador.disconnect();
+    const linksNav = $$(".nav a");
+    const cards = () => $$(".card-categoria");
+    observador = new IntersectionObserver((entradas) => {
+      entradas.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const id = e.target.id;
+        linksNav.forEach((a) => a.classList.toggle("ativo", a.getAttribute("href") === "#" + id));
+        cards().forEach((c) => c.classList.toggle("ativo", c.dataset.categoria === id));
+      });
+    }, { rootMargin: "-40% 0px -55% 0px" });
+    $$(".secao-conteudo").forEach((s) => observador.observe(s));
+  }
+
+  /* Aviso */
+  let timerAviso;
+  function mostrarAviso(texto) {
+    const aviso = $("#aviso");
+    aviso.textContent = texto;
+    aviso.classList.add("visivel");
+    clearTimeout(timerAviso);
+    timerAviso = setTimeout(() => aviso.classList.remove("visivel"), 2600);
+  }
+
+  /* Busca */
+  const campo = $("#campo-busca");
+  const caixaBusca = $("#busca");
+  let timerBusca;
+
+  function aplicarBusca() {
+    const termo = normalizar(campo.value.trim());
+    caixaBusca.classList.toggle("preenchida", campo.value.length > 0);
+    renderizar(termo);
+  }
+
+  function limparBusca() {
+    campo.value = "";
+    aplicarBusca();
+    campo.focus();
+  }
+
+  campo.addEventListener("input", () => {
+    clearTimeout(timerBusca);
+    timerBusca = setTimeout(aplicarBusca, 80);
+  });
+  campo.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") limparBusca();
+    if (e.key === "Enter") {
+      const primeira = $(".secao-conteudo");
+      if (primeira) primeira.scrollIntoView();
+    }
+  });
+  $("#limpar-busca").addEventListener("click", limparBusca);
+  $("#limpar-vazio").addEventListener("click", limparBusca);
+
+  document.addEventListener("keydown", (e) => {
+    if (document.querySelector("dialog[open]")) return;
+    const digitando = ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName);
+    if ((e.key === "/" && !digitando) || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k")) {
+      e.preventDefault();
+      campo.focus();
+      campo.select();
+    }
+  });
+
+  /* Cliques em itens sem URL e botões de ação */
+  document.addEventListener("click", (e) => {
+    const alvo = e.target.closest("[data-acao]");
+    if (alvo) mostrarAviso(`"${alvo.dataset.acao}": link ainda não configurado.`);
+    const desabilitado = e.target.closest('.card-categoria[aria-disabled="true"]');
+    if (desabilitado) e.preventDefault();
+  });
+
+  /* Menu mobile */
+  const btnMenu = $("#btn-menu");
+  const nav = $("#nav");
+  function alternarMenu(abrir) {
+    nav.classList.toggle("aberto", abrir);
+    btnMenu.setAttribute("aria-expanded", String(abrir));
+    btnMenu.setAttribute("aria-label", abrir ? "Fechar menu" : "Abrir menu");
+    btnMenu.querySelector("use").setAttribute("href", abrir ? "#i-x" : "#i-menu");
+  }
+  btnMenu.addEventListener("click", () => alternarMenu(!nav.classList.contains("aberto")));
+  nav.addEventListener("click", (e) => { if (e.target.closest("a")) alternarMenu(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && nav.classList.contains("aberto")) { alternarMenu(false); btnMenu.focus(); } });
+  document.addEventListener("click", (e) => {
+    if (nav.classList.contains("aberto") && !e.target.closest("#nav, #btn-menu")) alternarMenu(false);
+  });
+
+  /* Edição do "Hoje" */
+  const dialogHoje = $("#dialog-hoje");
+  const formHoje = $("#form-hoje");
+  let editandoId = null;
+  let removerArquivo = false;
+
+  function renderizarArquivoAtual(item) {
+    $("#arquivo-atual").innerHTML = item && item.arquivo && !removerArquivo
+      ? `Arquivo atual: ${escapar(item.arquivo.nome)}<button type="button" data-remover-arquivo>remover</button>`
+      : "";
+  }
+
+  function abrirFormHoje(id = null) {
+    const item = dadosHoje.itens.find((i) => i.id === id);
+    editandoId = item ? id : null;
+    removerArquivo = false;
+    formHoje.reset();
+    $("#form-erro").textContent = "";
+    $("#titulo-form-hoje").textContent = item ? "Editar item" : "Novo item";
+    formHoje.querySelector('[type="submit"]').textContent = item ? "Salvar" : "Publicar";
+    if (item) {
+      formHoje.tipo.value = item.tipo;
+      formHoje.titulo.value = item.titulo;
+      formHoje.texto.value = item.texto || "";
+      formHoje.link.value = item.link || "";
+      formHoje.importante.checked = !!item.importante;
+    }
+    renderizarArquivoAtual(item);
+    dialogHoje.showModal();
+    formHoje.titulo.focus();
+  }
+
+  const lerArquivo = (arquivo) => new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+    leitor.onload = () => resolve(leitor.result);
+    leitor.onerror = reject;
+    leitor.readAsDataURL(arquivo);
+  });
+
+  formHoje.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const erro = $("#form-erro");
+    const titulo = formHoje.titulo.value.trim();
+    if (!titulo) {
+      erro.textContent = "Informe um título.";
+      formHoje.titulo.focus();
+      return;
+    }
+
+    let link = formHoje.link.value.trim();
+    if (link && !/^(https?:|mailto:)/i.test(link)) link = "https://" + link;
+
+    const existente = dadosHoje.itens.find((i) => i.id === editandoId);
+    let arquivo = existente && !removerArquivo ? existente.arquivo || null : null;
+    const novoArquivo = formHoje.arquivo.files[0];
+    if (novoArquivo) {
+      if (novoArquivo.size > LIMITE_ANEXO) {
+        erro.textContent = "O anexo passa de 3 MB. Para arquivos maiores, use um link (SharePoint, OneDrive…).";
+        return;
+      }
+      arquivo = { nome: novoArquivo.name, dados: await lerArquivo(novoArquivo) };
+    }
+
+    const campos = {
+      tipo: formHoje.tipo.value,
+      titulo,
+      texto: formHoje.texto.value.trim(),
+      link,
+      arquivo,
+      importante: formHoje.importante.checked
+    };
+    if (existente) Object.assign(existente, campos);
+    else dadosHoje.itens.push({ id: Date.now().toString(36), criadoEm: new Date().toISOString(), ...campos });
+
+    salvarRascunho();
+    dialogHoje.close();
+    aplicarBusca();
+    mostrarAviso(existente ? "Item atualizado." : "Item publicado. Baixe o site atualizado para a equipe ver.");
+  });
+
+  function baixarSiteAtualizado() {
+    const json = JSON.stringify(dadosHoje).replace(/</g, "\\u003c");
+    const html = HTML_ORIGINAL.replace(
+      /(<script type="application\/json" id="dados-hoje">)[\s\S]*?(<\/script>)/,
+      (_, inicio, fim) => `${inicio}\n${json}\n${fim}`
+    );
+    const url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "index.html";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    mostrarAviso("Arquivo baixado. Substitua o index.html compartilhado por ele.");
+  }
+
+  document.addEventListener("click", (e) => {
+    const botao = e.target.closest("[data-hoje]");
+    if (botao) {
+      const acao = botao.dataset.hoje;
+      if (acao === "editar") {
+        modoEdicao = !modoEdicao;
+        aplicarBusca();
+        $('[data-hoje="editar"]').focus({ preventScroll: true });
+      }
+      if (acao === "novo") abrirFormHoje();
+      if (acao === "baixar") baixarSiteAtualizado();
+      if (acao === "descartar" && confirm("Descartar as alterações que ainda não foram publicadas?")) {
+        dadosHoje = JSON.parse(dadosPublicados);
+        salvarRascunho();
+        aplicarBusca();
+      }
+      if (acao === "limpar" && confirm("Remover todos os itens publicados antes de hoje?")) {
+        const hoje = chaveDia(new Date());
+        dadosHoje.itens = dadosHoje.itens.filter((i) => chaveDia(new Date(i.criadoEm)) === hoje);
+        salvarRascunho();
+        aplicarBusca();
+      }
+    }
+
+    const editar = e.target.closest("[data-editar-recado]");
+    if (editar) abrirFormHoje(editar.dataset.editarRecado);
+
+    const excluir = e.target.closest("[data-excluir-recado]");
+    if (excluir && confirm("Excluir este item?")) {
+      dadosHoje.itens = dadosHoje.itens.filter((i) => i.id !== excluir.dataset.excluirRecado);
+      salvarRascunho();
+      aplicarBusca();
+    }
+
+    if (e.target.closest("[data-fechar-form]")) dialogHoje.close();
+    if (e.target.closest("[data-remover-arquivo]")) {
+      removerArquivo = true;
+      renderizarArquivoAtual(null);
+    }
+  });
+  dialogHoje.addEventListener("click", (e) => { if (e.target === dialogHoje) dialogHoje.close(); });
+
+  setInterval(atualizarRelogio, 1000);
+
+  /* Imagem do banner */
+  const dialogBanner = $("#dialog-banner");
+  $("#btn-ver-banner").addEventListener("click", () => dialogBanner.showModal());
+  dialogBanner.addEventListener("click", (e) => {
+    if (e.target === dialogBanner || e.target.closest("[data-fechar-banner]")) dialogBanner.close();
+  });
+
+  /* Login */
+  const dialogLogin = $("#dialog-login");
+  const formLogin = $("#form-login");
+  const msgLogin = $("#login-msg");
+  const btnVerSenha = $("#btn-ver-senha");
+  const CHAVE_USUARIO = "suporte-n2-usuario";
+
+  function mensagemLogin(texto, tipo = "info") {
+    msgLogin.dataset.tipo = tipo;
+    msgLogin.textContent = texto;
+  }
+
+  function alternarSenha(mostrar) {
+    formLogin.senha.type = mostrar ? "text" : "password";
+    btnVerSenha.setAttribute("aria-pressed", String(mostrar));
+    btnVerSenha.setAttribute("aria-label", mostrar ? "Ocultar senha" : "Mostrar senha");
+    btnVerSenha.querySelector("use").setAttribute("href", mostrar ? "#i-olho-fechado" : "#i-olho");
+  }
+
+  function abrirLogin() {
+    formLogin.reset();
+    mensagemLogin("");
+    alternarSenha(false);
+    $$("[aria-invalid]", formLogin).forEach((c) => c.removeAttribute("aria-invalid"));
+    let lembrado = "";
+    try { lembrado = localStorage.getItem(CHAVE_USUARIO) || ""; } catch (e) {}
+    formLogin.usuario.value = lembrado;
+    dialogLogin.showModal();
+    (lembrado ? formLogin.senha : formLogin.usuario).focus();
+  }
+
+  $("#btn-login").addEventListener("click", abrirLogin);
+  btnVerSenha.addEventListener("click", () => alternarSenha(formLogin.senha.type === "password"));
+
+  formLogin.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const usuario = formLogin.usuario;
+    const senha = formLogin.senha;
+    [[usuario, !usuario.value.trim()], [senha, !senha.value]].forEach(([campo, invalido]) => {
+      if (invalido) campo.setAttribute("aria-invalid", "true");
+      else campo.removeAttribute("aria-invalid");
+    });
+    if (!usuario.value.trim()) {
+      mensagemLogin("Informe seu usuário.", "erro");
+      usuario.focus();
+      return;
+    }
+    if (!senha.value) {
+      mensagemLogin("Informe sua senha.", "erro");
+      senha.focus();
+      return;
+    }
+    try { localStorage.setItem(CHAVE_USUARIO, usuario.value.trim()); } catch (e) {}
+    mensagemLogin("O login ainda não está conectado a um sistema de autenticação.");
+  });
+  formLogin.addEventListener("input", (e) => {
+    if (e.target.value) e.target.removeAttribute("aria-invalid");
+  });
+
+  $("#btn-google").addEventListener("click", () => mensagemLogin("O login com Google ainda não está configurado."));
+  dialogLogin.addEventListener("click", (e) => {
+    if (e.target === dialogLogin || e.target.closest("[data-fechar-login]")) dialogLogin.close();
+  });
+
+  /* Perfil da pessoa */
+  const perfil = $("#perfil");
+  const perfilCorpo = $("#perfil-corpo");
+  let perfilAtual = null;
+
+  function idsVisiveis() {
+    return $$("[data-pessoa]").map((b) => +b.dataset.pessoa);
+  }
+
+  function htmlAniversario(nasc) {
+    if (!nasc) return '<span class="vazio-txt">Não informado</span>';
+    const dias = diasAteAniversario(nasc);
+    const quando = dias === 0 ? "É hoje!" : dias === 1 ? "É amanhã" : `Faltam ${dias} dias`;
+    return `${nasc.dia} de ${MESES[nasc.mes - 1]}<small>${quando}</small>`;
+  }
+
+  function htmlIdade(nasc) {
+    if (!nasc) return '<span class="vazio-txt">Não informada</span>';
+    const data = [String(nasc.dia).padStart(2, "0"), String(nasc.mes).padStart(2, "0"), nasc.ano].join("/");
+    return `${calcularIdade(nasc)} anos<small>Nascimento: ${data}</small>`;
+  }
+
+  function abrirPerfil(id) {
+    const p = PESSOAS[id];
+    if (!p) return;
+    perfilAtual = id;
+    const nasc = lerData(p.nascimento);
+    const ids = idsVisiveis();
+    const posicao = ids.indexOf(id);
+
+    perfilCorpo.innerHTML = `
+      ${htmlAvatar(p, "avatar perfil-foto")}
+      <h2 id="perfil-nome">${escapar(p.nome)}</h2>
+      <p class="apoio perfil-cargo">${escapar(p.cargo)}</p>
+      <span class="rotulo perfil-grupo">${escapar(p.grupo)}</span>
+
+      <dl class="perfil-dados">
+        <div class="perfil-dado">
+          <span class="icone-box">${svg("i-bolo")}</span>
+          <div><dt class="rotulo">Aniversário</dt><dd>${htmlAniversario(nasc)}</dd></div>
+        </div>
+        <div class="perfil-dado">
+          <span class="icone-box">${svg("i-usuario")}</span>
+          <div><dt class="rotulo">Idade</dt><dd>${htmlIdade(nasc)}</dd></div>
+        </div>
+      </dl>
+
+      <div class="perfil-sobre">
+        <span class="rotulo">Sobre mim</span>
+        ${p.descricao
+          ? `<p>${escapar(p.descricao)}</p>`
+          : '<p class="vazio-txt">Esta pessoa ainda não escreveu uma descrição.</p>'}
+      </div>
+
+      ${ids.length > 1 ? `
+      <div class="perfil-nav">
+        <button class="btn btn-secundario" type="button" data-navegar="-1" aria-label="Pessoa anterior">‹ Anterior</button>
+        <span class="apoio">${posicao + 1} de ${ids.length}</span>
+        <button class="btn btn-secundario" type="button" data-navegar="1" aria-label="Próxima pessoa">Próximo ›</button>
+      </div>` : ""}`;
+
+    if (!perfil.open) perfil.showModal();
+    perfil.scrollTop = 0;  }
+
+  function navegarPerfil(passo) {
+    const ids = idsVisiveis();
+    if (ids.length < 2) return;
+    const i = (ids.indexOf(perfilAtual) + passo + ids.length) % ids.length;
+    abrirPerfil(ids[i]);
+    const botao = perfilCorpo.querySelector(`[data-navegar="${passo}"]`);
+    if (botao) botao.focus();
+  }
+
+  document.addEventListener("click", (e) => {
+    const card = e.target.closest("[data-pessoa]");
+    if (card) abrirPerfil(+card.dataset.pessoa);
+  });
+  perfilCorpo.addEventListener("click", (e) => {
+    const foto = e.target.closest(".perfil-foto");
+    if (foto && matchMedia("(hover: none)").matches) foto.classList.toggle("ampliada");
+    const nav = e.target.closest("[data-navegar]");
+    if (nav) navegarPerfil(+nav.dataset.navegar);
+  });
+  $("#perfil-fechar").addEventListener("click", () => perfil.close());
+  perfil.addEventListener("click", (e) => { if (e.target === perfil) perfil.close(); });
+  perfil.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") navegarPerfil(1);
+    if (e.key === "ArrowLeft") navegarPerfil(-1);
+  });
+  perfil.addEventListener("close", () => {
+    const card = $(`[data-pessoa="${perfilAtual}"]`);
+    if (card) card.focus({ preventScroll: true });
+  });
+
+  /* Voltar ao topo */
+  const btnTopo = $("#btn-topo");
+  window.addEventListener("scroll", () => btnTopo.classList.toggle("visivel", window.scrollY > 600), { passive: true });
+  btnTopo.addEventListener("click", () => { window.scrollTo({ top: 0 }); campo.focus({ preventScroll: true }); });
+
+  renderizar();
+</script>
+</body>
+</html>

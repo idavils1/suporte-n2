@@ -1,0 +1,43 @@
+SPB - para obter o PFX, é necessário que o cliente faça a junção da CHAVE PRIVADA (onde gerou a CSR) junto com o *.CER* 
+ 
+decodificador de CSR: 
+https://www.ssl.org/csr-decoder 
+ 
+ 
+INSTALAÇÃO DO OPEN SSL 
+- Necessário senha de ADM 
+ 
+ 
+ 
+
+
+ 
+ 
+
+
+ 
+ 
+
+
+ 
+ 
+
+
+ 
+ 
+
+
+ 
+ 
+
+
+ 
+ 
+ 
+Redefinição de senhas - produtos SSL. 
+Essa função está operacional, desde que seja feito pelo responsável pelo CNPJ. 
+ 
+ 
+Certificado internacional  - antes de fazer a validação precisa enviar para a SECTIGO definir o domínio primário. 
+ 
+Exemplo certificado TJSP 

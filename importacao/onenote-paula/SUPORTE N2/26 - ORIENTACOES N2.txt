@@ -1,0 +1,47 @@
+ 
+
+Email: suporte.corporativo@validcertificadora.com.br 
+
+  
+
+Para que serve : Projetos Corporativos e SSL 
+
+Quem pode mandar solicitação para ele: todos os projetos corporativos e clientes SSL 
+
+Observação: A configuração está para abrir chamado automaticamente no GLPI, mas a conferencia de entrar na locaweb não mudou. 
+
+  
+
+Como acessar locaweb:  
+
+https://webmail-seguro.com.br/?_task=mail&_mbox=INBOX 
+
+Usuário: suporte.corporativo@validcertificadora.com.br  Senha:   K1nT3#cOnt5 
+
+  
+
+Organizei por pastas:  
+
+ 
+
+imagem
+Na caixa de entrada devem ficar casos que não foram prestados suporte: 
+
+ 
+
+imagem
+solucionou, terminou o suporte ??? selecione o email e mova para pasta correspondente. 
+
+  
+
+  
+
+Não receber no GLPI impede o suporte?  
+
+Não, sinalize que para que acione a responsável da ferramenta validar o que está ocorrendo 
+
+  
+
+Quem é o responsável de tratar esses e-mails? 
+
+Todos do N2 os assuntos são diversos como Projetos  e SSL  

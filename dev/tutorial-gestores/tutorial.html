@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Inventário de Equipamentos · Guia dos Gestores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --roxo: #6b4c9a; --lilas: #9b7fd4; --lilas-claro: #f3eefb; --lilas-borda: #e4d8f7;
+    --texto: #1c1b1f; --apoio: #5a5a5a; --borda: #e5e1ec;
+    --verde: #2e7d32; --verde-f: #dff3e0; --vermelho: #c62828; --vermelho-f: #fde2e1; --amarelo: #8a6d00; --amarelo-f: #fdf3c4;
+  }
+  @page { size: A4; margin: 15mm 15mm 17mm; }
+  @page capa { margin: 0; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif; color: var(--texto); font-size: 10.6pt; line-height: 1.5; }
+  h1, h2, h3 { line-height: 1.2; margin: 0; }
+  p { margin: 0 0 8px; }
+  strong { font-weight: 650; }
+  kbd { font-family: inherit; font-size: 8.8pt; font-weight: 650; border: 1px solid #cfc6dd; border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; background: #fff; white-space: nowrap; }
+  .campo { font-weight: 650; letter-spacing: .02em; color: var(--roxo); white-space: nowrap; }
+  .botao { display: inline-block; font-weight: 650; font-size: 9.4pt; padding: 0 7px; border-radius: 6px; background: #111212; color: #fff; white-space: nowrap; }
+  .botao.sec { background: #fff; color: #111212; border: 1px solid #d9d3e3; }
+  .etq { display: inline-block; font-size: 8.4pt; font-weight: 700; padding: 0 7px; border-radius: 99px; white-space: nowrap; }
+  .etq.verde { background: var(--verde-f); color: var(--verde); }
+  .etq.vermelho { background: var(--vermelho-f); color: var(--vermelho); }
+  .etq.amarelo { background: var(--amarelo-f); color: var(--amarelo); }
+  .etq.rosa { background: #fce4ef; color: #ad1457; }
+
+  /* Capa */
+  .capa { page: capa; height: 297mm; position: relative; overflow: hidden; background: linear-gradient(160deg, #f6f1fd 0%, #ece3fa 55%, #e0d2f6 100%); padding: 34mm 22mm 20mm; display: flex; flex-direction: column; break-after: page; }
+  .capa::after { content: ""; position: absolute; right: -60mm; bottom: -50mm; width: 170mm; height: 170mm; border-radius: 50%; background: radial-gradient(circle, rgba(155,127,212,.35), rgba(155,127,212,0) 70%); }
+  .capa .logo { width: 22mm; height: 22mm; }
+  .capa .selo { display: inline-block; margin-top: 16mm; font-size: 10pt; font-weight: 700; letter-spacing: .14em; color: var(--roxo); text-transform: uppercase; }
+  .capa h1 { font-size: 40pt; font-weight: 800; letter-spacing: -.01em; margin-top: 4mm; color: #1b1530; }
+  .capa h1 span { color: var(--roxo); }
+  .capa .sub { font-size: 15pt; color: #3d3550; margin-top: 6mm; max-width: 140mm; }
+  .capa .temas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; margin-top: 18mm; position: relative; z-index: 1; }
+  .capa .tema { background: rgba(255,255,255,.78); border: 1px solid var(--lilas-borda); border-radius: 12px; padding: 6mm 5mm; }
+  .capa .tema b { display: block; font-size: 13pt; margin-bottom: 1.5mm; }
+  .capa .tema small { color: var(--apoio); font-size: 9.5pt; line-height: 1.4; display: block; }
+  .capa .tema .n { display: inline-grid; place-items: center; width: 9mm; height: 9mm; border-radius: 50%; background: var(--roxo); color: #fff; font-weight: 800; margin-bottom: 3mm; }
+  .capa .rodape { margin-top: auto; position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: end; color: #3d3550; font-size: 9.5pt; border-top: 1px solid #cdbdea; padding-top: 5mm; }
+  .capa .rodape b { display: block; font-size: 11pt; color: #1b1530; }
+
+  /* Sumário */
+  .sumario { break-after: page; }
+  .sumario h2 { font-size: 22pt; font-weight: 800; margin-bottom: 6mm; }
+  .sumario ol { list-style: none; padding: 0; margin: 0; counter-reset: s; }
+  .sumario > ol > li { counter-increment: s; border-bottom: 1px solid var(--borda); padding: 3mm 0; display: grid; grid-template-columns: 11mm 1fr; }
+  .sumario > ol > li::before { content: counter(s); font-weight: 800; font-size: 13pt; color: var(--roxo); }
+  .sumario li b { font-size: 12pt; }
+  .sumario li small { display: block; color: var(--apoio); font-size: 9.5pt; }
+  .quadro-perfil { margin-top: 9mm; background: var(--lilas-claro); border: 1px solid var(--lilas-borda); border-radius: 12px; padding: 5mm 6mm; }
+  .quadro-perfil h3 { font-size: 12pt; margin-bottom: 2mm; }
+
+  /* Seções */
+  section.cap { break-before: page; }
+  .cab-cap { display: flex; align-items: center; gap: 4mm; margin-bottom: 5mm; padding-bottom: 3mm; border-bottom: 2px solid var(--lilas-borda); }
+  .cab-cap .num { flex: none; width: 12mm; height: 12mm; border-radius: 10px; background: var(--roxo); color: #fff; font-size: 17pt; font-weight: 800; display: grid; place-items: center; }
+  .cab-cap h2 { font-size: 20pt; font-weight: 800; }
+  .cab-cap p { margin: 1mm 0 0; color: var(--apoio); font-size: 10pt; }
+  h3 { font-size: 13.2pt; font-weight: 750; margin: 6mm 0 2.5mm; color: #241c3a; }
+  h3 .tag { font-size: 8.4pt; font-weight: 700; color: #fff; background: var(--lilas); border-radius: 99px; padding: 1px 8px; vertical-align: middle; margin-left: 2mm; letter-spacing: .03em; }
+  h4 { font-size: 11pt; margin: 4mm 0 1.5mm; }
+  h3, h4, .cab-cap { break-after: avoid; }
+  h3 + p, h3 + ol, h3 + ul, h4 + p { break-before: avoid; }
+
+  /* Passos */
+  ol.passos { list-style: none; counter-reset: p; padding: 0; margin: 2mm 0 4mm; }
+  ol.passos > li { counter-increment: p; position: relative; padding: 0 0 2.4mm 9.5mm; }
+  ol.passos > li::before { content: counter(p); position: absolute; left: 0; top: .5mm; width: 6.4mm; height: 6.4mm; border-radius: 50%; background: var(--lilas-claro); border: 1.5px solid var(--lilas); color: var(--roxo); font-weight: 800; font-size: 9pt; display: grid; place-items: center; }
+  ul { margin: 1mm 0 3mm; padding-left: 5.5mm; }
+  ul li { margin-bottom: 1mm; }
+
+  /* Figuras */
+  figure { margin: 3mm 0 5mm; break-inside: avoid; }
+  figure img { display: block; max-width: 100%; border: 1px solid #ddd6e8; border-radius: 10px; box-shadow: 0 2px 8px rgba(60,40,100,.08); margin: 0 auto; }
+  figure.media img { max-width: 78%; }
+  figure.pequena img { max-width: 56%; }
+  figure.mini img { max-width: 44%; }
+  figcaption { font-size: 8.8pt; color: var(--apoio); text-align: center; margin-top: 2mm; }
+  .lado { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; align-items: start; break-inside: avoid; }
+  .lado figure { margin: 0; }
+  .texto-img { display: grid; grid-template-columns: 1.05fr .95fr; gap: 6mm; align-items: start; break-inside: avoid; margin: 2mm 0 4mm; }
+  .texto-img figure { margin: 0; }
+
+  /* Avisos */
+  .aviso { border-radius: 10px; padding: 3mm 4mm 3mm 12mm; margin: 3mm 0 4mm; position: relative; break-inside: avoid; font-size: 10pt; }
+  .aviso p:last-child, .aviso ul:last-child { margin-bottom: 0; }
+  .aviso::before { position: absolute; left: 4mm; top: 3mm; font-weight: 800; font-size: 11pt; width: 5.5mm; height: 5.5mm; border-radius: 50%; display: grid; place-items: center; color: #fff; }
+  .aviso.dica { background: var(--lilas-claro); border: 1px solid var(--lilas-borda); }
+  .aviso.dica::before { content: "i"; background: var(--lilas); }
+  .aviso.atencao { background: #fff8e1; border: 1px solid #f3dc8a; }
+  .aviso.atencao::before { content: "!"; background: #c99a06; }
+  .aviso.importante { background: #fdeeee; border: 1px solid #f3c2c2; }
+  .aviso.importante::before { content: "!"; background: var(--vermelho); }
+  .aviso b.titulo { display: block; margin-bottom: 1mm; }
+
+  /* Tabelas */
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 9.4pt; margin: 2mm 0 5mm; break-inside: avoid; border: 1px solid var(--borda); border-radius: 10px; overflow: hidden; }
+  th { background: var(--lilas-claro); color: #2d2345; text-align: left; font-weight: 700; padding: 2mm 3mm; border-bottom: 1px solid var(--lilas-borda); }
+  td { padding: 1.8mm 3mm; border-bottom: 1px solid var(--borda); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td.sim { color: var(--verde); font-weight: 700; white-space: nowrap; }
+  td.nao { color: var(--vermelho); font-weight: 700; white-space: nowrap; }
+  .legenda { columns: 2; column-gap: 7mm; padding: 0; list-style: none; margin: 1mm 0 4mm; font-size: 9.8pt; }
+  .legenda li { break-inside: avoid; margin-bottom: 1.8mm; padding-left: 8mm; position: relative; }
+  .legenda li b.n { position: absolute; left: 0; top: .3mm; width: 5.6mm; height: 5.6mm; border-radius: 50%; background: #e5484d; color: #fff; font-size: 8.4pt; display: grid; place-items: center; }
+  .comparar { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin: 3mm 0 5mm; break-inside: avoid; }
+  .comparar > div { border: 1px solid var(--borda); border-radius: 12px; padding: 4mm; }
+  .comparar h4 { margin-top: 0; }
+  .comparar .bom { border-color: #b9dfbb; background: #f4fbf4; }
+  .comparar .raro { border-color: #f3c2c2; background: #fff7f7; }
+  .modelo { font-family: Consolas, "Cascadia Mono", monospace; font-size: 9pt; background: #faf8fd; border: 1px dashed var(--lilas); border-radius: 8px; padding: 2.5mm 3.5mm; margin: 2mm 0 4mm; }
+  .evitar-quebra { break-inside: avoid; }
+  .faq dt { font-weight: 700; margin-top: 3.5mm; color: #241c3a; break-after: avoid; }
+  .faq dd { margin: 1mm 0 0; break-before: avoid; break-inside: avoid; }
+  .fim { margin-top: 8mm; text-align: center; color: var(--apoio); font-size: 9.5pt; border-top: 1px solid var(--borda); padding-top: 4mm; }
+</style>
+</head>
+<body>
+
+<!-- ============================== CAPA ============================== -->
+<div class="capa">
+  <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#6b4c9a"/><rect x="11" y="13" width="42" height="28" rx="4" fill="#fff"/><rect x="16" y="18" width="32" height="18" rx="2" fill="#9b7fd4"/><path d="M21 27h10M21 31h6" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M28 41v6M36 41v6" stroke="#fff" stroke-width="4"/><rect x="21" y="46" width="22" height="5" rx="2.5" fill="#fff"/></svg>
+  <span class="selo">Guia dos gestores</span>
+  <h1>Inventário de<br><span>Equipamentos</span></h1>
+  <p class="sub">Passo a passo para incluir equipamentos, alterar dados e inativar registros na planilha online do Suporte V/Cert.</p>
+  <div class="temas">
+    <div class="tema"><span class="n">1</span><b>Incluir</b><small>Cadastrar um equipamento novo ou vários de uma vez.</small></div>
+    <div class="tema"><span class="n">2</span><b>Alterar</b><small>Corrigir e atualizar usuário, área, gestor, status e demais campos.</small></div>
+    <div class="tema"><span class="n">3</span><b>Inativar</b><small>Tirar um equipamento de uso sem perder o histórico.</small></div>
+  </div>
+  <div class="rodape">
+    <div><b>Suporte V/Cert</b>Administradoras: Lays e Paula</div>
+    <div style="text-align:right">Versão 1.0<br>Novembro de 2026</div>
+  </div>
+</div>
+
+<!-- ============================== SUMÁRIO ============================== -->
+<div class="sumario">
+  <h2>Sumário</h2>
+  <ol>
+    <li><div><b>Antes de começar</b><small>O que o gestor pode fazer, as colunas da planilha e os cuidados com LGPD</small></div></li>
+    <li><div><b>Como entrar</b><small>Primeiro acesso, liberação e acessos seguintes</small></div></li>
+    <li><div><b>Conhecendo a tela</b><small>Resumo, abas, barra de ferramentas e a grade</small></div></li>
+    <li><div><b>Incluir equipamentos</b><small>Formulário, linha rápida, preencher em massa e colar do Excel</small></div></li>
+    <li><div><b>Alterar dados</b><small>Editar na célula, editar pela ficha, campos com cadeado e histórico</small></div></li>
+    <li><div><b>Inativar um registro</b><small>Passo a passo, troca de DNA e quando pedir exclusão</small></div></li>
+    <li><div><b>Funções adicionais</b><small>Busca rápida, filtros, visões, exportar, imprimir e desfazer</small></div></li>
+    <li><div><b>Atalhos e dúvidas frequentes</b><small>Teclas úteis e respostas para os problemas mais comuns</small></div></li>
+    <li><div><b>Abrir chamado no Suporte Técnico</b><small>Acesso pelo SSO, abertura do formulário, preenchimento, acompanhamento e respostas</small></div></li>
+  </ol>
+  <div class="quadro-perfil">
+    <h3>Para quem é este guia</h3>
+    <p style="margin:0">Para os <strong>gestores</strong> que acessam o Inventário com o perfil <strong>Equipe</strong>. As duas contas administradoras (Lays e Paula) têm acesso completo e cuidam da estrutura da planilha, das listas de opções, da liberação de acessos e das exclusões. Sempre que este guia disser "fale com as administradoras", é com elas.</p>
+  </div>
+</div>
+
+<!-- ============================== 1. ANTES DE COMEÇAR ============================== -->
+<section class="cap">
+  <div class="cab-cap"><div class="num">1</div><div><h2>Antes de começar</h2><p>O essencial para usar a planilha com segurança.</p></div></div>
+
+  <p>O Inventário de Equipamentos é uma planilha online. Tudo o que você inclui ou altera é <strong>salvo na hora</strong>, sem botão "Salvar arquivo", e aparece para todos em tempo real. Cada mudança fica registrada com o seu nome, a data e a hora.</p>
+
+  <h3>O que o gestor pode e não pode fazer</h3>
+  <table>
+    <thead><tr><th style="width:62%">Ação</th><th>Gestor</th></tr></thead>
+    <tbody>
+      <tr><td>Ver, pesquisar, filtrar, exportar CSV e imprimir a planilha</td><td class="sim">Pode</td></tr>
+      <tr><td>Incluir equipamentos (um por vez, em massa ou colando do Excel)</td><td class="sim">Pode</td></tr>
+      <tr><td>Alterar NOME DO USUÁRIO, ÁREA, GESTOR, STATUS, AUDITORIA, TÉCNICO QUE FEZ, DATA FEITA e OBSERVAÇÃO</td><td class="sim">Pode</td></tr>
+      <tr><td>Inativar um equipamento (STATUS = INATIVO) e reativá-lo</td><td class="sim">Pode</td></tr>
+      <tr><td>Solicitar a exclusão de um registro feito por engano</td><td class="sim">Pode</td></tr>
+      <tr><td>Alterar HOSTNAME, DNA e AR depois do cadastro</td><td class="nao">Só administradoras</td></tr>
+      <tr><td>Excluir um registro de vez, criar colunas ou incluir opções nas listas</td><td class="nao">Só administradoras</td></tr>
+    </tbody>
+  </table>
+
+  <h3>As colunas da planilha</h3>
+  <table>
+    <thead><tr><th style="width:23%">Coluna</th><th>O que preencher</th><th style="width:25%">Quem altera depois</th></tr></thead>
+    <tbody>
+      <tr><td><span class="campo">HOSTNAME *</span></td><td>Nome da máquina na rede. Fica em maiúsculas e não pode se repetir.</td><td>🔒 Só administradoras</td></tr>
+      <tr><td><span class="campo">DNA</span></td><td>Identificador da máquina no cadastro DNA. Não pode se repetir.</td><td>🔒 Só administradoras</td></tr>
+      <tr><td><span class="campo">AR *</span></td><td>VCERT ou VCORP.</td><td>🔒 Só administradoras</td></tr>
+      <tr><td><span class="campo">NOME DO USUÁRIO</span></td><td>Quem usa o equipamento (texto livre).</td><td>Gestores</td></tr>
+      <tr><td><span class="campo">ÁREA</span></td><td>Escolha na lista (SAC | SAP, VALIDAÇÃO, PRODUTOS, ANTIFRAUDE…).</td><td>Gestores</td></tr>
+      <tr><td><span class="campo">GESTOR</span></td><td>Escolha na lista de gestores.</td><td>Gestores</td></tr>
+      <tr><td><span class="campo">STATUS</span></td><td><span class="etq verde">ATIVO</span> equipamento em uso · <span class="etq vermelho">INATIVO</span> fora de uso.</td><td>Gestores</td></tr>
+      <tr><td><span class="campo">AUDITORIA</span></td><td><span class="etq amarelo">PENDENTE</span> <span class="etq verde">REALIZADA</span> <span class="etq rosa">FÉRIAS</span> <span class="etq vermelho">REMOVIDO</span></td><td>Gestores</td></tr>
+      <tr><td><span class="campo">TÉCNICO QUE FEZ</span></td><td>Técnico do Suporte N2 que fez o atendimento ou a auditoria.</td><td>Gestores</td></tr>
+      <tr><td><span class="campo">DATA FEITA</span></td><td>Data e hora do atendimento. O botão <span class="botao sec">Agora</span> preenche sozinho.</td><td>Gestores</td></tr>
+      <tr><td><span class="campo">OBSERVAÇÃO</span></td><td>Qualquer informação útil: motivo de inativação, troca de DNA, férias…</td><td>Gestores</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:9.4pt;color:var(--apoio)">* Campo obrigatório. 🔒 O cadeado indica um campo que o gestor preenche só no cadastro. Depois disso, apenas a Lays ou a Paula podem corrigi-lo.</p>
+
+  <div class="aviso atencao"><b class="titulo">LGPD</b><p>NOME DO USUÁRIO e GESTOR já são dados pessoais. <strong>Não registre</strong> CPF, RG, endereço, telefone pessoal nem dados de saúde, nem mesmo na OBSERVAÇÃO.</p></div>
+</section>
+
+<!-- ============================== 2. COMO ENTRAR ============================== -->
+<section class="cap">
+  <div class="cab-cap"><div class="num">2</div><div><h2>Como entrar</h2><p>Não há senha: você entra com o seu e-mail corporativo e o seu nome.</p></div></div>
+
+  <h3>Primeiro acesso</h3>
+  <div class="texto-img">
+    <div>
+      <ol class="passos">
+        <li>Abra o endereço do Inventário que as administradoras enviaram.</li>
+        <li>Em <span class="campo">E-MAIL</span>, digite o seu e-mail corporativo. Aparece o aviso "Primeira vez com este e-mail? Vamos criar o seu cadastro."</li>
+        <li>Em <span class="campo">NOME</span>, digite o seu nome e sobrenome. <strong>Guarde como escreveu</strong>: nos próximos acessos o nome precisa ser igual.</li>
+        <li>Clique em <span class="botao">Entrar</span>, confira o e-mail e clique em <span class="botao">Criar cadastro</span> <b style="color:#e5484d">(1)</b>. Se errou o e-mail, use <span class="botao sec">Corrigir e-mail</span>.</li>
+        <li>Aparece a tela <strong>"Aguardando liberação"</strong>. Avise a Lays ou a Paula. Assim que uma delas liberar, a planilha abre sozinha nesta tela.</li>
+      </ol>
+    </div>
+    <figure><img src="img/02-primeiro-acesso.png" alt=""><figcaption>Confirmação do primeiro cadastro</figcaption></figure>
+  </div>
+  <figure class="pequena"><img src="img/02b-aguardando.png" alt=""><figcaption>Tela exibida até a liberação pelas administradoras</figcaption></figure>
+
+  <h3>Acessos seguintes</h3>
+  <div class="texto-img">
+    <div>
+      <ol class="passos">
+        <li>Digite o mesmo e-mail <b style="color:#e5484d">(1)</b>. O aviso muda para "Cadastro encontrado".</li>
+        <li>Digite o nome <strong>exatamente como no cadastro</strong> <b style="color:#e5484d">(2)</b>.</li>
+        <li>Clique em <span class="botao">Entrar</span> <b style="color:#e5484d">(3)</b>.</li>
+      </ol>
+      <div class="aviso dica"><p>No computador em que você já entrou, aparece o botão <strong>"Continuar como…"</strong> com o seu nome, que entra com um clique.</p></div>
+      <div class="aviso atencao"><p>O link <strong>"Sou administradora"</strong> é só para a Lays e a Paula. Depois de várias tentativas com o nome errado, a tela pede para esperar 1 minuto.</p></div>
+    </div>
+    <figure><img src="img/01-login.png" alt=""><figcaption>Entrada com e-mail e nome</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============================== 3. CONHECENDO A TELA ============================== -->
+<section class="cap">
+  <div class="cab-cap"><div class="num">3</div><div><h2>Conhecendo a tela</h2><p>Onde fica cada coisa na planilha.</p></div></div>
+  <figure><img src="img/04-visao-geral-marcada.png" alt=""><figcaption>Tela principal do Inventário, vista por um gestor</figcaption></figure>
+  <ul class="legenda">
+    <li><b class="n">1</b><strong>Busca rápida</strong>: digite um HOSTNAME ou DNA para abrir o equipamento direto (<kbd>Ctrl</kbd> + <kbd>K</kbd>).</li>
+    <li><b class="n">2</b><strong>Você</strong>: o seu nome e o perfil <em>Equipe</em>. Clique para "Trocar de pessoa".</li>
+    <li><b class="n">3</b><strong>Resumo</strong>: totais por STATUS e por AUDITORIA. Clique num número para filtrar a planilha e clique de novo para tirar o filtro.</li>
+    <li><b class="n">4</b><strong>Abas por ÁREA</strong>: mostram só os equipamentos daquela área.</li>
+    <li><b class="n">5</b><strong>Busca geral, visões e agrupamento</strong>: procure em todas as colunas, escolha uma visão pronta ou agrupe por uma coluna.</li>
+    <li><b class="n">6</b><span class="botao">+ Novo equipamento</span>: formulário de cadastro.</li>
+    <li><b class="n">7</b><strong>Colar do Excel</strong> e <strong>Preencher em massa</strong>: incluem vários equipamentos de uma vez.</li>
+    <li><b class="n">8</b><strong>Desfazer</strong>: desfaz a sua última alteração (<kbd>Ctrl</kbd> + <kbd>Z</kbd>).</li>
+    <li><b class="n">9</b><strong>A grade</strong>: os equipamentos. No fim de cada linha, o <strong>olho</strong> abre a ficha e o <strong>⋯</strong> mostra mais ações.</li>
+    <li><b class="n">10</b><strong>Linha rápida</strong>: inclui um equipamento direto na grade.</li>
+  </ul>
+  <div class="aviso dica"><p>No resumo, <strong>"Divergências"</strong> conta os equipamentos com AUDITORIA <span class="etq rosa">FÉRIAS</span> e <strong>"Não localizados"</strong> conta os com AUDITORIA <span class="etq vermelho">REMOVIDO</span>.</p></div>
+</section>
+
+<!-- ============================== 4. INCLUIR ============================== -->
+<section class="cap">
+  <div class="cab-cap"><div class="num">4</div><div><h2>Incluir equipamentos</h2><p>Quatro formas de incluir. Para o dia a dia, use o formulário.</p></div></div>
+  <figure class="media"><img src="img/05-botoes-incluir.png" alt=""><figcaption>(1) Novo equipamento · (2) Colar do Excel · (3) Preencher em massa</figcaption></figure>
+
+  <h3>4.1 Pelo formulário "Novo equipamento" <span class="tag">RECOMENDADO</span></h3>
+  <ol class="passos">
+    <li>Clique em <span class="botao">+ Novo equipamento</span>.</li>
+    <li>Preencha <span class="campo">HOSTNAME</span> (vira maiúsculas sozinho), <span class="campo">DNA</span> e <span class="campo">AR</span>. <strong>Confira com atenção</strong>: depois de registrar, esses três campos só podem ser corrigidos pelas administradoras.</li>
+    <li>Preencha <span class="campo">NOME DO USUÁRIO</span>.</li>
+    <li>Nas listas (<span class="campo">ÁREA</span>, <span class="campo">GESTOR</span>, <span class="campo">STATUS</span>, <span class="campo">AUDITORIA</span>, <span class="campo">TÉCNICO QUE FEZ</span>), digite parte do nome e escolha a opção com o mouse ou com <kbd>Enter</kbd>.</li>
+    <li>Se houve atendimento, use <span class="botao sec">Agora</span> em <span class="campo">DATA FEITA</span> e escreva o que for útil na <span class="campo">OBSERVAÇÃO</span>.</li>
+    <li>Clique em <span class="botao">Registrar</span> (<kbd>Ctrl</kbd> + <kbd>Enter</kbd>).</li>
+  </ol>
+  <div class="lado">
+    <figure><img src="img/07-novo-lista.png" alt=""><figcaption>Lista pesquisável: digite "JES" e escolha o gestor</figcaption></figure>
+    <figure><img src="img/09-novo-preenchido.png" alt=""><figcaption>(1) Campos com cadeado: confira antes · (2) Registrar</figcaption></figure>
+  </div>
+
+  <div class="aviso dica"><b class="titulo">Para cadastrar vários seguidos</b><p>Use <span class="botao sec">+ Registrar e adicionar outro</span> (<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd>). A janela continua aberta e mantém área, gestor, status, auditoria, técnico, data e AR. Só HOSTNAME, DNA, usuário e observação ficam em branco.</p>
+  <p>O formulário também <strong>guarda um rascunho</strong> neste navegador: se a janela fechar sem querer, os dados voltam ao abrir de novo. As sugestões do seu último cadastro podem ser apagadas em <strong>"Limpar sugestões"</strong>.</p></div>
+
+  <div class="texto-img">
+    <div>
+      <h4>HOSTNAME ou DNA repetido</h4>
+      <p>Se o HOSTNAME ou o DNA já existir em outra linha, aparece o aviso <strong>"Já usado por…"</strong> logo abaixo do campo, e o equipamento não é registrado.</p>
+      <p>Clique em <strong>Abrir</strong> para ver o equipamento que já usa esse valor. Talvez ele só precise ser atualizado, e não cadastrado de novo.</p>
+    </div>
+    <figure><img src="img/08-repetido.png" alt=""><figcaption>Aviso de HOSTNAME repetido</figcaption></figure>
+  </div>
+
+  <figure><img src="img/10-registrado.png" alt=""><figcaption>Depois de registrar: a linha nova aparece no topo, destacada, com o aviso "Equipamento adicionado."</figcaption></figure>
+
+  <h3>4.2 Pela linha rápida no fim da grade</h3>
+  <p>A última linha da grade, com os textos <em>"+ HOSTNAME"</em>, <em>"DNA"</em>…, serve para incluir um equipamento sem abrir janela. Preencha os campos (use <kbd>Tab</kbd> para passar ao próximo), role para a direita para preencher o <span class="campo">AR</span>, que é obrigatório, e tecle <kbd>Enter</kbd> ou clique no <strong>+</strong> no fim da linha.</p>
+  <figure><img src="img/11-linha-nova.png" alt=""><figcaption>Linha rápida sendo preenchida</figcaption></figure>
+
+  <h3>4.3 Vários de uma vez: "Preencher em massa"</h3>
+  <p>Abre uma grade de rascunho, como no Excel, com uma linha por equipamento.</p>
+  <ul>
+    <li>Digite, ou cole um bloco copiado do Excel com <kbd>Ctrl</kbd> + <kbd>V</kbd>.</li>
+    <li>Repita um valor para baixo com <kbd>Ctrl</kbd> + <kbd>D</kbd> ou arrastando a alça ◢ da célula.</li>
+    <li>Um selo vermelho <strong>"N problemas"</strong> mostra as linhas com erro (por exemplo, AR vazio). Clique nele para ir até elas.</li>
+    <li>Clique em <span class="botao">Salvar N registros</span>. Linhas vazias são ignoradas e o rascunho fica salvo no navegador até você salvar ou descartar.</li>
+  </ul>
+  <figure><img src="img/12-massa.png" alt=""><figcaption>Preencher em massa com duas linhas prontas para salvar</figcaption></figure>
+
+  <h3>4.4 Colar do Excel</h3>
+  <ol class="passos">
+    <li>No Excel, selecione as células <strong>com a linha de cabeçalho</strong> e copie (<kbd>Ctrl</kbd> + <kbd>C</kbd>).</li>
+    <li>Clique em <span class="botao sec">Colar do Excel</span> e cole no quadro. Se preferir, escolha um arquivo <strong>.csv</strong>.</li>
+    <li>Confira a <strong>Conferência</strong>: cada coluna do Excel é ligada a uma coluna do Inventário. Ajuste se precisar e marque "Ignorar" nas colunas que não devem entrar.</li>
+    <li>Confira a prévia e clique em <span class="botao">Gravar N linha(s)</span>.</li>
+  </ol>
+  <figure class="media"><img src="img/13-colar.png" alt=""><figcaption>Colar do Excel: conferência das colunas e prévia das linhas</figcaption></figure>
+  <div class="aviso dica"><p>Para os gestores, o "Colar do Excel" <strong>só inclui linhas novas</strong> e nunca altera um equipamento que já existe. Valores de lista que não batem (por exemplo, um gestor escrito errado) aparecem marcados para você corrigir antes de gravar.</p></div>
+</section>
+
+<!-- ============================== 5. ALTERAR ============================== -->
+<section class="cap">
+  <div class="cab-cap"><div class="num">5</div><div><h2>Alterar dados</h2><p>Duas formas: direto na célula ou pela ficha do equipamento.</p></div></div>
+
+  <h3>5.1 Direto na célula <span class="tag">MAIS RÁPIDO</span></h3>
+  <ol class="passos">
+    <li><strong>Clique na célula</strong> que quer mudar. Ela abre para edição.</li>
+    <li>Digite o novo valor. Nas colunas de lista, digite parte do nome e escolha a opção.</li>
+    <li>Confirme: <kbd>Enter</kbd> salva e desce para a linha de baixo, <kbd>Tab</kbd> salva e vai para a coluna ao lado e clicar fora também salva. <kbd>Esc</kbd> cancela.</li>
+  </ol>
+  <figure><img src="img/14-editar-celula.png" alt=""><figcaption>Editando NOME DO USUÁRIO direto na célula</figcaption></figure>
+  <figure><img src="img/15-editar-lista.png" alt=""><figcaption>Editando GESTOR: a lista abre embaixo da célula</figcaption></figure>
+  <div class="aviso dica"><p>Com uma célula selecionada, as <strong>setas</strong> do teclado andam pela grade, <kbd>Enter</kbd> ou <kbd>F2</kbd> abrem a edição e <kbd>Delete</kbd> apaga o conteúdo (menos em campos obrigatórios). Errou? Use <strong>Desfazer</strong> (<kbd>Ctrl</kbd> + <kbd>Z</kbd>).</p></div>
+
+  <h3>5.2 Pela ficha do equipamento</h3>
+  <p>A ficha mostra todos os campos de uma vez, além do histórico. É a melhor opção para mudar vários campos juntos.</p>
+  <ol class="passos">
+    <li>Na linha do equipamento, clique no <strong>olho</strong> (coluna Ações). Outra opção: clique no <strong>⋯</strong> e escolha "Editar na ficha".</li>
+    <li>Clique em <span class="botao">✎ Editar</span>.</li>
+    <li>Altere os campos e clique em <span class="botao">Salvar</span>. O aviso "Equipamento salvo." confirma.</li>
+  </ol>
+  <figure><img src="img/18-ficha.png" alt=""><figcaption>Ficha aberta ao lado da grade, com a seção Movimentações</figcaption></figure>
+  <div class="lado">
+    <figure><img src="img/19-ficha-editar.png" alt=""><figcaption>Ficha em modo de edição</figcaption></figure>
+    <div>
+      <figure class="evitar-quebra" style="margin-top:0"><img src="img/17-menu-acoes.png" alt="" style="max-width:80%"><figcaption>Menu ⋯ da linha</figcaption></figure>
+      <p style="font-size:9.6pt">O menu <strong>⋯</strong> também tem <strong>"Copiar resumo"</strong>, que copia todos os dados do equipamento em texto para colar num chamado ou e-mail.</p>
+    </div>
+  </div>
+
+  <h3>5.3 Campos com cadeado</h3>
+  <div class="texto-img">
+    <div>
+      <p><span class="campo">HOSTNAME</span>, <span class="campo">DNA</span> e <span class="campo">AR</span> têm um <strong>cadeado</strong> no título da coluna. O gestor preenche esses campos só ao cadastrar o equipamento.</p>
+      <p>Se você tentar alterar um deles, aparece o aviso: <em>"HOSTNAME não muda depois do cadastro. Para corrigir, fale com a Lays ou a Paula."</em></p>
+      <p>Nesse caso, envie às administradoras o HOSTNAME atual e o valor correto.</p>
+    </div>
+    <figure><img src="img/16-cadeado.png" alt=""><figcaption>Aviso ao tentar mudar um campo com cadeado</figcaption></figure>
+  </div>
+
+  <h3>5.4 Histórico de movimentações</h3>
+  <p>Cada alteração entra na seção <strong>Movimentações</strong> da ficha, com <strong>quem</strong> alterou, <strong>quando</strong>, o valor <strong>antes</strong> e o valor <strong>depois</strong>. Trocas de usuário, área, gestor, status, técnico e auditoria aparecem em destaque. Nada se perde: se alguém mudar algo por engano, dá para ver o valor anterior e voltar.</p>
+  <div class="aviso atencao"><p>Se uma opção for <strong>retirada de uma lista</strong> pelas administradoras, os equipamentos que já a usam continuam mostrando o nome, com um pequeno marcador. Essa opção só não aparece mais para novas escolhas. Se o gestor ou a área que você precisa não estiver na lista, peça às administradoras para incluir.</p></div>
+</section>
+
+<!-- ============================== 6. INATIVAR ============================== -->
+<section class="cap">
+  <div class="cab-cap"><div class="num">6</div><div><h2>Inativar um registro</h2><p>Inativar é mudar o STATUS para INATIVO. O equipamento continua na planilha, com todo o histórico.</p></div></div>
+
+  <div class="aviso importante"><b class="titulo">Regra principal: não se apaga equipamento do Inventário</b><p>Quando um equipamento sai de uso (colaborador desligado, máquina devolvida, formatada, substituída ou recolhida), <strong>inative</strong> o registro. A linha continua na planilha para consulta, auditoria e histórico. A exclusão é só para cadastros feitos por engano (veja o item 6.5).</p></div>
+
+  <h3>6.1 Passo a passo pela ficha <span class="tag">RECOMENDADO</span></h3>
+  <div class="texto-img">
+    <div>
+      <ol class="passos">
+        <li>Encontre o equipamento: use a busca rápida (<kbd>Ctrl</kbd> + <kbd>K</kbd>) com o HOSTNAME ou o DNA, ou a busca geral.</li>
+        <li>Clique no <strong>olho</strong> da linha para abrir a ficha e depois em <span class="botao">✎ Editar</span>.</li>
+        <li>Em <span class="campo">STATUS</span> <b style="color:#e5484d">(1)</b>, digite "INAT" e <span style="white-space:nowrap">escolha <span class="etq vermelho">INATIVO</span>.</span></li>
+        <li>Em <span class="campo">OBSERVAÇÃO</span> <b style="color:#e5484d">(2)</b>, escreva a data e o motivo da inativação. Use o modelo abaixo.</li>
+        <li>Em <span class="campo">DATA FEITA</span> <b style="color:#e5484d">(3)</b>, clique em <span class="botao sec">Agora</span>.</li>
+        <li>Clique em <span class="botao">Salvar</span> <b style="color:#e5484d">(4)</b>.</li>
+      </ol>
+      <p style="margin-bottom:1mm"><strong>Modelo de observação:</strong></p>
+      <div class="modelo">INATIVADO em dd/mm/aaaa – motivo – destino do equipamento – nº do chamado</div>
+      <p style="font-size:9.4pt;color:var(--apoio)">Exemplo: <em>INATIVADO em 04/11/2026 – colaborador desligado – notebook devolvido ao TI – chamado GLPI 18452.</em></p>
+    </div>
+    <figure><img src="img/21-inativar-ficha.png" alt=""><figcaption>Ficha em edição: STATUS INATIVO, observação, data e Salvar</figcaption></figure>
+  </div>
+
+  <div class="texto-img">
+    <div>
+      <h4>Resultado</h4>
+      <p>O STATUS passa a mostrar <span class="etq vermelho">INATIVO</span> na grade e na ficha. Em <strong>Movimentações</strong> fica registrado <em>"STATUS: ATIVO → INATIVO"</em>, com o seu nome, a data e a hora, junto com a observação e a data preenchidas.</p>
+      <div class="aviso dica"><p><strong>Reativar:</strong> se o equipamento voltar a ser usado, faça o mesmo caminho e escolha <span class="etq verde">ATIVO</span>. Atualize a OBSERVAÇÃO com o motivo da reativação.</p></div>
+    </div>
+    <figure><img src="img/22-inativado-historico.png" alt=""><figcaption>Equipamento inativado, com o registro nas Movimentações</figcaption></figure>
+  </div>
+
+  <h3>6.2 Forma rápida: direto na célula STATUS</h3>
+  <p>Clique na célula <span class="campo">STATUS</span> da linha, escolha <strong>INATIVO</strong> e tecle <kbd>Enter</kbd>. Depois, clique na célula <span class="campo">OBSERVAÇÃO</span> da mesma linha (role a grade para a direita) e registre o motivo.</p>
+  <figure><img src="img/23-inativar-celula.png" alt=""><figcaption>Escolhendo INATIVO direto na célula STATUS</figcaption></figure>
+
+  <h3>6.3 Ver os equipamentos inativos</h3>
+  <p>No resumo do topo, clique em <strong>INATIVO</strong> para ver só os inativos. Clique de novo para voltar a ver todos. O filtro <span class="campo">STATUS</span> no título da coluna faz o mesmo.</p>
+  <figure><img src="img/24-filtro-inativos.png" alt=""><figcaption>Resumo filtrando só os equipamentos INATIVOS</figcaption></figure>
+
+  <h3>6.4 Máquina formatada ou troca de DNA</h3>
+  <p>Pela regra do processo de auditoria, quando a máquina é formatada o <strong>DNA anterior é inativado e o novo é cadastrado</strong>, sem apagar os dados antigos. Trocar o nome da máquina também exige um DNA novo.</p>
+  <ol class="passos">
+    <li><strong>Inative a linha antiga</strong> (item 6.1). Na OBSERVAÇÃO, escreva: <em>"Máquina formatada em dd/mm. DNA novo: xxxxx"</em>.</li>
+    <li><strong>Cadastre a linha nova</strong> com o HOSTNAME e o DNA novos (item 4.1). Na OBSERVAÇÃO, escreva: <em>"Substitui o DNA xxxxx"</em>.</li>
+  </ol>
+  <figure><img src="img/25-troca-dna.png" alt=""><figcaption>Busca por "Diego": a linha antiga INATIVA e a nova ATIVA, cada uma com o seu DNA</figcaption></figure>
+  <div class="aviso atencao"><p><strong>HOSTNAME e DNA não se repetem em nenhuma linha, nem nas inativas.</strong> Se a máquina formatada continuar com o <strong>mesmo HOSTNAME</strong>, o formulário vai avisar "Já usado por…". Nesse caso, inative a linha antiga e peça à Lays ou à Paula para registrar o DNA novo.</p></div>
+
+  <h3>6.5 Inativar ou solicitar exclusão?</h3>
+  <div class="comparar">
+    <div class="bom">
+      <h4>Inativar (STATUS = INATIVO)</h4>
+      <p style="font-size:9.8pt">Para equipamentos <strong>reais</strong> que saíram de uso: devolução, desligamento, formatação, substituição ou recolhimento.</p>
+      <p style="font-size:9.8pt;margin:0">O gestor faz sozinho. A linha e o histórico ficam na planilha.</p>
+    </div>
+    <div class="raro">
+      <h4>Solicitar exclusão</h4>
+      <p style="font-size:9.8pt">Só para <strong>registros feitos por engano</strong>: cadastro duplicado, teste ou equipamento que não existe.</p>
+      <p style="font-size:9.8pt;margin:0">O gestor pede e uma administradora aprova ou recusa.</p>
+    </div>
+  </div>
+  <div class="texto-img">
+    <div>
+      <h4>Como solicitar a exclusão</h4>
+      <ol class="passos">
+        <li>Na linha, clique no <strong>⋯</strong> e escolha <strong>"Solicitar exclusão"</strong>. O botão também aparece na ficha.</li>
+        <li>Escreva o <strong>motivo</strong> (obrigatório). Exemplo: <em>"Cadastro duplicado por engano: o HOSTNAME correto é VCSP-NB0610."</em></li>
+        <li>Clique em <span class="botao" style="background:#c62828">Solicitar exclusão</span>.</li>
+      </ol>
+      <p>A linha fica marcada com <span class="etq vermelho">Exclusão solicitada</span> até a Lays ou a Paula decidirem. Se for aprovada, a linha vai para a Lixeira delas, de onde ainda pode ser restaurada.</p>
+    </div>
+    <figure><img src="img/26-solicitar-exclusao.png" alt=""><figcaption>Pedido de exclusão com o motivo</figcaption></figure>
+  </div>
+  <figure><img src="img/27-exclusao-solicitada.png" alt=""><figcaption>Linha marcada com "Exclusão solicitada", aguardando as administradoras</figcaption></figure>
+</section>
+
+<!-- ============================== 7. FUNÇÕES ADICIONAIS ============================== -->
+<section class="cap">
+  <div class="cab-cap"><div class="num">7</div><div><h2>Funções adicionais</h2><p>Recursos que agilizam o dia a dia.</p></div></div>
+
+  <h3>Busca rápida por HOSTNAME ou DNA</h3>
+  <div class="texto-img">
+    <div>
+      <p>Clique em <strong>HOSTNAME / DNA</strong> no topo ou tecle <kbd>Ctrl</kbd> + <kbd>K</kbd>. Digite o HOSTNAME ou o DNA: com o valor exato, <kbd>Enter</kbd> abre a ficha direto. É o caminho mais rápido para conferir uma máquina durante um atendimento.</p>
+    </div>
+    <figure><img src="img/28-busca-rapida.png" alt=""><figcaption>Busca rápida pelo DNA</figcaption></figure>
+  </div>
+
+  <h3>Busca geral, filtros e abas</h3>
+  <ul>
+    <li><strong>Buscar em todas as colunas</strong>: procura o texto em qualquer campo (usuário, observação, gestor…).</li>
+    <li><strong>Filtro da coluna</strong>: o funil no título de cada coluna permite marcar um ou mais valores. Exemplo: só os equipamentos de um gestor.</li>
+    <li><strong>Abas por ÁREA</strong> e <strong>resumo</strong> do topo: filtram com um clique.</li>
+    <li><span class="botao sec">× Limpar filtros</span> volta a mostrar tudo. O contador "X de Y equipamentos" mostra quantos aparecem.</li>
+    <li><strong>Ordenar</strong>: clique no nome da coluna (uma vez em ordem crescente, de novo em decrescente, a terceira tira a ordem).</li>
+  </ul>
+  <figure class="media"><img src="img/29-filtro-coluna.png" alt=""><figcaption>Filtro da coluna GESTOR</figcaption></figure>
+
+  <h3>Visões e agrupamento</h3>
+  <ul>
+    <li><strong>Visões prontas</strong>: "Todos os registros" e <strong>"Registrados por mim"</strong>, que mostra só o que você cadastrou.</li>
+    <li><strong>Salvar visão atual…</strong>: guarda os seus filtros, colunas e ordem com um nome, para usar de novo. Fica só para você, neste navegador.</li>
+    <li><strong>Agrupar por</strong>: separa a grade em blocos, por exemplo por GESTOR ou por AUDITORIA, com a contagem de cada grupo.</li>
+  </ul>
+
+  <h3>Ferramentas da barra</h3>
+  <figure><img src="img/30-ferramentas.png" alt=""><figcaption>Ferramentas da barra</figcaption></figure>
+  <table>
+    <thead><tr><th style="width:8%">Nº</th><th style="width:30%">Ferramenta</th><th>Para que serve</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Colunas</td><td>Mostra ou esconde colunas. Vale só para você e não muda a planilha dos outros.</td></tr>
+      <tr><td>2</td><td>Densidade compacta</td><td>Deixa as linhas mais baixas para ver mais equipamentos por tela.</td></tr>
+      <tr><td>3</td><td>Tamanho (− 100% +)</td><td>Aumenta ou diminui só a planilha.</td></tr>
+      <tr><td>4</td><td>Exportar CSV</td><td>Baixa as <strong>linhas filtradas</strong>, que abrem no Excel. Filtre antes para exportar só o que precisa.</td></tr>
+      <tr><td>5</td><td>Imprimir</td><td>Imprime a visão atual.</td></tr>
+      <tr><td>6</td><td>Desfazer</td><td>Desfaz a sua última alteração (<kbd>Ctrl</kbd> + <kbd>Z</kbd>). Não desfaz um cadastro novo: para isso, use "Solicitar exclusão".</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Outras funções</h3>
+  <div class="texto-img">
+    <div>
+      <ul>
+        <li><strong>Trocar de pessoa</strong>: em computador compartilhado, clique no seu nome no topo e em "Trocar de pessoa". Assim, as alterações seguintes ficam no nome certo.</li>
+        <li><strong>Tema claro ou escuro</strong>: o botão da lua ou do sol, no canto superior direito.</li>
+        <li><strong>Sem conexão</strong>: se a internet cair, aparece uma faixa avisando. A planilha continua visível, mas a edição fica bloqueada até a conexão voltar.</li>
+        <li><strong>Tempo real</strong>: o que outra pessoa altera aparece na sua tela sem recarregar a página.</li>
+      </ul>
+    </div>
+    <figure><img src="img/31-menu-pessoa.png" alt=""><figcaption>Menu com o seu nome: "Trocar de pessoa"</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============================== 8. ATALHOS E DÚVIDAS ============================== -->
+<section class="cap">
+  <div class="cab-cap"><div class="num">8</div><div><h2>Atalhos e dúvidas frequentes</h2><p>Para consultar rápido.</p></div></div>
+
+  <h3>Atalhos de teclado</h3>
+  <table>
+    <thead><tr><th style="width:36%">Tecla</th><th>O que faz</th></tr></thead>
+    <tbody>
+      <tr><td><kbd>Ctrl</kbd> + <kbd>K</kbd></td><td>Busca rápida por HOSTNAME ou DNA</td></tr>
+      <tr><td><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td><td>Registrar, no formulário "Novo equipamento"</td></tr>
+      <tr><td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd></td><td>Registrar e adicionar outro</td></tr>
+      <tr><td>Clique, <kbd>Enter</kbd> ou <kbd>F2</kbd></td><td>Editar a célula selecionada</td></tr>
+      <tr><td><kbd>Enter</kbd> / <kbd>Tab</kbd> (editando)</td><td>Salva e vai para a célula de baixo ou para a da direita</td></tr>
+      <tr><td><kbd>Esc</kbd></td><td>Cancela a edição ou fecha a janela ou a ficha</td></tr>
+      <tr><td>Setas, <kbd>Home</kbd>, <kbd>End</kbd></td><td>Andar pela grade</td></tr>
+      <tr><td><kbd>Delete</kbd></td><td>Apagar o conteúdo da célula (menos em campo obrigatório)</td></tr>
+      <tr><td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td><td>Desfazer a última alteração</td></tr>
+      <tr><td><kbd>Ctrl</kbd> + <kbd>V</kbd> sobre a grade</td><td>Colar um bloco do Excel (abre a conferência do "Colar do Excel")</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Dúvidas frequentes</h3>
+  <dl class="faq">
+    <dt>"O nome não confere com o cadastro deste e-mail."</dt>
+    <dd>Digite o nome exatamente como no primeiro acesso, com o mesmo sobrenome. Se não lembrar, peça à Lays ou à Paula para conferir o seu cadastro.</dd>
+    <dt>Fiquei na tela "Aguardando liberação".</dt>
+    <dd>O seu cadastro ainda não foi liberado. Avise as administradoras. Quando liberarem, a planilha abre sozinha.</dd>
+    <dt>O gestor, a área ou o técnico que preciso não aparece na lista.</dt>
+    <dd>Os gestores não criam opções de lista. Peça às administradoras para incluir a opção e, enquanto isso, deixe o campo vazio ou anote na OBSERVAÇÃO.</dd>
+    <dt>Digitei o HOSTNAME, o DNA ou o AR errado no cadastro.</dt>
+    <dd>Esses campos têm cadeado. Envie às administradoras o HOSTNAME e o valor correto. Se o registro inteiro estiver errado ou duplicado, use "Solicitar exclusão".</dd>
+    <dt>Alterei um campo sem querer.</dt>
+    <dd>Use Desfazer (<kbd>Ctrl</kbd> + <kbd>Z</kbd>) logo em seguida. Se já fez outras mudanças, abra a ficha, veja o valor anterior em Movimentações e corrija.</dd>
+    <dt>Posso apagar um equipamento que saiu de uso?</dt>
+    <dd>Não. Inative o registro (capítulo 6). A exclusão é só para cadastros feitos por engano e passa pelas administradoras.</dd>
+    <dt>Mudei algumas colunas e filtros e a planilha ficou estranha.</dt>
+    <dd>Clique em "Limpar filtros" e escolha a visão "Todos os registros". Para as colunas, use o botão Colunas. Essas preferências são só suas e não afetam os outros.</dd>
+  </dl>
+</section>
+
+<!-- ============================== 9. ABRIR CHAMADO ============================== -->
+<section class="cap">
+  <div class="cab-cap"><div class="num">9</div><div><h2>Abrir chamado no Suporte Técnico</h2><p>Guia rápido da plataforma de chamados: registrar, acompanhar e responder.</p></div></div>
+
+  <h3>9.1 Acesso à plataforma</h3>
+  <div class="texto-img">
+    <div>
+      <ol class="passos">
+        <li>Abra o endereço <strong>suporte.si.valid.com.br/index.php</strong> no navegador.</li>
+        <li>O login é <strong>somente pelo SSO</strong>.</li>
+        <li>Clique em <span class="botao">Login com SSO</span>.</li>
+      </ol>
+    </div>
+    <figure><img src="img/32-chamado-login.png" alt="" style="max-width:72%"><figcaption>Entrada pelo botão "Login com SSO"</figcaption></figure>
+  </div>
+
+  <h3>9.2 Abrindo o formulário de chamado</h3>
+  <div class="texto-img">
+    <div>
+      <ol class="passos">
+        <li>No canto superior direito, clique no seu perfil e selecione <strong>Atendimento Padrão</strong>, logo abaixo do seu nome.</li>
+      </ol>
+    </div>
+    <figure><img src="img/39-chamado-perfil.png" alt="" style="max-width:62%"><figcaption>Perfil Atendimento Padrão</figcaption></figure>
+  </div>
+  <div class="evitar-quebra">
+    <ol class="passos" style="counter-reset: p 1">
+      <li>Na barra do lado esquerdo, clique no ícone destacado <b style="color:#e5484d">(1)</b> para ver as opções e vá em <strong>Formulários</strong> <b style="color:#e5484d">(2)</b>.</li>
+    </ol>
+    <figure><img src="img/40-chamado-formularios.png" alt=""><figcaption>(1) Ícone de Assistência · (2) Formulários</figcaption></figure>
+  </div>
+  <div class="texto-img">
+    <div>
+      <ol class="passos" style="counter-reset: p 2">
+        <li>Em <strong>Categorias</strong>, selecione <strong>Certificadora</strong> e veja as opções.</li>
+      </ol>
+    </div>
+    <figure><img src="img/41-chamado-certificadora.png" alt=""><figcaption>Categoria Certificadora</figcaption></figure>
+  </div>
+  <div class="evitar-quebra">
+    <ol class="passos" style="counter-reset: p 3">
+      <li>Abra <strong>Suporte - Redes</strong> <b style="color:#e5484d">(1)</b> e, ao lado direito, clique em <strong>Solicitações Suporte Técnico</strong> <b style="color:#e5484d">(2)</b>.</li>
+    </ol>
+    <figure class="media"><img src="img/42-chamado-suporte-redes.png" alt=""><figcaption>(1) Suporte - Redes · (2) Solicitações Suporte Técnico</figcaption></figure>
+  </div>
+
+  <div class="evitar-quebra">
+    <h3>9.3 Preenchendo o formulário</h3>
+    <ol class="passos">
+      <li>Em <strong>Descrição da solicitação</strong>, selecione a <span class="campo">CATEGORIA</span> <b style="color:#e5484d">(1)</b> e faça um breve resumo em <span class="campo">BREVE RESUMO DA SOLICITAÇÃO (TÍTULO)</span> <b style="color:#e5484d">(2)</b>.</li>
+    </ol>
+    <figure class="media"><img src="img/43-chamado-descricao.png" alt=""><figcaption>(1) Categoria · (2) Breve resumo da solicitação</figcaption></figure>
+  </div>
+  <div class="evitar-quebra">
+    <ol class="passos" style="counter-reset: p 1">
+      <li>Em <strong>Detalhamento do Pedido</strong>, dê o <span class="campo">MOTIVO DO CONTATO</span> <b style="color:#e5484d">(1)</b>, informe a sua AR em <span class="campo">INFORME SUA AR</span> <b style="color:#e5484d">(2)</b> e descreva o pedido em <span class="campo">DESCRIÇÃO DA SOLICITAÇÃO</span> <b style="color:#e5484d">(3)</b>.</li>
+    </ol>
+    <figure class="media"><img src="img/44-chamado-detalhamento.png" alt=""><figcaption>(1) Motivo do contato · (2) AR · (3) Descrição da solicitação</figcaption></figure>
+  </div>
+  <ol class="passos" style="counter-reset: p 2">
+    <li>Se precisar, anexe evidências em <strong>Anexos</strong> e clique em <span class="botao">Enviar</span>.</li>
+  </ol>
+  <div class="aviso dica"><b class="titulo">O que colocar na descrição</b><p>Informe se o pedido trata de <strong>informações biométricas, biográficas ou ambas</strong>. Inclua também o <strong>número de ticket</strong>, a <strong>mensagem de erro</strong>, a <strong>etapa do processo</strong> e as <strong>demais evidências relevantes</strong>. Se o chamado for sobre um equipamento, use <strong>"Copiar resumo"</strong> no menu <strong>⋯</strong> da linha do Inventário (item 5.2) e cole os dados na descrição.</p></div>
+
+  <div class="evitar-quebra">
+    <h3>9.4 Acompanhar o chamado</h3>
+    <p>Pronto, chamado registrado com sucesso! O acompanhamento é feito pelo seu perfil na plataforma, na seção <strong>"Chamado"</strong> <b style="color:#e5484d">(1)</b>. Lá aparecem os dados do formulário enviado <b style="color:#e5484d">(2)</b>, e o aviso de confirmação mostra o número do chamado <b style="color:#e5484d">(3)</b>.</p>
+    <figure><img src="img/37-chamado-registrado.png" alt=""><figcaption>(1) Seção Chamado · (2) Dados do formulário · (3) Número do chamado</figcaption></figure>
+  </div>
+
+  <h3>9.5 Interação no chamado</h3>
+  <div class="texto-img">
+    <div>
+      <p>Use os botões <span class="botao">Responder</span> e <span class="botao" style="background:#7fcba0;color:#1c1b1f">Documento</span> para interagir no chamado e para anexar evidências, quando necessário.</p>
+    </div>
+    <figure><img src="img/38-chamado-responder.png" alt="" style="max-width:80%"><figcaption>Botões Responder e Documento</figcaption></figure>
+  </div>
+
+  <p class="fim">Dúvidas ou sugestões sobre o Inventário de Equipamentos: <strong>Lays</strong> e <strong>Paula</strong> · Suporte V/Cert</p>
+</section>
+
+</body>
+</html>

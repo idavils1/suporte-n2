@@ -1,0 +1,519 @@
+{
+ "gruposColunas": [
+  {
+   "id": "equipamento",
+   "nome": "Equipamento",
+   "ordem": 1
+  }
+ ],
+ "listasEquipe": {
+  "status": [
+   "em-uso",
+   "disponivel"
+  ],
+  "auditoria": [
+   "divergencia-encontrada",
+   "nao-localizado",
+   "pendente",
+   "auditado-ok"
+  ],
+  "tecnico": [
+   "davi-santos",
+   "maria-luisa-chaves",
+   "paula-katiele",
+   "lays-almeida",
+   "david-bezerra",
+   "isaque-pereira",
+   "anderson-leite",
+   "fabiana-santos",
+   "guilherme-bezerra"
+  ],
+  "area": [
+   "sac-sap",
+   "validacao",
+   "produtos",
+   "antifraude",
+   "suporte-n2",
+   "suporte-operacional",
+   "normas-e-compliance",
+   "administrativo",
+   "comercial",
+   "central-de-verificacao"
+  ],
+  "gestor": [
+   "lays-almeida",
+   "jessica-rombalde",
+   "elaine-dayane-silva",
+   "franscisco-helio-diniz",
+   "elisabete-biondo-guimaraes",
+   "fabiane-mayumi-otsubo",
+   "eduardo-santos",
+   "marcela-sudre",
+   "ramon-lica",
+   "caroline-oliveira",
+   "willians-correa-da-costa",
+   "priscila-primo",
+   "ana-paula-cohen"
+  ]
+ },
+ "colunasTravadas": [
+  "hostname",
+  "dna",
+  "ar"
+ ],
+ "versao": 20,
+ "atualizadoEm": {
+  "timestampValue": "2026-11-04T17:07:02.838Z"
+ },
+ "titulo": "INVENTÁRIO DE EQUIPAMENTOS",
+ "categorias": [],
+ "colunasEquipe": [
+  "hostname",
+  "dna",
+  "usuario",
+  "area",
+  "gestor",
+  "status",
+  "auditoria",
+  "tecnico",
+  "observacao",
+  "dataFeita",
+  "ar"
+ ],
+ "atualizadoPor": "lays.almeida@valid.com",
+ "colunas": [
+  {
+   "id": "hostname",
+   "nome": "HOSTNAME",
+   "tipo": "texto",
+   "grupo": "equipamento",
+   "ordem": 1,
+   "largura": 170,
+   "obrigatoria": true,
+   "unica": true,
+   "padrao": "",
+   "opcoes": [],
+   "ajuda": "Nome da máquina na rede. Fica em maiúsculas, sem espaços.",
+   "acesso": "travado",
+   "somenteAdmin": false,
+   "ativa": true
+  },
+  {
+   "id": "dna",
+   "nome": "DNA",
+   "tipo": "texto",
+   "grupo": "equipamento",
+   "ordem": 2,
+   "largura": 150,
+   "obrigatoria": false,
+   "unica": true,
+   "padrao": "",
+   "opcoes": [],
+   "ajuda": "Identificador da máquina no cadastro DNA.",
+   "acesso": "travado",
+   "somenteAdmin": false,
+   "ativa": true
+  },
+  {
+   "id": "usuario",
+   "nome": "NOME DO USUÁRIO",
+   "tipo": "texto",
+   "grupo": "equipamento",
+   "ordem": 3,
+   "largura": 220,
+   "obrigatoria": false,
+   "unica": false,
+   "padrao": "",
+   "opcoes": [],
+   "ajuda": "",
+   "acesso": "livre",
+   "somenteAdmin": false,
+   "ativa": true
+  },
+  {
+   "id": "area",
+   "nome": "ÁREA",
+   "tipo": "lista",
+   "grupo": "equipamento",
+   "ordem": 4,
+   "largura": 190,
+   "obrigatoria": false,
+   "unica": false,
+   "padrao": "",
+   "opcoes": [
+    {
+     "id": "sac-sap",
+     "nome": "SAC | SAP",
+     "cor": ""
+    },
+    {
+     "id": "validacao",
+     "nome": "VALIDAÇÃO",
+     "cor": ""
+    },
+    {
+     "id": "produtos",
+     "nome": "PRODUTOS",
+     "cor": ""
+    },
+    {
+     "id": "antifraude",
+     "nome": "ANTIFRAUDE",
+     "cor": ""
+    },
+    {
+     "id": "suporte-n2",
+     "nome": "SUPORTE N2",
+     "cor": ""
+    },
+    {
+     "id": "suporte-operacional",
+     "nome": "SUPORTE OPERACIONAL",
+     "cor": ""
+    },
+    {
+     "id": "normas-e-compliance",
+     "nome": "NORMAS E COMPLIANCE",
+     "cor": ""
+    },
+    {
+     "id": "administrativo",
+     "nome": "ADMINISTRATIVO",
+     "cor": ""
+    },
+    {
+     "id": "comercial",
+     "nome": "COMERCIAL",
+     "cor": ""
+    },
+    {
+     "id": "central-de-verificacao",
+     "nome": "CENTRAL DE VERIFICAÇÃO",
+     "cor": ""
+    }
+   ],
+   "ajuda": "",
+   "acesso": "lista",
+   "somenteAdmin": false,
+   "ativa": true
+  },
+  {
+   "id": "gestor",
+   "nome": "GESTOR",
+   "tipo": "lista",
+   "grupo": "equipamento",
+   "ordem": 5,
+   "largura": 200,
+   "obrigatoria": false,
+   "unica": false,
+   "padrao": "",
+   "opcoes": [
+    {
+     "id": "lays-almeida",
+     "nome": "LAYS ALMEIDA",
+     "cor": ""
+    },
+    {
+     "id": "jessica-rombalde",
+     "nome": "JESSICA ROMBALDE",
+     "cor": ""
+    },
+    {
+     "id": "elaine-dayane-silva",
+     "nome": "ELAINE DAYANE SILVA",
+     "cor": ""
+    },
+    {
+     "id": "franscisco-helio-diniz",
+     "nome": "FRANSCISCO HÉLIO DINIZ",
+     "cor": ""
+    },
+    {
+     "id": "elisabete-biondo-guimaraes",
+     "nome": "ELISABETE BIONDO GUIMARAES",
+     "cor": ""
+    },
+    {
+     "id": "fabiane-mayumi-otsubo",
+     "nome": "FABIANE MAYUMI OTSUBO",
+     "cor": ""
+    },
+    {
+     "id": "eduardo-santos",
+     "nome": "EDUARDO SANTOS",
+     "cor": ""
+    },
+    {
+     "id": "marcela-sudre",
+     "nome": "MARCELA SUDRE",
+     "cor": ""
+    },
+    {
+     "id": "ramon-lica",
+     "nome": "RAMON LICA",
+     "cor": ""
+    },
+    {
+     "id": "caroline-oliveira",
+     "nome": "CAROLINE OLIVEIRA",
+     "cor": ""
+    },
+    {
+     "id": "willians-correa-da-costa",
+     "nome": "WILLIANS CORREA DA COSTA",
+     "cor": ""
+    },
+    {
+     "id": "priscila-primo",
+     "nome": "PRISCILA PRIMO",
+     "cor": ""
+    },
+    {
+     "id": "ana-paula-cohen",
+     "nome": "ANA PAULA COHEN",
+     "cor": ""
+    }
+   ],
+   "ajuda": "",
+   "acesso": "lista",
+   "somenteAdmin": false,
+   "ativa": true
+  },
+  {
+   "id": "status",
+   "nome": "STATUS",
+   "tipo": "status",
+   "grupo": "equipamento",
+   "ordem": 6,
+   "largura": 190,
+   "obrigatoria": false,
+   "unica": false,
+   "padrao": "",
+   "opcoes": [
+    {
+     "id": "em-uso",
+     "nome": "ATIVO",
+     "cor": "verde"
+    },
+    {
+     "id": "disponivel",
+     "nome": "INATIVO",
+     "cor": "vermelho"
+    },
+    {
+     "id": "em-manutencao",
+     "nome": "Em manutenção",
+     "cor": "laranja",
+     "ativa": false,
+     "removidaEm": "2026-10-30T14:33:29.954Z",
+     "removidaPor": "lays.almeida@valid.com"
+    },
+    {
+     "id": "aguardando-devolucao",
+     "nome": "Aguardando devolução",
+     "cor": "amarelo",
+     "ativa": false,
+     "removidaEm": "2026-10-30T14:33:30.843Z",
+     "removidaPor": "lays.almeida@valid.com"
+    },
+    {
+     "id": "emprestado",
+     "nome": "Emprestado",
+     "cor": "roxo",
+     "ativa": false,
+     "removidaEm": "2026-10-30T14:33:30.307Z",
+     "removidaPor": "lays.almeida@valid.com"
+    },
+    {
+     "id": "extraviado",
+     "nome": "Extraviado",
+     "cor": "vermelho",
+     "ativa": false,
+     "removidaEm": "2026-10-30T14:33:31.289Z",
+     "removidaPor": "lays.almeida@valid.com"
+    },
+    {
+     "id": "baixado-descartado",
+     "nome": "Baixado/descartado",
+     "cor": "cinza",
+     "ativa": false,
+     "removidaEm": "2026-10-30T14:33:32.379Z",
+     "removidaPor": "lays.almeida@valid.com"
+    }
+   ],
+   "ajuda": "",
+   "acesso": "lista",
+   "somenteAdmin": false,
+   "ativa": true
+  },
+  {
+   "id": "auditoria",
+   "nome": "AUDITORIA",
+   "tipo": "lista",
+   "grupo": "equipamento",
+   "ordem": 7,
+   "largura": 200,
+   "obrigatoria": false,
+   "unica": false,
+   "padrao": "",
+   "opcoes": [
+    {
+     "id": "divergencia-encontrada",
+     "nome": "FÉRIAS",
+     "cor": "rosa"
+    },
+    {
+     "id": "nao-localizado",
+     "nome": "REMOVIDO",
+     "cor": "vermelho"
+    },
+    {
+     "id": "pendente",
+     "nome": "PENDENTE",
+     "cor": "amarelo"
+    },
+    {
+     "id": "auditado-ok",
+     "nome": "REALIZADA",
+     "cor": "verde"
+    }
+   ],
+   "ajuda": "",
+   "acesso": "lista",
+   "somenteAdmin": false,
+   "ativa": true
+  },
+  {
+   "id": "tecnico",
+   "nome": "TÉCNICO QUE FEZ",
+   "tipo": "lista",
+   "grupo": "equipamento",
+   "ordem": 8,
+   "largura": 180,
+   "obrigatoria": false,
+   "unica": false,
+   "padrao": "",
+   "opcoes": [
+    {
+     "id": "davi-santos",
+     "nome": "Davi Lopes",
+     "cor": ""
+    },
+    {
+     "id": "maria-luisa-chaves",
+     "nome": "Maria Luisa",
+     "cor": ""
+    },
+    {
+     "id": "paula-katiele",
+     "nome": "Paula Katiele",
+     "cor": ""
+    },
+    {
+     "id": "lays-almeida",
+     "nome": "Lays Almeida",
+     "cor": ""
+    },
+    {
+     "id": "david-bezerra",
+     "nome": "David Bezerra",
+     "cor": ""
+    },
+    {
+     "id": "isaque-pereira",
+     "nome": "Isaque Pereira",
+     "cor": ""
+    },
+    {
+     "id": "anderson-leite",
+     "nome": "Anderson Leite",
+     "cor": ""
+    },
+    {
+     "id": "fabiana-santos",
+     "nome": "Fabiana Santos",
+     "cor": ""
+    },
+    {
+     "id": "guilherme-bezerra",
+     "nome": "Guilherme Bezerra",
+     "cor": ""
+    }
+   ],
+   "ajuda": "",
+   "acesso": "lista",
+   "somenteAdmin": false,
+   "ativa": true
+  },
+  {
+   "id": "observacao",
+   "nome": "OBSERVAÇÃO",
+   "tipo": "textoLongo",
+   "grupo": "equipamento",
+   "ordem": 9,
+   "largura": 280,
+   "obrigatoria": false,
+   "unica": false,
+   "padrao": "",
+   "opcoes": [],
+   "ajuda": "",
+   "acesso": "livre",
+   "somenteAdmin": false,
+   "ativa": true
+  },
+  {
+   "id": "dataFeita",
+   "nome": "DATA FEITA",
+   "tipo": "dataHora",
+   "grupo": "equipamento",
+   "ordem": 10,
+   "largura": 150,
+   "obrigatoria": false,
+   "unica": false,
+   "padrao": "",
+   "opcoes": [],
+   "ajuda": "",
+   "acesso": "livre",
+   "somenteAdmin": false,
+   "ativa": true
+  },
+  {
+   "id": "ar",
+   "nome": "AR",
+   "tipo": "lista",
+   "grupo": "equipamento",
+   "ordem": 11,
+   "largura": 150,
+   "obrigatoria": true,
+   "unica": false,
+   "padrao": "",
+   "opcoes": [
+    {
+     "id": "vcert",
+     "nome": "VCERT",
+     "cor": ""
+    },
+    {
+     "id": "vcorp",
+     "nome": "VCORP",
+     "cor": ""
+    }
+   ],
+   "ajuda": "",
+   "acesso": "travado",
+   "somenteAdmin": false,
+   "ativa": true
+  }
+ ],
+ "regras": {
+  "janelaEdicaoHoras": 0,
+  "equipeEdita": "todas",
+  "exportacao": true,
+  "registro": {
+   "aprovacao": true,
+   "aberto": true,
+   "dominios": [],
+   "papelPadrao": "equipe"
+  }
+ }
+}

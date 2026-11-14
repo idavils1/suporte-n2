@@ -1,0 +1,31 @@
+O retorno da "correção" do webhook - retorno com o ticket gerado no SAT, já estava "configurado" desde o início do projeto. 
+
+Porém por se tratar de uma informação única VALID, a contratada teve que fazer alterações dado que a interface é a mesma para todos os clientes, ou seja aplicação genérica. 
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Observações: 
+
+S3 (AWS - Amazon)  
+
+ 
+
+ 
+
+ 
+
+ 
+
+Identidade visual: 
+
+
+ 

@@ -1,0 +1,23 @@
+Quando criar um produto cadeia JUS: Se faz necessário solicitar para INFRA executar a seguinte Query:  
+
+ 
+
+select id_product from product where sku='NOVO SKU'; 
+
+  
+
+INSERT INTO role_product ( 
+
+    id_role, 
+
+    id_product 
+
+) SELECT 
+
+    id_role, id_product_retorno_query 
+
+FROM role; 
+
+ 
+
+ 

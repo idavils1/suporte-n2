@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 470" width="560" height="470" role="img" aria-labelledby="t d" font-family="Segoe UI, Arial, Helvetica, sans-serif">
+  <title id="t">Cadeia de certificação</title><desc id="d">Quatro níveis: AC Raiz Brasileira, mantida pelo ITI; AC intermediária; AC VALID RFB v5; certificado do titular. Cada nível assina o de baixo.</desc>
+  <defs><marker id="ponta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6b4c9a"/></marker></defs>
+  <rect x="0.5" y="0.5" width="559" height="469" rx="14" fill="#ffffff" stroke="#c9b8e6"/>
+  <text x="24" y="34" font-size="17" font-weight="700" fill="#6b4c9a">Cadeia de certificação</text>
+  
+  <g><rect x="110" y="56" width="340" height="64" rx="10" fill="#e4d8f7" stroke="#6b4c9a" stroke-width="1.6"/>
+  <text x="280" y="85" text-anchor="middle" font-size="15" font-weight="700" fill="#111212">AC Raiz Brasileira</text>
+  <text x="280" y="103" text-anchor="middle" font-size="12" fill="#5a5a5a">mantida pelo ITI · o sistema confia nela de fábrica</text></g>
+  <g><line x1="280" y1="120" x2="280" y2="152" stroke="#6b4c9a" stroke-width="2" marker-end="url(#ponta)"/>
+  <text x="288" y="140" font-size="11.5" fill="#5a5a5a">assina</text></g>
+  <g><rect x="110" y="156" width="340" height="64" rx="10" fill="#f3eefb" stroke="#6b4c9a" stroke-width="1.6"/>
+  <text x="280" y="185" text-anchor="middle" font-size="15" font-weight="700" fill="#111212">AC intermediária</text>
+  <text x="280" y="203" text-anchor="middle" font-size="12" fill="#5a5a5a">ex.: AC de 1º nível da cadeia da Receita Federal</text></g>
+  <g><line x1="280" y1="220" x2="280" y2="252" stroke="#6b4c9a" stroke-width="2" marker-end="url(#ponta)"/>
+  <text x="288" y="240" font-size="11.5" fill="#5a5a5a">assina</text></g>
+  <g><rect x="110" y="256" width="340" height="64" rx="10" fill="#f3eefb" stroke="#6b4c9a" stroke-width="1.6"/>
+  <text x="280" y="285" text-anchor="middle" font-size="15" font-weight="700" fill="#111212">AC VALID RFB v5</text>
+  <text x="280" y="303" text-anchor="middle" font-size="12" fill="#5a5a5a">AC que emite o certificado do titular</text></g>
+  <g><line x1="280" y1="320" x2="280" y2="352" stroke="#6b4c9a" stroke-width="2" marker-end="url(#ponta)"/>
+  <text x="288" y="340" font-size="11.5" fill="#5a5a5a">assina</text></g>
+  <g><rect x="110" y="356" width="340" height="64" rx="10" fill="#dff3e0" stroke="#2e7d32" stroke-width="1.6"/>
+  <text x="280" y="385" text-anchor="middle" font-size="15" font-weight="700" fill="#111212">Certificado do titular</text>
+  <text x="280" y="403" text-anchor="middle" font-size="12" fill="#5a5a5a">e-CPF / e-CNPJ · Entidade Final</text></g>
+  <text x="24" y="452" font-size="12" fill="#5a5a5a">A validação "sobe a escada": cada certificado é conferido com a chave pública de quem está acima.</text>
+</svg>

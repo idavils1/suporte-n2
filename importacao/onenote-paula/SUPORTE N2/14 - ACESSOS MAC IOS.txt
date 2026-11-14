@@ -1,0 +1,71 @@
+Para consegui visualizar a tela do titular requerente, ele precisa fazer a PERMISSÃO. 
+
+ 
+
+https://www.teamviewer.com/pt-br/global/support/knowledge-base/teamviewer-remote/remote-control/remote-control-a-mac/ 
+
+ 
+
+Para dar permissão ao TeamViewer no Mac, você precisa ir em Preferências do Sistema > Segurança e Privacidade > Privacidade, e conceder acesso na aba Acessibilidade (marcando o TeamViewer), e também em Gravação de Tela e Acesso Total ao Disco, clicando no cadeado para desbloquear e inserir sua senha de administrador 
+
+ 
+
+De <https://www.google.com/search?q=Como+fazer+as+permiss%C3%B5es+de+acesso+team+viewer+no+mac&rlz=1C1GCEA_enBR1175BR1175&oq=Como+fazer+as+permiss%C3%B5es+de+acesso+team+viewer+no+mac&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIJCAEQIRgKGKABMgkIAhAhGAoYoAEyCQgDECEYChigATIJCAQQIRgKGKAB0gEJMjE0NThqMGoxqAIAsAIA&sourceid=chrome&ie=UTF-8#cobssid=s>  
+
+ 
+
+ 
+
+ 
+
+ 
+
+Configuração para gerar senha no TeamViewer  
+
+Configurações > Segurança > Configurações adicionais de autenticações > Senha aleatória após cada sessão > Seleciona Gerar novo > 6 caracteres 
+
+Interface Antiga 
+
+Configurações> Segurança > Senha aleatória > 6 caracteres. 
+
+  
+
+---------------------------------------------- 
+
+Mac permissões 
+
+  
+
+Por favor, conceda as seguintes permissões para o TeamViewer: 
+
+Ajustes > Privacidade e Segurança > privacidade:  
+
+-Gravação de tela 
+
+-Acessibilidade 
+
+-Acesso total ao disco 
+
+ 
+
+ 
+
+https://validcertificadora.com.br/pages/instalando-certificado-a1-no-linux?_pos=1&_psq=linux&_ss=e&_v=1.0 
+
+LINUX 
+
+ 
+
+ 
+
+11984565546 
+senha:  4u6qm6pn 
+senha: 2irrmxk5 
+ 
+308649733 
+uq7s9dqi 
+rhane6kg 
+
+ 
+
+ 

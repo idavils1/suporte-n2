@@ -1,0 +1,48 @@
+ 
+
+Item: 5.7 Data e hora. 
+
+ 
+
+Atual: a.st1.ntp.br 
+ 
+Recomendáveis:  
+
+pool.ntp.br > o mais recomendado. 
+
+ 
+
+a.st1.ntp.br  200.160.7.186 
+
+ 
+
+ a.ntp.br 200.160.0.8 
+
+ 
+
+b.ntp.br 
+
+ 
+
+c.st1.ntp.br 200.186.125.195 
+
+ 
+
+d.st1.ntp.br  200.20.186.76 
+
+ 
+
+Visualizador de eventos 
+
+Alterar de 20480 para 1000000 (1 GB). 
+
+Antes estava 20480 por que nossas maquinas estavam na estrutura de 32 bits. 
+
+ 
+
+ 
+
+Questionar se podemos usar a 2ª opção ao invés da 1ª 
+
+
+ 

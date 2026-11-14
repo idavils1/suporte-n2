@@ -1,0 +1,2442 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comunicados · Central do Suporte V/CERT</title>
+<link rel="icon" type="image/png" sizes="32x32" href="fotos/icone-32.png">
+<link rel="apple-touch-icon" href="fotos/icone-apple.png">
+<script>
+  (function () {
+    try {
+      var tema = localStorage.getItem("suporte-n2-tema");
+      if (tema !== "claro" && tema !== "escuro") {
+        tema = window.matchMedia("(prefers-color-scheme: dark)").matches ? "escuro" : "claro";
+      }
+      document.documentElement.setAttribute("data-tema", tema);
+    } catch (e) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..700&display=swap" rel="stylesheet">
+<!-- Carlito: mesmas medidas da Calibri (fonte dos templates oficiais), para quem não tem Calibri (Mac, Linux, celular) -->
+<link href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="comum/base.css">
+<style>
+  .pagina { max-width: 1280px; margin: 0 auto; padding: 20px 20px 48px; display: grid; gap: 18px; }
+  .abas { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--borda); }
+  .aba {
+    display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px; margin-bottom: -1px;
+    background: none; border: 1px solid transparent; border-radius: var(--raio-md) var(--raio-md) 0 0; cursor: pointer; font-weight: 600; color: var(--texto-secundario);
+  }
+  .aba:hover { color: var(--cor-acao); background: var(--superficie-quente); }
+  .aba[aria-selected="true"] { color: var(--cor-acao); background: var(--superficie); border-color: var(--borda); border-bottom-color: var(--superficie); }
+  .aba .ponto { width: 10px; height: 10px; border-radius: 50%; background: var(--cor-aba, var(--lilas)); box-shadow: 0 0 0 1px var(--borda-forte); }
+  .editor { display: grid; grid-template-columns: minmax(300px, 420px) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .formulario { display: grid; gap: 14px; }
+  .campo-topo { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .contador { font-size: 12px; color: var(--texto-secundario); font-variant-numeric: tabular-nums; }
+  .contador.excedeu { color: var(--erro-texto); font-weight: 700; }
+  .campo-linha { display: flex; gap: 6px; }
+  .campo-linha input { flex: 1; min-width: 0; }
+  .prontos { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pronto { font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--borda); background: var(--superficie); cursor: pointer; }
+  .pronto:hover { background: var(--lilas-destaque); border-color: var(--lilas); }
+  .campo-aviso { font-size: 12px; color: var(--c-laranja); }
+  .campo.focado input, .campo.focado textarea, .campo.focado .caixa-recado { border-color: var(--lilas); box-shadow: 0 0 0 3px var(--lilas-destaque); }
+  .previa-coluna { position: sticky; top: calc(var(--altura-topo) + 16px); display: grid; gap: 12px; }
+  .previa-quadro { position: relative; border: 1px solid var(--borda); border-radius: var(--raio-md); background: var(--superficie-suave); overflow: hidden; }
+  .previa-quadro canvas { display: block; width: 100%; height: auto; cursor: text; }
+  .acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+  .aviso-modelo { font-size: 13px; color: var(--texto-secundario); }
+  .historico { display: grid; gap: 10px; }
+  .historico-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .hist-item { display: grid; gap: 4px; padding: 6px; border: 1px solid var(--borda); border-radius: var(--raio-md); background: var(--superficie); text-align: left; cursor: pointer; position: relative; }
+  .hist-item:hover { border-color: var(--borda-forte); background: var(--superficie-quente); }
+  .hist-item img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--raio-sm); background: var(--superficie-suave); }
+  .hist-item .t { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hist-item .d { font-size: 11px; color: var(--texto-secundario); }
+  .hist-apagar { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; }
+  /* Modo ajuste (administradoras) */
+  .camada-ajuste { position: absolute; inset: 0; }
+  .caixa {
+    position: absolute; border: 2px dashed var(--lilas); background: rgba(155, 127, 212, 0.12); cursor: move; touch-action: none;
+    font-size: 11px; font-weight: 700; color: #ffffff; text-shadow: 0 1px 2px #000;
+  }
+  .caixa span { position: absolute; top: 2px; left: 4px; pointer-events: none; white-space: nowrap; }
+  .caixa.ativa { border-style: solid; border-color: #ff9800; background: rgba(255, 152, 0, 0.15); }
+  .caixa .alca { position: absolute; right: -7px; bottom: -7px; width: 14px; height: 14px; background: #ff9800; border: 2px solid #fff; border-radius: 3px; cursor: nwse-resize; }
+  .painel-ajuste { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--borda-forte); border-radius: var(--raio-md); background: var(--superficie-quente); }
+  .painel-ajuste h2 { font-size: 16px; }
+  .grade-ajuste { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .grade-ajuste .campo input, .grade-ajuste .campo select { padding: 6px 8px !important; font-size: 14px !important; }
+  /* Templates oficiais: um único campo "Recado" entre a saudação e a assinatura fixas */
+  .recado-bloco { display: grid; gap: 8px; }
+  /* Caixa do recado: edição visual sobre fundo branco (como o template), nos dois temas */
+  .recado-editor { display: grid; gap: 6px; }
+  .barra-formato { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .btn-formato {
+    min-width: 32px; height: 32px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; gap: 3px;
+    border: 1px solid var(--borda); border-radius: var(--raio-sm); background: var(--superficie); color: var(--cor-acao); cursor: pointer;
+    font: 600 15px/1 "Calibri", "Carlito", "Segoe UI", Arial, sans-serif;
+  }
+  .btn-formato:hover { background: var(--superficie-quente); border-color: var(--borda-forte); }
+  .btn-formato[aria-pressed="true"] { background: var(--lilas-destaque); border-color: var(--lilas); }
+  .btn-formato .icone { width: 14px; height: 14px; stroke: var(--cor-acao); }
+  .btn-formato .seta { font-size: 10px; }
+  .letra-a { display: inline-grid; justify-items: center; line-height: 1; }
+  .faixa-cor { display: block; width: 14px; height: 3px; margin-top: 2px; border-radius: 1px; background: #000000; }
+  .cor-menu { position: relative; display: inline-flex; }
+  .menu-cores {
+    position: absolute; top: calc(100% + 4px); left: 0; z-index: 30; display: grid; min-width: 190px; padding: 4px;
+    background: var(--superficie); border: 1px solid var(--borda-forte); border-radius: var(--raio-md); box-shadow: 0 8px 24px var(--sombra);
+  }
+  .menu-cores[hidden] { display: none; }
+  .menu-cores button { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border: 0; border-radius: var(--raio-sm); background: none; color: var(--cor-acao); font-size: 13px; text-align: left; cursor: pointer; }
+  .menu-cores button:hover, .menu-cores button:focus-visible { background: var(--superficie-quente); outline: none; }
+  .menu-cores button[aria-checked="true"]::after { content: "✓"; margin-left: auto; font-weight: 700; }
+  .amostra { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25); }
+  .caixa-recado, .previa-modelo {
+    background: #ffffff; color: #000000; font-family: "Calibri", "Carlito", "Segoe UI", Arial, sans-serif;
+    white-space: pre-wrap; overflow-wrap: anywhere; border: 1px solid var(--borda-forte); border-radius: var(--raio-sm);
+  }
+  .caixa-recado { position: relative; min-height: 260px; max-height: 60vh; overflow-y: auto; padding: 10px 12px; font-size: 15px; line-height: 1.45; outline: none; cursor: text; }
+  .caixa-recado:focus { border-color: var(--lilas); box-shadow: 0 0 0 3px var(--lilas-destaque); }
+  .caixa-recado[data-vazio]::before { content: attr(data-placeholder); position: absolute; top: 10px; left: 12px; right: 12px; color: #6b6b6b; pointer-events: none; }
+  .caixa-recado .f-n, .previa-modelo .f-n { font-weight: 700; }
+  .caixa-recado .f-i, .previa-modelo .f-i { font-style: italic; }
+  .previa-modelo { max-height: 200px; overflow-y: auto; padding: 8px 10px; font-size: 14px; line-height: 1.4; }
+  .aviso-modelos { font-size: 12px; color: var(--c-laranja); }
+  .aviso-modelos[hidden] { display: none; }
+  /* Gerenciar modelos */
+  .gm-topo { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; justify-content: space-between; }
+  .gm-abas { display: flex; flex-wrap: wrap; gap: 6px; }
+  .gm-abas .pronto { font-size: 13px; padding: 5px 12px; }
+  .pronto[aria-pressed="true"] { background: var(--lilas-destaque); border-color: var(--lilas); font-weight: 700; }
+  .gm-busca { flex: 1; min-width: 200px; max-width: 340px; }
+  .gm-faixa { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; font-size: 13px; padding: 8px 10px; border-radius: var(--raio-sm); background: var(--f-laranja); color: var(--c-laranja); }
+  .gm-faixa[hidden] { display: none; }
+  .gm-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .gm-item { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--borda); border-radius: var(--raio-md); background: var(--superficie); }
+  .gm-cab { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .gm-texto { font-size: 13px; color: var(--texto-secundario); white-space: pre-line; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .gm-meta { font-size: 12px; color: var(--texto-secundario); }
+  .gm-acoes { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .gm-acoes .btn-icone { width: 32px; height: 32px; }
+  .fixo-ref { margin: 0; padding: 6px 12px; border-radius: var(--raio-sm); background: var(--superficie-suave); color: var(--texto-secundario); font-family: "Calibri", "Carlito", "Segoe UI", Arial, sans-serif; font-size: 15px; user-select: none; }
+  .fixo-ref strong { color: var(--texto-secundario); }
+  .ajudas-recado { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .recado-bloco .ajudas-recado select { width: auto; height: 32px; padding: 0 8px; border: 1px solid var(--borda); border-radius: var(--raio-sm); background: var(--superficie); font-size: 12px; font-weight: 600; cursor: pointer; }
+  .recado-bloco .campo-aviso.erro { color: var(--erro-texto); font-weight: 700; }
+  .opcoes-baixar { display: grid; gap: 4px; }
+  .opcoes-baixar .ajuda { font-size: 12px; color: var(--texto-secundario); }
+  .guia { position: absolute; pointer-events: none; }
+  .guia-v { top: 0; bottom: 0; width: 0; border-left: 1px dashed #00a2ff; }
+  .guia-h { left: 0; right: 0; height: 0; border-top: 1px dashed #00a2ff; }
+  .aviso-oficial { font-size: 13px; padding: 8px 10px; border-radius: var(--raio-sm); background: var(--f-azul); color: var(--c-azul); }
+  @media (max-width: 900px) {
+    .editor { grid-template-columns: minmax(0, 1fr); }
+    .previa-coluna { position: static; order: -1; }
+  }
+  @media (max-width: 640px) {
+    .pagina { padding: 14px 12px 40px; }
+    .aba { padding: 0 10px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+<header class="topo-pagina">
+  <a class="btn btn-secundario btn-mini voltar" href="index.html#inicio" aria-label="Voltar para a Central">← <span>Central</span></a>
+  <h1><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-megafone"/></svg>Comunicados</h1>
+  <div class="topo-acoes">
+    <button type="button" class="btn-icone" id="btn-ajuste" hidden aria-pressed="false" title="Modo ajuste (administradoras)" aria-label="Modo ajuste"></button>
+    <button type="button" class="btn-icone" id="btn-tema" aria-label="Alternar tema"></button>
+    <button type="button" class="btn btn-secundario btn-mini btn-login" id="btn-login" hidden></button>
+  </div>
+</header>
+<div class="faixa-aviso" id="faixa-offline" hidden>Sem conexão com a nuvem: usando os templates embutidos e os modelos de recado salvos só neste computador. Gerar e baixar continua funcionando.</div>
+
+<main class="pagina">
+  <p class="apoio">Escolha o tipo, preencha os textos e baixe a imagem pronta. O layout é fixo: só os textos mudam.</p>
+  <div class="abas" role="tablist" aria-label="Tipo de comunicado" id="abas"></div>
+  <section id="painel" role="tabpanel" class="editor" tabindex="-1">
+    <form class="formulario" id="formulario" novalidate autocomplete="off"></form>
+    <div class="previa-coluna">
+      <div class="previa-quadro" id="previa-quadro">
+        <canvas id="tela" aria-label="Prévia do comunicado" role="img"></canvas>
+        <div class="camada-ajuste" id="camada-ajuste" hidden></div>
+      </div>
+      <p class="aviso-modelo" id="aviso-modelo"></p>
+      <div class="acoes">
+        <button type="button" class="btn" id="btn-baixar"></button>
+        <button type="button" class="btn btn-secundario" id="btn-copiar"></button>
+        <button type="button" class="btn btn-secundario" id="btn-texto"></button>
+        <button type="button" class="btn btn-secundario" id="btn-limpar"></button>
+      </div>
+      <div class="opcoes-baixar" id="opcoes-baixar" hidden>
+        <label class="check"><input type="checkbox" id="alta-resolucao"> Alta resolução (2×)</label>
+        <span class="ajuda">O texto sai nítido, mas o fundo pode ficar levemente menos nítido, porque o template original é pequeno. Padrão: tamanho original.</span>
+      </div>
+      <div class="painel-ajuste" id="painel-ajuste" hidden></div>
+    </div>
+  </section>
+  <section class="historico" aria-labelledby="titulo-historico">
+    <h2 id="titulo-historico" style="font-size:18px">Últimos 10 comunicados</h2>
+    <p class="apoio" id="historico-vazio">Os comunicados que você baixar ou copiar aparecem aqui (só neste navegador).</p>
+    <div class="historico-lista" id="historico"></div>
+  </section>
+</main>
+
+<script type="module">
+  import { $, $$, escapar, svg, mostrarAviso, ligarTema, ligarLogin, aoMudarSessao, ehAdmin, sessao, conectarNuvem,
+    registrarAuditoria, criarDialogo, confirmar, lerLocal, gravarLocal, partesBrasilia, dataHoraBrasilia, formatarData,
+    baixarArquivo, copiarTexto, abrirSugestao, normalizar } from "./comum/base.js";
+
+  /* ============================================================
+   *  MODELOS DOS COMUNICADOS
+   *  As imagens ficam em fotos/comunicados/ (mesmo site, sem upload).
+   *  Enquanto a imagem não existir, a prévia desenha um fundo provisório.
+   *  As administradoras ajustam as caixas no "Modo ajuste" e o resultado
+   *  é gravado em conteudo/comunicados (substitui este objeto).
+   * ============================================================ */
+  const PRONTOS_SISTEMAS = ["SAR", "SAT", "SGS", "SIG", "VIDaaS", "VQUEUE", "GLPI"];
+  const campo = (c) => ({
+    fonte: "Bricolage Grotesque", peso: 400, cor: "#111212", alinhar: "esquerda", alinharVertical: "topo",
+    maxLinhas: 1, maxCaracteres: 80, maiusculas: false, entrelinha: 1.2, tipo: "texto", prefixo: "", padrao: "", prontos: [], ...c
+  });
+  /* Templates oficiais (Instabilidade e Restabelecimento): imagem pronta de 561×545 com a saudação
+     "Olá Parceiro(a)," e a assinatura "Atenciosamente, Suporte Técnico V/Cert" já desenhadas.
+     A pessoa escreve só o RECADO, no branco entre as duas. versao 2: configurações salvas de
+     versão menor (as provisórias de 1080×1080) são ignoradas para estes dois modelos. */
+  const VERSAO_OFICIAL = 2;
+  const campoRecado = (caixa) => campo({
+    id: "recado", rotulo: "Recado", tipo: "texto",
+    fonte: "Calibri", peso: 400, cor: "#000000", tamanhoMax: 13, tamanhoMin: 9, entrelinha: 1.3,
+    alinhar: "esquerda", alinharVertical: "topo", maxLinhas: 24, maxCaracteres: 1200, padrao: "", ...caixa
+  });
+  /* Textos fixos, só desenhados se um template futuro vier SEM eles (desenharFixos: true). Nunca aparecem no formulário. */
+  const fixosDoTemplate = (x, ySaudacao, yAtenciosamente, tamanho = 13, passo = 16) => [
+    { texto: "Olá Parceiro(a),", x, y: ySaudacao, tamanho, peso: 700 },
+    { texto: "Atenciosamente,", x, y: yAtenciosamente, tamanho, peso: 400 },
+    { texto: "Suporte Técnico V/Cert", x, y: yAtenciosamente + passo, tamanho, peso: 700 }
+  ];
+  const MODELOS_COMUNICADO = {
+    /* Template oficial recebido em 1024×968, já COM "Olá Parceiro(a)," (y 194–214, x 23) e
+       "Atenciosamente," (a partir de y 803) + "Suporte Técnico V/Cert": a página não redesenha.
+       Caixa: topo = fim da saudação + 18; base = 22 acima do "Atenciosamente"; margens de 23. */
+    instabilidade: {
+      id: "instabilidade", nome: "Instabilidade", imagem: "fotos/comunicados/instabilidade.png", largura: 1024, altura: 968, corProvisoria: "#c62828",
+      versao: 3, oficial: true, desenharFixos: false, fixos: fixosDoTemplate(23, 194, 803, 22, 29),
+      campos: [campoRecado({ x: 23, y: 233, largura: 978, altura: 548, tamanhoMax: 22, tamanhoMin: 15 })]
+    },
+    /* Template oficial recebido em 771×743, com a área branca VAZIA (y 102 a 651): a saudação e a
+       assinatura são desenhadas pela página (desenharFixos: true). Medidas na proporção do layout de
+       561×545 (fator 771/561): margem 22, saudação em 134, assinatura em 572/594, fonte 18 a 12,5 px; caixa = área entre as duas. */
+    restabelecimento: {
+      id: "restabelecimento", nome: "Restabelecimento", imagem: "fotos/comunicados/restabelecimento.png", largura: 771, altura: 743, corProvisoria: "#111212",
+      versao: 3, oficial: true, desenharFixos: true, fixos: fixosDoTemplate(22, 134, 572, 18, 22),
+      campos: [campoRecado({ x: 22, y: 169, largura: 727, altura: 387, tamanhoMax: 18, tamanhoMin: 12.5 })]
+    }
+  };
+  const ORDEM_ABAS = ["instabilidade", "restabelecimento"];
+  /* Abas que saíram do site: o endereço antigo abre Instabilidade e o rascunho local é apagado */
+  const ABAS_REMOVIDAS = ["novidades"];
+  const FONTES = ["Bricolage Grotesque", "Calibri", "Arial", "Georgia", "Verdana"];
+  /* Pilha de fontes do canvas: Calibri (dos templates) cai para Carlito, que tem as mesmas medidas */
+  const PILHA_FONTES = {
+    "Bricolage Grotesque": '"Bricolage Grotesque", system-ui, sans-serif',
+    "Calibri": '"Calibri", "Carlito", "Segoe UI", Arial, sans-serif',
+    "Arial": "Arial, Helvetica, sans-serif",
+    "Georgia": "Georgia, serif",
+    "Verdana": "Verdana, sans-serif"
+  };
+  const pilhaFonte = (f) => PILHA_FONTES[f] || PILHA_FONTES["Bricolage Grotesque"];
+  const RE_CAMPO_TROCAR = /\[[^\]\n]{1,40}\]/g;
+  const temCampoTrocar = (s) => /\[[^\]\n]{1,40}\]/.test(String(s || ""));
+  const SAUDACAO = "Olá Parceiro(a),";
+  const ASSINATURA = "Atenciosamente,\nSuporte Técnico V/Cert";
+  const CHAVE_ULTIMA_INSTABILIDADE = "suporte-n2-comunicado-ultima-instabilidade";
+  const CHAVE_RASCUNHO = (aba) => `suporte-n2-comunicado-${aba}`;
+  const CHAVE_HISTORICO = "suporte-n2-comunicados-historico";
+  const COR = /^#[0-9a-f]{6}$/i;
+  const CAMINHO_IMAGEM = /^fotos\/comunicados\/[a-z0-9._-]{1,60}\.(png|jpe?g|webp)$/i;
+
+  /* ------------------------------------------------------------
+   *  Recado formatado: marcação guardada no rascunho, no histórico e nos modelos
+   *    **negrito**   _itálico_   {vermelho}texto colorido{/vermelho}
+   *  Cores só da PALETA. Caractere literal: \*  \_  \{  \\ (a caixa visual escapa sozinha).
+   *  Cada linha fecha o que abriu: a marcação nunca atravessa uma quebra de linha.
+   *  Rascunhos sem "formato: 2" são do formato antigo (só **negrito**) e são convertidos ao abrir.
+   * ------------------------------------------------------------ */
+  const FORMATO_RECADO = 2;
+  const PALETA = [
+    { id: "", nome: "Padrão (preto)", cor: "#000000" },
+    { id: "vermelho", nome: "Vermelho", cor: "#C62828" },
+    { id: "laranja", nome: "Laranja", cor: "#B45309" },
+    { id: "verde", nome: "Verde", cor: "#2E7D32" },
+    { id: "azul", nome: "Azul", cor: "#1565C0" },
+    { id: "cinza", nome: "Cinza", cor: "#5F6368" }
+  ];
+  const CORES = Object.fromEntries(PALETA.filter((p) => p.id).map((p) => [p.id, p.cor]));
+  const NOMES_CORES = PALETA.filter((p) => p.id).map((p) => p.id).join("|");
+  const RE_TAG_COR = new RegExp(`^\\{(\\/?)(${NOMES_CORES})\\}`);
+  const RE_ESCAPAR_TAG = new RegExp(`\\{(?=\\/?(${NOMES_CORES})\\})`, "g");
+  const SEM_FORMATO = { b: false, i: false, cor: "" };
+  document.head.insertAdjacentHTML("beforeend", `<style>${PALETA.filter((p) => p.id).map((p) => `.caixa-recado [data-cor="${p.id}"], .previa-modelo [data-cor="${p.id}"] { color: ${p.cor}; }`).join("\n")}</style>`);
+
+  const escaparMarca = (t) => String(t).replace(/[\\*_]/g, "\\$&").replace(RE_ESCAPAR_TAG, "\\{");
+  function lerLinhaMarcada(linha, saida) {
+    const tokens = [];
+    for (let i = 0; i < linha.length;) {
+      const ch = linha[i];
+      if (ch === "\\" && i + 1 < linha.length && "\\*_{}".includes(linha[i + 1])) { tokens.push({ t: linha[i + 1] }); i += 2; continue; }
+      if (linha.startsWith("**", i)) { tokens.push({ m: "b", bruto: "**" }); i += 2; continue; }
+      if (ch === "_") { tokens.push({ m: "i", bruto: "_" }); i++; continue; }
+      const tag = ch === "{" ? RE_TAG_COR.exec(linha.slice(i)) : null;
+      if (tag) { tokens.push({ m: "cor", fecha: !!tag[1], cor: tag[2], bruto: tag[0] }); i += tag[0].length; continue; }
+      tokens.push({ t: ch });
+      i++;
+    }
+    /* Marcador sem par na mesma linha vale como texto */
+    ["b", "i"].forEach((m) => {
+      const pos = tokens.reduce((a, k, j) => (k.m === m ? a.concat(j) : a), []);
+      if (pos.length % 2) tokens[pos[pos.length - 1]] = { t: tokens[pos[pos.length - 1]].bruto };
+    });
+    const abertas = [];
+    tokens.forEach((k, j) => {
+      if (k.m !== "cor") return;
+      if (!k.fecha) { abertas.push(j); return; }
+      if (abertas.length && tokens[abertas[abertas.length - 1]].cor === k.cor) { tokens[abertas.pop()].par = true; k.par = true; }
+    });
+    let b = false, i = false;
+    const cores = [];
+    tokens.forEach((k) => {
+      if (k.m === "b") b = !b;
+      else if (k.m === "i") i = !i;
+      else if (k.m === "cor" && k.par) { if (k.fecha) cores.pop(); else cores.push(k.cor); }
+      else {
+        const t = k.m === "cor" ? k.bruto : k.t;
+        const cor = cores.length ? cores[cores.length - 1] : "";
+        const ult = saida[saida.length - 1];
+        if (ult && ult.b === b && ult.i === i && ult.cor === cor && ult.t !== "\n") ult.t += t;
+        else saida.push({ t, b, i, cor });
+      }
+    });
+  }
+  /* Marcação → trechos { t, b, i, cor } (as quebras de linha ficam em trechos "\n" sem formato) */
+  function lerMarcacao(marcacao) {
+    const saida = [];
+    String(marcacao || "").replace(/\r/g, "").split("\n").forEach((linha, k) => {
+      if (k) saida.push({ t: "\n", ...SEM_FORMATO });
+      lerLinhaMarcada(linha, saida);
+    });
+    return saida;
+  }
+  /* Trechos → marcação, abrindo e fechando na ordem cor > negrito > itálico */
+  function escreverMarcacao(trechos) {
+    const linhas = [[]];
+    trechos.forEach((r) => String(r.t).split("\n").forEach((parte, k) => {
+      if (k) linhas.push([]);
+      if (parte) linhas[linhas.length - 1].push({ t: parte, b: !!r.b, i: !!r.i, cor: CORES[r.cor] ? r.cor : "" });
+    }));
+    return linhas.map((linha) => {
+      let s = "";
+      const aberto = { ...SEM_FORMATO };
+      const fechar = (nivel) => {
+        if (aberto.i && nivel <= 2) { s += "_"; aberto.i = false; }
+        if (aberto.b && nivel <= 1) { s += "**"; aberto.b = false; }
+        if (aberto.cor && nivel <= 0) { s += `{/${aberto.cor}}`; aberto.cor = ""; }
+      };
+      linha.forEach((r) => {
+        const nivel = r.cor !== aberto.cor ? 0 : r.b !== aberto.b ? 1 : r.i !== aberto.i ? 2 : 3;
+        fechar(nivel);
+        if (nivel <= 0 && r.cor) { s += `{${r.cor}}`; aberto.cor = r.cor; }
+        if (nivel <= 1 && r.b) { s += "**"; aberto.b = true; }
+        if (nivel <= 2 && r.i) { s += "_"; aberto.i = true; }
+        s += escaparMarca(r.t);
+      });
+      fechar(0);
+      return s;
+    }).join("\n");
+  }
+  const textoDaMarcacao = (m) => lerMarcacao(m).map((r) => r.t).join("");
+  /* Formato antigo (só **negrito**, sem escapes): mesmo resultado que a página desenhava antes */
+  function trechosNegrito(texto) {
+    const partes = [];
+    const re = /\*\*([^*\n]+?)\*\*/g;
+    let i = 0, m;
+    while ((m = re.exec(texto))) {
+      if (m.index > i) partes.push({ t: texto.slice(i, m.index), b: false });
+      partes.push({ t: m[1], b: true });
+      i = m.index + m[0].length;
+    }
+    if (i < texto.length) partes.push({ t: texto.slice(i), b: false });
+    return partes;
+  }
+  function marcacaoDoTextoAntigo(texto) {
+    const trechos = [];
+    String(texto || "").replace(/\r/g, "").split("\n").forEach((linha, k) => {
+      if (k) trechos.push({ t: "\n", ...SEM_FORMATO });
+      trechosNegrito(linha).forEach((p) => trechos.push({ t: p.t, b: p.b, i: false, cor: "" }));
+    });
+    return escreverMarcacao(trechos);
+  }
+  /* HTML seguro dos trechos (caixa visual e prévias): só <span> com classe e cor da paleta */
+  const htmlDosTrechos = (trechos) => trechos.map((r) => {
+    const t = escapar(r.t);
+    if (!r.b && !r.i && !r.cor) return t;
+    const classes = [r.b ? "f-n" : "", r.i ? "f-i" : ""].filter(Boolean).join(" ");
+    return `<span${classes ? ` class="${classes}"` : ""}${r.cor ? ` data-cor="${escapar(r.cor)}"` : ""}>${t}</span>`;
+  }).join("");
+  const htmlDaMarcacao = (m) => htmlDosTrechos(lerMarcacao(m));
+
+  /* ------------------------------------------------------------
+   *  Caixa visual do recado (contenteditable controlado)
+   *  Digitar e apagar ficam com o navegador; Enter, colar, soltar, Ctrl+B/I e desfazer passam por aqui.
+   *  Depois de cada mudança a caixa é relida e, se tiver algo fora do formato (só texto,
+   *  <span class="f-n f-i" data-cor> e o <br data-fim> final), é redesenhada no lugar.
+   * ------------------------------------------------------------ */
+  const RE_LETRA_PALAVRA = /[\p{L}\p{N}\p{M}_'’\-\/:]/u;
+  const BLOCOS = /^(DIV|P|LI|UL|OL|H[1-6]|BLOCKQUOTE|PRE|TABLE|TR|SECTION|ARTICLE)$/;
+  const paraLetras = (trechos) => trechos.flatMap((r) => String(r.t).split("").map((c) => ({ c, ...(c === "\n" ? SEM_FORMATO : { b: !!r.b, i: !!r.i, cor: CORES[r.cor] ? r.cor : "" }) })));
+  function juntarLetras(letras) {
+    const saida = [];
+    letras.forEach((l) => {
+      const u = saida[saida.length - 1];
+      if (u && u.b === l.b && u.i === l.i && u.cor === l.cor) u.t += l.c;
+      else saida.push({ t: l.c, b: l.b, i: l.i, cor: l.cor });
+    });
+    return saida;
+  }
+  const limparColado = (t) => String(t).replace(/\r\n?/g, "\n").replace(/[\t\u00a0\u2007\u202f]/g, " ").replace(/[\u0000-\u0008\u000b-\u001f\u007f\u200b-\u200d\u2060\ufeff]/g, "");
+  function corDoEstilo(valor) {
+    const m = /^rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(valor || "");
+    if (!m) return null;
+    const hex = "#" + m.slice(1, 4).map((n) => Number(n).toString(16).padStart(2, "0")).join("");
+    const p = PALETA.find((x) => x.cor.toLowerCase() === hex);
+    return p ? p.id : null;
+  }
+  /* Lê a caixa: letras { c, b, i, cor } e a posição no texto de cada ponto { no, offset } pedido */
+  function lerEditor(raiz, pontos = []) {
+    const letras = [];
+    const pos = pontos.map(() => null);
+    let quebra = false;
+    const soltarQuebra = () => { if (quebra && letras.length && letras[letras.length - 1].c !== "\n") letras.push({ c: "\n", ...SEM_FORMATO }); quebra = false; };
+    const marcar = (no, offset) => pontos.forEach((p, k) => { if (pos[k] === null && p.no === no && p.offset === offset) pos[k] = letras.length; });
+    const brQueSobra = (br) => {
+      if (br.hasAttribute("data-fim")) return true;
+      let n = br.nextSibling;
+      while (n && n.nodeType === 3 && !n.nodeValue) n = n.nextSibling;
+      return !n && (br.parentNode === raiz || BLOCOS.test(br.parentNode.tagName));
+    };
+    function visitar(no, f) {
+      if (no.nodeType === 3) {
+        const t = no.nodeValue.replace(/\u00a0/g, " ").replace(/\r/g, "");
+        if (t) soltarQuebra();
+        pontos.forEach((p, k) => { if (pos[k] === null && p.no === no) pos[k] = letras.length + Math.min(p.offset, t.length); });
+        for (const c of t.split("")) letras.push({ c, ...(c === "\n" ? SEM_FORMATO : f) });
+        return;
+      }
+      if (no.nodeType !== 1) return;
+      const el = no;
+      if (el.tagName === "BR") { if (!brQueSobra(el)) { soltarQuebra(); letras.push({ c: "\n", ...SEM_FORMATO }); } return; }
+      if (/^(SCRIPT|STYLE|TEMPLATE|NOSCRIPT)$/.test(el.tagName)) return;
+      const g = { ...f };
+      const peso = el.style ? el.style.fontWeight : "";
+      if (/^(B|STRONG)$/.test(el.tagName) || el.classList.contains("f-n") || peso === "bold" || Number(peso) >= 600) g.b = true;
+      else if (peso === "normal" || (Number(peso) > 0 && Number(peso) < 600)) g.b = false;
+      if (/^(I|EM)$/.test(el.tagName) || el.classList.contains("f-i") || (el.style && el.style.fontStyle === "italic")) g.i = true;
+      else if (el.style && el.style.fontStyle === "normal") g.i = false;
+      if (el.dataset && CORES[el.dataset.cor]) g.cor = el.dataset.cor;
+      else { const c = corDoEstilo(el.style && el.style.color); if (c !== null) g.cor = c; }
+      const bloco = el !== raiz && BLOCOS.test(el.tagName);
+      if (bloco && letras.length) quebra = true;
+      el.childNodes.forEach((filho, k) => { marcar(el, k); visitar(filho, g); });
+      marcar(el, el.childNodes.length);
+      if (bloco) quebra = true;
+    }
+    visitar(raiz, SEM_FORMATO);
+    return { letras, pos };
+  }
+  /* A caixa está no formato que ela mesma desenha? */
+  function caixaNoFormato(raiz) {
+    const filhos = [...raiz.childNodes];
+    const fim = filhos.pop();
+    if (!fim || fim.nodeName !== "BR" || !fim.hasAttribute("data-fim") || fim.attributes.length !== 1) return false;
+    return filhos.every((n) => {
+      if (n.nodeType === 3) return true;
+      if (n.nodeName !== "SPAN") return false;
+      const atributosOk = [...n.attributes].every((a) => (a.name === "class" ? [...n.classList].every((c) => c === "f-n" || c === "f-i") : a.name === "data-cor" && !!CORES[a.value]));
+      return atributosOk && [...n.childNodes].every((x) => x.nodeType === 3);
+    });
+  }
+  /* Posição no texto → ponto do DOM (na caixa já no formato) */
+  function pontoDoTexto(raiz, alvo) {
+    let acc = 0;
+    const filhos = [...raiz.childNodes];
+    const textos = filhos.flatMap((n) => (n.nodeType === 3 ? [n] : n.nodeName === "SPAN" ? [...n.childNodes].filter((x) => x.nodeType === 3) : []));
+    for (const t of textos) {
+      const L = t.nodeValue.length;
+      if (alvo < acc + L || (alvo === acc + L && !t.nodeValue.endsWith("\n"))) return { no: t, offset: Math.max(0, alvo - acc) };
+      acc += L;
+    }
+    const br = filhos.findIndex((n) => n.nodeName === "BR");
+    return { no: raiz, offset: br >= 0 ? br : filhos.length };
+  }
+  function selecionarNoEditor(raiz, inicio, fim = inicio) {
+    const a = pontoDoTexto(raiz, inicio), b = pontoDoTexto(raiz, fim);
+    const r = document.createRange();
+    r.setStart(a.no, a.offset);
+    r.setEnd(b.no, b.offset);
+    const s = getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+  }
+  let contadorEditores = 0;
+  function criarEditorRecado({ id, valor = "", max = 1200, rotulo = "Recado", descricao = "", campo = "", placeholder = "", aoMudar = () => {} } = {}) {
+    const idCaixa = id || `editor-recado-${++contadorEditores}`;
+    const idMenu = `${idCaixa}-cores`;
+    const raiz = document.createElement("div");
+    raiz.className = "recado-editor";
+    raiz.innerHTML = `<div class="barra-formato" role="toolbar" aria-label="Formatação do recado" aria-controls="${escapar(idCaixa)}">
+        <button type="button" class="btn-formato" data-fmt="b" aria-pressed="false" aria-label="Negrito" title="Negrito (Ctrl+B)"><b>N</b></button>
+        <button type="button" class="btn-formato" data-fmt="i" aria-pressed="false" aria-label="Itálico" title="Itálico (Ctrl+I)"><i style="font-family: Georgia, serif">I</i></button>
+        <span class="cor-menu">
+          <button type="button" class="btn-formato" data-fmt="cor" aria-haspopup="menu" aria-expanded="false" aria-controls="${escapar(idMenu)}" aria-label="Cor do texto: Padrão (preto)" title="Cor do texto"><span class="letra-a" aria-hidden="true">A<i class="faixa-cor"></i></span><span class="seta" aria-hidden="true">▾</span></button>
+          <div class="menu-cores" id="${escapar(idMenu)}" role="menu" aria-label="Cor do texto" hidden>${PALETA.map((p) => `<button type="button" role="menuitemradio" aria-checked="false" tabindex="-1" data-cor="${escapar(p.id)}"><i class="amostra" style="background:${escapar(p.cor)}" aria-hidden="true"></i>${escapar(p.nome)}</button>`).join("")}</div>
+        </span>
+        <button type="button" class="btn-formato" data-fmt="limpar" aria-label="Limpar formatação" title="Limpar formatação do trecho selecionado">${svg("i-fechar")}</button>
+      </div>
+      <div class="caixa-recado" id="${escapar(idCaixa)}" contenteditable="true" role="textbox" aria-multiline="true" aria-label="${escapar(rotulo)}"${descricao ? ` aria-describedby="${escapar(descricao)}"` : ""}${campo ? ` data-campo="${escapar(campo)}"` : ""} spellcheck="true" data-placeholder="${escapar(placeholder)}"></div>`;
+    const el = raiz.querySelector(".caixa-recado");
+    const menu = raiz.querySelector(".menu-cores");
+    const btnCor = raiz.querySelector('[data-fmt="cor"]');
+    let letras = paraLetras(lerMarcacao(valor));
+    let ultimaSel = { inicio: letras.length, fim: letras.length };
+    let compondo = false, jaConectado = false, avisoLimiteEm = 0;
+    const pilha = [];
+    let posPilha = -1, ultimoTipo = "", ultimoEmpilhar = 0;
+
+    const texto = () => letras.map((l) => l.c).join("");
+    const marcacao = () => escreverMarcacao(juntarLetras(letras));
+    const limitar = (s) => {
+      const n = letras.length;
+      const a = Math.max(0, Math.min(n, s.inicio)), b = Math.max(0, Math.min(n, s.fim));
+      return { inicio: Math.min(a, b), fim: Math.max(a, b) };
+    };
+    function desenharCaixa(sel, focar = false) {
+      el.innerHTML = htmlDosTrechos(juntarLetras(letras)) + '<br data-fim="">';
+      el.toggleAttribute("data-vazio", letras.length === 0);
+      if (!sel) return;
+      ultimaSel = limitar(sel);
+      if (focar) el.focus({ preventScroll: true });
+      if (document.activeElement === el) selecionarNoEditor(el, ultimaSel.inicio, ultimaSel.fim);
+    }
+    function selecaoAtual() {
+      const s = getSelection();
+      if (s.rangeCount && el.contains(s.anchorNode) && el.contains(s.focusNode)) {
+        const r = s.getRangeAt(0);
+        const { pos } = lerEditor(el, [{ no: r.startContainer, offset: r.startOffset }, { no: r.endContainer, offset: r.endOffset }]);
+        if (pos[0] !== null && pos[1] !== null) return limitar({ inicio: pos[0], fim: pos[1] });
+      }
+      return limitar(ultimaSel);
+    }
+    function mostrarCursor() {
+      const s = getSelection();
+      if (!s.rangeCount || !el.contains(s.focusNode)) return;
+      const r = s.getRangeAt(0);
+      const ret = r.getClientRects()[0] || r.getBoundingClientRect();
+      if (!ret || (!ret.top && !ret.bottom)) return;
+      const caixa = el.getBoundingClientRect();
+      if (ret.bottom > caixa.bottom - 4) el.scrollTop += ret.bottom - caixa.bottom + 8;
+      else if (ret.top < caixa.top + 4) el.scrollTop -= caixa.top - ret.top + 8;
+    }
+    function empilhar(tipo) {
+      const m = marcacao(), sel = { ...ultimaSel }, agora = Date.now();
+      if (posPilha >= 0 && pilha[posPilha].m === m) { pilha[posPilha].sel = sel; return; }
+      pilha.length = posPilha + 1;
+      if (tipo === "digitar" && ultimoTipo === "digitar" && agora - ultimoEmpilhar < 1200 && posPilha > 0) pilha[posPilha] = { m, sel };
+      else { pilha.push({ m, sel }); if (pilha.length > 100) pilha.shift(); }
+      posPilha = pilha.length - 1;
+      ultimoTipo = tipo;
+      ultimoEmpilhar = agora;
+    }
+    function mudou(tipo) { empilhar(tipo); atualizarBotoes(); aoMudar(marcacao()); }
+    function irPara(k) {
+      if (k < 0 || k >= pilha.length) return;
+      posPilha = k;
+      ultimoTipo = "";
+      letras = paraLetras(lerMarcacao(pilha[k].m));
+      desenharCaixa(pilha[k].sel, true);
+      mostrarCursor();
+      atualizarBotoes();
+      aoMudar(pilha[k].m);
+    }
+    function avisarLimite() {
+      if (Date.now() - avisoLimiteEm < 2500) return;
+      avisoLimiteEm = Date.now();
+      mostrarAviso(`O texto tem no máximo ${max} caracteres.`);
+    }
+    function sincronizar() {
+      const s = getSelection();
+      const r = s.rangeCount && el.contains(s.anchorNode) ? s.getRangeAt(0) : null;
+      const lido = lerEditor(el, r ? [{ no: r.startContainer, offset: r.startOffset }, { no: r.endContainer, offset: r.endOffset }] : []);
+      letras = lido.letras;
+      if (lido.pos[0] != null) ultimaSel = limitar({ inicio: lido.pos[0], fim: lido.pos[1] != null ? lido.pos[1] : lido.pos[0] });
+      if (!caixaNoFormato(el)) desenharCaixa(ultimaSel);
+      else el.toggleAttribute("data-vazio", letras.length === 0);
+      mudou("digitar");
+    }
+    /* Texto novo no lugar da seleção. herdar = usa a formatação do trecho trocado (ou da letra antes do cursor) */
+    function inserir(novo, herdar = false, sel = selecaoAtual()) {
+      let t = String(novo);
+      const livre = max - (letras.length - (sel.fim - sel.inicio));
+      if (t.length > livre) { t = t.slice(0, Math.max(0, livre)); avisarLimite(); }
+      if (!t && sel.inicio === sel.fim) return;
+      let f = SEM_FORMATO;
+      if (herdar) {
+        const ref = sel.fim > sel.inicio ? letras.slice(sel.inicio, sel.fim).find((l) => l.c !== "\n") : letras[sel.inicio - 1];
+        if (ref && ref.c !== "\n") f = { b: ref.b, i: ref.i, cor: ref.cor };
+      }
+      letras.splice(sel.inicio, sel.fim - sel.inicio, ...t.split("").map((c) => ({ c, ...(c === "\n" ? SEM_FORMATO : f) })));
+      const p = sel.inicio + t.length;
+      desenharCaixa({ inicio: p, fim: p }, true);
+      mostrarCursor();
+      mudou("inserir");
+    }
+    /* Sem seleção, o formato vale para a palavra onde está o cursor */
+    function faixaDoFormato() {
+      const s = selecaoAtual();
+      if (s.inicio !== s.fim) return { ...s, volta: s };
+      const t = texto();
+      let a = s.inicio, b = s.inicio;
+      while (a > 0 && RE_LETRA_PALAVRA.test(t[a - 1])) a--;
+      while (b < t.length && RE_LETRA_PALAVRA.test(t[b])) b++;
+      return a < b ? { inicio: a, fim: b, volta: s } : null;
+    }
+    function formatar(calcular) {
+      const f = faixaDoFormato();
+      if (!f) { mostrarAviso("Selecione um trecho (ou coloque o cursor numa palavra) para formatar."); el.focus({ preventScroll: true }); return; }
+      const muda = calcular(letras.slice(f.inicio, f.fim).filter((l) => l.c !== "\n"));
+      for (let k = f.inicio; k < f.fim; k++) if (letras[k].c !== "\n") letras[k] = { ...letras[k], ...muda };
+      desenharCaixa(f.volta, true);
+      mudou("formato");
+    }
+    const alternar = (p) => formatar((trecho) => ({ [p]: !(trecho.length && trecho.every((l) => l[p])) }));
+    const colorir = (cor) => formatar(() => ({ cor: CORES[cor] ? cor : "" }));
+    const limparFormato = () => formatar(() => ({ ...SEM_FORMATO }));
+    function atualizarBotoes() {
+      const s = selecaoAtual();
+      let alvo;
+      if (s.inicio === s.fim) {
+        const antes = letras[s.inicio - 1], depois = letras[s.inicio];
+        const ref = antes && antes.c !== "\n" ? antes : depois;
+        alvo = ref && ref.c !== "\n" ? [ref] : [];
+      } else alvo = letras.slice(s.inicio, s.fim).filter((l) => l.c !== "\n");
+      const todos = (p) => alvo.length > 0 && alvo.every((l) => l[p]);
+      raiz.querySelector('[data-fmt="b"]').setAttribute("aria-pressed", String(todos("b")));
+      raiz.querySelector('[data-fmt="i"]').setAttribute("aria-pressed", String(todos("i")));
+      const cor = !alvo.length ? "" : alvo.every((l) => l.cor === alvo[0].cor) ? alvo[0].cor : null;
+      const p = PALETA.find((x) => x.id === cor);
+      raiz.querySelector(".faixa-cor").style.background = p ? p.cor : `linear-gradient(90deg, ${CORES.vermelho}, ${CORES.verde}, ${CORES.azul})`;
+      btnCor.setAttribute("aria-label", `Cor do texto: ${p ? p.nome : "várias cores"}`);
+      menu.querySelectorAll("[data-cor]").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.cor === cor)));
+    }
+    function selecionar(inicio, fim = inicio) {
+      el.focus({ preventScroll: true });
+      ultimaSel = limitar({ inicio, fim });
+      selecionarNoEditor(el, ultimaSel.inicio, ultimaSel.fim);
+      mostrarCursor();
+      atualizarBotoes();
+    }
+    function selecionarCampo(aPartirDe = 0, voltar = false) {
+      const marcas = [...texto().matchAll(RE_CAMPO_TROCAR)];
+      if (!marcas.length) return false;
+      const alvo = voltar
+        ? [...marcas].reverse().find((m) => m.index + m[0].length <= aPartirDe) || marcas[marcas.length - 1]
+        : marcas.find((m) => m.index >= aPartirDe) || marcas[0];
+      selecionar(alvo.index, alvo.index + alvo[0].length);
+      return true;
+    }
+
+    /* Menu de cores */
+    const fora = (e) => { if (!raiz.querySelector(".cor-menu").contains(e.target)) fecharMenu(); };
+    function abrirMenu(focarItem) {
+      menu.hidden = false;
+      btnCor.setAttribute("aria-expanded", "true");
+      document.addEventListener("pointerdown", fora, true);
+      if (focarItem) (menu.querySelector('[aria-checked="true"]') || menu.querySelector("button")).focus();
+    }
+    function fecharMenu(voltarFoco = false) {
+      if (menu.hidden) return;
+      menu.hidden = true;
+      btnCor.setAttribute("aria-expanded", "false");
+      document.removeEventListener("pointerdown", fora, true);
+      if (voltarFoco) btnCor.focus();
+    }
+    const barra = raiz.querySelector(".barra-formato");
+    /* Os botões não tiram o foco nem a seleção da caixa */
+    barra.addEventListener("mousedown", (e) => { if (e.target.closest("button")) e.preventDefault(); });
+    barra.addEventListener("click", (e) => {
+      const itemCor = e.target.closest(".menu-cores [data-cor]");
+      if (itemCor) { fecharMenu(); colorir(itemCor.dataset.cor); return; }
+      const b = e.target.closest("[data-fmt]");
+      if (!b) return;
+      const f = b.dataset.fmt;
+      if (f === "b" || f === "i") alternar(f);
+      else if (f === "limpar") limparFormato();
+      else if (f === "cor") { if (menu.hidden) abrirMenu(document.activeElement === btnCor); else fecharMenu(); }
+    });
+    btnCor.addEventListener("keydown", (e) => { if (e.key === "ArrowDown") { e.preventDefault(); abrirMenu(true); } });
+    menu.addEventListener("keydown", (e) => {
+      const itens = [...menu.querySelectorAll("button")];
+      const i = itens.indexOf(document.activeElement);
+      if (e.key === "ArrowDown") { e.preventDefault(); itens[(i + 1) % itens.length].focus(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); itens[(i - 1 + itens.length) % itens.length].focus(); }
+      else if (e.key === "Home") { e.preventDefault(); itens[0].focus(); }
+      else if (e.key === "End") { e.preventDefault(); itens[itens.length - 1].focus(); }
+      else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); fecharMenu(true); }
+      else if (e.key === "Tab") fecharMenu();
+    });
+
+    /* Caixa */
+    el.addEventListener("beforeinput", (e) => {
+      const t = e.inputType || "";
+      if (t === "insertParagraph" || t === "insertLineBreak") { e.preventDefault(); inserir("\n", true); return; }
+      if (/^insertFrom(Paste|Drop|Yank|PasteAsQuotation)$/.test(t)) {
+        e.preventDefault();
+        const dado = e.dataTransfer ? e.dataTransfer.getData("text/plain") : "";
+        if (dado) inserir(limparColado(dado));
+        return;
+      }
+      if (t.startsWith("format")) { e.preventDefault(); if (t === "formatBold") alternar("b"); else if (t === "formatItalic") alternar("i"); return; }
+      if (t === "historyUndo") { e.preventDefault(); irPara(posPilha - 1); return; }
+      if (t === "historyRedo") { e.preventDefault(); irPara(posPilha + 1); return; }
+      if (t === "insertText" && e.data) {
+        const s = selecaoAtual();
+        if (letras.length - (s.fim - s.inicio) + e.data.length > max) { e.preventDefault(); avisarLimite(); }
+      }
+    });
+    el.addEventListener("input", (e) => { if (compondo || e.isComposing) return; sincronizar(); });
+    el.addEventListener("compositionstart", () => { compondo = true; });
+    el.addEventListener("compositionend", () => { compondo = false; sincronizar(); });
+    /* Colar e soltar: sempre texto simples (sem a formatação do Word, Teams ou e-mail) */
+    el.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const dado = e.clipboardData ? e.clipboardData.getData("text/plain") : "";
+      if (dado) inserir(limparColado(dado));
+    });
+    el.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const dado = e.dataTransfer ? e.dataTransfer.getData("text/plain") : "";
+      if (!dado) return;
+      const r = document.caretRangeFromPoint ? document.caretRangeFromPoint(e.clientX, e.clientY) : null;
+      const p = !r && document.caretPositionFromPoint ? document.caretPositionFromPoint(e.clientX, e.clientY) : null;
+      const no = r ? r.startContainer : p && p.offsetNode;
+      const off = r ? r.startOffset : p && p.offset;
+      let sel = selecaoAtual();
+      if (no && el.contains(no)) { const { pos } = lerEditor(el, [{ no, offset: off }]); if (pos[0] !== null) sel = { inicio: pos[0], fim: pos[0] }; }
+      inserir(limparColado(dado), false, limitar(sel));
+    });
+    el.addEventListener("keydown", (e) => {
+      const mod = (e.ctrlKey || e.metaKey) && !e.altKey;
+      const k = (e.key || "").toLowerCase();
+      if (mod && k === "b") { e.preventDefault(); alternar("b"); return; }
+      if (mod && k === "i") { e.preventDefault(); alternar("i"); return; }
+      if (mod && k === "u") { e.preventDefault(); return; }
+      if (mod && k === "z" && !e.shiftKey) { e.preventDefault(); irPara(posPilha - 1); return; }
+      if (mod && (k === "y" || (k === "z" && e.shiftKey))) { e.preventDefault(); irPara(posPilha + 1); return; }
+      if (e.key === "Escape" && !menu.hidden) { e.preventDefault(); fecharMenu(); return; }
+      if (e.key === "Tab" && !mod && !e.altKey && temCampoTrocar(texto())) {
+        e.preventDefault();
+        const s = selecaoAtual();
+        selecionarCampo(e.shiftKey ? s.inicio : s.fim, e.shiftKey);
+      }
+    });
+    const aoMudarSelecao = () => {
+      if (!el.isConnected) { if (jaConectado) document.removeEventListener("selectionchange", aoMudarSelecao); return; }
+      jaConectado = true;
+      const s = getSelection();
+      if (!s.rangeCount || !el.contains(s.anchorNode)) return;
+      ultimaSel = selecaoAtual();
+      atualizarBotoes();
+    };
+    document.addEventListener("selectionchange", aoMudarSelecao);
+
+    desenharCaixa(null);
+    empilhar("inicio");
+    atualizarBotoes();
+    return {
+      raiz, el, marcacao, texto, selecionar, selecionarCampo, selecaoAtual,
+      focar: () => selecionar(ultimaSel.inicio, ultimaSel.fim),
+      definir(m) {
+        letras = paraLetras(lerMarcacao(m));
+        desenharCaixa({ inicio: letras.length, fim: letras.length }, true);
+        mudou("externo");
+      },
+      inserirTexto: (t) => inserir(String(t), true),
+      /* trocas = [{ inicio, fim, texto }] no texto atual; cada troca herda a formatação do trecho trocado */
+      substituir(trocas) {
+        let desvio = 0, fim = 0;
+        [...trocas].sort((a, b) => a.inicio - b.inicio).forEach((t) => {
+          const inicio = t.inicio + desvio, novo = String(t.texto);
+          const ref = letras[inicio] && letras[inicio].c !== "\n" ? letras[inicio] : SEM_FORMATO;
+          const f = { b: !!ref.b, i: !!ref.i, cor: ref.cor || "" };
+          letras.splice(inicio, t.fim - t.inicio, ...novo.split("").map((c) => ({ c, ...(c === "\n" ? SEM_FORMATO : f) })));
+          desvio += novo.length - (t.fim - t.inicio);
+          fim = inicio + novo.length;
+        });
+        if (letras.length > max) letras = letras.slice(0, max);
+        desenharCaixa({ inicio: fim, fim }, true);
+        mudou("externo");
+      }
+    };
+  }
+
+  /* Normaliza o que vem do Firestore (ou do "Modo ajuste") para o mesmo formato acima */
+  const num = (v, min, max, padrao) => { const n = Number(v); return Number.isFinite(n) ? Math.min(max, Math.max(min, Math.round(n * 100) / 100)) : padrao; };
+  const txt = (v, max) => String(v == null ? "" : v).slice(0, max);
+  function normalizarCampo(c, modelo) {
+    if (!c || typeof c !== "object") return null;
+    const id = txt(c.id, 30).replace(/[^a-z0-9-]/gi, "");
+    if (!id) return null;
+    const base = campo({});
+    return {
+      id, rotulo: txt(c.rotulo, 40) || id, padrao: txt(c.padrao, 300), prefixo: txt(c.prefixo, 30),
+      x: num(c.x, 0, modelo.largura, 0), y: num(c.y, 0, modelo.altura, 0),
+      largura: num(c.largura, 20, modelo.largura, 300), altura: num(c.altura, 10, modelo.altura, 80),
+      fonte: FONTES.includes(c.fonte) ? c.fonte : base.fonte,
+      tamanhoMax: num(c.tamanhoMax, 8, 200, 40), tamanhoMin: num(c.tamanhoMin, 8, 200, 20),
+      peso: [400, 500, 600, 700].includes(Number(c.peso)) ? Number(c.peso) : 400,
+      cor: COR.test(c.cor || "") ? c.cor : base.cor,
+      alinhar: ["esquerda", "centro", "direita"].includes(c.alinhar) ? c.alinhar : "esquerda",
+      alinharVertical: ["topo", "meio", "base"].includes(c.alinharVertical) ? c.alinharVertical : "topo",
+      maxLinhas: num(c.maxLinhas, 1, 40, 1), maxCaracteres: num(c.maxCaracteres, 1, 2000, 80),
+      maiusculas: !!c.maiusculas, entrelinha: num(c.entrelinha, 0.8, 2.5, 1.2),
+      tipo: ["texto", "dataHora", "lista"].includes(c.tipo) ? c.tipo : "texto",
+      prontos: Array.isArray(c.prontos) ? c.prontos.slice(0, 20).map((p) => txt(p, 200)).filter(Boolean) : []
+    };
+  }
+  function normalizarModelo(m, id) {
+    if (!m || typeof m !== "object") return null;
+    const padrao = MODELOS_COMUNICADO[id];
+    if (padrao.oficial) {
+      /* Template oficial: imagem e campo único fixos; da configuração salva só valem a caixa e o texto do recado */
+      if ((Number(m.versao) || 1) < padrao.versao) return null;
+      const salvo = (Array.isArray(m.campos) ? m.campos : []).find((c) => c && c.id === "recado");
+      if (!salvo) return null;
+      const modelo = { ...copiaProfunda(padrao), largura: num(m.largura, 200, 4000, padrao.largura), altura: num(m.altura, 200, 4000, padrao.altura) };
+      const base = modelo.campos[0];
+      const c = normalizarCampo({ ...base, ...salvo, id: "recado", rotulo: "Recado", tipo: "texto", fonte: "Calibri", peso: 400, alinhar: "esquerda", alinharVertical: "topo", prefixo: "", padrao: "", prontos: [], maiusculas: false }, modelo);
+      if (!c) return null;
+      if (c.tamanhoMin > c.tamanhoMax) c.tamanhoMin = c.tamanhoMax;
+      modelo.campos = [{ ...c, maxLinhas: base.maxLinhas, maxCaracteres: base.maxCaracteres }];
+      if (Array.isArray(m.fixos) && typeof m.desenharFixos === "boolean") modelo.desenharFixos = m.desenharFixos;
+      return modelo;
+    }
+    const modelo = {
+      id, nome: txt(m.nome, 40) || MODELOS_COMUNICADO[id].nome,
+      imagem: CAMINHO_IMAGEM.test(m.imagem || "") ? m.imagem : MODELOS_COMUNICADO[id].imagem,
+      largura: num(m.largura, 200, 4000, 1080), altura: num(m.altura, 200, 4000, 1080),
+      corProvisoria: COR.test(m.corProvisoria || "") ? m.corProvisoria : MODELOS_COMUNICADO[id].corProvisoria
+    };
+    modelo.campos = (Array.isArray(m.campos) ? m.campos : []).slice(0, 20).map((c) => normalizarCampo(c, modelo)).filter(Boolean);
+    if (modelo.campos.length === 0) return null;
+    if (modelo.campos.some((c) => c.tamanhoMin > c.tamanhoMax)) modelo.campos.forEach((c) => { if (c.tamanhoMin > c.tamanhoMax) c.tamanhoMin = c.tamanhoMax; });
+    return modelo;
+  }
+  const copiaProfunda = (o) => JSON.parse(JSON.stringify(o));
+
+  const estado = {
+    modelos: copiaProfunda(MODELOS_COMUNICADO),
+    salvos: null,
+    aba: ORDEM_ABAS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "instabilidade",
+    valores: {},
+    imagens: {},
+    avisos: {},
+    recado: { usado: 0, coube: true },
+    deteccao: {},
+    configSalva: {},
+    altaResolucao: false,
+    ajuste: false,
+    campoAtivo: null,
+    api: null,
+    nuvemDecidida: false,
+    modelosRecado: { nuvem: [], falhou: false }
+  };
+  if (ABAS_REMOVIDAS.includes(location.hash.slice(1))) history.replaceState(null, "", "#" + estado.aba);
+  const modelo = () => estado.modelos[estado.aba];
+
+  /* ------------------------------------------------------------
+   *  Abas
+   * ------------------------------------------------------------ */
+  function renderizarAbas() {
+    $("#abas").innerHTML = ORDEM_ABAS.map((id) => {
+      const m = estado.modelos[id];
+      const ativa = id === estado.aba;
+      return `<button type="button" class="aba" role="tab" id="aba-${id}" aria-controls="painel" aria-selected="${ativa}" tabindex="${ativa ? 0 : -1}" data-aba="${id}" style="--cor-aba:${escapar(m.corProvisoria)}"><span class="ponto" aria-hidden="true"></span>${escapar(m.nome)}</button>`;
+    }).join("");
+    $("#painel").setAttribute("aria-labelledby", "aba-" + estado.aba);
+  }
+  $("#abas").addEventListener("click", (e) => { const b = e.target.closest("[data-aba]"); if (b) trocarAba(b.dataset.aba, true); });
+  $("#abas").addEventListener("keydown", (e) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+    e.preventDefault();
+    let i = ORDEM_ABAS.indexOf(estado.aba);
+    if (e.key === "ArrowRight") i = (i + 1) % ORDEM_ABAS.length;
+    if (e.key === "ArrowLeft") i = (i - 1 + ORDEM_ABAS.length) % ORDEM_ABAS.length;
+    if (e.key === "Home") i = 0;
+    if (e.key === "End") i = ORDEM_ABAS.length - 1;
+    trocarAba(ORDEM_ABAS[i], true);
+    $(`#aba-${ORDEM_ABAS[i]}`).focus();
+  });
+  window.addEventListener("hashchange", () => {
+    let a = location.hash.slice(1);
+    if (ABAS_REMOVIDAS.includes(a)) { a = "instabilidade"; history.replaceState(null, "", "#" + a); }
+    if (ORDEM_ABAS.includes(a) && a !== estado.aba) trocarAba(a, false);
+  });
+
+  function trocarAba(aba, mudarHash) {
+    estado.aba = aba;
+    estado.campoAtivo = null;
+    if (mudarHash) history.replaceState(null, "", "#" + aba);
+    carregarValores();
+    renderizarAbas();
+    renderizarFormulario();
+    desenhar();
+    if (estado.ajuste) renderizarAjuste();
+  }
+
+  /* ------------------------------------------------------------
+   *  Valores (rascunho por aba no localStorage)
+   * ------------------------------------------------------------ */
+  /* Rascunho do formato antigo (titulo, sistemas, impacto...) vira o texto do recado, uma única vez */
+  const CAMPOS_ANTIGOS = [
+    ["titulo", ""], ["sistemas", "Sistema(s): "], ["impacto", ""], ["resumo", ""],
+    ["inicio", "Início: "], ["fim", "Fim: "], ["previsao", "Previsão de retorno: "], ["orientacao", ""]
+  ];
+  const TITULOS_PADRAO_ANTIGOS = ["Instabilidade identificada", "Serviço restabelecido"];
+  function converterRascunhoAntigo(salvo) {
+    if (!salvo || typeof salvo !== "object" || typeof salvo.recado === "string") return null;
+    if (!CAMPOS_ANTIGOS.some(([k]) => typeof salvo[k] === "string")) return null;
+    return CAMPOS_ANTIGOS.map(([k, rotulo]) => {
+      let t = String(salvo[k] || "").trim();
+      if (!t || (k === "titulo" && TITULOS_PADRAO_ANTIGOS.includes(t))) return "";
+      if (k === "sistemas") t = t.split(/\n/).map((x) => x.trim()).filter(Boolean).join(", ");
+      return rotulo + t;
+    }).filter(Boolean).join("\n\n");
+  }
+
+  function carregarValores() {
+    let salvo = lerLocal(CHAVE_RASCUNHO(estado.aba), null);
+    if (modelo().oficial) {
+      const convertido = converterRascunhoAntigo(salvo);
+      if (convertido !== null) {
+        salvo = { recado: marcacaoDoTextoAntigo(convertido), formato: FORMATO_RECADO };
+        gravarLocal(CHAVE_RASCUNHO(estado.aba), salvo);
+        if (convertido) mostrarAviso("Rascunho antigo convertido");
+      } else if (salvo && typeof salvo.recado === "string" && salvo.formato !== FORMATO_RECADO) {
+        salvo = { recado: marcacaoDoTextoAntigo(salvo.recado), formato: FORMATO_RECADO };
+        gravarLocal(CHAVE_RASCUNHO(estado.aba), salvo);
+      }
+    }
+    const v = {};
+    modelo().campos.forEach((c) => { v[c.id] = salvo && typeof salvo[c.id] === "string" ? salvo[c.id] : c.padrao; });
+    estado.valores = v;
+  }
+  let temporizadorRascunho = null;
+  function guardarRascunho() {
+    clearTimeout(temporizadorRascunho);
+    const aba = estado.aba, valores = { ...estado.valores, formato: FORMATO_RECADO };
+    temporizadorRascunho = setTimeout(() => gravarLocal(CHAVE_RASCUNHO(aba), valores), 300);
+  }
+
+  /* ------------------------------------------------------------
+   *  Formulário
+   * ------------------------------------------------------------ */
+  function ultimaInstabilidade() {
+    try { const u = JSON.parse(sessionStorage.getItem(CHAVE_ULTIMA_INSTABILIDADE) || "null"); return u && (u.sistema || u.dataHora) ? u : null; } catch (e) { return null; }
+  }
+  let editorRecado = null;
+  function renderizarFormularioRecado() {
+    const c = modelo().campos[0];
+    const ultima = estado.aba === "restabelecimento" ? ultimaInstabilidade() : null;
+    $("#formulario").innerHTML = `<div class="campo recado-bloco" data-bloco="recado">
+      <div class="campo-topo"><span class="rotulo" id="rotulo-recado">Recado</span><span class="contador" data-contador="recado"></span></div>
+      <div class="ajudas-recado">
+        <label class="sr-only" for="ajuda-sistema">Inserir sistema</label>
+        <select id="ajuda-sistema" data-inserir-sistema><option value="">Sistema ▾</option>${PRONTOS_SISTEMAS.map((s) => `<option>${escapar(s)}</option>`).join("")}</select>
+        <button type="button" class="btn btn-secundario btn-mini" data-inserir-agora title="Insere a data e a hora de Brasília no cursor">${svg("i-relogio")}Agora</button>
+        <label class="sr-only" for="ajuda-modelo">Modelos de recado</label>
+        <select id="ajuda-modelo" data-modelo-recado>${opcoesModelosRecado()}</select>
+      </div>
+      <p class="aviso-modelos" id="aviso-modelos" aria-live="polite" hidden></p>
+      ${ultima ? `<button type="button" class="pronto" data-usar-instabilidade style="justify-self:start">Usar o sistema e o horário da última instabilidade (${escapar([ultima.sistema, ultima.dataHora].filter(Boolean).join(" · "))})</button>` : ""}
+      <p class="fixo-ref" aria-hidden="true"><strong>${escapar(SAUDACAO)}</strong></p>
+      <div data-lugar-editor></div>
+      <p class="fixo-ref" aria-hidden="true">Atenciosamente,<br><strong>Suporte Técnico V/Cert</strong></p>
+      <span class="ajuda" id="ajuda-recado">Selecione um trecho para deixar em negrito, itálico ou colorido. “- ” no começo da linha = item.</span>
+      <span class="campo-aviso" data-aviso="recado" aria-live="polite"></span>
+    </div>`;
+    editorRecado = criarEditorRecado({
+      id: "campo-recado", campo: "recado", rotulo: "Recado", descricao: "ajuda-recado", max: c.maxCaracteres,
+      valor: estado.valores.recado || "",
+      placeholder: "Escreva aqui o recado. A saudação e a assinatura já estão na imagem.",
+      aoMudar: (m) => { estado.valores.recado = m; guardarRascunho(); desenhar(); }
+    });
+    $("[data-lugar-editor]").replaceWith(editorRecado.raiz);
+    $("#rotulo-recado").addEventListener("click", () => editorRecado.focar());
+    atualizarAvisoModelos();
+    atualizarContadores();
+  }
+  function atualizarBotoesAba() {
+    const oficial = modelo().oficial;
+    $("#btn-texto").innerHTML = svg(oficial ? "i-copiar" : "i-documento") + (oficial ? "Copiar texto" : "Versão em texto");
+    $("#opcoes-baixar").hidden = !oficial;
+    $("#alta-resolucao").checked = estado.altaResolucao;
+  }
+  function renderizarFormulario() {
+    const m = modelo();
+    atualizarBotoesAba();
+    if (m.oficial) { renderizarFormularioRecado(); return; }
+    editorRecado = null;
+    $("#formulario").innerHTML = m.campos.map((c) => {
+      const valor = estado.valores[c.id] || "";
+      const multilinha = c.tipo === "lista" || c.maxLinhas > 1 && c.tipo !== "dataHora";
+      const ajuda = c.tipo === "lista" ? "Um item por linha." : "";
+      const entrada = multilinha
+        ? `<textarea id="campo-${c.id}" data-campo="${c.id}" rows="${Math.min(6, Math.max(2, c.maxLinhas))}" maxlength="${c.maxCaracteres * 2}">${escapar(valor)}</textarea>`
+        : `<input id="campo-${c.id}" data-campo="${c.id}" value="${escapar(valor)}" maxlength="${c.maxCaracteres * 2}">`;
+      return `<div class="campo" data-bloco="${c.id}">
+        <div class="campo-topo"><label class="rotulo" for="campo-${c.id}">${escapar(c.rotulo)}</label><span class="contador" data-contador="${c.id}"></span></div>
+        ${c.tipo === "dataHora" ? `<div class="campo-linha">${entrada}<button type="button" class="btn btn-secundario btn-mini" data-agora="${c.id}" title="Data e hora de Brasília">${svg("i-relogio")}Agora</button></div>` : entrada}
+        ${ajuda ? `<span class="ajuda">${ajuda}</span>` : ""}
+        ${c.prontos.length ? `<div class="prontos" aria-label="Textos prontos para ${escapar(c.rotulo)}">${c.prontos.map((p) => `<button type="button" class="pronto" data-pronto="${c.id}" data-texto="${escapar(p)}">${escapar(p)}</button>`).join("")}</div>` : ""}
+        <span class="campo-aviso" data-aviso="${c.id}" aria-live="polite"></span>
+      </div>`;
+    }).join("");
+    atualizarContadores();
+  }
+  function atualizarContadores() {
+    if (modelo().oficial) {
+      const c = modelo().campos[0];
+      const n = textoDaMarcacao(estado.valores.recado).length;
+      const el = $('[data-contador="recado"]');
+      if (el) {
+        el.textContent = `${n}/${c.maxCaracteres} caracteres · espaço usado ${estado.recado.usado}%`;
+        el.classList.toggle("excedeu", !estado.recado.coube || n > c.maxCaracteres);
+      }
+      const av = $('[data-aviso="recado"]');
+      if (av) {
+        av.textContent = estado.recado.coube ? "" : "O recado passou do espaço da imagem. Encurte o texto.";
+        av.classList.toggle("erro", !estado.recado.coube);
+      }
+      return;
+    }
+    modelo().campos.forEach((c) => {
+      const n = (estado.valores[c.id] || "").length;
+      const el = $(`[data-contador="${c.id}"]`);
+      if (el) { el.textContent = `${n}/${c.maxCaracteres}`; el.classList.toggle("excedeu", n > c.maxCaracteres); }
+      const av = $(`[data-aviso="${c.id}"]`);
+      if (av) av.textContent = n > c.maxCaracteres ? "Passou do limite de caracteres." : (estado.avisos[c.id] || "");
+    });
+  }
+  $("#formulario").addEventListener("input", (e) => {
+    const id = e.target.dataset.campo;
+    if (!id || !("value" in e.target)) return;
+    estado.valores[id] = e.target.value;
+    guardarRascunho();
+    desenhar();
+  });
+  $("#formulario").addEventListener("focusin", (e) => { const id = e.target.dataset.campo; if (id) marcarCampo(id); });
+  $("#formulario").addEventListener("click", (e) => {
+    const agora = e.target.closest("[data-agora]");
+    if (agora) { definirValor(agora.dataset.agora, dataHoraBrasilia()); return; }
+    const pronto = e.target.closest("[data-pronto]");
+    if (pronto) {
+      const c = modelo().campos.find((x) => x.id === pronto.dataset.pronto);
+      const atual = (estado.valores[c.id] || "").trim();
+      const texto = pronto.dataset.texto;
+      if (c.tipo === "lista") {
+        const itens = atual ? atual.split(/\n/).map((t) => t.trim()).filter(Boolean) : [];
+        if (!itens.includes(texto)) itens.push(texto);
+        definirValor(c.id, itens.join("\n"));
+      } else definirValor(c.id, texto);
+    }
+  });
+  /* Ajudas do recado: inserem texto no cursor (ou trocam o [CAMPO] selecionado, com a formatação dele) */
+  $("#formulario").addEventListener("change", (e) => {
+    if (e.target.matches("[data-inserir-sistema]") && e.target.value) {
+      const s = e.target.value;
+      e.target.value = "";
+      if (editorRecado) editorRecado.inserirTexto(s);
+    } else if (e.target.matches("[data-modelo-recado]") && e.target.value !== "") {
+      const v = e.target.value;
+      e.target.value = "";
+      if (v === "salvar") abrirSalvarModelo();
+      else if (v === "gerenciar") abrirGerenciarModelos();
+      else { const m = acharModelo(v); if (m) usarModelo(m); }
+    }
+  });
+  /* "Usar o sistema e o horário da última instabilidade": preenche [SISTEMA] e o [DATA E HORA] do início.
+     Recado vazio: entra só a linha "Sistema: … · Início: …" para a pessoa completar. */
+  const RE_INICIO_DATA = /(iniciad[ao]s? em|desde|a partir de|início:?)\s*\[DATA E HORA\]/i;
+  function usarUltimaInstabilidade() {
+    const u = ultimaInstabilidade();
+    if (!u || !editorRecado) return;
+    const ed = editorRecado;
+    const linha = `Sistema: ${u.sistema || "[SISTEMA]"} · Início: ${u.dataHora || "[DATA E HORA]"}`;
+    const plano = ed.texto();
+    if (!plano.trim()) {
+      ed.definir(escaparMarca(linha));
+      if (!ed.selecionarCampo(0)) ed.focar();
+      return;
+    }
+    if (!/\[SISTEMA\]|\[DATA E HORA\]/.test(plano)) {
+      const { inicio } = ed.selecaoAtual();
+      ed.inserirTexto(inicio > 0 && plano[inicio - 1] !== "\n" ? "\n" + linha : linha);
+      mostrarAviso("O recado não tinha [SISTEMA] nem [DATA E HORA]: a linha com o sistema e o início entrou no cursor.");
+      return;
+    }
+    const trocas = [];
+    if (u.sistema) for (const m of plano.matchAll(/\[SISTEMA\]/g)) trocas.push({ inicio: m.index, fim: m.index + m[0].length, texto: u.sistema });
+    if (u.dataHora) {
+      const inicio = RE_INICIO_DATA.exec(plano);
+      const pos = inicio ? inicio.index + inicio[0].length - "[DATA E HORA]".length : plano.indexOf("[DATA E HORA]");
+      if (pos >= 0) trocas.push({ inicio: pos, fim: pos + "[DATA E HORA]".length, texto: u.dataHora });
+    }
+    if (!trocas.length) { mostrarAviso("Não há sistema nem horário guardados para preencher estes campos."); ed.selecionarCampo(0); return; }
+    ed.substituir(trocas);
+    if (!ed.selecionarCampo(0)) ed.focar();
+  }
+  $("#formulario").addEventListener("click", (e) => {
+    if (e.target.closest("[data-inserir-agora]")) { if (editorRecado) editorRecado.inserirTexto(dataHoraBrasilia()); return; }
+    if (e.target.closest("[data-usar-instabilidade]")) usarUltimaInstabilidade();
+  });
+
+  /* ------------------------------------------------------------
+   *  Modelos de recado da equipe — Firestore comunicados-modelos/{id}:
+   *  { aba, nome, texto (marcação), ordem, criadoPor, criadoPorNome, criadoEm, atualizadoPor, atualizadoPorNome, atualizadoEm }
+   *  Assina: o e-mail da administradora logada ou o nome guardado no navegador (sem "@").
+   *  Sem nuvem, ficam só neste navegador (CHAVE_MODELOS_LOCAIS) até "Enviar para a equipe".
+   *  Excluir da equipe: só administradoras (as regras conferem); o limite de 50 por aba é conferido aqui.
+   * ------------------------------------------------------------ */
+  const COLECAO_MODELOS = "comunicados-modelos";
+  const CHAVE_MODELOS_LOCAIS = "suporte-n2-comunicados-modelos-locais";
+  const CHAVE_AUTOR = "suporte-n2-autor-caderno";
+  const MAX_MODELOS_ABA = 50, MAX_NOME_MODELO = 60, MAX_TEXTO_MODELO = 1200;
+  const nomeDaAba = (aba) => (estado.modelos[aba] || MODELOS_COMUNICADO[aba] || {}).nome || aba;
+  const lerTextoLocal = (k) => { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } };
+  const limparNome = (t) => String(t || "").replace(/@/g, "").replace(/\s+/g, " ").trim().slice(0, 60);
+  const nomeGuardado = () => limparNome(lerTextoLocal(CHAVE_AUTOR) || lerTextoLocal("suporte-n2-autor-anotacao") || lerTextoLocal("suporte-n2-autor-galeria"));
+  function assinatura(nomeDigitado) {
+    if (sessao.email) return { por: sessao.email, nome: String(sessao.admin ? sessao.admin.nome : sessao.email).slice(0, 80) };
+    const nome = limparNome(nomeDigitado);
+    if (!nome) return null;
+    try { localStorage.setItem(CHAVE_AUTOR, nome); } catch (e) {}
+    return { por: nome, nome };
+  }
+  const naNuvem = () => !!(estado.api && !estado.modelosRecado.falhou);
+  function normalizarModeloRecado(d, local = false) {
+    if (!d || typeof d !== "object" || !ORDEM_ABAS.includes(d.aba)) return null;
+    const nome = txt(d.nome, MAX_NOME_MODELO).trim(), texto = txt(d.texto, MAX_TEXTO_MODELO);
+    if (!d.id || !nome || !textoDaMarcacao(texto).trim()) return null;
+    return {
+      id: txt(d.id, 60), aba: d.aba, nome, texto, ordem: Number.isFinite(Number(d.ordem)) ? Number(d.ordem) : 0,
+      criadoPor: txt(d.criadoPor, 80), criadoPorNome: txt(d.criadoPorNome, 80), criadoEm: d.criadoEm || "",
+      atualizadoPorNome: txt(d.atualizadoPorNome, 80), atualizadoEm: d.atualizadoEm || "", local
+    };
+  }
+  const listaLocalBruta = () => { const l = lerLocal(CHAVE_MODELOS_LOCAIS, []); return Array.isArray(l) ? l : []; };
+  const modelosLocais = () => listaLocalBruta().map((d) => normalizarModeloRecado(d, true)).filter(Boolean);
+  const porOrdem = (a, b) => a.ordem - b.ordem || String(a.criadoEm).localeCompare(String(b.criadoEm));
+  const modelosDaAba = (aba) => [
+    ...estado.modelosRecado.nuvem.filter((m) => m.aba === aba).sort(porOrdem),
+    ...modelosLocais().filter((m) => m.aba === aba).sort(porOrdem)
+  ];
+  const todosModelos = () => ORDEM_ABAS.flatMap(modelosDaAba);
+  const proximaOrdem = (lista) => lista.reduce((mx, m) => Math.max(mx, m.ordem), -1) + 1;
+  const acharModelo = (valor) => todosModelos().find((m) => `${m.local ? "l" : "n"}:${m.id}` === valor) || null;
+  function mensagemErroNuvem(err) {
+    const codigo = (err && err.code) || "";
+    if (/permission-denied/.test(codigo)) return "A nuvem recusou a gravação. Confira o nome e o tamanho do texto e tente de novo.";
+    if (/unavailable|network/.test(codigo)) return "Sem conexão com a nuvem agora. Tente de novo em instantes.";
+    return "Não foi possível salvar agora. Tente de novo.";
+  }
+
+  function opcoesModelosRecado() {
+    const lista = modelosDaAba(estado.aba);
+    const op = (m) => `<option value="${m.local ? "l" : "n"}:${escapar(m.id)}">${escapar(m.nome)}</option>`;
+    const daEquipe = lista.filter((m) => !m.local), locais = lista.filter((m) => m.local);
+    return `<option value="">Modelos de recado ▾</option>`
+      + (lista.length ? "" : `<option value="" disabled>Nenhum modelo ainda</option>`)
+      + (daEquipe.length ? `<optgroup label="Modelos da equipe">${daEquipe.map(op).join("")}</optgroup>` : "")
+      + (locais.length ? `<optgroup label="Só neste computador">${locais.map(op).join("")}</optgroup>` : "")
+      + `<optgroup label="Ações"><option value="salvar">+ Salvar o recado atual como modelo</option><option value="gerenciar">⚙ Gerenciar modelos</option></optgroup>`;
+  }
+  function atualizarAvisoModelos() {
+    const av = $("#aviso-modelos");
+    if (!av) return;
+    const locais = modelosLocais().length;
+    let t = "";
+    if (estado.nuvemDecidida && !naNuvem()) t = "Modelos salvos só neste computador.";
+    else if (naNuvem() && locais) t = `${locais === 1 ? "1 modelo está salvo" : `${locais} modelos estão salvos`} só neste computador: abra “⚙ Gerenciar modelos” e use “Enviar para a equipe”.`;
+    av.textContent = t;
+    av.hidden = !t;
+  }
+  function atualizarModelosNaTela() {
+    const s = $("#ajuda-modelo");
+    if (s) s.innerHTML = opcoesModelosRecado();
+    atualizarAvisoModelos();
+    if (gerenciar) gerenciar.renderizar();
+  }
+
+  async function usarModelo(m) {
+    if (m.aba !== estado.aba) trocarAba(m.aba, true);
+    if (!editorRecado) return;
+    if (editorRecado.texto().trim() && !(await confirmar("Trocar o recado atual por este modelo? O texto escrito será substituído.", { titulo: "Modelo de recado", botao: "Trocar" }))) return;
+    editorRecado.definir(m.texto);
+    if (!editorRecado.selecionarCampo(0)) editorRecado.focar();
+  }
+  function conferirModelo(nome, marca) {
+    if (!nome) return "Dê um nome ao modelo.";
+    if (nome.length > MAX_NOME_MODELO) return `O nome tem no máximo ${MAX_NOME_MODELO} caracteres.`;
+    if (!textoDaMarcacao(marca).trim()) return "O texto do modelo está vazio.";
+    if (marca.length > MAX_TEXTO_MODELO) return `Com a formatação, o texto ocupa ${marca.length} de ${MAX_TEXTO_MODELO} caracteres. Encurte o texto ou tire parte da formatação.`;
+    return "";
+  }
+  const campoAutor = () => (sessao.email ? "" : `<label class="campo"><span class="rotulo">Seu nome</span><input name="autor" maxlength="60" required autocomplete="name" value="${escapar(nomeGuardado())}"><span class="ajuda">Fica registrado como quem criou ou alterou o modelo.</span></label>`);
+  /* Nome de quem assina para ações sem formulário (duplicar, reordenar, enviar) */
+  function pedirAssinatura() {
+    if (sessao.email || nomeGuardado()) return Promise.resolve(assinatura(nomeGuardado()));
+    return new Promise((resolver) => {
+      const d = criarDialogo({
+        titulo: "Seu nome",
+        corpo: `<p class="apoio">Os modelos da equipe ficam assinados com o nome de quem cria ou altera.</p>${campoAutor()}
+          <p class="form-erro" role="alert"></p>
+          <div class="form-botoes"><button type="button" class="btn btn-secundario" data-fechar>Cancelar</button><button type="submit" class="btn">Continuar</button></div>`
+      });
+      const form = d.querySelector("form");
+      let quem = null;
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        quem = assinatura(form.autor.value);
+        if (!quem) { form.querySelector(".form-erro").textContent = "Informe seu nome."; form.autor.focus(); return; }
+        d.close();
+      });
+      d.addEventListener("close", () => resolver(quem));
+      d.showModal();
+      form.autor.focus();
+    });
+  }
+
+  async function criarModelo({ aba, nome, texto, criadoPorNome = "" }, quem) {
+    if (modelosDaAba(aba).filter((m) => !m.local || !naNuvem()).length >= MAX_MODELOS_ABA) throw Object.assign(new Error("limite"), { code: "limite" });
+    if (naNuvem()) {
+      const id = estado.api.novoId(COLECAO_MODELOS);
+      const ordem = proximaOrdem(estado.modelosRecado.nuvem.filter((m) => m.aba === aba));
+      await estado.api.salvarDoc(`${COLECAO_MODELOS}/${id}`, {
+        aba, nome, texto, ordem,
+        criadoPor: quem.por, criadoPorNome: (criadoPorNome || quem.nome).slice(0, 80), criadoEm: "__AGORA__",
+        atualizadoPor: quem.por, atualizadoPorNome: quem.nome, atualizadoEm: "__AGORA__"
+      });
+      registrarAuditoria({ acao: "criar", alvo: "comunicados", resumo: `Criou o modelo de recado “${nome}” (${nomeDaAba(aba)})`, detalhes: `${COLECAO_MODELOS}/${id} · por ${quem.nome}` });
+      return id;
+    }
+    const lista = listaLocalBruta();
+    const id = "local-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    const agora = new Date().toISOString();
+    lista.push({ id, aba, nome, texto, ordem: proximaOrdem(modelosLocais().filter((m) => m.aba === aba)), criadoPor: quem.por, criadoPorNome: criadoPorNome || quem.nome, criadoEm: agora, atualizadoPorNome: quem.nome, atualizadoEm: agora });
+    if (!gravarLocal(CHAVE_MODELOS_LOCAIS, lista)) throw new Error("Sem espaço no navegador");
+    atualizarModelosNaTela();
+    return id;
+  }
+  async function editarModelo(m, { nome, texto }, quem) {
+    if (m.local) {
+      const lista = listaLocalBruta();
+      const item = lista.find((x) => x && x.id === m.id);
+      if (!item) throw new Error("Modelo não encontrado");
+      Object.assign(item, { nome, texto, atualizadoPorNome: quem.nome, atualizadoEm: new Date().toISOString() });
+      if (!gravarLocal(CHAVE_MODELOS_LOCAIS, lista)) throw new Error("Sem espaço no navegador");
+      atualizarModelosNaTela();
+      return;
+    }
+    await estado.api.salvarDoc(`${COLECAO_MODELOS}/${m.id}`, { nome, texto, atualizadoPor: quem.por, atualizadoPorNome: quem.nome, atualizadoEm: "__AGORA__" }, true);
+    const mudou = [m.nome !== nome ? `nome “${m.nome}” → “${nome}”` : "", m.texto !== texto ? "texto" : ""].filter(Boolean).join(" e ") || "sem mudanças";
+    registrarAuditoria({ acao: "editar", alvo: "comunicados", resumo: `Editou o modelo de recado “${nome}” (${nomeDaAba(m.aba)}): ${mudou}`, detalhes: `${COLECAO_MODELOS}/${m.id} · por ${quem.nome}` });
+  }
+  async function excluirModelo(m) {
+    if (m.local) {
+      gravarLocal(CHAVE_MODELOS_LOCAIS, listaLocalBruta().filter((x) => !x || x.id !== m.id));
+      atualizarModelosNaTela();
+      return;
+    }
+    await estado.api.excluirDoc(`${COLECAO_MODELOS}/${m.id}`);
+    registrarAuditoria({ acao: "excluir", alvo: "comunicados", resumo: `Excluiu o modelo de recado “${m.nome}” (${nomeDaAba(m.aba)})`, detalhes: `${COLECAO_MODELOS}/${m.id}\n${recadoEmTexto(m.texto)}`.slice(0, 800) });
+  }
+  /* Subir/Descer: troca a posição e regrava a "ordem" só de quem mudou */
+  async function moverModelo(m, passo) {
+    const irmaos = modelosDaAba(m.aba).filter((x) => x.local === m.local);
+    const i = irmaos.findIndex((x) => x.id === m.id), j = i + passo;
+    if (i < 0 || j < 0 || j >= irmaos.length) return;
+    [irmaos[i], irmaos[j]] = [irmaos[j], irmaos[i]];
+    const mudam = irmaos.map((x, k) => ({ x, k })).filter(({ x, k }) => x.ordem !== k);
+    if (!mudam.length) return;
+    if (m.local) {
+      const lista = listaLocalBruta();
+      mudam.forEach(({ x, k }) => { const item = lista.find((y) => y && y.id === x.id); if (item) item.ordem = k; });
+      gravarLocal(CHAVE_MODELOS_LOCAIS, lista);
+      atualizarModelosNaTela();
+      return;
+    }
+    const quem = await pedirAssinatura();
+    if (!quem) return;
+    await estado.api.lote(mudam.map(({ x, k }) => ({ caminho: `${COLECAO_MODELOS}/${x.id}`, mesclar: true, dados: { ordem: k, atualizadoPor: quem.por, atualizadoPorNome: quem.nome, atualizadoEm: "__AGORA__" } })));
+    registrarAuditoria({ acao: "editar", alvo: "comunicados", resumo: `Mudou a ordem do modelo de recado “${m.nome}” (${nomeDaAba(m.aba)})`, detalhes: `por ${quem.nome}` });
+  }
+  async function enviarParaEquipe() {
+    const locais = modelosLocais();
+    if (!locais.length || !naNuvem()) return;
+    const quem = await pedirAssinatura();
+    if (!quem) return;
+    let enviados = 0, cheios = 0;
+    for (const m of locais) {
+      try {
+        await criarModelo({ aba: m.aba, nome: m.nome, texto: m.texto, criadoPorNome: m.criadoPorNome }, quem);
+        gravarLocal(CHAVE_MODELOS_LOCAIS, listaLocalBruta().filter((x) => !x || x.id !== m.id));
+        enviados++;
+      } catch (err) {
+        if (err && err.code === "limite") { cheios++; continue; }
+        console.error(err);
+        mostrarAviso(`${enviados ? `${enviados} enviado(s). ` : ""}${mensagemErroNuvem(err)}`, { ms: 6000 });
+        atualizarModelosNaTela();
+        return;
+      }
+    }
+    atualizarModelosNaTela();
+    mostrarAviso(`${enviados === 1 ? "1 modelo enviado" : `${enviados} modelos enviados`} para a equipe.${cheios ? ` ${cheios} ficaram neste computador: a aba chegou a ${MAX_MODELOS_ABA} modelos.` : ""}`, { ms: 6000 });
+  }
+  function pedirExclusao(m) {
+    abrirSugestao({
+      titulo: `Pedido de exclusão: modelo de recado “${m.nome}”`,
+      contexto: `Pedido para excluir o modelo de recado “${m.nome}” (aba ${nomeDaAba(m.aba)} dos Comunicados; id ${m.id}).\n\nTexto do modelo:\n${recadoEmTexto(m.texto)}`,
+      dica: "Por que este modelo deve ser excluído?"
+    });
+  }
+
+  function abrirSalvarModelo() {
+    if (!editorRecado) return;
+    const marca = editorRecado.marcacao();
+    const aba = estado.aba;
+    if (!textoDaMarcacao(marca).trim()) { mostrarAviso("Escreva o recado antes de salvar como modelo."); editorRecado.focar(); return; }
+    if (!estado.nuvemDecidida) { mostrarAviso("Conectando à nuvem… Tente de novo em instantes."); return; }
+    if (modelosDaAba(aba).length >= MAX_MODELOS_ABA) { mostrarAviso(`A aba ${nomeDaAba(aba)} já tem ${MAX_MODELOS_ABA} modelos. Exclua (ou peça a exclusão de) algum antes de criar outro.`, { ms: 6000 }); return; }
+    const nuvem = naNuvem();
+    const d = criarDialogo({
+      titulo: "Salvar o recado como modelo",
+      corpo: `<p class="apoio">O modelo fica na aba <strong>${escapar(nomeDaAba(aba))}</strong> ${nuvem ? "e aparece para toda a equipe" : "e fica salvo <strong>só neste computador</strong> (sem conexão com a nuvem); depois dá para enviar para a equipe em “Gerenciar modelos”"}. Negrito, itálico, cores, itens e [CAMPOS] para trocar são mantidos.</p>
+        <label class="campo"><span class="rotulo">Nome do modelo</span><input name="nome" maxlength="${MAX_NOME_MODELO}" required placeholder="Ex.: Lentidão SAR"></label>
+        ${campoAutor()}
+        <div class="campo"><span class="rotulo">Texto do modelo</span><div class="previa-modelo">${htmlDaMarcacao(marca)}</div></div>
+        <p class="form-erro" role="alert"></p>
+        <div class="form-botoes"><button type="button" class="btn btn-secundario" data-fechar>Cancelar</button><button type="submit" class="btn">${svg("i-salvar")}Salvar modelo</button></div>`
+    });
+    const form = d.querySelector("form");
+    const erro = form.querySelector(".form-erro");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nome = form.nome.value.trim();
+      const problema = conferirModelo(nome, marca);
+      if (problema) { erro.textContent = problema; return; }
+      if (modelosDaAba(aba).some((m) => normalizar(m.nome) === normalizar(nome))) { erro.textContent = "Já existe um modelo com esse nome nesta aba."; return; }
+      const quem = assinatura(form.autor ? form.autor.value : "");
+      if (!quem) { erro.textContent = "Informe seu nome."; form.autor.focus(); return; }
+      const botao = form.querySelector('[type="submit"]');
+      botao.disabled = true;
+      try {
+        await criarModelo({ aba, nome, texto: marca }, quem);
+        d.close();
+        mostrarAviso(nuvem ? `Modelo “${nome}” salvo para a equipe.` : `Modelo “${nome}” salvo só neste computador.`);
+      } catch (err) {
+        console.error(err);
+        erro.textContent = err && err.code === "limite" ? `A aba já tem ${MAX_MODELOS_ABA} modelos.` : mensagemErroNuvem(err);
+        botao.disabled = false;
+      }
+    });
+    d.showModal();
+    form.nome.focus();
+  }
+
+  function abrirEditarModelo(m) {
+    const d = criarDialogo({
+      titulo: "Editar modelo", largo: true,
+      corpo: `<p class="apoio">Aba <strong>${escapar(nomeDaAba(m.aba))}</strong> · ${m.local ? "salvo só neste computador" : "modelo da equipe"}.</p>
+        <label class="campo"><span class="rotulo">Nome do modelo</span><input name="nome" maxlength="${MAX_NOME_MODELO}" required value="${escapar(m.nome)}"></label>
+        <div class="campo"><div class="campo-topo"><span class="rotulo">Texto do modelo</span><span class="contador" data-contador-modelo></span></div>
+          <div data-lugar-editor></div>
+          <span class="ajuda" data-ajuda-modelo>Selecione um trecho para deixar em negrito, itálico ou colorido. “- ” no começo da linha = item. [CAMPOS] como [SISTEMA] e [DATA E HORA] ficam para trocar depois.</span></div>
+        ${campoAutor()}
+        <p class="form-erro" role="alert"></p>
+        <div class="form-botoes"><button type="button" class="btn btn-secundario" data-fechar>Cancelar</button><button type="submit" class="btn">${svg("i-salvar")}Salvar alterações</button></div>`
+    });
+    const form = d.querySelector("form");
+    const erro = form.querySelector(".form-erro");
+    const contador = form.querySelector("[data-contador-modelo]");
+    const contar = (marca) => {
+      contador.textContent = `${marca.length}/${MAX_TEXTO_MODELO} com a formatação`;
+      contador.classList.toggle("excedeu", marca.length > MAX_TEXTO_MODELO);
+    };
+    const idAjuda = `ajuda-modelo-${++contadorEditores}`;
+    form.querySelector("[data-ajuda-modelo]").id = idAjuda;
+    const ed = criarEditorRecado({ rotulo: "Texto do modelo", descricao: idAjuda, valor: m.texto, max: MAX_TEXTO_MODELO, aoMudar: contar });
+    form.querySelector("[data-lugar-editor]").replaceWith(ed.raiz);
+    contar(m.texto);
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nome = form.nome.value.trim();
+      const marca = ed.marcacao();
+      const problema = conferirModelo(nome, marca);
+      if (problema) { erro.textContent = problema; return; }
+      if (modelosDaAba(m.aba).some((x) => x.id !== m.id && normalizar(x.nome) === normalizar(nome))) { erro.textContent = "Já existe um modelo com esse nome nesta aba."; return; }
+      const quem = assinatura(form.autor ? form.autor.value : "");
+      if (!quem) { erro.textContent = "Informe seu nome."; form.autor.focus(); return; }
+      if (nome === m.nome && marca === m.texto) { d.close(); return; }
+      const botao = form.querySelector('[type="submit"]');
+      botao.disabled = true;
+      try {
+        await editarModelo(m, { nome, texto: marca }, quem);
+        d.close();
+        mostrarAviso(`Modelo “${nome}” atualizado.`);
+      } catch (err) {
+        console.error(err);
+        erro.textContent = mensagemErroNuvem(err);
+        botao.disabled = false;
+      }
+    });
+    d.showModal();
+    form.nome.focus();
+  }
+
+  let gerenciar = null;
+  function abrirGerenciarModelos(abaInicial = estado.aba) {
+    if (gerenciar) gerenciar.d.close();
+    let aba = abaInicial, busca = "";
+    const d = criarDialogo({
+      titulo: "Gerenciar modelos de recado", largo: true,
+      corpo: `<div class="gm-topo">
+          <div class="gm-abas" role="group" aria-label="Aba do comunicado">${ORDEM_ABAS.map((id) => `<button type="button" class="pronto" data-gm-aba="${id}" aria-pressed="false"></button>`).join("")}</div>
+          <label class="campo gm-busca"><span class="rotulo">Buscar</span><input type="search" data-gm-busca placeholder="Nome ou texto do modelo" autocomplete="off"></label>
+        </div>
+        <div class="gm-faixa" data-gm-faixa role="status" hidden></div>
+        <ul class="gm-lista" data-gm-lista></ul>
+        <div class="form-botoes"><button type="button" class="btn btn-secundario" data-fechar>Fechar</button></div>`
+    });
+    const form = d.querySelector("form");
+    form.addEventListener("submit", (e) => e.preventDefault());
+    const listaEl = d.querySelector("[data-gm-lista]");
+    const faixa = d.querySelector("[data-gm-faixa]");
+    function renderizar() {
+      const ativo = document.activeElement;
+      const itemAtivo = ativo && d.contains(ativo) && ativo.dataset && ativo.dataset.gm ? ativo.closest("[data-id]") : null;
+      const foco = itemAtivo ? { id: itemAtivo.dataset.id, local: itemAtivo.dataset.local, gm: ativo.dataset.gm } : null;
+      d.querySelectorAll("[data-gm-aba]").forEach((b) => {
+        b.textContent = `${nomeDaAba(b.dataset.gmAba)} (${modelosDaAba(b.dataset.gmAba).length})`;
+        b.setAttribute("aria-pressed", String(b.dataset.gmAba === aba));
+      });
+      const locais = modelosLocais().length;
+      if (estado.nuvemDecidida && !naNuvem()) {
+        faixa.innerHTML = `<span>Modelos salvos só neste computador. Quando a conexão com a nuvem voltar, abra esta janela e use “Enviar para a equipe”.</span>`;
+      } else if (naNuvem() && locais) {
+        faixa.innerHTML = `<span>${locais === 1 ? "1 modelo está salvo" : `${locais} modelos estão salvos`} só neste computador.</span><button type="button" class="btn btn-mini" data-gm-enviar>${svg("i-upload")}Enviar para a equipe</button>`;
+      } else faixa.innerHTML = "";
+      faixa.hidden = !faixa.innerHTML;
+      const todos = modelosDaAba(aba);
+      const termo = normalizar(busca.trim());
+      const lista = termo ? todos.filter((m) => normalizar(`${m.nome} ${textoDaMarcacao(m.texto)}`).includes(termo)) : todos;
+      if (!todos.length) listaEl.innerHTML = `<li class="apoio">Nenhum modelo ainda na aba ${escapar(nomeDaAba(aba))}. Escreva um recado e use “+ Salvar o recado atual como modelo”.</li>`;
+      else if (!lista.length) listaEl.innerHTML = `<li class="apoio">Nenhum modelo encontrado para “${escapar(busca.trim())}”.</li>`;
+      else listaEl.innerHTML = lista.map((m) => {
+        const irmaos = todos.filter((x) => x.local === m.local);
+        const i = irmaos.indexOf(m);
+        const criado = `Criado por ${m.criadoPorNome || m.criadoPor || "—"}${m.criadoEm ? ` em ${formatarData(m.criadoEm, true)}` : ""}`;
+        const editado = m.atualizadoEm && m.atualizadoEm !== m.criadoEm ? ` · Editado por ${m.atualizadoPorNome || "—"} em ${formatarData(m.atualizadoEm, true)}` : "";
+        const podeExcluir = m.local || ehAdmin();
+        const resumo = recadoEmTexto(m.texto);
+        return `<li class="gm-item" data-id="${escapar(m.id)}" data-local="${m.local ? 1 : 0}">
+          <div class="gm-cab"><strong>${escapar(m.nome)}</strong>${m.local ? '<span class="selo">Só neste computador</span>' : ""}</div>
+          <div class="gm-texto">${escapar(resumo.length > 300 ? resumo.slice(0, 300) + "…" : resumo)}</div>
+          <div class="gm-meta">${escapar(criado + editado)}</div>
+          <div class="gm-acoes">
+            <button type="button" class="btn btn-mini" data-gm="usar">Usar</button>
+            <button type="button" class="btn btn-secundario btn-mini" data-gm="editar">${svg("i-lapis")}Editar</button>
+            <button type="button" class="btn btn-secundario btn-mini" data-gm="duplicar">${svg("i-duplicar")}Duplicar</button>
+            <button type="button" class="btn-icone" data-gm="subir" aria-label="Subir “${escapar(m.nome)}”" title="${termo ? "Limpe a busca para reordenar" : "Subir"}"${termo || i <= 0 ? " disabled" : ""}>${svg("i-seta-cima")}</button>
+            <button type="button" class="btn-icone" data-gm="descer" aria-label="Descer “${escapar(m.nome)}”" title="${termo ? "Limpe a busca para reordenar" : "Descer"}"${termo || i >= irmaos.length - 1 ? " disabled" : ""}>${svg("i-seta-baixo")}</button>
+            ${podeExcluir
+              ? `<button type="button" class="btn btn-perigo btn-mini" data-gm="excluir">${svg("i-lixeira")}Excluir</button>`
+              : `<button type="button" class="btn btn-secundario btn-mini" data-gm="pedir" title="Só as administradoras excluem modelos da equipe">${svg("i-lixeira")}Pedir exclusão</button>`}
+          </div>
+        </li>`;
+      }).join("");
+      if (foco) {
+        const li = [...listaEl.querySelectorAll("[data-id]")].find((x) => x.dataset.id === foco.id && x.dataset.local === foco.local);
+        const oposto = { subir: "descer", descer: "subir" }[foco.gm];
+        const alvo = li && (li.querySelector(`[data-gm="${foco.gm}"]:not([disabled])`) || (oposto && li.querySelector(`[data-gm="${oposto}"]:not([disabled])`)) || li.querySelector('[data-gm="usar"]'));
+        if (alvo) alvo.focus();
+      }
+    }
+    d.querySelector("[data-gm-busca]").addEventListener("input", (e) => { busca = e.target.value; renderizar(); });
+    d.addEventListener("click", async (e) => {
+      const botaoAba = e.target.closest("[data-gm-aba]");
+      if (botaoAba) { aba = botaoAba.dataset.gmAba; renderizar(); return; }
+      const enviar = e.target.closest("[data-gm-enviar]");
+      if (enviar) { enviar.disabled = true; await enviarParaEquipe(); renderizar(); return; }
+      const b = e.target.closest("[data-gm]");
+      const li = b && b.closest("[data-id]");
+      if (!li) return;
+      const m = todosModelos().find((x) => x.id === li.dataset.id && String(x.local ? 1 : 0) === li.dataset.local);
+      if (!m) return;
+      try {
+        switch (b.dataset.gm) {
+          case "usar": d.close(); usarModelo(m); break;
+          case "editar": abrirEditarModelo(m); break;
+          case "duplicar": {
+            if (modelosDaAba(m.aba).length >= MAX_MODELOS_ABA) { mostrarAviso(`A aba ${nomeDaAba(m.aba)} já tem ${MAX_MODELOS_ABA} modelos.`); break; }
+            const quem = await pedirAssinatura();
+            if (!quem) break;
+            const nomes = new Set(modelosDaAba(m.aba).map((x) => normalizar(x.nome)));
+            let nome = `${m.nome} (cópia)`.slice(0, MAX_NOME_MODELO), n = 2;
+            while (nomes.has(normalizar(nome))) nome = `${m.nome.slice(0, MAX_NOME_MODELO - 12)} (cópia ${n++})`;
+            await criarModelo({ aba: m.aba, nome, texto: m.texto }, quem);
+            mostrarAviso(`Modelo duplicado: “${nome}”.`);
+            break;
+          }
+          case "subir": await moverModelo(m, -1); break;
+          case "descer": await moverModelo(m, 1); break;
+          case "excluir":
+            if (!m.local && !ehAdmin()) break;
+            if (!(await confirmar(`Excluir o modelo “${m.nome}”${m.local ? " deste computador" : " para toda a equipe"}? Não dá para desfazer.`, { titulo: "Excluir modelo", botao: "Excluir", perigo: true }))) break;
+            await excluirModelo(m);
+            mostrarAviso(`Modelo “${m.nome}” excluído.`);
+            break;
+          case "pedir": pedirExclusao(m); break;
+        }
+      } catch (err) {
+        console.error(err);
+        mostrarAviso(err && err.code === "limite" ? `A aba já tem ${MAX_MODELOS_ABA} modelos.` : mensagemErroNuvem(err), { ms: 6000 });
+      }
+      if (gerenciar && gerenciar.d === d) renderizar();
+    });
+    d.addEventListener("close", () => { if (gerenciar && gerenciar.d === d) gerenciar = null; });
+    gerenciar = { d, renderizar };
+    d.showModal();
+    renderizar();
+  }
+
+  function definirValor(id, valor) {
+    estado.valores[id] = valor;
+    const el = $(`#campo-${id}`);
+    if (el) { el.value = valor; el.focus(); }
+    guardarRascunho();
+    desenhar();
+  }
+  function marcarCampo(id) {
+    estado.campoAtivo = id;
+    $$(".formulario .campo").forEach((b) => b.classList.toggle("focado", b.dataset.bloco === id));
+    if (estado.ajuste) renderizarAjuste();
+  }
+
+  /* ------------------------------------------------------------
+   *  Desenho no canvas (tamanho real; a prévia só escala via CSS)
+   * ------------------------------------------------------------ */
+  const tela = $("#tela");
+  /* Troque ao substituir um template em fotos/comunicados/: obriga o navegador a buscar a imagem nova */
+  const VERSAO_TEMPLATES = "2026-10-21c";
+  function carregarImagem(caminho) {
+    if (!estado.imagens[caminho]) {
+      estado.imagens[caminho] = new Promise((resolver) => {
+        const img = new Image();
+        img.onload = () => resolver(img);
+        img.onerror = () => resolver(null);
+        img.src = `${caminho}?v=${VERSAO_TEMPLATES}`;
+      });
+    }
+    return estado.imagens[caminho];
+  }
+  function quebrarLinhas(ctx, texto, largura) {
+    const linhas = [];
+    String(texto).split("\n").forEach((paragrafo) => {
+      const palavras = paragrafo.split(/\s+/).filter(Boolean);
+      if (!palavras.length) { linhas.push(""); return; }
+      let atual = "";
+      palavras.forEach((p) => {
+        let palavra = p;
+        while (ctx.measureText(palavra).width > largura && palavra.length > 1) {
+          let corte = palavra.length - 1;
+          while (corte > 1 && ctx.measureText(palavra.slice(0, corte) + "-").width > largura) corte--;
+          if (atual) { linhas.push(atual); atual = ""; }
+          linhas.push(palavra.slice(0, corte) + "-");
+          palavra = palavra.slice(corte);
+        }
+        const teste = atual ? atual + " " + palavra : palavra;
+        if (ctx.measureText(teste).width <= largura || !atual) atual = teste;
+        else { linhas.push(atual); atual = palavra; }
+      });
+      if (atual) linhas.push(atual);
+    });
+    while (linhas.length && linhas[linhas.length - 1] === "") linhas.pop();
+    return linhas;
+  }
+  function textoDoCampo(c, valor) {
+    let t = String(valor || "").trim();
+    if (!t) return "";
+    if (c.tipo === "lista") t = t.split(/\n/).map((x) => x.trim()).filter(Boolean).join("  •  ");
+    t = c.prefixo + t;
+    return c.maiusculas ? t.toLocaleUpperCase("pt-BR") : t;
+  }
+  function encaixar(ctx, c, texto) {
+    const fonte = (tam) => `${c.peso} ${tam}px "${c.fonte}", system-ui, sans-serif`;
+    for (let tam = c.tamanhoMax; tam >= c.tamanhoMin; tam -= 1) {
+      ctx.font = fonte(tam);
+      const linhas = quebrarLinhas(ctx, texto, c.largura);
+      if (linhas.length <= c.maxLinhas && linhas.length * tam * c.entrelinha <= c.altura + 0.5) return { tam, linhas, cortou: false };
+    }
+    const tam = c.tamanhoMin;
+    ctx.font = fonte(tam);
+    let linhas = quebrarLinhas(ctx, texto, c.largura);
+    const cabem = Math.max(1, Math.min(c.maxLinhas, Math.floor((c.altura + 0.5) / (tam * c.entrelinha))));
+    if (linhas.length > cabem) {
+      linhas = linhas.slice(0, cabem);
+      let ultima = linhas[cabem - 1];
+      while (ultima.length > 1 && ctx.measureText(ultima + "…").width > c.largura) ultima = ultima.slice(0, -1);
+      linhas[cabem - 1] = ultima.replace(/\s+$/, "") + "…";
+      return { tam, linhas, cortou: true };
+    }
+    return { tam, linhas, cortou: false };
+  }
+  function desenharProvisorio(ctx, m) {
+    const escuro = false;
+    ctx.fillStyle = escuro ? "#1a1724" : "#f3eefb";
+    ctx.fillRect(0, 0, m.largura, m.altura);
+    ctx.fillStyle = m.corProvisoria;
+    ctx.fillRect(0, 0, m.largura, Math.round(m.altura * 0.12));
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `700 ${Math.round(m.altura * 0.05)}px "Bricolage Grotesque", system-ui, sans-serif`;
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "left";
+    ctx.fillText(m.nome.toLocaleUpperCase("pt-BR"), Math.round(m.largura * 0.074), Math.round(m.altura * 0.06));
+    ctx.fillStyle = "rgba(17,18,18,0.45)";
+    ctx.font = `600 ${Math.round(m.altura * 0.022)}px "Bricolage Grotesque", system-ui, sans-serif`;
+    ctx.textAlign = "right";
+    ctx.fillText("Template pendente", m.largura - Math.round(m.largura * 0.037), m.altura - Math.round(m.altura * 0.028));
+    ctx.fillStyle = m.corProvisoria;
+    ctx.fillRect(0, m.altura - 12, m.largura, 12);
+    /* Sem o template, a saudação e a assinatura aparecem em cinza só para mostrar onde o recado entra */
+    if (m.fixos) desenharFixos(ctx, m, "#7a7a7a");
+  }
+  function desenharFixos(ctx, m, cor = "#000000") {
+    ctx.save();
+    ctx.fillStyle = cor;
+    ctx.textBaseline = "top";
+    ctx.textAlign = "left";
+    m.fixos.forEach((f) => {
+      ctx.font = `${f.peso} ${f.tamanho}px ${pilhaFonte("Calibri")}`;
+      /* "V/Cert" com a barra em vermelho, como na marca (só no template real) */
+      const i = cor === "#000000" ? f.texto.indexOf("V/Cert") : -1;
+      if (i < 0) { ctx.fillText(f.texto, f.x, f.y); return; }
+      const antes = f.texto.slice(0, i + 1);
+      ctx.fillText(antes, f.x, f.y);
+      let x = f.x + ctx.measureText(antes).width;
+      ctx.fillStyle = "#e53935";
+      ctx.fillText("/", x, f.y);
+      x += ctx.measureText("/").width;
+      ctx.fillStyle = cor;
+      ctx.fillText(f.texto.slice(i + 2), x, f.y);
+    });
+    ctx.restore();
+  }
+
+  /* O canvas usa o tamanho REAL do arquivo. Se o template vier em outro tamanho (ex.: exportação 2×),
+     a caixa do recado, os textos fixos e as fontes são reescalados na mesma proporção. */
+  function alinharModeloAImagem(m, img) {
+    const nw = img.naturalWidth, nh = img.naturalHeight;
+    if (!nw || !nh || (nw === m.largura && nh === m.altura)) return;
+    const fx = nw / m.largura, fy = nh / m.altura;
+    m.campos.forEach((c) => {
+      c.x = Math.round(c.x * fx); c.largura = Math.round(c.largura * fx);
+      c.y = Math.round(c.y * fy); c.altura = Math.round(c.altura * fy);
+      c.tamanhoMax = Math.round(c.tamanhoMax * fx * 2) / 2; c.tamanhoMin = Math.round(c.tamanhoMin * fx * 2) / 2;
+    });
+    (m.fixos || []).forEach((f) => { f.x = Math.round(f.x * fx); f.y = Math.round(f.y * fy); f.tamanho = Math.round(f.tamanho * fx); });
+    m.largura = nw;
+    m.altura = nh;
+  }
+
+  /* "Detectar área livre": lê os pixels do template e acha a saudação (1ª faixa de texto na
+     coluna da esquerda) e o "Atenciosamente" (penúltima faixa, antes de "Suporte Técnico V/Cert"). */
+  function detectarAreaLivre(img) {
+    const W = img.naturalWidth, H = img.naturalHeight;
+    if (!W || !H) return null;
+    const k = W / 561;
+    const cv = document.createElement("canvas");
+    cv.width = W; cv.height = H;
+    const g = cv.getContext("2d", { willReadFrequently: true });
+    g.drawImage(img, 0, 0);
+    let d;
+    try { d = g.getImageData(0, 0, W, H).data; } catch (e) { return null; }
+    const luz = (i) => (d[i + 3] < 128 ? 255 : 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]);
+    const fracaoClara = new Float32Array(H);
+    const primeiroEscuro = new Int32Array(H).fill(-1);
+    const xa = Math.round(W * 0.01), xb = Math.round(W * 0.5);
+    for (let y = 0; y < H; y++) {
+      let claros = 0;
+      for (let x = 0; x < W; x++) {
+        const l = luz((y * W + x) * 4);
+        if (l > 200) claros++;
+        if (x >= xa && x <= xb && l < 120 && primeiroEscuro[y] < 0) primeiroEscuro[y] = x;
+      }
+      fracaoClara[y] = claros / W;
+    }
+    /* Fim do cabeçalho: depois das primeiras linhas escuras, a primeira sequência de linhas claras */
+    let y = 0;
+    while (y < H && fracaoClara[y] >= 0.5) y++;
+    while (y < H && fracaoClara[y] < 0.9) y++;
+    const topo = y;
+    while (y < H && fracaoClara[y] >= 0.5) y++;
+    const rodape = y;
+    if (topo >= H || rodape - topo < 40 * k) return null;
+    const faixas = [];
+    const folga = Math.max(2, Math.round(2 * k));
+    for (let i = topo, vazio = folga + 1; i < rodape; i++) {
+      if (primeiroEscuro[i] >= 0) {
+        if (vazio > folga || !faixas.length) faixas.push({ inicio: i, fim: i, x: primeiroEscuro[i] });
+        const f = faixas[faixas.length - 1];
+        f.fim = i;
+        f.x = Math.min(f.x, primeiroEscuro[i]);
+        vazio = 0;
+      } else vazio++;
+    }
+    const texto = faixas.filter((f) => f.fim - f.inicio + 1 >= 4 * k);
+    if (texto.length < 3) return null;
+    const saudacao = texto[0];
+    const atenciosamente = texto[texto.length - 2];
+    const margem = Math.min(saudacao.x, atenciosamente.x);
+    const caixa = {
+      x: margem,
+      y: saudacao.fim + 1 + Math.round(10 * k),
+      largura: W - 2 * margem,
+      altura: atenciosamente.inicio - Math.round(12 * k) - (saudacao.fim + 1 + Math.round(10 * k))
+    };
+    if (caixa.altura < 30 * k) return null;
+    return { caixa, guias: { margem, saudacaoFim: saudacao.fim + 1, atenciosamenteInicio: atenciosamente.inicio }, largura: W, altura: H };
+  }
+
+  /* Template sem os textos (desenharFixos): a área livre vem da posição da saudação e do "Atenciosamente" */
+  function areaPelosFixos(m) {
+    const [s, a] = m.fixos || [];
+    if (!s || !a) return null;
+    const k = m.largura / 561;
+    const saudacaoFim = s.y + Math.round(s.tamanho * 1.15);
+    const y = saudacaoFim + Math.round(10 * k);
+    return {
+      caixa: { x: s.x, y, largura: m.largura - 2 * s.x, altura: a.y - Math.round(12 * k) - y },
+      guias: { margem: s.x, saudacaoFim, atenciosamenteInicio: a.y },
+      largura: m.largura, altura: m.altura
+    };
+  }
+
+  /* ------------------------------------------------------------
+   *  Recado: Enter = nova linha, linha em branco = parágrafo, trechos com
+   *  negrito/itálico/cor (lerMarcacao), "- " ou "• " = item com marcador e recuo
+   * ------------------------------------------------------------ */
+  const RE_ITEM = /^\s*[-•]\s+/;
+  const fonteRecado = (c, tam, f) => `${f.i ? "italic " : ""}${f.b ? 700 : c.peso} ${tam}px ${pilhaFonte(c.fonte)}`;
+  const corDoTrecho = (f, c) => CORES[f.cor] || c.cor;
+  /* Linhas da marcação, cada uma com seus trechos */
+  function linhasDaMarcacao(marcacao) {
+    const linhas = [[]];
+    lerMarcacao(marcacao).forEach((r) => { if (r.t === "\n") linhas.push([]); else linhas[linhas.length - 1].push(r); });
+    return linhas;
+  }
+  function cortarInicio(trechos, n) {
+    const saida = [];
+    let falta = n;
+    trechos.forEach((r) => {
+      if (falta >= r.t.length) { falta -= r.t.length; return; }
+      saida.push({ ...r, t: r.t.slice(falta) });
+      falta = 0;
+    });
+    return saida;
+  }
+  function montarRecado(ctx, c, texto, tam) {
+    const medir = (t, f) => { ctx.font = fonteRecado(c, tam, f); return ctx.measureText(t).width; };
+    const larguras = new Map();
+    const larguraLetra = (ch, f) => {
+      const k = `${f.b ? 1 : 0}${f.i ? 1 : 0}${ch}`;
+      if (!larguras.has(k)) larguras.set(k, medir(ch, f));
+      return larguras.get(k);
+    };
+    const agrupar = (letras) => {
+      const partes = [];
+      letras.forEach((l) => { const u = partes[partes.length - 1]; if (u && u.f === l.f) u.t += l.ch; else partes.push({ t: l.ch, f: l.f }); });
+      return partes.map((p) => ({ ...p, w: medir(p.t, p.f) }));
+    };
+    /* Palavra maior que a linha: corta com hífen (larguras somadas letra a letra) */
+    function partirPalavra(partes, largura) {
+      const letras = partes.flatMap((p) => p.t.split("").map((ch) => ({ ch, f: p.f })));
+      let k = 1, soma = larguraLetra(letras[0].ch, letras[0].f);
+      while (k < letras.length - 1) {
+        const prox = soma + larguraLetra(letras[k].ch, letras[k].f);
+        if (prox + larguraLetra("-", letras[k].f) > largura) break;
+        soma = prox;
+        k++;
+      }
+      const cabeca = agrupar(letras.slice(0, k));
+      const ult = cabeca[cabeca.length - 1];
+      ult.t += "-";
+      ult.w = medir(ult.t, ult.f);
+      return [cabeca, agrupar(letras.slice(k))];
+    }
+    const soma = (partes) => partes.reduce((s, p) => s + p.w, 0);
+    const linhas = [];
+    linhasDaMarcacao(texto).forEach((trechos) => {
+      const plano = trechos.map((r) => r.t).join("");
+      if (!plano.trim()) { linhas.push({ vazia: true, recuo: 0, partes: [] }); return; }
+      const item = RE_ITEM.exec(plano);
+      const corpo = item ? cortarInicio(trechos, item[0].length) : trechos;
+      const recuo = item ? medir("•  ", SEM_FORMATO) : 0;
+      const corMarcador = item && corpo[0] ? corpo[0].cor : "";
+      const largura = c.largura - recuo;
+      /* Palavra = sequência sem espaço, mesmo com formatos diferentes no meio (não quebra dentro dela) */
+      const palavras = [];
+      corpo.forEach((r) => {
+        const f = { b: r.b, i: r.i, cor: r.cor };
+        r.t.split(/(\s+)/).forEach((w) => {
+          if (!w) return;
+          const espaco = /^\s+$/.test(w);
+          const ult = palavras[palavras.length - 1];
+          if (!espaco && ult && !ult.espaco) ult.pecas.push({ t: w, f });
+          else palavras.push({ espaco, pecas: [{ t: espaco ? " " : w, f }] });
+        });
+      });
+      let atual = [], w = 0, primeira = true;
+      const fechar = () => {
+        while (atual.length && atual[atual.length - 1].espaco) w -= atual.pop().w;
+        linhas.push({ recuo, marcador: !!item && primeira, corMarcador, partes: atual });
+        primeira = false; atual = []; w = 0;
+      };
+      palavras.forEach((p) => {
+        if (p.espaco) {
+          if (atual.length) { const f = p.pecas[0].f, ew = medir(" ", f); atual.push({ t: " ", f, w: ew, espaco: true }); w += ew; }
+          return;
+        }
+        let partes = p.pecas.map((x) => ({ t: x.t, f: x.f, w: medir(x.t, x.f) }));
+        let pw = soma(partes);
+        while (pw > largura && partes.reduce((n, x) => n + x.t.length, 0) > 1) {
+          if (atual.length) fechar();
+          const [cabeca, resto] = partirPalavra(partes, largura);
+          atual = cabeca;
+          fechar();
+          partes = resto;
+          pw = soma(resto);
+        }
+        if (w + pw > largura && atual.some((x) => !x.espaco)) fechar();
+        atual.push(...partes);
+        w += pw;
+      });
+      fechar();
+    });
+    while (linhas.length && linhas[linhas.length - 1].vazia) linhas.pop();
+    return linhas;
+  }
+  /* Ajuste automático: reduz de tamanhoMax até tamanhoMin. Se nem assim couber, o texto fica preso à caixa
+     (nunca invade a assinatura) e a pessoa é avisada; a caixa vermelha aparece só na prévia. */
+  function encaixarRecado(ctx, c, texto) {
+    let escolha = null;
+    for (let tam = c.tamanhoMax; tam >= c.tamanhoMin - 0.001; tam -= 0.5) {
+      const linhas = montarRecado(ctx, c, texto, tam);
+      const altura = linhas.length * tam * c.entrelinha;
+      escolha = { tam, linhas, altura, coube: linhas.length <= c.maxLinhas && altura <= c.altura + 0.5 };
+      if (escolha.coube) break;
+    }
+    return escolha;
+  }
+  function desenharRecado(ctx, c, texto, naTela) {
+    if (!String(texto || "").trim()) return { usado: 0, coube: true };
+    const { tam, linhas, altura, coube } = encaixarRecado(ctx, c, texto);
+    const lh = tam * c.entrelinha;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(c.x, c.y, c.largura, c.altura);
+    ctx.clip();
+    ctx.textBaseline = "top";
+    ctx.textAlign = "left";
+    linhas.forEach((l, i) => {
+      if (l.vazia) return;
+      const y = c.y + i * lh + (lh - tam) / 2;
+      if (naTela) {
+        /* [CAMPOS] para trocar ficam destacados só na prévia */
+        const texto = l.partes.map((p) => p.t).join("");
+        for (const m of texto.matchAll(RE_CAMPO_TROCAR)) {
+          let x = c.x + l.recuo, pos = 0, x0 = null, x1 = null;
+          for (const p of l.partes) {
+            ctx.font = fonteRecado(c, tam, p.f);
+            const ini = pos, fim = pos + p.t.length;
+            if (x0 === null && m.index < fim) x0 = x + ctx.measureText(p.t.slice(0, m.index - ini)).width;
+            if (x1 === null && m.index + m[0].length <= fim) x1 = x + ctx.measureText(p.t.slice(0, m.index + m[0].length - ini)).width;
+            x += p.w; pos = fim;
+          }
+          if (x0 !== null && x1 !== null) { ctx.fillStyle = "rgba(255, 213, 79, 0.75)"; ctx.fillRect(x0 - 1, c.y + i * lh, x1 - x0 + 2, lh); }
+        }
+      }
+      if (l.marcador) { ctx.font = fonteRecado(c, tam, SEM_FORMATO); ctx.fillStyle = corDoTrecho({ cor: l.corMarcador }, c); ctx.fillText("•", c.x, y); }
+      let x = c.x + l.recuo;
+      l.partes.forEach((p) => { ctx.font = fonteRecado(c, tam, p.f); ctx.fillStyle = corDoTrecho(p.f, c); ctx.fillText(p.t, x, y); x += p.w; });
+    });
+    ctx.restore();
+    if (naTela && !coube) {
+      ctx.save();
+      ctx.strokeStyle = "#e53935";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeRect(c.x - 1, c.y - 1, c.largura + 2, c.altura + 2);
+      ctx.restore();
+    }
+    return { usado: Math.round((altura / c.altura) * 100), coube };
+  }
+
+  /* Carrega fontes e imagem (assíncrono) e pinta num canvas (síncrono): prévia, PNG 1× e 2× usam o mesmo código */
+  const FONTES_PARA_CARREGAR = ['700 40px "Bricolage Grotesque"', '400 40px "Bricolage Grotesque"',
+    '400 13px "Carlito"', '700 13px "Carlito"', 'italic 400 13px "Carlito"', 'italic 700 13px "Carlito"',
+    '400 13px "Calibri"', '700 13px "Calibri"', 'italic 400 13px "Calibri"', 'italic 700 13px "Calibri"'];
+  async function prepararDesenho() {
+    try { await Promise.all(FONTES_PARA_CARREGAR.map((f) => document.fonts.load(f))); } catch (e) {}
+    const m = modelo();
+    const img = await carregarImagem(m.imagem);
+    if (img && m.oficial) {
+      alinharModeloAImagem(m, img);
+      if (!estado.deteccao[m.id]) estado.deteccao[m.id] = (m.desenharFixos ? areaPelosFixos(m) : detectarAreaLivre(img)) || { falhou: true };
+      corrigirCaixaPadrao(m);
+    }
+    return { m, img };
+  }
+  /* Segurança para a caixa do código (sem configuração salva): se ela invadir a saudação ou o
+     "Atenciosamente" da imagem real, usa a área livre detectada. A configuração salva nunca é trocada. */
+  /* Marca no próprio objeto do modelo (a configuração da nuvem pode trocar o objeto durante um desenho) */
+  const caixaConferida = new WeakMap();
+  const foiAutoAjustado = (m) => caixaConferida.get(m) === true;
+  function corrigirCaixaPadrao(m) {
+    const det = estado.deteccao[m.id];
+    if (!det || det.falhou || caixaConferida.has(m)) return;
+    caixaConferida.set(m, false);
+    if (estado.configSalva[m.id]) return;
+    const c = m.campos[0];
+    const g = det.guias;
+    const fx = m.largura / det.largura, fy = m.altura / det.altura;
+    const invade = c.y < g.saudacaoFim * fy || c.y + c.altura > g.atenciosamenteInicio * fy || c.x < (g.margem - 3) * fx;
+    if (!invade) return;
+    Object.assign(c, { x: Math.round(det.caixa.x * fx), y: Math.round(det.caixa.y * fy), largura: Math.round(det.caixa.largura * fx), altura: Math.round(det.caixa.altura * fy) });
+    caixaConferida.set(m, true);
+  }
+  function pintar(canvas, k, naTela, { m, img }) {
+    canvas.width = Math.round(m.largura * k);
+    canvas.height = Math.round(m.altura * k);
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(k, 0, 0, k, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.clearRect(0, 0, m.largura, m.altura);
+    if (img) ctx.drawImage(img, 0, 0, m.largura, m.altura);
+    else desenharProvisorio(ctx, m);
+    if (img && m.oficial && m.desenharFixos && m.fixos) desenharFixos(ctx, m);
+    const avisos = {};
+    let recado = { usado: 0, coube: true };
+    m.campos.forEach((c) => {
+      if (m.oficial && c.id === "recado") { recado = desenharRecado(ctx, c, estado.valores.recado, naTela); return; }
+      const texto = textoDoCampo(c, estado.valores[c.id]);
+      if (!texto) return;
+      const { tam, linhas, cortou } = encaixar(ctx, c, texto);
+      if (cortou) avisos[c.id] = "O texto não coube inteiro: foi cortado com “…”. Encurte o texto.";
+      const altLinha = tam * c.entrelinha;
+      const total = linhas.length * altLinha;
+      let y = c.y;
+      if (c.alinharVertical === "meio") y = c.y + (c.altura - total) / 2;
+      if (c.alinharVertical === "base") y = c.y + c.altura - total;
+      ctx.fillStyle = c.cor;
+      ctx.textBaseline = "top";
+      ctx.textAlign = c.alinhar === "centro" ? "center" : c.alinhar === "direita" ? "right" : "left";
+      const x = c.alinhar === "centro" ? c.x + c.largura / 2 : c.alinhar === "direita" ? c.x + c.largura : c.x;
+      linhas.forEach((l, i) => ctx.fillText(l, x, y + i * altLinha + (altLinha - tam) / 2));
+    });
+    return { avisos, recado };
+  }
+  /* A prévia dos templates oficiais (pequenos) é pintada em 2× só para ficar nítida na tela */
+  const escalaPrevia = (m) => (m.oficial ? 2 : 1);
+  let pedidoDesenho = 0;
+  async function desenhar() {
+    const pedido = ++pedidoDesenho;
+    const preparo = await prepararDesenho();
+    if (pedido !== pedidoDesenho) return;
+    const { m, img } = preparo;
+    const r = pintar(tela, escalaPrevia(m), true, preparo);
+    estado.avisos = r.avisos;
+    estado.recado = r.recado;
+    let aviso = img ? "" : `Template pendente: coloque a imagem em ${m.imagem} (${m.largura}×${m.altura} px). Até lá, a prévia usa um fundo provisório.`;
+    if (img && foiAutoAjustado(m) && ehAdmin()) aviso = "A caixa do recado foi encaixada automaticamente na área livre desta imagem. Confira no Modo ajuste e salve.";
+    $("#aviso-modelo").textContent = aviso;
+    atualizarContadores();
+    if (estado.ajuste) posicionarCaixas();
+  }
+  /* Imagem final (sem destaques de tela), no tamanho original ou em 2× */
+  async function gerarImagemFinal(k = 1) {
+    const preparo = await prepararDesenho();
+    const canvas = document.createElement("canvas");
+    const r = pintar(canvas, k, false, preparo);
+    return { canvas, recado: r.recado };
+  }
+
+  /* Clique na prévia leva ao campo (coordenadas no tamanho do modelo) */
+  function pontoNaTela(e) {
+    const r = tela.getBoundingClientRect();
+    const m = modelo();
+    return { x: (e.clientX - r.left) * (m.largura / r.width), y: (e.clientY - r.top) * (m.altura / r.height), escala: m.largura / r.width };
+  }
+  tela.addEventListener("click", (e) => {
+    if (estado.ajuste) return;
+    const p = pontoNaTela(e);
+    const c = modelo().campos.find((k) => p.x >= k.x && p.x <= k.x + k.largura && p.y >= k.y && p.y <= k.y + k.altura);
+    if (c) { const el = $(`#campo-${c.id}`); if (el) { el.focus(); el.scrollIntoView({ block: "nearest", behavior: "smooth" }); } }
+  });
+
+  /* ------------------------------------------------------------
+   *  Baixar, copiar, texto e limpar
+   * ------------------------------------------------------------ */
+  /* Recado sem a marcação e com "• " nos itens (texto para copiar e título do histórico) */
+  const recadoEmTexto = (marcacao) => textoDaMarcacao(marcacao).split("\n").map((l) => l.replace(RE_ITEM, "• ")).join("\n").trim();
+  function tituloAtual() {
+    if (!modelo().oficial) return (estado.valores.titulo || modelo().nome).trim();
+    const primeira = recadoEmTexto(estado.valores.recado).split("\n").find((l) => l.trim()) || "";
+    const curta = primeira.replace(/^•\s*/, "").trim();
+    return curta ? `${modelo().nome}: ${curta.length > 40 ? curta.slice(0, 40).trimEnd() + "…" : curta}` : modelo().nome;
+  }
+  function nomeArquivo(k = 1) {
+    const p = partesBrasilia();
+    return `${estado.aba}-${p.ano}-${p.mes}-${p.dia}-${p.hora}${p.minuto}${k > 1 ? "-2x" : ""}.png`;
+  }
+  const gerarBlob = (canvas) => new Promise((r) => canvas.toBlob(r, "image/png"));
+  const escalaFinal = () => (modelo().oficial && estado.altaResolucao ? 2 : 1);
+  /* Antes de gerar: [CAMPOS] ainda sem trocar e recado maior que a caixa pedem confirmação */
+  async function conferirAntesDeGerar(recado) {
+    if (!modelo().oficial) return true;
+    const texto = textoDaMarcacao(estado.valores.recado);
+    const campos = [...new Set(texto.match(RE_CAMPO_TROCAR) || [])];
+    if (campos.length) {
+      const dica = estado.aba === "restabelecimento" && ultimaInstabilidade() ? " Dica: use “Usar o sistema e o horário da última instabilidade”." : "";
+      if (!(await confirmar(`Ainda há campos para trocar no recado: ${campos.join(", ")}.${dica} Gerar a imagem mesmo assim?`, { titulo: "Campos para trocar", botao: "Gerar mesmo assim" }))) return false;
+    }
+    if (!recado.coube && !(await confirmar("O recado passou do espaço da imagem e vai sair cortado. Gerar mesmo assim?", { titulo: "Recado grande demais", botao: "Gerar mesmo assim" }))) return false;
+    return true;
+  }
+  /* Guarda sistema e horário da instabilidade gerada nesta sessão, para o Restabelecimento */
+  function lembrarInstabilidade() {
+    if (estado.aba !== "instabilidade") return;
+    const texto = textoDaMarcacao(estado.valores.recado);
+    const sistema = PRONTOS_SISTEMAS.find((s) => new RegExp(`(^|[^\\p{L}])${s}([^\\p{L}]|$)`, "iu").test(texto)) || "";
+    const dataHora = (/\d{2}\/\d{2}\/\d{4} às \d{2}:\d{2}/.exec(texto) || [""])[0];
+    if (sistema || dataHora) { try { sessionStorage.setItem(CHAVE_ULTIMA_INSTABILIDADE, JSON.stringify({ sistema, dataHora })); } catch (e) {} }
+  }
+  function registrarGerado(como, canvas = tela) {
+    lembrarInstabilidade();
+    const mini = document.createElement("canvas");
+    const lado = 220;
+    mini.width = lado;
+    mini.height = Math.round(lado * canvas.height / canvas.width);
+    mini.getContext("2d").drawImage(canvas, 0, 0, mini.width, mini.height);
+    const historico = lerLocal(CHAVE_HISTORICO, []).filter((h) => h && h.miniatura);
+    historico.unshift({ aba: estado.aba, titulo: tituloAtual().slice(0, 120), valores: { ...estado.valores, formato: FORMATO_RECADO }, miniatura: mini.toDataURL("image/jpeg", 0.7), em: new Date().toISOString() });
+    let lista = historico.slice(0, 10);
+    while (lista.length && !gravarLocal(CHAVE_HISTORICO, lista)) lista = lista.slice(0, -1);
+    renderizarHistorico();
+    registrarAuditoria({ acao: como, alvo: "comunicados", resumo: `Gerou comunicado (${modelo().nome}): ${tituloAtual()}`.slice(0, 200) });
+  }
+  $("#btn-baixar").innerHTML = svg("i-download") + "Baixar PNG";
+  $("#btn-copiar").innerHTML = svg("i-copiar") + "Copiar imagem";
+  $("#btn-limpar").innerHTML = svg("i-desfazer") + "Limpar";
+  $("#alta-resolucao").addEventListener("change", (e) => { estado.altaResolucao = e.target.checked; });
+  $("#btn-baixar").addEventListener("click", async () => {
+    await desenhar();
+    const k = escalaFinal();
+    const { canvas, recado } = await gerarImagemFinal(k);
+    if (!(await conferirAntesDeGerar(recado))) return;
+    const blob = await gerarBlob(canvas);
+    if (!blob) { mostrarAviso("Não foi possível gerar a imagem."); return; }
+    baixarArquivo(nomeArquivo(k), blob);
+    registrarGerado("baixar", canvas);
+    mostrarAviso(k > 1 ? `Imagem baixada em alta resolução (${canvas.width}×${canvas.height}).` : "Imagem baixada.");
+  });
+  $("#btn-copiar").addEventListener("click", async () => {
+    if (!window.isSecureContext) { mostrarAviso("Copiar imagem só funciona em endereço seguro (https). Use “Baixar PNG”.", { ms: 6000 }); return; }
+    if (!window.ClipboardItem || !navigator.clipboard || !navigator.clipboard.write) { mostrarAviso("Este navegador não permite copiar imagens (sem suporte a ClipboardItem). Use “Baixar PNG” e anexe o arquivo.", { ms: 6000 }); return; }
+    await desenhar();
+    const k = escalaFinal();
+    const { canvas, recado } = await gerarImagemFinal(k);
+    if (!(await conferirAntesDeGerar(recado))) return;
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": gerarBlob(canvas) })]);
+      registrarGerado("copiar", canvas);
+      mostrarAviso("Imagem copiada. Cole com Ctrl+V no Teams, WhatsApp ou e-mail.");
+    } catch (e) {
+      console.warn(e);
+      mostrarAviso("O navegador recusou a cópia da imagem (permissão ou janela sem foco). Use “Baixar PNG”.", { ms: 6000 });
+    }
+  });
+  function versaoTexto() {
+    if (modelo().oficial) return `${SAUDACAO}\n\n${recadoEmTexto(estado.valores.recado)}\n\n${ASSINATURA}`;
+    return modelo().campos.map((c) => {
+      const t = textoDoCampo({ ...c, prefixo: "", maiusculas: false }, estado.valores[c.id]);
+      if (!t) return "";
+      return c.id === "titulo" ? t.toLocaleUpperCase("pt-BR") : `${c.rotulo}: ${c.tipo === "lista" ? t.replace(/ {2}• {2}/g, ", ") : t}`;
+    }).filter(Boolean).join("\n");
+  }
+  $("#btn-texto").addEventListener("click", async () => {
+    if (modelo().oficial) {
+      mostrarAviso((await copiarTexto(versaoTexto())) ? "Texto copiado com a saudação e a assinatura." : "Não foi possível copiar.");
+      return;
+    }
+    const d = criarDialogo({
+      titulo: "Versão em texto",
+      corpo: `<label class="campo"><span class="rotulo">Texto para colar no chat ou e-mail</span><textarea rows="10" readonly>${escapar(versaoTexto())}</textarea></label>
+        <div class="form-botoes"><button type="button" class="btn btn-secundario" data-fechar>Fechar</button><button type="button" class="btn" data-copiar-texto>${svg("i-copiar")}Copiar texto</button></div>`
+    });
+    d.querySelector("[data-copiar-texto]").addEventListener("click", async () => {
+      mostrarAviso((await copiarTexto(versaoTexto())) ? "Texto copiado." : "Não foi possível copiar.");
+    });
+    d.showModal();
+  });
+  $("#btn-limpar").addEventListener("click", async () => {
+    const pergunta = modelo().oficial ? "Apagar o recado desta aba?" : "Voltar todos os campos desta aba para o texto padrão?";
+    if (!(await confirmar(pergunta, { titulo: "Limpar", botao: "Limpar" }))) return;
+    try { localStorage.removeItem(CHAVE_RASCUNHO(estado.aba)); } catch (e) {}
+    carregarValores();
+    renderizarFormulario();
+    desenhar();
+  });
+
+  /* ------------------------------------------------------------
+   *  Histórico (últimos 10, só neste navegador)
+   * ------------------------------------------------------------ */
+  function renderizarHistorico() {
+    const lista = lerLocal(CHAVE_HISTORICO, []).map((h, i) => ({ ...h, i })).filter((h) => h && h.miniatura && ORDEM_ABAS.includes(h.aba));
+    $("#historico-vazio").hidden = lista.length > 0;
+    $("#historico").innerHTML = lista.map((h) => `<div class="hist-item" role="button" tabindex="0" data-hist="${h.i}" title="Abrir este comunicado">
+      <img src="${escapar(/^data:image\/jpeg;base64,/.test(h.miniatura) ? h.miniatura : "")}" alt="">
+      <span class="t">${escapar(h.titulo || "")}</span>
+      <span class="d">${escapar((estado.modelos[h.aba] || {}).nome || h.aba)} · ${escapar(formatarData(h.em, true))}</span>
+      <button type="button" class="btn-icone hist-apagar" data-apagar-hist="${h.i}" aria-label="Remover do histórico">${svg("i-fechar")}</button>
+    </div>`).join("");
+  }
+  function abrirHistorico(i) {
+    const h = lerLocal(CHAVE_HISTORICO, [])[i];
+    if (!h || !ORDEM_ABAS.includes(h.aba)) return;
+    gravarLocal(CHAVE_RASCUNHO(h.aba), h.valores || {});
+    trocarAba(h.aba, true);
+    mostrarAviso("Comunicado reaberto para editar.");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  $("#historico").addEventListener("click", (e) => {
+    const apagar = e.target.closest("[data-apagar-hist]");
+    if (apagar) {
+      const lista = lerLocal(CHAVE_HISTORICO, []);
+      lista.splice(Number(apagar.dataset.apagarHist), 1);
+      gravarLocal(CHAVE_HISTORICO, lista);
+      renderizarHistorico();
+      return;
+    }
+    const item = e.target.closest("[data-hist]");
+    if (item) abrirHistorico(Number(item.dataset.hist));
+  });
+  $("#historico").addEventListener("keydown", (e) => {
+    const item = e.target.closest("[data-hist]");
+    if (item && (e.key === "Enter" || e.key === " ") && e.target === item) { e.preventDefault(); abrirHistorico(Number(item.dataset.hist)); }
+  });
+
+  /* ------------------------------------------------------------
+   *  MODO AJUSTE (só administradoras): caixas sobre o template
+   * ------------------------------------------------------------ */
+  const camada = $("#camada-ajuste");
+  const btnAjuste = $("#btn-ajuste");
+  btnAjuste.innerHTML = svg("i-ajustes");
+  btnAjuste.addEventListener("click", () => alternarAjuste(!estado.ajuste));
+  function alternarAjuste(ligar) {
+    estado.ajuste = ligar && ehAdmin();
+    btnAjuste.setAttribute("aria-pressed", String(estado.ajuste));
+    camada.hidden = !estado.ajuste;
+    $("#painel-ajuste").hidden = !estado.ajuste;
+    if (estado.ajuste) { if (!estado.campoAtivo) estado.campoAtivo = modelo().campos[0].id; renderizarAjuste(); posicionarCaixas(); }
+  }
+  function posicionarCaixas() {
+    const m = modelo();
+    /* Guias (só nos templates oficiais): margem do "Olá" e os limites detectados na imagem */
+    const det = m.oficial && estado.deteccao[m.id] && !estado.deteccao[m.id].falhou ? estado.deteccao[m.id].guias : null;
+    const fx = det ? m.largura / estado.deteccao[m.id].largura : 1, fy = det ? m.altura / estado.deteccao[m.id].altura : 1;
+    const guias = det ? `<i class="guia guia-v" style="left:${det.margem * fx / m.largura * 100}%" title="Margem do “Olá”"></i>
+      <i class="guia guia-h" style="top:${det.saudacaoFim * fy / m.altura * 100}%" title="Fim da saudação"></i>
+      <i class="guia guia-h" style="top:${det.atenciosamenteInicio * fy / m.altura * 100}%" title="Início do “Atenciosamente”"></i>` : "";
+    camada.innerHTML = guias + m.campos.map((c) => `<div class="caixa${c.id === estado.campoAtivo ? " ativa" : ""}" data-caixa="${c.id}"
+      style="left:${c.x / m.largura * 100}%;top:${c.y / m.altura * 100}%;width:${c.largura / m.largura * 100}%;height:${c.altura / m.altura * 100}%">
+      <span>${escapar(c.rotulo)}</span><i class="alca" data-alca="${c.id}"></i></div>`).join("");
+  }
+  let arraste = null;
+  camada.addEventListener("pointerdown", (e) => {
+    const caixa = e.target.closest("[data-caixa]");
+    if (!caixa) return;
+    e.preventDefault();
+    const c = modelo().campos.find((k) => k.id === caixa.dataset.caixa);
+    marcarCampo(c.id);
+    posicionarCaixas();
+    const r = tela.getBoundingClientRect();
+    arraste = { c, redimensionar: !!e.target.closest("[data-alca]"), x0: e.clientX, y0: e.clientY, inicial: { ...c }, escala: modelo().largura / r.width };
+    camada.setPointerCapture(e.pointerId);
+  });
+  camada.addEventListener("pointermove", (e) => {
+    if (!arraste) return;
+    const m = modelo();
+    const dx = (e.clientX - arraste.x0) * arraste.escala;
+    const dy = (e.clientY - arraste.y0) * arraste.escala;
+    const c = arraste.c;
+    if (arraste.redimensionar) {
+      c.largura = Math.round(Math.max(20, Math.min(m.largura - c.x, arraste.inicial.largura + dx)));
+      c.altura = Math.round(Math.max(10, Math.min(m.altura - c.y, arraste.inicial.altura + dy)));
+    } else {
+      c.x = Math.round(Math.max(0, Math.min(m.largura - c.largura, arraste.inicial.x + dx)));
+      c.y = Math.round(Math.max(0, Math.min(m.altura - c.altura, arraste.inicial.y + dy)));
+    }
+    desenhar();
+  });
+  camada.addEventListener("pointerup", () => { if (arraste) { arraste = null; renderizarAjuste(); } });
+
+  const botoesSalvarAjuste = () => `<div class="acoes">
+        <button type="button" class="btn" data-aj-acao="salvar">${svg("i-salvar")}Salvar para todos</button>
+        <button type="button" class="btn btn-secundario" data-aj-acao="exportar">${svg("i-download")}Exportar configuração</button>
+        <button type="button" class="btn btn-secundario" data-aj-acao="descartar">Descartar ajustes</button>
+      </div>`;
+  function renderizarAjusteOficial(m) {
+    const c = m.campos[0];
+    estado.campoAtivo = c.id;
+    const numero = (nome, rotulo, valor, min, max, passo = 1) => `<label class="campo"><span class="rotulo">${rotulo}</span><input type="number" data-aj="${nome}" value="${valor}" min="${min}" max="${max}" step="${passo}"></label>`;
+    const det = estado.deteccao[m.id];
+    const temImagem = !!det;
+    $("#painel-ajuste").innerHTML = `
+      <div class="form-topo"><h2>Modo ajuste · ${escapar(m.nome)}</h2></div>
+      <p class="aviso-oficial">Template oficial: a imagem (${escapar(m.imagem)}) e o campo único “Recado” são fixos. Aqui só se ajusta a caixa do recado e o texto. A saudação e a assinatura já estão na imagem.</p>
+      <p class="apoio">Arraste a caixa na prévia (canto laranja redimensiona). As linhas azuis marcam a margem do “Olá” e os limites detectados na imagem.</p>
+      <div class="grade-ajuste">
+        ${numero("x", "X", c.x, 0, m.largura)}${numero("y", "Y", c.y, 0, m.altura)}
+        ${numero("largura", "Largura", c.largura, 20, m.largura)}${numero("altura", "Altura", c.altura, 10, m.altura)}
+        ${numero("tamanhoMax", "Tamanho máximo (px)", c.tamanhoMax, 6, 60, 0.5)}${numero("tamanhoMin", "Tamanho mínimo (px)", c.tamanhoMin, 6, 60, 0.5)}
+        ${numero("entrelinha", "Entrelinha", c.entrelinha, 0.8, 2.5, 0.05)}
+        <label class="campo"><span class="rotulo">Cor</span><input type="color" data-aj="cor" value="${escapar(c.cor)}"></label>
+      </div>
+      <div class="acoes">
+        <button type="button" class="btn btn-secundario btn-mini" data-aj-acao="detectar"${temImagem ? "" : " disabled"}>${svg("i-busca")}Detectar área livre</button>
+        <button type="button" class="btn btn-secundario btn-mini" data-aj-acao="restaurar">${svg("i-desfazer")}Restaurar padrão</button>
+      </div>
+      ${temImagem ? (det.falhou ? '<p class="apoio">Não foi possível achar a saudação e o “Atenciosamente” nesta imagem: ajuste a caixa à mão.</p>' : "") : '<p class="apoio">“Detectar área livre” fica disponível quando o template estiver em fotos/comunicados/.</p>'}
+      ${botoesSalvarAjuste()}`;
+  }
+  function renderizarAjuste() {
+    if (!estado.ajuste) return;
+    const m = modelo();
+    if (m.oficial) { renderizarAjusteOficial(m); return; }
+    const c = m.campos.find((k) => k.id === estado.campoAtivo) || m.campos[0];
+    estado.campoAtivo = c.id;
+    const opcoes = (lista, atual, nomes) => lista.map((v, i) => `<option value="${escapar(v)}"${String(v) === String(atual) ? " selected" : ""}>${escapar(nomes ? nomes[i] : v)}</option>`).join("");
+    const numero = (nome, rotulo, valor, min, max, passo = 1) => `<label class="campo"><span class="rotulo">${rotulo}</span><input type="number" data-aj="${nome}" value="${valor}" min="${min}" max="${max}" step="${passo}"></label>`;
+    $("#painel-ajuste").innerHTML = `
+      <div class="form-topo"><h2>Modo ajuste · ${escapar(m.nome)}</h2></div>
+      <p class="apoio">Arraste as caixas na prévia (canto laranja redimensiona). Os ajustes valem para todo mundo depois de salvar.</p>
+      <div class="grade-ajuste">
+        <label class="campo" style="grid-column:1/-1"><span class="rotulo">Imagem do template</span><input data-aj-modelo="imagem" value="${escapar(m.imagem)}" placeholder="fotos/comunicados/arquivo.png"></label>
+        ${numero("m-largura", "Largura da imagem (px)", m.largura, 200, 4000).replace('data-aj="m-largura"', 'data-aj-modelo="largura"')}
+        ${numero("m-altura", "Altura da imagem (px)", m.altura, 200, 4000).replace('data-aj="m-altura"', 'data-aj-modelo="altura"')}
+      </div>
+      <label class="campo"><span class="rotulo">Campo selecionado</span><select data-aj-selecionar>${opcoes(m.campos.map((k) => k.id), c.id, m.campos.map((k) => k.rotulo))}</select></label>
+      <div class="grade-ajuste">
+        <label class="campo"><span class="rotulo">Rótulo</span><input data-aj="rotulo" value="${escapar(c.rotulo)}" maxlength="40"></label>
+        <label class="campo"><span class="rotulo">Tipo</span><select data-aj="tipo">${opcoes(["texto", "dataHora", "lista"], c.tipo, ["Texto", "Data e hora", "Lista"])}</select></label>
+        <label class="campo" style="grid-column:1/-1"><span class="rotulo">Texto padrão</span><input data-aj="padrao" value="${escapar(c.padrao)}" maxlength="300"></label>
+        <label class="campo"><span class="rotulo">Prefixo</span><input data-aj="prefixo" value="${escapar(c.prefixo)}" maxlength="30"></label>
+        <label class="campo"><span class="rotulo">Fonte</span><select data-aj="fonte">${opcoes(FONTES, c.fonte)}</select></label>
+        ${numero("x", "X", c.x, 0, m.largura)}${numero("y", "Y", c.y, 0, m.altura)}
+        ${numero("largura", "Largura", c.largura, 20, m.largura)}${numero("altura", "Altura", c.altura, 10, m.altura)}
+        ${numero("tamanhoMax", "Tamanho máximo", c.tamanhoMax, 8, 200)}${numero("tamanhoMin", "Tamanho mínimo", c.tamanhoMin, 8, 200)}
+        <label class="campo"><span class="rotulo">Peso</span><select data-aj="peso">${opcoes([400, 500, 600, 700], c.peso, ["Normal", "Médio", "Seminegrito", "Negrito"])}</select></label>
+        <label class="campo"><span class="rotulo">Cor</span><input type="color" data-aj="cor" value="${escapar(c.cor)}"></label>
+        <label class="campo"><span class="rotulo">Alinhar</span><select data-aj="alinhar">${opcoes(["esquerda", "centro", "direita"], c.alinhar, ["Esquerda", "Centro", "Direita"])}</select></label>
+        <label class="campo"><span class="rotulo">Vertical</span><select data-aj="alinharVertical">${opcoes(["topo", "meio", "base"], c.alinharVertical, ["Topo", "Meio", "Base"])}</select></label>
+        ${numero("maxLinhas", "Máx. de linhas", c.maxLinhas, 1, 20)}${numero("maxCaracteres", "Máx. de caracteres", c.maxCaracteres, 1, 600)}
+        ${numero("entrelinha", "Entrelinha", c.entrelinha, 0.8, 2.5, 0.05)}
+        <label class="check" style="align-self:end"><input type="checkbox" data-aj="maiusculas"${c.maiusculas ? " checked" : ""}> Maiúsculas</label>
+        <label class="campo" style="grid-column:1/-1"><span class="rotulo">Textos prontos (um por linha)</span><textarea data-aj="prontos" rows="3">${escapar(c.prontos.join("\n"))}</textarea></label>
+      </div>
+      <div class="acoes">
+        <button type="button" class="btn btn-secundario btn-mini" data-aj-acao="adicionar">${svg("i-mais")}Adicionar campo</button>
+        <button type="button" class="btn btn-perigo btn-mini" data-aj-acao="remover"${m.campos.length < 2 ? " disabled" : ""}>${svg("i-lixeira")}Remover este campo</button>
+      </div>
+      <div class="acoes">
+        <button type="button" class="btn" data-aj-acao="salvar">${svg("i-salvar")}Salvar para todos</button>
+        <button type="button" class="btn btn-secundario" data-aj-acao="exportar">${svg("i-download")}Exportar configuração</button>
+        <button type="button" class="btn btn-secundario" data-aj-acao="descartar">Descartar ajustes</button>
+      </div>`;
+  }
+  const painelAjuste = $("#painel-ajuste");
+  painelAjuste.addEventListener("change", (e) => {
+    const m = modelo();
+    if (e.target.matches("[data-aj-selecionar]")) { marcarCampo(e.target.value); posicionarCaixas(); return; }
+    if (e.target.matches("[data-aj-modelo]")) {
+      if (m.oficial) return;
+      const k = e.target.dataset.ajModelo;
+      if (k === "imagem") {
+        const v = e.target.value.trim();
+        if (!CAMINHO_IMAGEM.test(v)) { mostrarAviso("Use um arquivo dentro de fotos/comunicados/ (png, jpg ou webp)."); e.target.value = m.imagem; return; }
+        m.imagem = v;
+      } else m[k] = num(e.target.value, 200, 4000, m[k]);
+      desenhar();
+      return;
+    }
+    const k = e.target.dataset.aj;
+    if (!k) return;
+    if (m.oficial && !["x", "y", "largura", "altura", "tamanhoMax", "tamanhoMin", "entrelinha", "cor"].includes(k)) return;
+    const c = m.campos.find((x) => x.id === estado.campoAtivo);
+    let v = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    if (k === "prontos") v = String(v).split("\n").map((t) => t.trim()).filter(Boolean);
+    const novo = normalizarCampo({ ...c, [k]: v }, m);
+    if (!novo) return;
+    if (novo.tamanhoMin > novo.tamanhoMax) novo.tamanhoMin = novo.tamanhoMax;
+    Object.assign(c, novo);
+    if (["tipo", "rotulo", "prontos", "maxLinhas", "maxCaracteres"].includes(k)) renderizarFormulario();
+    desenhar();
+    if (["rotulo"].includes(k)) renderizarAjuste();
+  });
+  painelAjuste.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-aj-acao]");
+    if (!b) return;
+    const m = modelo();
+    const acao = b.dataset.ajAcao;
+    if (m.oficial && (acao === "adicionar" || acao === "remover")) return;
+    if (acao === "detectar") {
+      const det = estado.deteccao[m.id];
+      if (!det || det.falhou) { mostrarAviso("Não foi possível detectar a área livre nesta imagem."); return; }
+      const fx = m.largura / det.largura, fy = m.altura / det.altura;
+      const s = { x: Math.round(det.caixa.x * fx), y: Math.round(det.caixa.y * fy), largura: Math.round(det.caixa.largura * fx), altura: Math.round(det.caixa.altura * fy) };
+      if (!(await confirmar(`Área livre encontrada entre a saudação e o “Atenciosamente”: X ${s.x}, Y ${s.y}, largura ${s.largura}, altura ${s.altura}. Aplicar na caixa do recado?`, { titulo: "Detectar área livre", botao: "Aplicar" }))) return;
+      Object.assign(m.campos[0], s);
+      desenhar(); renderizarAjuste();
+      mostrarAviso("Caixa ajustada. Clique em “Salvar para todos” para valer para a equipe.");
+      return;
+    }
+    if (acao === "restaurar") {
+      const padrao = copiaProfunda(MODELOS_COMUNICADO[m.id]);
+      const c = m.campos[0];
+      const p = padrao.campos[0];
+      const fx = m.largura / padrao.largura, fy = m.altura / padrao.altura;
+      Object.assign(c, { x: Math.round(p.x * fx), y: Math.round(p.y * fy), largura: Math.round(p.largura * fx), altura: Math.round(p.altura * fy),
+        tamanhoMax: Math.round(p.tamanhoMax * fx * 2) / 2, tamanhoMin: Math.round(p.tamanhoMin * fx * 2) / 2, entrelinha: p.entrelinha, cor: p.cor });
+      desenhar(); renderizarAjuste();
+      mostrarAviso("Caixa e texto do recado de volta ao padrão.");
+      return;
+    }
+    if (acao === "adicionar") {
+      let n = 1;
+      while (m.campos.some((c) => c.id === "campo-" + n)) n++;
+      m.campos.push(campo({ id: "campo-" + n, rotulo: "Campo " + n, x: 80, y: 80, largura: 400, altura: 80, tamanhoMax: 36, tamanhoMin: 20 }));
+      estado.campoAtivo = "campo-" + n;
+      carregarValores(); renderizarFormulario(); desenhar(); renderizarAjuste();
+    } else if (acao === "remover") {
+      if (m.campos.length < 2) return;
+      m.campos = m.campos.filter((c) => c.id !== estado.campoAtivo);
+      estado.campoAtivo = m.campos[0].id;
+      renderizarFormulario(); desenhar(); renderizarAjuste();
+    } else if (acao === "exportar") {
+      const p = partesBrasilia();
+      baixarArquivo(`comunicados-config-${p.ano}-${p.mes}-${p.dia}.json`, JSON.stringify({ modelos: estado.modelos }, null, 2), "application/json");
+    } else if (acao === "descartar") {
+      estado.modelos = copiaProfunda(estado.salvos || MODELOS_COMUNICADO);
+      carregarValores(); renderizarAbas(); renderizarFormulario(); desenhar(); renderizarAjuste();
+      mostrarAviso("Ajustes descartados.");
+    } else if (acao === "salvar") {
+      if (!ehAdmin() || !estado.api) { mostrarAviso("Entre como administradora para salvar."); return; }
+      b.disabled = true;
+      try {
+        const dados = JSON.stringify({ versao: VERSAO_OFICIAL, modelos: estado.modelos });
+        await estado.api.salvarDoc("conteudo/comunicados", { dados, atualizadoEm: "__AGORA__", atualizadoPor: sessao.email });
+        estado.salvos = copiaProfunda(estado.modelos);
+        ORDEM_ABAS.forEach((id) => { if (estado.modelos[id].oficial) estado.configSalva[id] = true; });
+        registrarAuditoria({ acao: "editar", alvo: "comunicados", resumo: `Ajustou o modelo de comunicado: ${m.nome}` });
+        mostrarAviso("Modelos salvos para todos.");
+      } catch (err) {
+        console.error(err);
+        mostrarAviso("Não foi possível salvar. Verifique se você entrou como administradora.");
+      } finally { b.disabled = false; }
+    }
+  });
+
+  /* ------------------------------------------------------------
+   *  Início
+   * ------------------------------------------------------------ */
+  window.__comunicados = { estado, gerarImagemFinal, detectarAreaLivre, foiAutoAjustado, lerMarcacao, escreverMarcacao, textoDaMarcacao, marcacaoDoTextoAntigo };
+  ABAS_REMOVIDAS.forEach((aba) => { try { localStorage.removeItem(CHAVE_RASCUNHO(aba)); } catch (e) {} });
+  {
+    const historico = lerLocal(CHAVE_HISTORICO, []);
+    if (Array.isArray(historico) && historico.some((h) => h && ABAS_REMOVIDAS.includes(h.aba))) gravarLocal(CHAVE_HISTORICO, historico.filter((h) => !h || !ABAS_REMOVIDAS.includes(h.aba)));
+  }
+  ligarTema();
+  renderizarAbas();
+  carregarValores();
+  renderizarFormulario();
+  desenhar();
+  renderizarHistorico();
+  document.addEventListener("tema-mudou", () => {});
+
+  aoMudarSessao(() => {
+    btnAjuste.hidden = !ehAdmin();
+    if (!ehAdmin() && estado.ajuste) alternarAjuste(false);
+    desenhar();
+    atualizarModelosNaTela();
+  });
+  ligarLogin().then((api) => {
+    estado.api = api;
+    estado.nuvemDecidida = true;
+    $("#faixa-offline").hidden = !!api;
+    atualizarModelosNaTela();
+    if (!api) return;
+    api.ouvirColecao(COLECAO_MODELOS, (lista) => {
+      estado.modelosRecado = { nuvem: lista.map((d) => normalizarModeloRecado(d)).filter(Boolean), falhou: false };
+      atualizarModelosNaTela();
+    }, (e) => {
+      console.warn(COLECAO_MODELOS, e);
+      estado.modelosRecado = { nuvem: [], falhou: true };
+      atualizarModelosNaTela();
+    });
+    api.ouvirDoc("conteudo/comunicados", (d) => {
+      if (!d || !d.dados) return;
+      let bruto;
+      try { bruto = JSON.parse(d.dados); } catch (e) { console.warn("conteudo/comunicados inválido", e); return; }
+      const novos = copiaProfunda(MODELOS_COMUNICADO);
+      const salvas = {};
+      /* Instabilidade e Restabelecimento: configuração de versão menor que 2 (provisória de 1080×1080) é ignorada em normalizarModelo() */
+      ORDEM_ABAS.forEach((id) => { const m = normalizarModelo(bruto && bruto.modelos && bruto.modelos[id], id); if (m) { novos[id] = m; salvas[id] = true; } });
+      estado.salvos = copiaProfunda(novos);
+      if (estado.ajuste) return;
+      estado.configSalva = salvas;
+      estado.modelos = novos;
+      carregarValores();
+      renderizarAbas();
+      renderizarFormulario();
+      desenhar();
+    }, () => {});
+  });
+</script>
+</body>
+</html>

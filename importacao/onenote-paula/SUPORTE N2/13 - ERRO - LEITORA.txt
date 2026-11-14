@@ -1,0 +1,46 @@
+Dados sistema: 
+
+ 
+
+Nome do Dispositivo CERTIFICADOS-VALID 
+
+Processador Intel(R) Core(TM) i5-6400 CPU @ 2.70GHz   2.70 GHz 
+
+RAM instalada 8,00 GB (utilizável: 7,89 GB) 
+
+Armazenamento 224 GB SSD ADATA SU650 
+
+Placa de vídeo Intel(R) HD Graphics 530 (128 MB) 
+
+ID do dispositivo EECBDE32-7A18-46D5-A4A7-844F0724856D 
+
+ID do Produto 00330-80000-00000-AA505 
+
+Tipo de sistema Sistema operacional de 64 bits, processador baseado em x64 
+
+Caneta e toque Nenhuma entrada à caneta ou por toque disponível para este vídeo 
+
+ 
+
+  
+
+Edição Windows 10 Pro 
+
+Versão 22H2 
+
+Instalado em ‎09/‎02/‎2022 
+
+Build SO 19045.6456 
+
+ 
+
+
+ 
+
+e o número de série é : da que funciona : fps516016 
+
+ 
+
+FS80H                                   
+
+da q n deu é fps585729 

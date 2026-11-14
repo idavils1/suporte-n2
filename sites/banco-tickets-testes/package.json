@@ -1,0 +1,13 @@
+{
+  "name": "banco-tickets-testes",
+  "private": true,
+  "type": "module",
+  "description": "Testes das regras do Banco de Tickets no Emulador do Firestore (não vão para o Firebase).",
+  "scripts": {
+    "test": "cd ../.. && firebase emulators:exec --only firestore --project demo-banco-tickets \"node --test sites/banco-tickets-testes/regras.test.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.10.0"
+  }
+}

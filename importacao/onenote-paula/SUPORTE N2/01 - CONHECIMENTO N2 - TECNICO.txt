@@ -1,0 +1,1943 @@
+
+ 
+
+
+ 
+
+ 
+
+Esse erro se dá pelo fato do template estar invertido. 
+
+ 
+
+Alguns sites acatam dessa forma, entretanto temos alguns (principalmente órgãos públicos) não funcionam com o cd nessa estrutura. 
+
+ 
+
+Estrutura correta:  
+
+ 
+
+
+ 
+
+Windows 10 - arquitetura ,32 bits. 
+
+Erro na execução do  
+
+. 
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+Solução: Formatar a máquina e instalar o W11 com 64 bits// 
+
+ 
+
+ 
+
+Integração do firefox do mac os, vocês tem o caminho da dll pro cartão AWP/IDEMIA2? 
+
+ 
+
+ /usr/local/awp/lib/libOcsCryptoki.dylib 
+
+ 
+
+ 
+
+Erro:  
+
+
+ 
+
+Causa: excesso de pacote visual:  
+
+
+ 
+
+ 
+
+Solução: remover os pacotes 64 (anos 2012/ 2013) pacote 2008 e 2010 x64 
+
+https://learn.microsoft.com/pt-br/cpp/windows/latest-supported-vc-redist?view=msvc-170 
+
+ 
+
+ 
+
+
+ 
+
+Pacote visual corrigido e mesmo assim não carrega o  
+
+: 
+
+ 
+
+
+ 
+
+ 
+
+Detectado ausência do PROCESSADOR. Solução: FORMATAR o equipamento. 
+
+ 
+
+ 
+
+ 
+
+CSR. 
+
+ 
+
+ Para criar um arquivo PFX, basta juntar o .Q e a CSR a chave privada precisa estar no JKS.(nome do programa) 
+
+ 
+
+CSR: Você vai criar duas chaves (pública e privada) Na publica vc escreve as características da empresa e na validação da CSR é para confirmar se os dados assinados com a privada estão certos. 
+
+Só gera a CSR com o .Q 
+
+ 
+
+https://www.globalsign.com/pt-br/blog/what-is-a-certificate-signing-request-csr 
+
+ 
+
+ 
+
+ 
+
+Leitor biométrico detectado, mas não solicita o finger do AGR (etapa validação > verificação)  
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+Verificar a biometria do AGR o VC IVS (SAP) e em paralelo, confirmar a versão do JAVA e dos pacotes visuais. 
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+Erro no reconhecimento CSP: 
+
+Driver AWP : 
+
+ 
+
+
+ 
+
+ 
+
+Remove  5.1.8.825 e instala a versão: 
+
+ 
+
+ 
+
+ 
+
+Criação da sala > videoconferência: 
+
+
+ 
+
+ 
+
+Verificar se  a VPN está ativada, se sim desativa-la e fazer um novo acesso. 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+IE habilitado no link da LIVENES > acessa configurações do EDGE> NAVEGADOR PADRÃO > remove o link da valid > cola o link de login do SAR. 
+
+ 
+
+ 
+
+Limpeza de base local > foto errada: 
+
+ 
+
+Para essa ação, é necessário o SAP mover a foto para EXCLUIDO > aciona INFRA via OTRS > para ação de INFRA. 
+
+ 
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+ Se o ticket em atendimento estiver com toda a documentação e ao validar apresente o erro acima, basta finaliza-lo no link ar2-icp-brasil.validcertificadora.com.br 
+
+ 
+
+ 
+
+COLETA BIOMETRICA AGR: 
+
+ 
+
+
+ 
+
+ 
+
+Versão do JAVA > máquina do AGR:  
+
+ 
+
+
+ 
+
+Para habilitação, é necessário está no JAVA 8 441 ou 371 
+
+Ou o JAVA:  371 
+
+  
+
+Pastas do Java: 
+
+C:\Program Files (x86)\Java 
+
+C:\Program Files 
+
+C:\Users\caique.souza\AppData\LocalLow\Sun 
+
+ 
+
+ 
+
+https://ar-icp-brasil.validcertificadora.com.br:443 
+
+ 
+
+ 
+
+ 
+
+ERRO:  
+
+
+ 
+
+
+ 
+
+A consulta do VC IVS está sendo direcionada para o parâmetro VCIVS-brasil2// 
+
+E daí quebra a consulta ocasionado em erros. 
+
+ 
+
+Comandos resgatados pelo time de engenharia:  
+
+ 
+
+Alan: 
+
+2025-07-07 09:11:28,308 INFO  [br.com.valid.cd.bio.helper.ServiceHelper] (JavaFX Application Thread) SearchByCPF Request: PersonBioSearchRequestVo [cpf=50426852869, userReqVo=UserSystemVo [idUserSystem=1030971, name=null, cpf=50426852869, email=null], getCredential()=null, getBillingInfoReq()=br.com.valid.cd.acbio.service.entities.auth.BillingInfoReq@161f6d0, ticket=35642656620] 
+
+ 
+
+Vinicius: vcivs-icp-brasil.validcertificadora.com.br/acbio-ws/SARBioServices?wsdl 
+
+ 
+
+updateUrlBiometry 
+
+ 
+
+ALAN: https://vcivs-icp-brasil.validcertificadora.com.br/vc-ivs-acbio-client-web/startBio?skin=SKN100113&specialCode=PT02562&ticket=35642656620&lockManualPhoto=FALSE&noOptionManualPhoto=FALSE&cpfRAOperator=50426852869&idUserSystem=1030971&skipConfereBiometricAgr=TRUE&blockSkipFingerModule=FALSE&cpf=50426852869&lat=0.0&lng=0.0 
+
+ 
+
+VINICIUS: url.web.biometry.system.consult 
+
+ 
+
+MARCILIO:  
+
+url.web.biometry.system.consult= https://ar-icp-brasil.validcertificadora.com.br/vc-ivs-acbio-client-web/pages/public/viewBioProcess.jsf 
+
+ 
+
+VINICIUS: url.web.service.biometry 
+
+ 
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+Para realizar a emissão:  
+
+Abrir o app VidaaS > Emitir novo E-CPF > Digite o CPF > Emitir novo certificado > Selecionar a data de atendimento > 04/07/2025 > Prosseguir com a senha de emissão e após definir a senha do certificado.  
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+ 
+
+ Orientar a remover o app > reinstala > importa o cd. 
+
+ 
+
+ 
+
+ 
+
+Erro de conexão SAT  e SAR:  
+
+
+ 
+
+ 
+
+Procedimentos:  
+
+ 
+
+Abrir o CMD e verificar se está tendo resposta através do PING + link (SAT e SAR) 
+
+ Fazer o pingconf e ver se o DNS tem resposta 
+
+ Caso não tenha configurar os seguintes IPS na tabela host: C:\Windows\System32\drivers\etc \ hosts. 
+
+Antes de abri -lo é importante executar como ADM : pesquisar\ notas\ abrir como administrador. 
+
+Depois de aberto edite a tabela hosts com os IPS apontados (importante obter orientação de infra quanto ao endereço). 
+
+ 
+
+Caso a ocorrência esteja relacionada a lentidão ao consultar a RFB (caso isolado) é importante, testar a velocidade do SAR com o IE habilitado, remove e instala o pacote C++ > redefine o navegador IE e peça novos testes. 
+  
+
+ 
+
+Habilitar o CONSOLE do JAVA: 
+
+
+ 
+
+ 
+
+IP da VIVO:  
+
+177.43.163.167  
+
+ 
+
+AGR consegue logar no SAT, mas qdo migra para o SAR cai a conexão. 
+
+Procedimento:  
+
+Acessar a tabela host>  comitar esse IP > salva > limpa histórico e acessa o SAR novamente. 
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+Exclui a pasta: C:\Users\paula.conceicao\AppData\Local\vc-ivs-bio 
+
+Remove o arquivo no painel de controle\ programas e recursos 
+
+E instala os arquivos:  
+
+1° https://s3-sa-east-1.amazonaws.com/share-validcertificadora/vc-ivs-bio-1.0.1.1-jar-with-dependencies.jar  
+
+ 
+
+2° https://s3-sa-east-1.amazonaws.com/share-validcertificadora/vc-ivs-bio-1.0.1.1.exe 
+
+ 
+
+Para conseguir avançar da validação para verificação, esses devem ser os arquivos e pastas que devem constar na máquina do AGR:  
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+ERRO Validação do Requerente: 
+
+
+ 
+
+Cert _ Validação Simplificada _ Implantação-040825-170738.pdf link
+ 
+
+Acionar o SAP para verificar se: 
+
+A localidade está vinculada ao SKU correspondente ao ticket que apresentou o erro; 
+
+Verificar junto ao SAT se o ticket não já consta como validado, ou solicitado. 
+
+ Essa tratativa se aplica também para os tickets de tipo E CPF A3. 
+
+ 
+
+ 
+
+Instalador do GERENCIADOR DE MIDIAS - SAFESIGN>  
+
+ 
+
+Não usar o site da VALID. 
+
+ 
+
+
+    
+
+Erro n emissão. 
+ 
+Esse erro tambem pode estar relacionado a versão do Vagent. 
+ 
+
+Remove o gerenciador de mídia  >  
+
+ 
+
+Exclui a pasta A.E.T Europe no appdata > local   
+
+instala a versão ADM   
+
+ 
+
+SafeSign_Windows_x64_3.5.0.0_ADMIN 1.exe link
+Refaz a emissão. 
+
+ 
+ 
+Reinicia os serviços  
+cartão inteligente 
+ 
+
+ 
+
+LOOPING NO LOGIN (não carrega as credenciais) 
+
+ 
+
+Limpa o histórico > redefine o navegador > faz novos testes de acesso. 
+
+Acessa a tabela host 
+
+Setar os IPS:  
+
+Operadora vivo:  
+
+177.43.163.133    agenda-icp-brasil.validcertificadora.com.br 
+
+177.43.163.167    ar-icp-brasil.validcertificadora.com.br 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ERRO PARA DESBLOQUEAR  O TOKEN. 
+
+
+ 
+
+ 
+
+Versão do gerenciador:  
+
+ 
+
+
+ 
+
+Solução: Remover a versão SAFENET instalada na máquina, e instalar a versão:  
+
+Safenet+10.8+64bits_valid 2.msi link
+ 
+
+ 
+
+Para maiores orientações, acesse o manual:  
+
+Manual de Apoio - Safenet 5.pdf link
+ 
+
+ 
+
+Validação de requerente: 
+
+Para o funcionamento da validação pelo requerente o SKU precisa ser cadastrado: 
+
+Na localidade de autoatendimento de cada AR. 
+
+DC_request e autoservice > cadastros feitos via código > dev e P.O 
+
+Vincular o SKU dos produtos na localidade de autoserviço  
+
+ 
+
+ 
+
+ 
+
+ 
+
+Exceções BETA: 
+
+https://ar-beta.validcertificadora.com.br 
+
+https://ar-beta.validcertificadora.com.br/ra-operator-web/pages/private/request/addRequest.jsf 
+
+ 
+
+https://vcivs-beta.validcertificadora.com.br:443 
+
+https://agenda-beta.validcertificadora.com.br/scheduler-web/pages/private/raoperatorhome.jsf 
+
+ 
+
+ 
+
+ 
+
+https://ar-beta.validcertificadora.com.br 
+
+https://ar-beta.validcertificadora.com.br/ra-operator-web/pages/private/request/addRequest.jsf 
+
+https://vcivs-beta.validcertificadora.com.br 
+
+https://vcivs-beta.validcertificadora.com.br:443 
+
+ 
+
+ 
+
+PSC: Prestador de Serviços de CONFIANÇA. 
+
+ 
+
+ 
+
+Aracert > passou o contato do N2 para o cliente final. 
+
+ 
+
+CPF: 64627152604 
+
+ 
+
+Concessão de ticket NUVEM:  
+
+VHUB: Concede certificado de 1ano (nuvem). 
+
+Varejo aplica política de analise. 
+
+ 
+
+ 
+
+
+ 
+
+ERRO gerado devido ao baixo grau de complexidade da senha. 
+
+Solução: criar uma nova senha. 
+
+ 
+
+ 
+
+ 
+
+Certificado emitido e ocorre erro na importação. 
+
+ 
+
+
+ 
+
+ 
+
+1. Desinstale o Vidaas e Reinicie o Celular.  
+
+2. Instale o Vidaas novamente. 
+
+3. Após a reinstalação, acesse o Vidaas e clique em 'Novo'. 
+
+4. Importe seus certificados antigos. 
+
+5. Insira seu CPF e senha e prossiga. 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ERRO na abertura do LIVENESS. 
+
+Remover o link da Liveness da configuração. 
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+Caminho para a safenet > MAC OS :  
+
+ 
+
+/usr/local/lib/libeTPkcs11.dylib 
+
+  
+
+Assinador JAVA PROJUDI. 
+
+ 
+
+ 
+
+Recoleta de biometria AGR, só captura no VC IVS se o AGR estiver ativo 
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+A GMUD corrigiu a anomalia que "permitia" o acesso do SAR sem a URL estar setada dentro da EXCEÇÃO do JAVA. 
+
+ 
+
+ 
+
+O cadastro na Nuvidio é automático e se ocorrer o erro abaixo, certifique se de o ticket em atendimento não estava iniciado, ou seja, quando a AR migrar para o atendimento através da Nuvidio, o ticket deve estar apenas como AGENDADO. 
+
+ 
+
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+Incluir exceção do JAVA:  
+
+ 
+
+Menu PESQUISAR > CONFIGURAR JAVA > abrir > aba SEGURANÇA > editar lista de SITES > clica em ADICIONAR o link:  
+
+https://ar-icp-brasil.validcertificadora.com.br:443 
+
+ 
+
+ 
+
+189.125.182.167 ar-icp-brasil.validcertificadora.com.br 
+
+ 
+
+ 
+
+C:\Windows\System32\aetpkss1.dll 
+
+Comando para configurar o certificado no SEBRAE 
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+Não publica a credencial mesmo depois de excluir o certificado do WINDOWS, forçar a publicação do certificado > SERVIÇOS. Reiniciar o item cartão inteligente. 
+
+ 
+
+Removido a versão do JAVA 8-201. E instalado o JAVA versão 8-441. 
+
+ 
+
+Removido as credenciais da cadeia JUS e o acesso foi reestabelecido. 
+
+ 
+
+ 
+
+ 
+
+ 
+
+TENTATIVA DE LOGAR NO SAR e ao colocar o PIN não carrega a caixa de entrada. 
+
+Navegador CHROME. 
+
+Conferir versionamentos do: 
+
+JAVA 
+
+VC IVS BIO 
+
+Vagent 
+
+Credenciais publicadas no navegador. 
+
+ 
+
+Limpar o histórico e por fim testar o acesso em outro perfil do Chrome. 
+
+ 
+
+ 
+
+ 
+QUEDA DE SESSÃO AO MIGRAR DO SAR PARA O SAT: 
+
+Verificar se o usuário está ativo no sistema > SAT> ADM> USUARIOS > filtro TODOS > pesquisa pelo nome do usuário (AGR ou G.O) 
+
+ 
+
+ 
+
+ 
+
+Para verificar a versão do Windows, a forma mais fácil é pressionar as teclas Windows + R, digitar winver. 
+
+ 
+
+No dia 07.10  
+
+ 
+
+ 
+
+ 
+
+ERRO > CADASTRO DE DNA:  
+
+
+ 
+
+Verificar as configurações em PAINEL DE CONTROLE > remover o vagent, paralisar o antivírus (caso esteja na lista de ofensores > instalar o Vagent e fazer uma nova tentativa (guia anônima). 
+
+ 
+
+ 
+
+ERRO 500 INTERNO > VIDEOCONFERENCIA: 
+
+ 
+
+
+ 
+
+CAUSAS > erros capturados no LOG. 
+
+ 
+
+CADASTRO DUPLICADO 
+
+2025-10-09 16:29:17,699 ERROR [org.apache.catalina.core.ContainerBase.[jboss.web].[localhost].[/ra-operator-web].[Faces Servlet]] (http-0.0.0.0-8180-17) Servlet.service() for servlet Faces Servlet threw exception: javax.persistence.NonUniqueResultException: result returns more than one elements 
+
+ 
+
+ 
+
+AGR NÃO É LOCALIZADO NA NUVIDIO. 
+
+2025-10-09 16:29:17,695 INFO  [br.com.valid.cd.ra.common.integration.dao.nuvidio.NuVidioAtendenteDao] (http-0.0.0.0-8180-17) Buscando atendente no banco {AG00020359 Leticia Rodrigues Ferreira} 
+
+2025-10-09 16:29:17,699 ERROR [br.com.valid.cd.ra.operator.web.interceptor.RaExceptionHandlerWrapper] (http-0.0.0.0-8180-17) com.sun.faces.mgbean.ManagedBeanCreationException: Um erro ocorreu ao realizar a inje??o de recurso no bean gerenciado validateRequestBean 
+
+ 
+
+
+ 
+
+ 
+
+ERRO:  
+
+ 
+
+CDM: java_version se maior que 1.8_411 > possivelmente foi atualizado o JAVA. 
+
+ 
+
+ 
+
+VARAIVEIS DE AMBIENTE: 
+
+ 
+
+w+VARIAVEIS DE AMBIENTE do sistema > ULTIMA OPÇÃO  >  configurar variáveis de ambientes > variável PATCH> editar as variáveis (sistema)  
+
+ 
+
+...... Verificar se alterou a versão + teste se deu bom, senão reinicia a maquina 
+
+ 
+
+ 
+
+ERRO 500 > atendimento presencial: 
+
+Analisar o ticket e a etapa em que está. 
+
+Se estiver pendente de VALIDAÇÃO, porém sem um AGR vinculado: 
+
+ 
+
+
+ 
+
+ACIONAR INFRA PARA EXECUTAR O SEGUINTE SCRIPT:  
+
+ 
+
+select * from AR_ONLINE_ICP.WORK_GROUP where id_request = (select ID_REQUEST from AR_ONLINE_ICP.REQUEST where ticket = '') 
+
+ID do AGR: 00000000 
+
+ 
+
+Resultado:  
+
+
+ 
+
+CAUSA: 
+
+O ticket teve seu atendimento iniciado por videoconferência e depois migraram para atendimento presencial, também teve retorno de status para o ticket, o que gerou quebra no fluxo/ ou ausência de respostas correspondentes aos campos. 
+
+ 
+
+ERRO LOG:  
+
+ 
+
+2025-10-13 14:33:05,291 INFO  [br.com.valid.cd.common.integration.dao.hibernate.GenericHibernateDao] (http-0.0.0.0-8180-13) List<CommentHistory> findCommentHistoryByRequestId(int idRequest) 
+
+2025-10-13 14:33:07,346 ERROR [STDERR] (http-0.0.0.0-8180-8) br.com.valid.cd.common.domain.exception.ValidationException 
+
+2025-10-13 14:33:07,346 ERROR [STDERR] (http-0.0.0.0-8180-8)    at br.com.valid.cd.ras.domain.service.request.RequestService.validateBasicRequestItens(RequestService.java:2499) 
+
+2025-10-13 14:33:07,346 ERROR [STDERR] (http-0.0.0.0-8180-8)    at br.com.valid.cd.ras.domain.service.request.RequestService.validateBasicRequestItens(RequestService.java:1886) 
+
+ 
+
+ 
+
+ 
+
+ERRO 500 - 
+Verificar se o DNA da máquina está disponível no RODAPÉ  
+ 
+
+ 
+
+ 
+
+Safenet Drivers :: Safenet Drivers :: GlobalSign Support 
+
+ 
+
+ 
+
+TRATATIVA PALEATIVA ERRO 3 VCRYPTO. 
+
+ 
+
+1° remove o Vagent (painel de controle e appdata > roaming > pasta VALID 
+
+ 
+
+2°  mantem apenas os pacotes C++ 86x anos 2010/ 12 / 13  e 2015 - 2022 remove os pacotes c++ excedentes. 
+
+ 
+
+Importante Reparar o pacote visual C++ durante a instalação do Vagent.3°reinicia a máquina > instala o Vagent: https://valid-websocket.s3.amazonaws.com/installer/VAgent-Certificadora-Cliente-Installer_x64_2.0.5.exe 
+
+ 
+
+Faça uma nova tentativa de acesso. 
+
+ 
+
+Se o erro persistir se faz necessário acionar o SUPORTE N2 (JIRA) para concessão do certificado NUVEM A3. 
+
+ 
+
+ 
+
+ 
+
+ 
+
+EDITOR DE REGISTRO: 
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography\Calais\ READS > botao direito > PERMISSOES  
+
+  
+
+ 
+
+ 
+ 
+
+
+  
+
+ 
+
+ 
+
+Máquina do tempo Windows 
+
+ PESQUISAR > RESTAURAÇÃO DO SISTEMA > CRIAR PONTO DE RESTAURAÇÃO > disco local C:  > defina o nome > CRIAR. 
+
+ 
+
+Com isso é possível "voltar" no tempo. 
+
+ 
+Acessa RESTAURAÇÃO DO SISTEMA > PROTEÇÃO DO SISTEMA >  Restauração do sistema. 
+
+ 
+
+ 
+
+ 
+
+DRIVER E PASS:  
+
+ 
+
+Ramal de normas 9001. 
+
+ 
+
+Formatação de data e hora > planilha 
+
+=esquerda(seleciona a célula a esquerda;17)+enter 
+
+ 
+
+LOOPING para logar no sistema: 
+
+ 
+
+Gerenciador de dispositivo > atualiza o driver > refaz o teste. 
+
+ 
+
+ 
+
+ 
+
+ 
+
+SISTEMAS: 
+
+SAR/ SIG/ VIDAAS/ SAT/ CONFIGURACAO 
+
+  
+
+AR: NOME DA AR PARCEIRA 
+
+  
+
+MOTIVO: 
+
+INSTABILIDADE, BIOMETRIA, UTILIZACAO, EQUIPAMENTO 
+
+ 
+
+ 
+
+PROPAGAÇÃO DE CERTIFICADO 
+
+Abra o REGEDIT (deverá ser executado como Administrador).  
+
+Vá até a chave [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography\Calais\Readers 
+
+Clique com o botão direito na pasta Readers e vá em Permissões. Permita o controle total nos usuários TODOS OS PACOTES DE APLICATIVOS e no usuário local. Conforme a imagem abaixo  
+
+  
+
+ 
+
+undefined
+ 
+
+ 
+
+Repita isso na chave HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography\Calais\SmartCards  
+
+  
+
+Reinicie o computador e veja se a leitora aparece.  
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+ 
+Abra o VIDaaS e clique em "Novo"> Emitir novo Certificado e-CPF> Digite o CPF> O app irá identificar o ticket válido para emissão, selecione "Emitir novo certificado" com a data de atendimento correspondente e prossiga> Selecione o pedido e prossiga> Digite a senha de emissão> Confirme o e-mail de recuperação de senha> Cadastre a senha de uso do certificado (pode ser a mesma de emissão)> aguarde a validação das informações. 
+
+ 
+
+ 
+
+ 
+
+ 
+
+PESQUISA DE SATISFAÇAO CHAT - N2 
+
+ 
+
+Prezado(a) gestor (a) 
+
+ 
+
+Sua opinião é de grande relevância, pois nos auxilia a evoluir continuamente e a disponibilizar um suporte de alta qualidade. 
+
+https://forms.gle/Ff7KucBv1fDb2qtH6 
+
+  
+
+ 
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+Permissões de Administrador: A instalação ou desinstalação não foi executada com privilégios totais de administrador. 
+
+Arquivo em Uso: Outro processo ou programa está usando o arquivo aetcsss1.dll no momento da operação. 
+
+Problemas de Compatibilidade: Pode haver um conflito entre a versão do SafeSign e a versão do seu sistema operacional Windows. 
+
+Versão Incorreta: O instalador de 64 bits pode estar sendo usado em um sistema de 32 bits, ou vice-versa.  
+
+  
+
+reinicia e tenta de novo, se for alguma dll em execução reiniciando vai dar bom. 
+
+ 
+
+ 
+
+ACESSO AO SAR > CARREGANDO SEM APARECER A OPÇÃO DE INSERIR O PIN 
+Remove o Vagent > reinicia a máquina > instala o Vagent > fazer um novo teste. 
+
+ 
+
+ 
+
+EXECUTAVEL COLETA BIOMETRICA AGR 
+
+ 
+ 
+
+ https://share-validcertificadora.s3.sa-east-1.amazonaws.com/AGRBIO.jnlp  
+ 
+
+
+  
+Valido tentar a reinstalação do VAGENT. 
+
+ 
+
+
+ 
+Erro de emissão - seguindo o passo a passo > nova emissão. 
+
+ 
+
+ 
+
+ERRO DE ACESSO AO SAR > VERIFICAÇÃO MODO IE 
+
+
+ 
+Remove o JAVA > verificar se tem atualização pendente na máquina > reiniciar o equipamento. 
+Reinstalar o JAVA e fazer um novo teste. 
+
+ 
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ERRO ACESSO SIG: 
+Jéssica do CPF 38530300840 > certificado cadeia DIGIFORTE > necessário substituir  por um cuja estrutura é VALID ou RFB. 
+
+ 
+
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+Emissão sem custo. 
+
+ 
+
+ 
+
+ERRO DE INSTALACAO VIDAAS CONNECT: 
+ 
+
+
+ 
+
+ 
+
+REMOVE TODOS OS PACOTES COM ESSA DESCRIÇÃO:  
+
+ 
+
+
+ 
+
+Apaga a pasta VidaaS Conect 
+
+ 
+
+ C:\VIDaaS Connect  
+reinstala o programa. 
+
+ 
+
+ 
+
+ 
+
+Erro de memória > certificados publicados no navegador 
+ 
+
+
+ 
+
+ 
+
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+REMOVE O VAGENT e reinstala. 
+ 
+ 
+
+ERRO:  
+
+
+ 
+
+O que fazer? 
+ 
+SEGURANÇA WINDOWS \ controle de aplicativos e do navegador  
+DESATIVAR A primeira OPÇÃO. 
+
+ 
+ 
+
+
+ 
+
+ 
+
+ 
+
+
+ 
+
+Reinstala o VidaaS Connect ou o Vagent e fazer uma nova tentativa de login. 
+
+ 
+
+Ações executadas na máquina:  
+
+Removido o Vagent > PAINEL DE CONTROLE > PROGRAMAS E RECURSOS > Vagent 2.0.5 
+
+ 
+
+Removido o pacote visual DESKTOP Runtime> PAINEL DE CONTROLE > PROGRAMAS E RECURSOS > DESKTOP Runtime 
+
+ 
+
+Removido o VidaaS Conect> PAINEL DE CONTROLE > PROGRAMAS E RECURSOS >VidaaS Conect 
+
+Depois reinstalamos o VidaaS conect, o Vagent e o acesso foi restaurado com sucesso. 
+
+ 
+
+De <https://valid-sa.atlassian.net/jira/servicedesk/projects/N2CERT/queues/custom/351/N2CERT-13581>  
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+  ERRO  LECOM > load balancer  
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+ERRO VIDAAS CONNECT: 
+
+
+ 
+
+ CAUSA: Certificado publicado no navegador, ou versão. Caso seja versão, instale a 1.3.1 
+E atualize para a 1.4.10// 
+ 
+
+ 
+
+ 
+
+
+  
+
+erro na geração do QR CODE > nova emissão. 
+
+ 
+
+ 
+
+ 
+
+
+ 
+ 
+ 
+ 
+
+ 11 98163-1252 
+
+Bárbara 
+
+ 
+
+De <https://app.callbox.com.br/home/appview/novoatendimento/atendimento>  
+
+ 
+
+ 
+
+ 
+
+
+  
+
+POSSIVELMENTE o ticket já foi validado e está pendente de emissão. 
+ 
+
+
+ 
+
+ 
+
+ 
+
+LOG DO APP VIDAAS 
+
+ Tela sobre > opções > clicar 15x em cima de opções 
+
+ 
+
+ 
+
+ 
+
+Certificado A1 não propaga no MAC . 
+Procedimento: 
+ 
+Necessário um computador Windows para exportar o cd > opções da internet > EXPORTAR  
+
+ 
+
+ 
+
+
+ 
+ 
+
+
+ 
+ 
+
+
+ 
+
+
+ 
+Por fim instala o novo PFX com o formato SHA 256 (destacado na imagem acima). 
+
+ 
+
+ 
+
+
+ 
+ 
+
+configurações \ privacidade e SEGURANCA\ segurança do dispositivo ou DO WINDOWS \ detalhes do isolamento do núcleo \ proteção de detalhes local > inativado \lista de bloqueios de driver Windows > desativado. 
+ 
+ 
+
+
+ 
+ 
+
+
+ 
+
+
+ 
+ 
+
+
+ 
+
+Ambas opções precisam estar desativadas. 
+
+ 
+
+ 
+
+De <https://valid-sa.atlassian.net/jira/servicedesk/projects/N2CERT/queues/custom/351/N2CERT-14105>  
+
+ 
+
+ 
+
+ 
+
+https://ar-icp-brasil.validcertificadora.com.br/ 
+
+https://vcivs-icp-brasil.validcertificadora.com.br/ 
+
+https://vcivs-icp-brasil.validcertificadora.com.br:443 
+
+https://ar-icp-brasil.validcertificadora.com.br:443 
+
+https://share-validcertificadora.s3.sa-east-1.amazonaws.com 
+
+ 
+
+ 
+
+ERRO PARA GERAÇÃO DO QR CODE. 
+ 
+
+
+ 
+Remove a versão atual - Microsoft RUNTIMER e instalar a versão como ADM 1.4.10 
+
+ 
+ 
+
+ 
+ 
+SISTEMA solicitando instalação do VAGENT - mesmo estando em execução 
+permissões do site >  
+ 
+
+
+ 
+ 
+
+
+ 
+
+ 
+
+CONFIGURAÇÕES > PRIVACIDADE, PESQUISA E SERVIÇOS > PERMISSOES DO SITE > TODOS OS SITES >  PESQUISAR - digite AR  
+ 
+
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+
+Manter a opção PERMITIR selecionada. 
+
+ 
+
+SISTEMA solicitando instalação do VAGENT - mesmo estando em execução Google Chrome 
+ 
+Na barra de endereço, clique com o botão direito no lugar indicado e escolha a opção "Configurações de site" 
+ 
+
+€ 
+1 
+up-brasil.validcertificadora.com.br/ra-operator-web/pages/public/login.jsf?faces-redirect=true 
+Outlook 
+OMNI 
+ar-icp- 
+GESTÃO TI - Consel ... 
+Digisac - Login ID SCDA 
+X 
+brasil.validcertificadora.com.br 
+A conexão é segura 
+> 
+Câmera 
+> 
+Última utilização: há 54 minutos. 
+Microfone 
+> 
+Última utilização: há 54 minutos. 
+Bem-Vindo ao SISTEMA OPERACIONAL 
+Pop-ups e redirecionamentos 
+Apps no dispositivo 
+Valid 
+Redefinir permissões 
+Cookies e dados de sites 
+Configurações de sites 
+AUTENTICAR 
+Acessar as configurações do site 
+Clique em voltar  
+ 
+
+Q Pesquise nas configurações 
+€ 
+ar-icp-brasil.validcertificadora.com.br 
+Uso 
+2,6 MB · 3 cookies 
+Excluir dados 
+DormireÄne 
+ 
+
+Pesquise por ar- > mostre as opções do validcertificadora.com.br na seta > Clique sobre o link do SAR 
+ 
+ 
+
+Todos os sites 
+- ar- 
+Ordenar por 
+Mais visitados 
+Armazenamento total usado pelos sites mostrados: 8,5 GB 
+Excluir os dados exibidos 
+validcertificadora.com.br 
+8,5 GB - 23 cookies 
+vpki.com.br 
+> 
+938 KB 
+vidaas.com.br 
+> 
+2.753 bytes · 4 cookies 
+ 
+
+Todos os sites 
+ar- 
+X 
+Ordenar por 
+Mais visitados 
+Armazenamento total usado pelos sites mostrados: 8,5 GB 
+Excluir os dados exibidos 
+validcertificadora.com.br 
+8,5 GB - 23 cookies 
+V 
+ar-icp-brasil.validcertificadora.com.br 2,6 MB . 3 cookies 
+agenda-icp-brasil.validcertificadora.com.br 49,1 MB · 3 cookies 
+ar-ciesp.validcertificadora.com.br 1.894 KB 
+A 
+ar3-icp-brasil.validcertificadora.com.br 450 KB 
+A 
+validcertificadora.com.br 13,7 MB . 13 cookies 
+ 
+
+Na página que irá abrir dessa até o final e deixe como permitir os campos Rede local e Apps no dispositivos. 
+
+ 
+
+Uso do seu dispositivo 
+Perguntar (padrão) 
+Gerenciamento de janelas 
+Perguntar (padrão) 
+A 
+Fontes 
+Perguntar (padrão) 
+Picture-in-picture automático 
+Perguntar (padrão) 
+Rolar a tela e aplicar zoom em guias compartilhadas 
+Perguntar (padrão) 
+Instalações de apps da Web 
+Perguntar (padrão) 
+Rede local 
+Permitir 
+Apps no dispositivo 
+Permitir 
+ 
+
+ 
+
+ 
+
+ERRO VIDEOCONFERENCIA: 
+ 
+
+
+Limpa histórico do navegador > todo o período 
+restaura as configurações do navegador, se necessário executar o comando:  
+
+ 
+
+ipconfig -flushdns e faz uma nova tentativa. 
+ 
+Tickets validados através do app VidaaS e caem na verificação, se faz necessário rejeita-lo para conceder um novo. 
+ 
+ 
+
+
+ 
+52.67.110.124 api.nuvidio.com 
+Solução paliativa. 
+ 
+ 
+ERRO DE EMISSÃO DEXON: 
+ 
+
+
+ 
+ 
+ 
+
+Restaurado os pacotes visuais (na máquina deve ter apenas os de 86x) 
+
+anos: 
+
+2010 
+
+2012 
+
+2013 
+
+2015-2022 
+
+E instalado o gerenciador 1.0.29 
+Emissão finalizada com sucesso. 
+ 
+ 
+times zone 
+O horário de vencimento do seu certificado é baseado com o UTC. 
+- A configuração de hora do seu Windows interfere no horário exato do vencimento. 
+No Brasil é sempre -3 
+ 
+O CD é sempre emitido com o UTC, podendo  
+ 
+ 
+Chamado (#572902) - Suporte - Redes | Dúvida - DUVIDA SOBRE SENHA DO VIDAAS - GLPI 
+ 
+https://repositorio.iti.gov.br/instrucoes-normativas/IN2026_36_identificacao_requerente.htm 
+ 
+ 
+ 
+erro de emissão 
+ 
+
+
+ 
+ 
+ 
+TOKEN DEXON: 
+ 
+
+
+ 
+Correção: inicializar a midia. 
+ 
+ 
+
+
+ 
+Remover os Vagents > PAINEL DE CONTROLE 
+Pastas no appdata > local > valid - EXLCLUIR 
+Roaming > Valid - EXCLUIR. 
+Reinstala e executa o teste de acesso. 
+
+ 
+ 
+ 
+ 
+
+ 
+
+Segue os passos para resolver o caso de ontem quando o a videochamada é iniciada, porém apenas o cliente consegue acessar. O cliente vê e ouve o AGR, mas, para o AGR, não aparece nada. 
+
+  
+
+Nesse caso, o problema está relacionado a uma permissão do navegador que impede o correto funcionamento do sistema de vídeo. Para resolver, basta seguir os passos abaixo: 
+
+  
+
+Configurações do navegador: 
+
+Acesse Privacidade e Segurança no menu lateral esquerdo. 
+
+Clique em Configurações do site. 
+
+Acesse Ver permissões de dados armazenados em sites. 
+
+No campo de filtro da página, procure por "nuvidio.com". 
+
+Clique na seta ao lado do link e defina como Permitir as opções:  
+
+Instalação de apps da Web 
+
+Rede local 
+
+Apps no dispositivo 
+
+Com essa liberação de permissões, o erro não ocorrerá mais. 
+ 
+ 
+
+
+ 
+
+Máquina sem PROCESSADOR 
+ 
+ 
+
+
+ 
+ 
+ 
+
+
+ 
+ 
+ 
+
+
+ 
+ 
+
+
+ 
+ 
+
+
+ 
+Ativa o serviço > APLICA > OK > REINICIA  
+atualiza a pagina Login solicita o cadastro. 
+
+ 
+ 
+ 
+
+
+ 
+
+CORREÇÃO: 
+ 
+
+O erro se dá por que o link é direcionado para o google PESQUISA e não no navegador nativo. 
+
+ 
+
+A correção pode ser feita através do seguinte passo a passo: 
+
+Android 
+
+Abra Configurações. 
+
+Vá em Apps ou Aplicativos. 
+
+Toque em Aplicativos padrão. 
+
+Selecione Aplicativo de navegador. 
+
+Escolha o navegador desejado (Chrome). 
+ 
+iPhone (iOS) 
+
+Abra Ajustes. 
+
+Role até encontrar o navegador que deseja usar (Chrome) 
+
+Toque nele. 
+
+Selecione App de Navegador Padrão. 
+
+Escolha o navegador desejado. 
+
+ 
+
+De <https://suporte.si.valid.com.br/front/ticket.form.php?id=611726>  
+
+ 
+ 
+ 
+ERRO PARA ACESSO DE VIDEOCONFERENCIA: 
+ 
+
+
+ 
+- Caso o cliente esteja em outro país, e ele enfrente dificuldades para ingressar na videoconferência após realização do LIVENESS, necessário solicitar o IP What Is My IP Address? - ifconfig.me e na sequência acionar o time de PRODUTOS. 
+ 
+ 
+COMANDO POWERSHELL para remoção de driver: 
+ 
+listar o driver:  
+
+pnputil /enum-drivers 
+ 
+REMOVER O DRIVER:  
+
+pnputil /delete-driver oem42.inf /uninstall /force 
+
+ 
+_______________________________________________________ 
+VINCULO DE SKU EM API. 
+Tarefa executada pelo time de Produtos (LUCAS E MATHEUS). 
+ 
+Necessário solicitar os seguintes dados para o parceiro: 
+ 
+NOME DA AR: 
+ID: 
+CUSTOMER: 
+ 
+________________________________________________________ 
+ 
+Erro de emissão - Classe já existe 
+ 
+
+
+ 
+ 
+Como resolver: 
+Remove a pasta Vagent > appdata\roaming\valid 
+Remove o Vagent > painel de controle 
+Remove o pacote visual Microsoft v14 
+ 
+reinicia a máquina. 
+instala o pacote visual Microsoft 2025-2022 
+instala o Vagent e realiza a emissão na guia anônima. 
+ 
+ 
+Emiti certificado em máquina com DNA cadastrado: 
+Recalcular o DNA: reiniciar o TESTADOR DE INSTRUMENTAÇÃO 
+ 
+ 
+
+
+ 
+ 
+ 
+ 
+
+
+ 
+ 
+NOVA EMISSÃO 
+ 
+ 
+ 
+ 
+ 
+
+
+ 

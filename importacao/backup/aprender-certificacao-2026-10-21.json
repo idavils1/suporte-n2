@@ -1,0 +1,374 @@
+{
+  "exportadoEm": "2026-10-21T19:56:42.251Z",
+  "origem": "comum/aprender-conteudo.js (versão anterior ao conteúdo novo de Certificação digital)",
+  "trilha": {
+    "id": "certificacao",
+    "nome": "Certificação digital",
+    "descricao": "O que é um certificado digital, os tipos (A1, A3 e nuvem), a ICP-Brasil e o VIDaaS.",
+    "icone": "i-certificado",
+    "ordem": 1
+  },
+  "temas": [
+    {
+      "id": "certificado-digital",
+      "trilha": "certificacao",
+      "paiId": null,
+      "ordem": 1,
+      "nivel": "Básico",
+      "titulo": "Certificado digital (A1, A3 e nuvem)",
+      "resumo": "A identidade eletrônica que prova quem é a pessoa ou empresa e permite assinar documentos.",
+      "palavrasChave": [
+        "certificado",
+        "e-cpf",
+        "e-cnpj",
+        "a1",
+        "a3",
+        "token",
+        "cartão",
+        "nuvem",
+        "assinatura"
+      ],
+      "secoes": {
+        "frase": "Um **certificado digital** é uma identidade eletrônica: ele prova quem é uma pessoa (e-CPF) ou uma empresa (e-CNPJ) no mundo digital e permite **assinar documentos** com validade jurídica.",
+        "simples": "Pense no seu RG com um carimbo de cartório. O RG diz quem você é; o carimbo mostra que alguém confiável conferiu isso.\n\nNo certificado digital é igual: uma **Autoridade Certificadora (AC)** conferiu a identidade da pessoa e \"carimbou\" o certificado. Quando a pessoa assina um documento com ele, é como reconhecer firma — só que pelo computador ou pelo celular.",
+        "funciona": "Todo certificado tem um **par de chaves**:\n\n- **Chave privada:** fica só com o titular, protegida por senha (PIN). É ela que assina.\n- **Chave pública:** vai dentro do certificado. Qualquer pessoa usa para conferir a assinatura.\n\nO que muda entre os tipos é **onde a chave privada fica guardada**:\n\n| Tipo | Onde fica a chave privada | Como a pessoa usa |\n| --- | --- | --- |\n| **A1** | Em um arquivo no computador (geralmente .pfx ou .p12) | Instala o arquivo e digita a senha |\n| **A3 (token ou cartão)** | Dentro de um dispositivo: token USB ou cartão inteligente com leitora | Conecta o dispositivo e digita o PIN |\n| **A3 em nuvem** | Em um ambiente seguro na nuvem (HSM), guardado por um prestador de serviço de confiança | Autoriza o uso pelo aplicativo no celular (ex.: VIDaaS) |\n\nO certificado tem **data de validade**. Depois que vence, ele não assina mais e é preciso um novo.\n\n> [!atencao] A confirmar com o time\n> Prazos de validade de cada produto (ex.: 1, 3 ou 5 anos), regras de renovação e preços variam conforme o catálogo da Valid. Consulte o time antes de informar o cliente.",
+        "exemplo": "**Token A3 não é reconhecido no Windows.** Uma verificação que o time usa: abrir os **Serviços** do Windows, localizar **Cartão inteligente**, parar o serviço, deixar em **Manual** e aplicar; depois **Iniciar**, voltar para **Automático** e aplicar. Em seguida, remover e reconectar o token.\n\n**Cliente não sabe qual tipo tem.** Pergunte onde ele usa o certificado: se instalou um arquivo, é A1; se usa um token ou cartão, é A3; se autoriza pelo celular, é nuvem.",
+        "duvidas": "### A1 ou A3: qual é melhor?\nDepende do uso. O A1 é prático (é só um arquivo), mas fica preso ao computador onde foi instalado. O A3 é mais protegido, porque a chave não sai do token, do cartão ou da nuvem.\n\n### O cliente errou o PIN várias vezes e o token travou. E agora?\nTokens e cartões bloqueiam depois de algumas tentativas erradas. Em geral, o desbloqueio usa o **PUK** (código de desbloqueio definido junto com o PIN).\n\n> [!atencao] A confirmar com o time\n> O passo a passo de desbloqueio e o que fazer quando o cliente não tem o PUK seguem procedimento interno.\n\n### Dá para copiar um certificado A3 para outro computador?\nNão. A chave privada do A3 não sai do dispositivo (ou da nuvem). Basta levar o token ou o cartão — ou, na nuvem, usar o aplicativo.",
+        "termos": "icp-brasil, vidaas, A1, A3, Chave privada, Autoridade Certificadora (AC), PUK",
+        "saibaMais": "- [ITI — Instituto Nacional de Tecnologia da Informação](https://www.gov.br/iti/pt-br)"
+      },
+      "quiz": [
+        {
+          "pergunta": "Onde fica a chave privada de um certificado A3?",
+          "opcoes": [
+            "Em um arquivo .pfx no computador",
+            "Em um token, cartão inteligente ou na nuvem (HSM)",
+            "No e-mail do cliente"
+          ],
+          "correta": 1,
+          "explicacao": "No A3 a chave privada fica protegida em um dispositivo (token ou cartão) ou em um ambiente seguro na nuvem. No A1 é que ela fica em um arquivo."
+        },
+        {
+          "pergunta": "Qual chave o titular usa para assinar um documento?",
+          "opcoes": [
+            "A chave pública",
+            "A chave privada",
+            "O número de série do certificado"
+          ],
+          "correta": 1,
+          "explicacao": "Quem assina usa a chave privada (que só ele tem). A chave pública serve para os outros conferirem a assinatura."
+        },
+        {
+          "pergunta": "O cliente autoriza a assinatura pelo celular, sem token. Que tipo ele provavelmente tem?",
+          "opcoes": [
+            "A1",
+            "A3 em nuvem",
+            "Certificado SSL"
+          ],
+          "correta": 1,
+          "explicacao": "Certificado em nuvem: a chave fica em um ambiente seguro e o uso é autorizado pelo aplicativo, como o VIDaaS."
+        }
+      ]
+    },
+    {
+      "id": "icp-brasil",
+      "trilha": "certificacao",
+      "paiId": null,
+      "ordem": 2,
+      "nivel": "Básico",
+      "titulo": "ICP-Brasil",
+      "resumo": "A cadeia de confiança oficial que define quem pode emitir certificados digitais no Brasil.",
+      "palavrasChave": [
+        "icp",
+        "iti",
+        "ac raiz",
+        "autoridade certificadora",
+        "autoridade de registro",
+        "ar",
+        "cadeia"
+      ],
+      "secoes": {
+        "frase": "A **ICP-Brasil** (Infraestrutura de Chaves Públicas Brasileira) é o sistema oficial que define **quem pode emitir certificados digitais** no país e **quais regras** essas empresas precisam seguir.",
+        "simples": "Imagine uma árvore genealógica da confiança:\n\n- No topo está a **AC Raiz**, que é o **ITI** (um órgão do governo federal).\n- Abaixo dela ficam as **Autoridades Certificadoras (ACs)** — empresas e órgãos autorizados a emitir certificados.\n- Na ponta ficam as **Autoridades de Registro (ARs)**, que atendem o cliente e conferem os documentos.\n\nComo cada nível foi autorizado pelo de cima, qualquer sistema consegue conferir se um certificado é confiável \"subindo a árvore\" até a raiz.",
+        "funciona": "- A ICP-Brasil foi criada pela **Medida Provisória 2.200-2, de 2001**.\n- O **ITI** é a AC Raiz: credencia, audita e fiscaliza as ACs e ARs.\n- Documentos assinados com certificado ICP-Brasil têm **presunção de validade jurídica**, como se fossem assinados à mão.\n- Cada certificado carrega a sua **cadeia**: o certificado do titular, o da AC que emitiu e o da AC Raiz. Se o computador não tiver a cadeia instalada, alguns sistemas não reconhecem o certificado.\n\nAs ARs podem atender de formas diferentes (presencial, videoconferência e outras), sempre dentro das regras do ITI.\n\n> [!atencao] A confirmar com o time\n> Quais formas de atendimento a Valid usa hoje em cada produto (ex.: videoconferência, módulo eletrônico) dependem de credenciamento no ITI e mudam com o tempo.",
+        "exemplo": "**\"O sistema diz que o certificado não é confiável.\"** Uma causa comum é a **cadeia de certificados** não estar instalada no computador. Instalar a cadeia da AC costuma resolver.\n\n> [!atencao] A confirmar com o time\n> Onde baixar a cadeia de cada produto e o passo a passo oficial para enviar ao cliente.\n\n**Normas.** Quando surgir dúvida de regra (o que pode ou não pode na emissão), a fonte são as normas e instruções normativas publicadas pelo ITI.",
+        "duvidas": "### Certificado de fora da ICP-Brasil vale?\nPode valer entre partes que aceitem aquele certificado, mas só o certificado ICP-Brasil tem a presunção de validade jurídica garantida pela MP 2.200-2.\n\n### Qual a diferença entre AC e AR?\nA **AC** emite e assina o certificado. A **AR** é a \"porta de entrada\": atende o cliente, confere identidade e documentos e encaminha o pedido para a AC.",
+        "termos": "certificado-digital, ITI, Autoridade Certificadora (AC), Autoridade de Registro (AR), Cadeia de certificados",
+        "saibaMais": "- [ITI — Instituto Nacional de Tecnologia da Informação](https://www.gov.br/iti/pt-br)"
+      },
+      "quiz": [
+        {
+          "pergunta": "Quem é a AC Raiz da ICP-Brasil?",
+          "opcoes": [
+            "O ITI",
+            "A Receita Federal",
+            "Cada certificadora é a própria raiz"
+          ],
+          "correta": 0,
+          "explicacao": "O ITI (Instituto Nacional de Tecnologia da Informação) é a AC Raiz: ele credencia e fiscaliza as ACs e ARs."
+        },
+        {
+          "pergunta": "Quem atende o cliente e confere a identidade dele?",
+          "opcoes": [
+            "A AC Raiz",
+            "A Autoridade de Registro (AR)",
+            "O navegador"
+          ],
+          "correta": 1,
+          "explicacao": "A AR é a porta de entrada: confere identidade e documentos e encaminha o pedido para a AC emitir."
+        }
+      ]
+    },
+    {
+      "id": "vidaas",
+      "trilha": "certificacao",
+      "paiId": null,
+      "ordem": 3,
+      "nivel": "Básico",
+      "titulo": "VIDaaS",
+      "resumo": "O aplicativo da Valid para certificado digital em nuvem: assinatura autorizada pelo celular.",
+      "palavrasChave": [
+        "vidaas",
+        "nuvem",
+        "aplicativo",
+        "celular",
+        "emissão",
+        "direito de uso",
+        "senha de emissão"
+      ],
+      "secoes": {
+        "frase": "O **VIDaaS** é o aplicativo da Valid para **certificado digital em nuvem**: a chave fica guardada em um ambiente seguro na nuvem e a pessoa **autoriza o uso pelo celular**, sem token.",
+        "simples": "Pense em um cofre de banco. O certificado fica guardado no cofre (a nuvem) e o celular funciona como a chave do cofre: cada vez que um sistema precisa do certificado, a pessoa confirma no aplicativo.",
+        "funciona": "- É um certificado **A3 em nuvem**: a chave privada não fica no celular nem no computador.\n- Na **emissão**, o cliente usa a **senha de emissão** e depois define a **senha do certificado**, que vai usar no dia a dia.\n- Para usar no computador, o sistema conversa com o VIDaaS — por integração direta ou pelo **VIDaaS Connect**.\n- Alguns produtos em nuvem são vendidos por **período de direito de uso** (no catálogo aparecem, por exemplo, opções de 4 meses e de 1, 2 ou 3 anos, e renovações de direito de uso).\n\n> [!atencao] A confirmar com o time\n> Regras de renovação do direito de uso, troca de celular e recuperação de acesso seguem procedimentos internos e podem mudar.",
+        "exemplo": "**Emitir pelo aplicativo** (passo a passo anotado pelo time):\n\n1. Abrir o app VIDaaS e tocar em **Emitir novo e-CPF**.\n2. Digitar o CPF e tocar em **Emitir novo certificado**.\n3. Selecionar a **data de atendimento**.\n4. Prosseguir com a **senha de emissão** e, depois, definir a **senha do certificado**.\n\n**Ativar/importar um certificado em nuvem:** reinstalar o app VIDaaS → **Novo** → **Ativar** → informar o CPF → concordar com o termo → **Confirmar** → **Ativar certificado** → com a opção **Ativar** selecionada, o botão **Prosseguir** é liberado.\n\n**O app travou ou não abre o certificado:** desinstalar o VIDaaS, reiniciar o celular, instalar de novo e, ao abrir, tocar em **Novo**.\n\n> [!atencao] A confirmar com o time\n> Em instabilidade geral do VIDaaS, o time registrou que é preciso comunicar no grupo de acompanhamento e formalizar por e-mail. Confirme o canal atual antes de seguir.",
+        "duvidas": "### O certificado do VIDaaS fica no celular?\nNão. Fica na nuvem. O celular só autoriza o uso. Por isso, trocar de celular não \"perde\" o certificado, mas exige reativar o acesso.\n\n> [!atencao] A confirmar com o time\n> Passo a passo oficial para troca de celular.\n\n### Funciona em qualquer sistema?\nNa maioria dos sistemas que aceitam certificado em nuvem, sim. Alguns portais exigem um tipo específico de integração com token e não aceitam — veja **VIDaaS Connect**.",
+        "termos": "certificado-digital, vidaas-connect, Certificado em nuvem, Direito de uso, HSM",
+        "saibaMais": "- [Valid — Instalação do VIDaaS no smartphone](https://validcertificadora.com.br/pages/instalacao-do-vidaas-no-seu-smartphone)\n- [Valid — Senha de utilização do VIDaaS](https://validcertificadora.com.br/pages/senha-de-utilizacao-vidaas)"
+      },
+      "quiz": [
+        {
+          "pergunta": "Onde fica a chave privada de um certificado no VIDaaS?",
+          "opcoes": [
+            "Na nuvem, em ambiente seguro",
+            "No chip do celular",
+            "Em um pendrive"
+          ],
+          "correta": 0,
+          "explicacao": "O VIDaaS é certificado em nuvem: a chave fica em ambiente seguro e o celular só autoriza o uso."
+        },
+        {
+          "pergunta": "O app travou e não abre o certificado. Qual o primeiro passo anotado pelo time?",
+          "opcoes": [
+            "Emitir outro certificado",
+            "Desinstalar, reiniciar o celular, instalar de novo e tocar em Novo",
+            "Formatar o computador"
+          ],
+          "correta": 1,
+          "explicacao": "Reinstalar o aplicativo (com o celular reiniciado) resolve boa parte dos travamentos sem mexer no certificado."
+        }
+      ]
+    },
+    {
+      "id": "vidaas-connect",
+      "trilha": "certificacao",
+      "paiId": "vidaas",
+      "ordem": 1,
+      "nivel": "Intermediário",
+      "titulo": "VIDaaS Connect",
+      "resumo": "O programa que leva o certificado em nuvem do VIDaaS para os sistemas do computador.",
+      "palavrasChave": [
+        "vidaas connect",
+        "connect",
+        "computador",
+        "pkcs#11",
+        "tjsp",
+        "portal de custas",
+        "qr code"
+      ],
+      "secoes": {
+        "frase": "O **VIDaaS Connect** é o programa instalado no computador que faz a **ponte** entre o computador e o certificado em nuvem do VIDaaS, para que sistemas e navegadores consigam usar esse certificado.",
+        "simples": "É como um adaptador de tomada. Muitos sistemas foram feitos esperando um token espetado no computador. O Connect faz o certificado que está na nuvem \"parecer\" um token conectado — e cada uso continua sendo autorizado no celular.",
+        "funciona": "1. A pessoa instala o VIDaaS Connect no computador.\n2. Vincula o Connect ao aplicativo VIDaaS do celular.\n3. Quando um sistema pede o certificado, o Connect busca a autorização no celular.\n\n**Limitação importante:** sistemas que dependem de uma integração específica com token (por exemplo, implementações baseadas em **PKCS#11**) podem não funcionar com o Connect.\n\n> [!atencao] A confirmar com o time\n> Lista atualizada de sistemas compatíveis e incompatíveis, versões do Connect e o passo a passo de vínculo (QR Code) para cada sistema operacional.",
+        "exemplo": "**Magistrado não consegue assinar no portal de custas (TJSP) com o VIDaaS.** Registro do time: no portal de custas o VIDaaS Connect **não funciona** porque o portal não é homologado para ele — usa outro tipo de criptografia e depende de **PKCS#11**, que não tem suporte. Nesse caso, configurar de novo não resolve; é preciso outra forma de certificado para aquele portal.\n\n> [!atencao] A confirmar com o time\n> Qual alternativa oferecer ao cliente nesse caso.",
+        "duvidas": "### Preciso do Connect para usar o VIDaaS?\nSó quando o sistema roda no computador e não tem integração direta com o VIDaaS. Muitos sistemas já se integram com a nuvem sem o Connect.\n\n### O Connect guarda o certificado no computador?\nNão. O certificado continua na nuvem; o Connect só faz a ponte.",
+        "termos": "vidaas, PKCS#11, Certificado em nuvem",
+        "saibaMais": ""
+      },
+      "quiz": [
+        {
+          "pergunta": "Para que serve o VIDaaS Connect?",
+          "opcoes": [
+            "Para guardar o certificado no computador",
+            "Para ligar o certificado em nuvem aos sistemas do computador",
+            "Para emitir certificados SSL"
+          ],
+          "correta": 1,
+          "explicacao": "Ele é uma ponte: o certificado continua na nuvem e o Connect permite que sistemas do computador o usem."
+        },
+        {
+          "pergunta": "Por que um portal pode não aceitar o VIDaaS Connect?",
+          "opcoes": [
+            "Porque depende de uma integração com token (como PKCS#11) que não tem suporte",
+            "Porque o celular está sem bateria",
+            "Porque o certificado é A1"
+          ],
+          "correta": 0,
+          "explicacao": "Foi o caso registrado no portal de custas do TJSP: integração baseada em PKCS#11, sem suporte no Connect."
+        }
+      ]
+    }
+  ],
+  "glossario": [
+    {
+      "termo": "A1",
+      "definicao": "Certificado digital cuja chave privada fica em um arquivo no computador (geralmente .pfx ou .p12)."
+    },
+    {
+      "termo": "A3",
+      "definicao": "Certificado digital cuja chave privada fica protegida em token, cartão inteligente ou na nuvem (HSM)."
+    },
+    {
+      "termo": "API",
+      "definicao": "Conjunto de regras que permite que um programa peça dados ou serviços a outro.",
+      "tema": "api"
+    },
+    {
+      "termo": "Assinatura digital",
+      "definicao": "Assinatura feita com a chave privada de um certificado; qualquer pessoa confere com a chave pública."
+    },
+    {
+      "termo": "Autoridade Certificadora (AC)",
+      "definicao": "Entidade autorizada que emite e assina certificados digitais."
+    },
+    {
+      "termo": "Autoridade de Registro (AR)",
+      "definicao": "Entidade que atende o cliente, confere identidade e documentos e encaminha o pedido para a AC."
+    },
+    {
+      "termo": "Cadeia de certificados",
+      "definicao": "Sequência que liga o certificado do titular à AC que emitiu e à AC Raiz; precisa estar instalada para o certificado ser reconhecido."
+    },
+    {
+      "termo": "Certificado digital",
+      "definicao": "Identidade eletrônica de uma pessoa (e-CPF) ou empresa (e-CNPJ), emitida por uma AC.",
+      "tema": "certificado-digital"
+    },
+    {
+      "termo": "Certificado em nuvem",
+      "definicao": "Certificado A3 cuja chave fica em ambiente seguro na nuvem; o uso é autorizado por aplicativo, como o VIDaaS."
+    },
+    {
+      "termo": "Chave privada",
+      "definicao": "Parte secreta do par de chaves; só o titular tem e é com ela que se assina ou se decifra."
+    },
+    {
+      "termo": "Chave pública",
+      "definicao": "Parte do par de chaves que vai dentro do certificado; serve para conferir assinaturas."
+    },
+    {
+      "termo": "CN (Common Name)",
+      "definicao": "Nome principal de um certificado SSL, normalmente o domínio do site."
+    },
+    {
+      "termo": "CSR",
+      "definicao": "Pedido de certificado (Certificate Signing Request) com a chave pública e os dados do domínio, gerado no servidor."
+    },
+    {
+      "termo": "Direito de uso",
+      "definicao": "Período em que um certificado em nuvem pode ser usado, conforme o produto contratado."
+    },
+    {
+      "termo": "DV",
+      "definicao": "Certificado SSL de validação de domínio: confere só que o domínio pertence a quem pediu."
+    },
+    {
+      "termo": "e-CNPJ",
+      "definicao": "Certificado digital de pessoa jurídica (empresa)."
+    },
+    {
+      "termo": "e-CPF",
+      "definicao": "Certificado digital de pessoa física."
+    },
+    {
+      "termo": "Endpoint",
+      "definicao": "Endereço (URL) onde uma API recebe pedidos."
+    },
+    {
+      "termo": "EV",
+      "definicao": "Certificado SSL de validação estendida, com a verificação mais rigorosa da organização."
+    },
+    {
+      "termo": "GET",
+      "definicao": "Método HTTP para buscar dados sem alterar nada; os parâmetros vão na URL."
+    },
+    {
+      "termo": "HSM",
+      "definicao": "Hardware Security Module: equipamento seguro que guarda chaves criptográficas, usado nos certificados em nuvem."
+    },
+    {
+      "termo": "HTTPS",
+      "definicao": "HTTP protegido por TLS; é o que faz aparecer o cadeado no navegador.",
+      "tema": "https"
+    },
+    {
+      "termo": "ICP-Brasil",
+      "definicao": "Infraestrutura de Chaves Públicas Brasileira: o sistema oficial de certificação digital do país.",
+      "tema": "icp-brasil"
+    },
+    {
+      "termo": "ITI",
+      "definicao": "Instituto Nacional de Tecnologia da Informação, a AC Raiz da ICP-Brasil."
+    },
+    {
+      "termo": "JSON",
+      "definicao": "Formato de texto com pares \"nome\": valor, muito usado nas respostas de API."
+    },
+    {
+      "termo": "OV",
+      "definicao": "Certificado SSL que valida o domínio e a organização (CNPJ e razão social)."
+    },
+    {
+      "termo": "PFX",
+      "definicao": "Arquivo que junta o certificado e a chave privada, protegido por senha (também chamado .p12)."
+    },
+    {
+      "termo": "PIN",
+      "definicao": "Senha de uso de um token ou cartão inteligente."
+    },
+    {
+      "termo": "PKCS#11",
+      "definicao": "Padrão técnico para sistemas conversarem com tokens e cartões criptográficos."
+    },
+    {
+      "termo": "POST",
+      "definicao": "Método HTTP para enviar dados e criar algo novo."
+    },
+    {
+      "termo": "PUK",
+      "definicao": "Código para desbloquear um token ou cartão travado por erros de PIN."
+    },
+    {
+      "termo": "RSA",
+      "definicao": "Algoritmo de criptografia de chave pública; o número (2048, 4096) é o tamanho da chave."
+    },
+    {
+      "termo": "SSL/TLS",
+      "definicao": "Tecnologia que cria a conexão criptografada entre navegador e site; TLS é a versão moderna do SSL.",
+      "tema": "ssl"
+    },
+    {
+      "termo": "Token",
+      "definicao": "Dispositivo USB que guarda a chave privada de um certificado A3."
+    },
+    {
+      "termo": "VIDaaS",
+      "definicao": "Aplicativo da Valid para certificado digital em nuvem.",
+      "tema": "vidaas"
+    },
+    {
+      "termo": "VIDaaS Connect",
+      "definicao": "Programa que liga o certificado em nuvem do VIDaaS aos sistemas do computador.",
+      "tema": "vidaas-connect"
+    }
+  ]
+}

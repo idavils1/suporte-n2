@@ -1,0 +1,31 @@
+// Confere o conteúdo embutido da Aprendizagem: node importacao/aprender/conferir-conteudo.mjs
+import { CATEGORIAS_PADRAO, TRILHAS_PADRAO, TEMAS_PADRAO, GLOSSARIO_PADRAO, CONTEUDO_VERSAO } from "../../comum/aprender-conteudo.js";
+const erros = [];
+const ids = new Set();
+TEMAS_PADRAO.forEach((t) => { if (ids.has(t.id)) erros.push(`id repetido: ${t.id}`); ids.add(t.id); });
+const trilhas = new Map(TRILHAS_PADRAO.map((t) => [t.id, t]));
+const cats = new Set(CATEGORIAS_PADRAO.map((c) => c.id));
+TRILHAS_PADRAO.forEach((t) => { if (!cats.has(t.categoria)) erros.push(`trilha ${t.id} sem categoria válida`); });
+const termos = new Set(GLOSSARIO_PADRAO.map((g) => g.termo.toLowerCase()));
+const norm = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+const titulos = new Set(TEMAS_PADRAO.map((t) => norm(t.titulo)));
+TEMAS_PADRAO.forEach((t) => {
+  const tr = trilhas.get(t.trilha);
+  if (!tr) erros.push(`${t.id}: trilha ${t.trilha} não existe`);
+  else if (t.modulo && tr.modulos && !tr.modulos.some((m) => m.id === t.modulo)) erros.push(`${t.id}: módulo ${t.modulo} não existe em ${t.trilha}`);
+  const textos = t.blocos ? t.blocos.map((b) => b.markdown) : Object.values(t.secoes || {});
+  const texto = textos.join("\n");
+  for (const m of texto.matchAll(/\]\(#([a-z0-9-]+)\)/g)) if (!ids.has(m[1]) && m[1] !== "glossario") erros.push(`${t.id}: link #${m[1]} não existe`);
+  const termosTxt = t.blocos ? (t.blocos.find((b) => b.id === "termos") || {}).markdown || "" : (t.secoes || {}).termos || "";
+  termosTxt.split(",").map((x) => x.trim()).filter(Boolean).forEach((x) => { if (!ids.has(x) && !termos.has(x.toLowerCase()) && !titulos.has(norm(x))) erros.push(`${t.id}: termo relacionado “${x}” não é aula nem termo do glossário`); });
+  if (/52 mil|40 mil|35 mil|1,5 mil|~450|1\.100/.test(texto)) erros.push(`${t.id}: volume do Datadog publicado`);
+  if (/Ny2n|4c9fb552/.test(texto)) erros.push(`${t.id}: credencial real no exemplo`);
+  if (/quiz/i.test(texto)) erros.push(`${t.id}: menciona quiz`);
+  const tamanho = JSON.stringify(t).length;
+  if (tamanho > 900000) erros.push(`${t.id}: ${tamanho} bytes (acima de 900 KB)`);
+});
+GLOSSARIO_PADRAO.forEach((g) => { if (g.tema && !ids.has(g.tema)) erros.push(`glossário ${g.termo}: tema ${g.tema} não existe`); });
+const porTrilha = (id) => TEMAS_PADRAO.filter((t) => t.trilha === id);
+console.log(`versão ${CONTEUDO_VERSAO}: ${CATEGORIAS_PADRAO.length} categorias, ${TRILHAS_PADRAO.length} trilhas, ${TEMAS_PADRAO.length} aulas, ${GLOSSARIO_PADRAO.length} termos`);
+TRILHAS_PADRAO.forEach((t) => console.log(` - ${t.categoria} › ${t.id}: ${porTrilha(t.id).length} aulas${t.modulos ? `, ${t.modulos.length} módulo(s)` : ""}`));
+console.log(erros.length ? `PROBLEMAS (${erros.length}):\n` + erros.join("\n") : "Sem problemas.");

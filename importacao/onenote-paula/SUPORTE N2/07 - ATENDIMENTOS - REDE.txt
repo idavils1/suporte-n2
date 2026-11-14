@@ -1,0 +1,11 @@
+IMPORTADO = Certificado solicitado, pendente de validação 
+
+PERSONALIZADO = Certificado validado, pendente de verificação 
+
+EXPEDIDO = Certificado verificado, pendente de emissão 
+
+EMITIDO = certificado emitido com sucesso. 
+
+RECUSADO = certificado revogado ou rejeitado. 
+
+ 

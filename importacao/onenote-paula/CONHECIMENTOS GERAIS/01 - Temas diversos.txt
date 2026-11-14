@@ -1,0 +1,207 @@
+
+ 
+
+ 
+
+Esse erro se deu em uma validação SSL EV > CSR gerada com SHA256, entretanto essa categoria de produto roda se na SHA512. 
+
+ 
+
+ 
+
+URLs 
+
+Caracteres comportados no SAR: 
+
+Razão Social/Nome 
+
+64 caracteres para Brasil 
+
+E 52 para RFB (com limitação de 49 letras pq o sistema automaticamente acrescenta o cnpj) 
+
+Limitação sistêmica 
+
+ 
+
+ 
+
+Criação de produto> Comercial Home (vpki.com.br) 
+
+Cadastro/ produto. Preenche os campos seguindo um modelo de produto já existente em tal categoria (seguir o padrão); 
+
+ Depois de criado, logar no SAR ADM Produto (vpki.com.br) 
+
+Produto > sincronização de produto, depois de sincronizado o produto, faça a conexão com a AC; 
+
+Configuração > autoridade de registro > listar conexão (1º faz conexão com uma cadeia pequena Time), depois de listada com a correspondente a especificação do produto; 
+
+ 
+
+
+ 
+
+ 
+
+Depois ter feito conexão c a AC (template do produto), vincula o produto no template, pontos (priorizar o ponto agenda1 - teste de emissão), CSP, gera sincronismo e faz o teste de emissão. 
+
+ 
+
+Versão do VALID Bio VC IVS - confirmado dia 27.06.23 / versão em produção: Credentials  IVS Bio 2016 v1.0.3.0 
+
+
+ 
+
+ 
+
+Criação de produto cadeia JUS > depois de criado, acionar DEV pra fazer associação do produto (habilitar o campo cargo); 
+
+ 
+
+  
+
+
+ 
+
+Clique em: 
+
+
+ 
+
+ 
+
+
+ DNS: refere se ao campo CN 
+
+ 
+
+ 
+
+O que é Blockchain? 
+
+Blockchain pode ser traduzida como corrente de blocos. De uma forma simples, trata-se de uma tecnologia que agrupa um conjunto de informações que se conectam por meio de criptografia. Assim, transações financeiras e outras operações podem ser feitas de forma segura. 
+
+A Blockchain é importante para garantir que ninguém consiga efetuar fraudes, tornando cada moeda rastreável desde o momento de sua criação. Funciona como um grande livro-caixa público, em que são registradas todas as transações, de forma rápida e segura. 
+
+ 
+
+De <https://coinext.com.br/o-que-e-blockchain>  
+
+ 
+
+https://blog.casadodesenvolvedor.com.br/frameworks/ 
+
+Vqueque > Fila de atendimento > seleciona a fila e fica apenas carregando > tamanho da query 
+
+Tratativa: INFRA "limpou" a query_ historylist 
+
+ 
+
+ 
+
+%systemroot%\system32\f12\IEChooser.exe 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+ 
+
+ 
+
+Troca o Vagent 1.2.6 para 2.0 
+
+Disco C > usuários > nome do "dono da máquina"| > appData > Roaming > exclui a pasta VALID. 
+
+ 
+
+ 
+
+Renovação de direito de uso > VidaaS 
+
+ 
+
+https://cs.vpki.com.br/ contrato > contrato de clientes 
+
+ 
+
+
+ 
+
+
+ 
+
+ 
+
+Seleciona o período cuja licença de uso permanecerá ativa e o colaborador terá seu certificado renovado.  
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Certificado EV. - cadeia brasil 
+
+ 
+
+Certificado OV e DV será sempre internacional - Sectigo 
+
+DV: Validação do domínio. Exemplo: garante que o domínio valid.com.br pertence a mesma. 
+
+OV: Valida o domínio e também a organização = CNPJ / razão social. 
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+Erro inesperado - emissão: 
+
+intermitência do EJBCA: Acarreta no erro inesperado, durante a emissão 
+
+ 
+
+Certificado SSL/TSL OV  
+
+Emitimos no SSL EV V10 - sha 512 
+
+ 
+
+IMFORMAÇÃO ANOTADA EM 04/09/2024hora 
+
+o RSA nada mais é que a chave e a numeração é o que define o tamanho, por exemplo, nos VALID emitimos apenas com o RSA 2048 pq nosso EJBCA não comporta o 4096  
+
+  
+
+pesquisa publica: A principal diferença entre RSA 2048 e RSA 4096 é o tamanho da chave, sendo que a RSA 4096 é o dobro da RSA 2048. A RSA 4096 oferece mais segurança, mas em detrimento de um tempo de processamento maior. 
+
+ 
+
+ 
+
+ 
+
+_____________________________________________________________ 
+
+DC - Biometry: Serviço que busca os dados biometricos de determinado serviço e monta o dossie de biometria 
+
+ 

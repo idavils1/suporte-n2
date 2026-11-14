@@ -1,0 +1,21 @@
+{
+  "projects": {
+    "default": "suporte-n2"
+  },
+  "targets": {
+    "suporte-n2": {
+      "hosting": {
+        "central": [
+          "suporte-n2"
+        ],
+        "tickets": [
+          "banco-tickets-vcert"
+        ],
+        "inventario": [
+          "inventario-equipamentos-vcert"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

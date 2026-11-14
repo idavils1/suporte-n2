@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planilha · Suporte V/CERT</title>
+<link rel="icon" type="image/png" sizes="32x32" href="fotos/icone-32.png">
+<link rel="icon" type="image/png" sizes="512x512" href="fotos/icone.png">
+<link rel="apple-touch-icon" href="fotos/icone-apple.png">
+<script>
+  (function () {
+    try {
+      var tema = localStorage.getItem("suporte-n2-tema");
+      if (tema !== "claro" && tema !== "escuro") {
+        tema = window.matchMedia("(prefers-color-scheme: dark)").matches ? "escuro" : "claro";
+      }
+      document.documentElement.setAttribute("data-tema", tema);
+      /* Aparência livre: as variáveis já calculadas (comum/planilha-aparencia.js) entram antes da primeira pintura.
+         Só nomes --[a-z0-9-] e valores sem chaves/ponto e vírgula, aplicados com setProperty. */
+      var p = new URLSearchParams(location.search).get("p") || "";
+      var c = /^[a-z0-9-]{1,40}$/.test(p) ? JSON.parse(localStorage.getItem("suporte-n2-planilha-aparencia-aplicada:" + p) || "null") : null;
+      if (c && c.v === 1 && Object.prototype.toString.call(c[tema]) === "[object Array]") {
+        var raiz = document.documentElement, nome = /^--[a-z0-9-]{1,40}$/, valor = /^[^{};<>\\]{0,20000}$/;
+        for (var i = 0; i < c[tema].length; i++) {
+          var par = c[tema][i];
+          if (par && nome.test(par[0]) && typeof par[1] === "string" && valor.test(par[1])) raiz.style.setProperty(par[0], par[1]);
+        }
+        var a = c.attrs || {}, aceitos = ["data-ap", "data-ap-fundo", "data-ap-area", "data-ap-vidro", "data-ap-vidro-blur"];
+        for (var k = 0; k < aceitos.length; k++) if (typeof a[aceitos[k]] === "string" && /^[a-z0-9-]{1,20}$/.test(a[aceitos[k]])) raiz.setAttribute(aceitos[k], a[aceitos[k]]);
+      }
+    } catch (e) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="comum/base.css">
+<link rel="stylesheet" href="comum/planilha.css">
+<link rel="stylesheet" href="comum/planilha-aparencia.css">
+</head>
+<body>
+<!-- Topo: ← Central (volta para a seção do bloco), nome da planilha, busca, menu, tema e login da Central -->
+<header class="topo-pagina topo-planilha">
+  <a class="btn btn-secundario btn-mini voltar" id="btn-voltar" href="index.html" aria-label="Voltar para a Central">
+    <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-esquerda"/></svg><span>Central</span>
+  </a>
+  <h1><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-tabela"/></svg><span id="titulo-planilha">Planilha</span></h1>
+  <label class="busca"><span class="sr-only">Buscar na planilha</span><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-busca"/></svg>
+    <input type="search" id="busca" placeholder="Buscar em todas as colunas…" autocomplete="off"></label>
+  <div class="topo-acoes">
+    <button type="button" class="btn btn-secundario btn-mini btn-texto-largo" id="btn-admin" aria-haspopup="menu" hidden></button>
+    <button type="button" class="btn-icone" data-tema-botao aria-label="Alternar tema"></button>
+    <button type="button" class="btn btn-secundario btn-login" id="btn-login" hidden></button>
+  </div>
+</header>
+
+<!-- Carregando -->
+<div class="tela-bloqueio" id="tela-carregando"><p class="apoio">Carregando a planilha…</p></div>
+
+<!-- Endereço que não é de nenhuma planilha da Central -->
+<div class="tela-bloqueio" id="tela-nao-encontrada" hidden>
+  <div class="cartao-login">
+    <div class="cabeca"><svg class="icone icone-grande" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-tabela"/></svg><h1>Planilha não encontrada</h1></div>
+    <p class="apoio" id="nao-encontrada-texto">O endereço desta planilha não existe ou o bloco deixou de ser uma planilha.</p>
+    <a class="btn" href="index.html">Voltar para a Central</a>
+  </div>
+</div>
+
+<!-- Planilha -->
+<div id="app" hidden>
+  <div class="faixa-aviso" id="faixa-offline" hidden>Sem conexão: mostrando a última cópia salva neste navegador. A edição fica bloqueada até a conexão voltar.</div>
+  <div class="faixa-aviso" id="faixa-rascunho" hidden>Este bloco ainda não foi publicado: publique a Central para a equipe ver esta planilha.</div>
+  <div class="faixa-aviso" id="faixa-conta" hidden>Esta conta não edita as planilhas. Saia da conta para editar assinando com o seu nome.</div>
+
+  <main class="pagina" id="conteudo-planilha">
+    <div class="faixa-v2" id="faixa-compactar" hidden><span id="faixa-compactar-texto"></span><button type="button" class="btn btn-mini" id="btn-faixa-compactar">Compactar agora</button></div>
+    <div id="sem-estrutura" hidden></div>
+    <div class="resumo" id="resumo" aria-label="Resumo (clique para filtrar)"></div>
+    <div class="abas-grupo" role="tablist" aria-label="Abas" id="abas" hidden></div>
+    <div class="barra" role="toolbar" aria-label="Ferramentas da planilha">
+      <label class="sr-only" for="visao">Visão</label>
+      <select id="visao" title="Visões prontas e salvas"></select>
+      <label class="sr-only" for="agrupar">Agrupar por</label>
+      <select id="agrupar" title="Agrupar por"></select>
+      <button type="button" class="btn btn-secundario btn-mini" id="btn-limpar-filtros"></button>
+      <span class="sep so-largo" aria-hidden="true"></span>
+      <button type="button" class="btn-icone so-largo" id="btn-colunas" title="Mostrar/ocultar colunas (só para você)" aria-label="Mostrar ou ocultar colunas"></button>
+      <button type="button" class="btn-icone so-largo" id="btn-densidade" title="Densidade compacta" aria-label="Densidade compacta" aria-pressed="false"></button>
+      <button type="button" class="btn-icone so-largo" id="btn-csv" title="Exportar CSV (linhas filtradas)" aria-label="Exportar CSV"></button>
+      <button type="button" class="btn-icone so-largo" id="btn-imprimir" title="Imprimir" aria-label="Imprimir"></button>
+      <span class="sep" aria-hidden="true" data-editor hidden></span>
+      <button type="button" class="btn btn-mini" id="btn-novo" data-editor hidden></button>
+      <button type="button" class="btn btn-secundario btn-mini" id="btn-colar" data-editor hidden></button>
+      <button type="button" class="btn btn-secundario btn-mini" id="btn-massa" data-editor hidden title="Preencher em massa: várias linhas de uma vez, como no Excel"></button>
+      <button type="button" class="btn-icone" id="btn-selecionar" data-editor hidden title="Selecionar linhas (edição e exclusão em massa)" aria-label="Selecionar linhas" aria-pressed="false"></button>
+      <button type="button" class="btn-icone" id="btn-desfazer" data-editor hidden title="Desfazer a última ação (Ctrl+Z)" aria-label="Desfazer a última ação"></button>
+      <span class="contagem" id="contagem" aria-live="polite"></span>
+    </div>
+    <div class="barra-selecao" id="barra-selecao" hidden></div>
+    <div id="area-dados"></div>
+    <div class="tabela-impressao" id="tabela-impressao"></div>
+  </main>
+  <aside class="ficha" id="ficha" aria-label="Ficha da linha" hidden></aside>
+</div>
+
+<script type="module" src="comum/planilha.js"></script>
+<script src="comum/mascote.js" defer data-prefixo="suporte-n2-planilha"></script>
+</body>
+</html>

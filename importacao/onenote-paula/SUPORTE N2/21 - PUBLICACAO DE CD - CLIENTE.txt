@@ -1,0 +1,53 @@
+Verificar o antivirus:  
+
+ 
+
+ 
+
+ 
+
+EDITOR DE REGISTRO: 
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography\Calais\ READS > botao direito > PERMISSOES  
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography\Calais\ SMARTCARDS> botao direito > PERMISSOES  
+ 
+ 
+ 
+
+ 
+
+Serviços 
+
+  
+
+Propagação do certificado > Parar > Manual > Aplicar. Iniciar > Automático > Aplicar  
+
+Cartão inteligente > Parar > Manual > Aplicar. Iniciar > Automático > Aplicar  
+
+Serviços de criptografia 
+
+  
+
+ 
+
+ 
+
+Programas que travam o Vagent/Certificado propagação (Lista) 
+
+  
+
+ 
+
+Kamo - Antitrack - NordVPN(Podendo pausar para uso ou remover) - Kaspersky premium - MalwareBytes - WebAdivision - Safeweb - Avira  
+
+RAV Enpoint protection - Bitdefender - Sophos Enpoint Agent - AVG  
+
+Avast no MAC 
+
+ 
+
+ 
+
+REMOVER:  
+
+ 
+

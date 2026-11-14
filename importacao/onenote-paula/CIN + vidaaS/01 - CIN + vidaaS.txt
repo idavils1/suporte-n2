@@ -1,0 +1,261 @@
+ 
+
+Reunião Kamila 
+
+ 
+
+16 17 e 18/09 evento de cidadania digital (antigo cert FÓRUM) 
+
+Portal de "integração" LECOM para gerar a documentação / dossiê para geração do certificado nuvem (vidaaS) 
+
+Acesso ao LECOM 
+
+Questiona se o civil deseja obter o certificado emitido / gerado juntamente com a CIN  
+
+Treinamento para os operadores prestar os devidos atendimentos. 
+
+Fluxo de emissão do certificado através da leitura de QR CODE ou email? 
+
+Dias de att para emissão do vidaaS 17 e 18/09  
+
+ 
+
+ 
+
+22/08 reunião Lucas Alexandre: 
+
+ 
+
+Payload que a certificadora busca do SCDA. 
+
+ 
+
+{ 
+
+    "transactionId": 477, - Informação do SCDA 
+
+    "sku": "CBRPSC003", - Será enviado pela V/Cert - Sempre sera o mesmo 
+
+    "idCertificateOffice": 8650, - Será enviado pela V/Cert - Sempre será o mesmo 
+
+    "cpf": "31422882870",- CPF do cliente (Dado do CIN) 
+
+    "operatorCpf": "32364645000", - Será enviado pela V/Cert - Sempre sera o mesmo 
+
+    "birthdayDate": "09/07/1984", - Data de nascimento do cliente (Dado do CIN) 
+
+    "name": "LEANDRO MUCI DE ARAUJO", Nome do cliente (Dado do CIN) 
+
+    "documents": [ 
+
+        { 
+
+            "doctoName": "teste1.pdf", - Arquivo PDF OPTIN que estará na API LECOM 
+
+            "docto": "{{PDF1}}" 
+
+        }, 
+
+        { 
+
+            "doctoName": "teste2.jpeg",- Arquivo JPEG Documento CIN  
+
+            "docto": "{{jpeg}}" 
+
+        }, 
+
+ 
+
+    ], 
+
+    "mailData": { 
+
+        "mail": "eder.silva@valid.com", Dado estará na API LECOM 
+
+        "mailConfirm": "eder.silva@valid.com" Dado estará na API LECOM 
+
+    }, 
+
+    "phoneDDD": "11",Dado estará na API LECOM 
+
+    "phoneNumber": "99991111",Dado estará na API LECOM 
+
+    "biometryData": { 
+
+        "photo": "{{foto_leandro}}", Foto retirada para o documento CIN 
+
+        "photoName": "Foto_teste.jpeg", Foto retirada para o documento CIN 
+
+        "fingers": [ 
+
+            { 
+
+                "fingerName": "t4_7", 
+
+                "image": "{{Dedo1_jpg}}", 
+
+                "imageWsq": "{{Dedo1_wsq}}", 
+
+                "observation": "Incluir observação" 
+
+            }, 
+
+            { 
+
+                "fingerName": "t4_6", 
+
+                "image": "{{Dedo2_jpg}}", 
+
+                "imageWsq": "{{Dedo2_wsq}}", 
+
+                "observation": "Incluir observação" 
+
+            }, 
+
+            { 
+
+                "fingerName": "t4_2", 
+
+                "image": "{{Dedo3_jpg}}", 
+
+                "imageWsq": "{{Dedo3_wsq}}", 
+
+                "observation": "Incluir observação" 
+
+            }, 
+
+            { 
+
+                "fingerName": "", 
+
+                "image": "", 
+
+                "imageWsq": "", 
+
+                "observation": "Incluir observação" 
+
+            } 
+
+        ] 
+
+    } 
+
+} 
+
+  
+
+OBS: Sobre Biometria finger: Caso nao tenha o finger  
+
+                "fingerName": "", 
+
+                "image": "", 
+
+                "imageWsq": "", 
+
+                "observation": "Incluir observação" 
+
+ 
+
+ 
+
+ 
+
+PROD. 
+
+Localidade > fluxo AR eletrônica: PROJETO CIN PCDF 
+
+Rede: CIN PCDF 
+
+RD: PROJETO CIN PCDF -RD029435 
+
+Codsat:  213f4e2b-95a3-411f-8dad-c9949f58755f 
+
+Pedido: 700000059 
+
+Agente eletronico Vcert 40873850866 
+
+Nascimento 02/12/1991 
+
+agenteeletronico@valid.com 
+
+ 
+
+id_certificate_office 107813 
+
+ 
+
+___________________________________________________________________ 
+
+ Planilha de tickets > Kamila 
+
+Localidade virtual > AR ACERTCAM PCDF Virtual 
+
+RD:   RD029437 
+
+ 
+
+___________________________________________________________________ 
+
+HML: 
+
+REDE: HML PROJETO CIN PCDF E VIDAAS 
+
+Localidade: HML - PROJETO CIN PCDF  
+
+Código: RD011156 
+
+Pedido: 370039591 
+
+COD SAT: 85f6f90c-50e9-4582-93cf-a54142445949 
+
+_____________________________________________________________________ 
+
+ 
+
+Módulo eletrônico: A AR precisa estar credenciada nesse modelo pelo ITI.(SAR request) 
+
+Base de dados da polícia civil do DF. 
+
+ 
+
+ 
+
+Base do TSE, mas ainda não está liberado. Não está em uso por questões normativas. 
+
+AR eletrônica: Não precisa ser credenciada, basta usar uma base de biometria (PSBio) 
+
+ 
+
+ 
+
+________________________________________________________________ 
+
+ 
+
+Camisetas, canetas, folders, flayers > previsão de chegada: 11.09 (WW) - COFEN e Congresso de cidadania digital. 
+
+Landpage: Houve algumas alterações sugeridas pelo MN e por isso está em desenvolvimento (emissão e de votação). 
+
+ 
+
+ 
+
+ 
+
+CONFIGURAÇÃO do Skin. 
+
+ 
+
+
+ 
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 

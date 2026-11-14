@@ -1,0 +1,15 @@
+{
+  "name": "inventario-testes",
+  "private": true,
+  "type": "module",
+  "description": "Testes das regras do Inventário de Equipamentos no Emulador do Firestore (não vão para o Firebase).",
+  "scripts": {
+    "test": "cd ../.. && firebase emulators:exec --only firestore --project demo-inventario \"node --test sites/inventario-testes/regras.test.mjs\"",
+    "test:planilhas": "cd ../.. && firebase emulators:exec --only firestore --project demo-planilhas \"node --test sites/inventario-testes/planilhas-aparencia.test.mjs\"",
+    "test:aprender": "cd ../.. && firebase emulators:exec --only firestore --project demo-aprender \"node --test sites/inventario-testes/aprender-regras.test.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.10.0"
+  }
+}

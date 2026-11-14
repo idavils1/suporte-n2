@@ -1,0 +1,285 @@
+Uma API (Interface de Programação de Aplicações) é um conjunto de regras e padrões que permite que diferentes softwares se comuniquem entre si. Em termos simples, é como um “tradutor” que possibilita que um programa peça informações ou  
+
+ 
+
+ de outro, sem precisar entender todos os detalhes internos de como ele funciona. 
+
+Como funciona 
+
+Analogia do restaurante: o cliente faz o pedido ao garçom, que leva a solicitação à cozinha e depois entrega o prato pronto. Nesse exemplo: 
+
+Cliente = aplicação que precisa de dados ou serviços 
+
+Garçom = API 
+
+Cozinha = sistema que processa e fornece os dados 
+
+Assim, a API recebe a solicitação, encaminha ao sistema e devolve a resposta de forma organizada. 
+
+Principais características 
+
+Padronização: define como os pedidos devem ser feitos e como as respostas serão entregues. 
+
+Facilidade: permite que desenvolvedores criem aplicativos sem precisar reinventar funcionalidades já existentes. 
+
+Interoperabilidade: conecta sistemas diferentes (por exemplo, um app de transporte acessando mapas do Google). 
+Exemplos práticos 
+
+Aplicativos de celular que usam APIs de sistemas operacionais (Android/iOS). 
+
+Sites que exibem previsão do tempo consultando APIs meteorológicas. 
+
+Integrações de pagamento online que usam APIs de bancos ou plataformas como PayPal. 
+Em resumo, uma API é a ponte que permite que softwares conversem entre si de forma  
+
+segura e eficiente. 
+
+ 
+
+ 
+
+Etapas de construção de uma API 
+
+Preparação 
+
+Definir os requisitos de negócio. 
+
+Escolher o estilo arquitetural (REST, GraphQL, gRPC, etc.). 
+
+Estabelecer conceitos e terminologias centrais. 
+
+Design 
+
+Planejar os endpoints (URLs que serão acessados). 
+
+Definir os métodos HTTP (GET, POST, PUT, DELETE). 
+
+Estruturar os formatos de entrada e saída (JSON, XML). 
+
+Garantir consistência e clareza na documentação. 
+
+Desenvolvimento 
+
+Implementar o código no servidor usando uma linguagem/framework (ex.: Node.js, Django, Spring Boot). 
+
+Criar regras de autenticação e autorização (tokens, OAuth). 
+
+Validar dados recebidos e retornados. 
+
+Entrega 
+
+Hospedar a API em um servidor ou serviço na nuvem. 
+
+Configurar versionamento para manter compatibilidade com clientes antigos. 
+
+Testar desempenho e segurança. 
+
+Análise e manutenção 
+
+Monitorar uso e erros. 
+
+Corrigir bugs e atualizar funcionalidades. 
+
+Melhorar a documentação e suporte para desenvolvedores. 
+Exemplo prático 
+Imagine que você quer criar uma API para um aplicativo de previsão do tempo: 
+
+Endpoint: /clima/cidade 
+
+Método: GET 
+
+Entrada: nome da cidade 
+
+Saída: dados em JSON com temperatura, umidade e condição do tempo 
+Assim, qualquer aplicativo pode consumir essa API e exibir a previsão sem precisar calcular ou armazenar os dados meteorológicos por conta própria. 
+
+ 
+
+// Instalar dependências: npm install express 
+
+const express = require('express'); 
+
+const app = express(); 
+
+const port = 3000; 
+
+ 
+
+// Endpoint simples 
+
+app.get('/hello', (req, res) => { 
+
+  res.json({ message: 'Olá, mundo!' }); 
+
+}); 
+
+ 
+
+// Iniciar servidor 
+
+app.listen(port, () => { 
+
+  console.log(`API rodando em http://localhost:${port}`); 
+
+}); 
+
+ 
+
+ 
+
+Exemplo em Python (Flask) 
+ 
+
+# Instalar dependências: pip install flask 
+
+from flask import Flask, jsonify 
+
+ 
+
+app = Flask(__name__) 
+
+ 
+
+@app.route('/hello', methods=['GET']) 
+
+def hello(): 
+
+    return jsonify(message="Olá, mundo!") 
+
+ 
+
+if __name__ == '__main__': 
+
+    app.run(port=3000) 
+
+ 
+
+O que esses exemplos mostram 
+
+Endpoint: /hello 
+
+Método HTTP: GET 
+
+Resposta: JSON com uma mensagem 
+
+Isso é a base de qualquer API: definir rotas, métodos e respostas. A partir daí, você pode adicionar autenticação, banco de dados, lógica de negócio e muito mais. 
+
+ 
+
+O método HTTP GET é utilizado para solicitar a representação de um recurso específico e deve ser usado apenas para recuperar dados. 
+
+O que é o Método GET? 
+
+O método GET é um dos métodos mais comuns do protocolo HTTP, que é a base da comunicação na web. Ele é utilizado para solicitar a representação de um recurso especificado, como uma página da web ou um arquivo. As requisições GET são geralmente usadas para obter informações do servidor sem causar efeitos colaterais, ou seja, não alteram o estado do recurso no servidor.  
+
+Mozilla+1 
+
+Características do Método GET 
+
+Recuperação de Dados: O método GET deve ser utilizado apenas para recuperar dados. Ele não deve ser usado para enviar dados que alterem o estado do servidor.  
+2 
+
+Parâmetros na URL: Os parâmetros da requisição GET são passados na URL, geralmente na forma de uma string de consulta (query string). Por exemplo: https://api.exemplo.com/usuarios?id=123&nome=João.  
+1 
+
+Limitações de Tamanho: Há uma limitação no tamanho da URL, o que pode restringir a quantidade de dados que podem ser enviados. Isso significa que não é adequado para enviar informações sensíveis, como senhas ou números de cartão de crédito, pois esses dados ficam expostos na URL.  
+2 
+
+Cache: As requisições GET podem ser armazenadas em cache, o que pode melhorar a eficiência em algumas situações, mas também significa que dados sensíveis não devem ser enviados por esse método.  
+
+ 
+
+De <https://www.bing.com/search?q=M%C3%A9todo%20HTTP%3A%20GET&qs=n&form=QBRE&sp=-1&lq=0&pq=m%C3%A9todo%20http%3A%20get&sc=12-16&sk=&cvid=E42886583C3944E3B09CF63A6303AEAA>  
+
+ 
+
+ 
+
+ 
+
+ 
+
+ENDIPOINT 
+
+Um endpoint é um termo amplamente utilizado em tecnologia da informação para descrever um ponto de comunicação ou conexão em uma rede. Ele pode assumir diferentes significados dependendo do contexto, mas geralmente refere-se a dispositivos ou interfaces que interagem diretamente com uma rede ou sistema. 
+
+ 
+
+No contexto de redes, um endpoint é qualquer dispositivo conectado, como computadores, smartphones, tablets ou dispositivos IoT. Esses dispositivos são as extremidades de uma comunicação, enviando ou recebendo dados. Por exemplo, em uma rede corporativa, laptops e smartphones dos funcionários são considerados endpoints. 
+
+ 
+
+Já em APIs (Application Programming Interfaces), um endpoint é a URL ou o ponto de acesso onde um cliente pode interagir com o servidor. Ele representa a extremidade de uma conexão entre o cliente e a API. Por exemplo, ao usar uma API de mapas para obter direções, o servidor da API é o endpoint que processa a solicitação. 
+
+ 
+
+Exemplos de Uso 
+
+ 
+
+ 
+
+Segurança de Endpoint: Refere-se à proteção de dispositivos conectados à rede contra ameaças cibernéticas. Isso inclui monitoramento, autenticação e aplicação de políticas de segurança para evitar ataques, como malwares ou acessos não autorizados. 
+
+Endpoint de Comunicação: Em APIs, é o ponto de acesso onde as solicitações são enviadas. Por exemplo, ao acessar https://api.exemplo.com/usuarios, esse URL é o endpoint que processa a solicitação para obter informações de usuários. 
+
+ 
+
+Importância dos Endpoints 
+
+Os endpoint são frequentemente alvos de ataques cibernéticos, pois podem ser pontos vulneráveis em uma rede. Por isso, a segurança de endpoint é essencial, especialmente em ambientes corporativos, para proteger dados sensíveis e evitar acessos indevidos. Além disso, em APIs, endpoint bem projetados garantem uma comunicação eficiente e segura entre sistemas. 
+
+ 
+
+Em resumo, um endpoint é a extremidade de uma conexão, seja em dispositivos físicos conectados a uma rede ou em interfaces de comunicação, como APIs. Sua proteção e gerenciamento são fundamentais para a segurança e eficiência de sistemas e redes. 
+ 
+ 
+ 
+
+INTEGRA ICP: 
+Procedimento:  
+ 
+ 
+ERRO  GFSIS 
+ 
+
+{"code":"invalidParameter","message":"Um ou mais campos da requisição são inválidos.","traceId":"bb599584-cc2c-4047-b94d-28bfa1478834","target":"/v1/order","details":[{"code":"Size","message":"O campo name do comprador não pode ter mais de 30 caracteres.","target":"orders[0].buyer.name"},{"code":"NotBlank","message":"O campo lastName do comprador é obrigatório.","target":"orders[0].buyer.lastName"}]} 
+
+ 
+
+De <https://suporte.si.valid.com.br/front/ticket.form.php?id=586111>  
+
+ 
+ 
+CORREÇÃO:  
+ 
+
+O campo de comprador possui um limite de 30 caracteres. Portanto, em alguns casos, será necessário realizar abreviações para garantir que o valor esteja dentro do padrão permitido. 
+
+  
+
+Pelo que identifiquei, o erro ocorre porque está sendo informado o nome completo do cliente no campo “name”, enquanto o campo “lastname” permanece em branco. 
+
+Para corrigir o problema, é necessário preencher: 
+
+“name” com o primeiro nome 
+
+“lastname” com o(s) sobrenome(s) 
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+https://cardsinova.gfsis.com.br/gestaofacil/login/faturamento/crud/PedidoVenda?ACAO=listagem#! 
+ 
+ 
+
+
+ 
+ 
+

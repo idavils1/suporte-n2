@@ -1,0 +1,27 @@
+Versão do gerenciador da midia. 
+Versão 3.8.46.1 
+
+ 
+remove:  
+
+
+ 
+
+
+ 
+
+
+ 
+
+Remove o gerenciador atual  
+
+E execute o seguinte procedimento:  
+ 
+
+EDITOR DE REGISTRO\  
+
+ 
+
+ 
+
+e instale a versão 3.5 

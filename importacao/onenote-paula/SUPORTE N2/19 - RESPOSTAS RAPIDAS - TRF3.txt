@@ -1,0 +1,103 @@
+SAFENET MIDIA ESTOQUE 
+
+ 
+
+Orientações para emissão do certificado: 
+
+ 
+
+- Conecte o token ao computador. 
+
+  
+
+- Acesse o link de emissão: Instalação de Certificado - sar-4  
+
+- Digite o ticket e a senha de identificação (criada no momento da validação do certificado). 
+
+  
+
+- Na lista de CSP, selecione a opção "ETOKEN" e clique em Iniciar. 
+
+  
+
+- O sistema solicitará o PIN três vezes. O PIN padrão é 1234 (caso não tenha sido alterado). 
+
+  
+
+- Após a emissão, remova e reconecte o token para concluir o processo. 
+ 
+
+SAFENET MIDIA DO SERVIDOR 
+ 
+
+Orientações para emissão do certificado: 
+
+ 
+
+- Conecte o token ao computador. 
+
+  
+
+- Acesse o link de emissão: Instalação de Certificado - sar-4  
+
+- Digite o ticket e a senha de identificação (criada no momento da validação do certificado). 
+
+  
+
+- Na lista de CSP, selecione a opção "ETOKEN" e clique em Iniciar. 
+
+  
+
+- O sistema solicitará o PIN três vezes. Por favor inserir sua senha PIN de uso continuo. 
+
+  
+
+- Após a emissão, remova e reconecte o token para concluir o processo. 
+______________________________________________________________________________ 
+
+ 
+
+SAFESIGN 
+Orientações para emissão do certificado: 
+
+ 
+
+- Conecte o token ao computador. 
+
+  
+
+- Acesse o link de emissão: Instalação de Certificado - sar-4   
+
+- Digite o ticket e a senha de identificação (criada no momento da validação do certificado). 
+
+  
+
+- Na lista de CSP, selecione a opção "SAFESIGN" e clique em Iniciar. 
+
+  
+
+- O sistema solicitará o PIN três vezes. O PIN padrão é 1234 (caso não tenha sido alterado). 
+
+  
+
+- Após a emissão, remova e reconecte o token para concluir o processo. 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Bom dia, sr. xxxxxxxxxxx  Sou a Paula, da equipe de Suporte N2 da V/Cert. Estou entrando em contato referente ao protocolo nº N2CERT-13469 (emissão de certificado) Podemos dar continuidade ao atendimento por este canal de comunicação? Equipe de Suporte V/Cert 
+
+ 
+
+ 
+
+ 
+
+ 

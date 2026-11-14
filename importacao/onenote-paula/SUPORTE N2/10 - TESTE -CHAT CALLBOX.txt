@@ -1,0 +1,13 @@
+Opção 1 > possui uma subcategoria item 6 SUPORTE TÉCNICO 
+
+Opção 9 > informações faseadas. 
+
+I > informa o CPF 
+
+II > informa a AR e depois da opções relacionadas ao cargo. 
+
+Opção escolhida. G.O > pede o e-mail 
+
+ 
+
+Permite colar a evidencia, mas não tem nenhuma ação, mesmo clicando no ícone correspondente ao envio da imagem. 

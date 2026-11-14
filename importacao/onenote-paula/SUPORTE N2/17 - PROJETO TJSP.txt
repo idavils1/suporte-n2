@@ -1,0 +1,30 @@
+Esclarecemos que, esse canal é para atendimento exclusivo aos técnicos da IT2B do TJSP. Não há autorização de atendimento para servidores e magistrados. Por favor, entre em contato com o suporte do TJSP (0800-770-5779) 
+
+ 
+
+Suporte N2  - magistrado TJSP 
+
+Fluxo > acionar o suporte do TJSP > suporte do TJSP aciona a gente caso for preciso  
+
+ 
+
+ 
+
+PORTAL DE CUSTAS 
+
+ 
+
+Olá Boa tarde, tudo bem? vocês poderiam me auxiliar em um chamado. estou com um caso que o magistrado está utilizando o certificado do VidaaS mas não consegue assinar no portal de custas. Fiz a configuração conforme o manual mas infelizmente continuou 
+
+  
+
+ 
+
+No portal de custas o VidaaS connect não funciona, não é homologado, pois utiliza outro tipo de criptografia, e não há suporte para implementações que dependem do PKCS#11, que é o caso do portal de custas etc.. 
+ 
+ 
+__________________________________ 
+Sempre que houver instabilidade no VidaaS, necessário comunicar no grupo RR e formalizar via e mail. 
+ 
+ 
+

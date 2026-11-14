@@ -1,0 +1,1914 @@
+p o<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contatos · Central do Suporte V/CERT</title>
+<link rel="icon" type="image/png" sizes="32x32" href="fotos/icone-32.png">
+<link rel="apple-touch-icon" href="fotos/icone-apple.png">
+<script>
+  (function () {
+    try {
+      var tema = localStorage.getItem("suporte-n2-tema");
+      if (tema !== "claro" && tema !== "escuro") {
+        tema = window.matchMedia("(prefers-color-scheme: dark)").matches ? "escuro" : "claro";
+      }
+      document.documentElement.setAttribute("data-tema", tema);
+    } catch (e) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="comum/base.css">
+<style>
+  .pagina { padding: 14px 20px 24px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .faixa-hoje { display: flex; flex-wrap: wrap; gap: 8px; }
+  .faixa-hoje button { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--borda); background: var(--superficie); cursor: pointer; font-size: 13px; }
+  .faixa-hoje button:hover { border-color: var(--borda-forte); background: var(--superficie-quente); }
+  .faixa-hoje .icone { width: 16px; height: 16px; }
+  .lgpd { font-size: 13px; padding: 8px 12px; border-radius: var(--raio-md); background: var(--f-laranja); color: var(--c-laranja); }
+  .faixa-sinc { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 8px 12px; border: 1px solid var(--borda); border-radius: var(--raio-md); background: var(--superficie); font-size: 13px; }
+  .faixa-sinc .estado { display: inline-flex; align-items: center; gap: 8px; flex: 1 1 260px; min-width: 0; }
+  .faixa-sinc .ponto { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--c-verde); box-shadow: 0 0 0 3px var(--f-verde); }
+  .faixa-sinc.atrasada .ponto { background: var(--c-amarelo); box-shadow: 0 0 0 3px var(--f-amarelo); }
+  .faixa-sinc .acoes-sinc { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .faixa-sinc select { height: 30px; padding: 0 6px; border: 1px solid var(--borda); border-radius: var(--raio-sm); background: var(--superficie); font-size: 12px; }
+  .colunas-recebidas { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; padding: 0; list-style: none; }
+  .colunas-recebidas li { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--borda); background: var(--superficie-suave); }
+  .colunas-recebidas li.suspeita { border-color: var(--c-vermelho); background: var(--f-vermelho); color: var(--c-vermelho); font-weight: 700; }
+  @keyframes piscar-linha { 0%, 60% { background: var(--f-amarelo); } 100% { background: transparent; } }
+  .linha.piscou > .celula, .cartao-contato.piscou { animation: piscar-linha 4s ease-out; }
+  @media (prefers-reduced-motion: reduce) {
+    .linha.piscou > .celula, .cartao-contato.piscou { animation: none; background: var(--f-amarelo); }
+  }
+  .abas-grupo { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--borda); scrollbar-width: thin; }
+  .aba-grupo { flex-shrink: 0; height: 38px; padding: 0 12px; border: 1px solid transparent; border-radius: var(--raio-md) var(--raio-md) 0 0; margin-bottom: -1px; background: none; cursor: pointer; font-weight: 600; font-size: 14px; color: var(--texto-secundario); white-space: nowrap; }
+  .aba-grupo:hover { color: var(--cor-acao); background: var(--superficie-quente); }
+  .aba-grupo[aria-selected="true"] { color: var(--cor-acao); border-color: var(--borda); border-bottom-color: var(--fundo); background: var(--fundo); }
+  .aba-grupo .n { font-size: 11px; color: var(--texto-secundario); margin-left: 4px; }
+  .sub-areas { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--borda); background: var(--superficie); cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--lilas-destaque); border-color: var(--lilas); color: var(--cor-icone); font-weight: 600; }
+  .barra { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .busca { position: relative; flex: 1 1 260px; max-width: 420px; }
+  .busca input { width: 100%; height: 36px; padding: 0 12px 0 36px; border: 1px solid var(--borda); border-radius: var(--raio-sm); background: var(--superficie); font-size: 14px; }
+  .busca input:focus { outline: none; border-color: var(--lilas); box-shadow: 0 0 0 3px var(--lilas-destaque); }
+  .busca .icone { position: absolute; left: 10px; top: 9px; width: 18px; height: 18px; }
+  .barra select { height: 36px; padding: 0 8px; border: 1px solid var(--borda); border-radius: var(--raio-sm); background: var(--superficie); font-size: 13px; max-width: 220px; }
+  .contagem { font-size: 13px; color: var(--texto-secundario); margin-left: auto; white-space: nowrap; }
+  .barra .sep { width: 1px; height: 24px; background: var(--borda); }
+
+  /* Planilha (linhas virtualizadas: só as visíveis existem no DOM) */
+  .planilha { --alt: 40px; position: relative; overflow: auto; height: calc(100vh - 300px); min-height: 360px; border: 1px solid var(--borda); border-radius: var(--raio-md); background: var(--superficie); outline: none; }
+  .planilha.compacta { --alt: 32px; }
+  .cab-grupos, .cab, .linha { display: grid; grid-template-columns: var(--colunas); width: var(--largura-total); }
+  .cab-grupos { position: sticky; top: 0; z-index: 4; height: 26px; background: var(--superficie-suave); }
+  .cab-grupo { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--texto-secundario); padding: 6px 10px; border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--superficie-suave); }
+  .cab { position: sticky; top: 26px; z-index: 4; background: var(--superficie-quente); }
+  .cab-celula { position: relative; display: flex; align-items: center; gap: 2px; min-width: 0; height: 38px; padding: 0 4px 0 10px; border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda-forte); background: var(--superficie-quente); font-size: 12px; font-weight: 700; user-select: none; }
+  .cab-celula.arrastando { opacity: 0.5; }
+  .cab-celula.alvo-soltar { box-shadow: inset 3px 0 0 var(--lilas); }
+  .cab-ordenar { flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; height: 100%; padding: 0; border: 0; background: none; font: inherit; font-weight: 700; text-align: left; cursor: pointer; overflow: hidden; }
+  .cab-ordenar span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cab-ordenar .icone { width: 14px; height: 14px; flex-shrink: 0; }
+  .cab-filtro { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; border-radius: var(--raio-sm); cursor: pointer; opacity: 0.55; }
+  .cab-filtro:hover { opacity: 1; background: var(--superficie); }
+  .cab-filtro.ativo { opacity: 1; background: var(--lilas-destaque); }
+  .cab-filtro .icone { width: 14px; height: 14px; }
+  .cab-redim { position: absolute; top: 0; right: -4px; width: 8px; height: 100%; cursor: col-resize; z-index: 2; touch-action: none; }
+  .cab-redim:hover { background: var(--lilas); opacity: 0.5; }
+  .corpo { position: relative; width: var(--largura-total); }
+  .linha { position: absolute; left: 0; height: var(--alt); background: var(--superficie); }
+  .linha:nth-child(even) { background: var(--superficie-suave); }
+  .linha:hover { background: var(--superficie-quente); }
+  .linha.desligado .celula { color: var(--texto-secundario); }
+  .celula { min-width: 0; height: var(--alt); display: flex; align-items: center; gap: 4px; padding: 0 10px; border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: inherit; outline: none; }
+  .celula > span.t { overflow: hidden; text-overflow: ellipsis; }
+  .celula:focus, .celula.ativa { box-shadow: inset 0 0 0 2px var(--lilas); }
+  .fixa { position: sticky; left: 0; z-index: 2; box-shadow: 1px 0 0 var(--borda-forte); }
+  .cab .fixa, .cab-grupos .fixa { z-index: 5; }
+  .col-acoes { position: sticky; right: 0; z-index: 2; justify-content: flex-end; gap: 2px; padding: 0 6px; box-shadow: -1px 0 0 var(--borda); }
+  .cab .col-acoes { z-index: 5; }
+  .acao-linha { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: var(--raio-sm); background: none; color: var(--cor-acao); cursor: pointer; text-decoration: none; }
+  .acao-linha:hover { background: var(--lilas-destaque); }
+  .acao-linha .icone { width: 15px; height: 15px; }
+  .acao-linha.inativa { opacity: 0.25; pointer-events: none; }
+  .linha-grupo { position: absolute; left: 0; height: var(--alt); width: var(--largura-total); display: flex; align-items: center; gap: 8px; padding: 0 10px; background: var(--lilas-destaque); border-bottom: 1px solid var(--borda-forte); font-size: 13px; font-weight: 700; cursor: pointer; }
+  .linha-grupo .rot { position: sticky; left: 10px; display: inline-flex; align-items: center; gap: 8px; }
+  .linha-grupo .icone { width: 16px; height: 16px; transition: transform var(--transicao); }
+  .linha-grupo.fechado .icone { transform: rotate(-90deg); }
+  .etq { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: var(--f-roxo); color: var(--c-roxo); font-weight: 600; }
+  .st-ativo { background: var(--f-verde); color: var(--c-verde); } .st-ferias { background: var(--f-azul); color: var(--c-azul); }
+  .st-licenca, .st-afastado { background: var(--f-laranja); color: var(--c-laranja); } .st-desligado { background: var(--f-cinza); color: var(--c-cinza); }
+  .exemplo { font-size: 10px; padding: 1px 6px; border-radius: 999px; background: var(--f-amarelo); color: var(--c-amarelo); font-weight: 700; flex-shrink: 0; }
+  .mini-foto { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .vazio { padding: 40px 20px; text-align: center; color: var(--texto-secundario); }
+  .editor-celula { position: absolute; z-index: 6; display: flex; }
+  .editor-celula input, .editor-celula select, .editor-celula textarea { width: 100%; height: 100%; padding: 4px 8px; font-size: 13px; border: 2px solid var(--lilas); border-radius: 0; background: var(--superficie); }
+  .editor-celula textarea { height: 120px; resize: vertical; }
+  .editor-celula [aria-invalid="true"] { border-color: var(--erro-borda); }
+  .editor-erro { position: absolute; top: 100%; left: 0; padding: 4px 8px; font-size: 12px; background: var(--erro-fundo); color: var(--erro-texto); border: 1px solid var(--erro-borda); white-space: nowrap; }
+  .pop { position: fixed; z-index: 120; width: 260px; max-height: 360px; overflow: auto; padding: 12px; display: grid; gap: 8px; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-md); box-shadow: 0 10px 30px var(--sombra); }
+  .pop input[type="search"] { width: 100%; padding: 6px 10px; border: 1px solid var(--borda); border-radius: var(--raio-sm); background: var(--superficie); }
+  .pop .opcoes { display: grid; gap: 4px; max-height: 200px; overflow: auto; }
+  .pop .check { font-size: 13px; }
+
+  /* Cartões (celular ou opção) */
+  .cartoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  .cartao-contato { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--borda); border-radius: var(--raio-md); background: var(--superficie); }
+  .cartao-contato .topo { display: flex; align-items: center; gap: 10px; }
+  .cartao-contato .nome { font-weight: 700; font-size: 15px; }
+  .cartao-contato .linha2 { font-size: 13px; color: var(--texto-secundario); }
+  .cartao-contato .acoes-c { display: flex; gap: 4px; flex-wrap: wrap; }
+  .cartao-contato .acoes-c .acao-linha { width: 34px; height: 34px; border: 1px solid var(--borda); }
+  .cartao-grupo { grid-column: 1 / -1; font-weight: 700; padding: 6px 2px; border-bottom: 1px solid var(--borda); }
+
+  /* Ficha lateral */
+  .ficha { position: fixed; top: 0; right: 0; bottom: 0; z-index: 110; width: min(460px, 100%); overflow: auto; background: var(--superficie); border-left: 1px solid var(--borda); box-shadow: -10px 0 30px var(--sombra); transform: translateX(105%); transition: transform 200ms ease; }
+  .ficha.aberta { transform: none; }
+  .ficha-corpo { padding: 18px 20px 28px; display: grid; gap: 14px; }
+  .ficha h2 { font-size: 20px; }
+  .ficha-grupo { display: grid; gap: 6px; }
+  .ficha-grupo h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--texto-secundario); border-bottom: 1px solid var(--borda); padding-bottom: 4px; }
+  .ficha dl { margin: 0; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 10px; font-size: 14px; }
+  .ficha dt { color: var(--texto-secundario); font-size: 13px; }
+  .ficha dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+  .ficha .foto-grande { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; }
+
+  /* Matriz de escalonamento */
+  .matriz { overflow: auto; border: 1px solid var(--borda); border-radius: var(--raio-md); }
+  .matriz table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 13px; }
+  .matriz th, .matriz td { padding: 8px 10px; border-bottom: 1px solid var(--borda); border-right: 1px solid var(--borda); text-align: left; vertical-align: top; }
+  .matriz th { background: var(--superficie-quente); position: sticky; top: 0; }
+  .matriz td:first-child { font-weight: 700; background: var(--superficie-suave); }
+  .matriz button { display: block; border: 0; background: none; padding: 1px 0; color: var(--cor-icone); cursor: pointer; text-align: left; font-size: 13px; }
+
+  .tabela-impressao { display: none; }
+  .mapa-colunas { display: grid; gap: 6px; max-height: 300px; overflow: auto; }
+  .mapa-colunas label { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; align-items: center; font-size: 13px; }
+  .mapa-colunas select { padding: 4px 6px; border: 1px solid var(--borda); border-radius: var(--raio-sm); background: var(--superficie); }
+  .previa-import { overflow: auto; max-height: 200px; border: 1px solid var(--borda); border-radius: var(--raio-sm); }
+  .previa-import table { border-collapse: collapse; font-size: 12px; }
+  .previa-import td, .previa-import th { padding: 4px 8px; border: 1px solid var(--borda); white-space: nowrap; }
+  .colunas-escolha { display: grid; gap: 12px; max-height: 60vh; overflow: auto; }
+  .colunas-escolha fieldset { border: 1px solid var(--borda); border-radius: var(--raio-md); padding: 8px 12px; display: grid; gap: 4px; }
+  .colunas-escolha legend { font-weight: 700; font-size: 13px; padding: 0 4px; }
+
+  @media (max-width: 768px) {
+    .pagina { padding: 10px 12px 20px; }
+    .contagem { margin-left: 0; width: 100%; }
+    .barra .so-largo { display: none; }
+    .ficha dl { grid-template-columns: minmax(0, 1fr); }
+    .ficha dt { margin-top: 6px; }
+  }
+  @media print {
+    .pagina > *:not(.tabela-impressao) { display: none !important; }
+    .ficha { display: none !important; }
+    .tabela-impressao { display: block !important; }
+    .tabela-impressao table { border-collapse: collapse; width: 100%; font-size: 9pt; }
+    .tabela-impressao th, .tabela-impressao td { border: 1px solid #999; padding: 3px 5px; text-align: left; vertical-align: top; }
+    .tabela-impressao th { background: #eee; }
+    @page { size: landscape; margin: 10mm; }
+  }
+</style>
+</head>
+<body>
+<header class="topo-pagina">
+  <a class="btn btn-secundario btn-mini voltar" href="index.html#contatos" aria-label="Voltar para a Central">← <span>Central</span></a>
+  <h1><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pessoas"/></svg>Contatos</h1>
+  <div class="topo-acoes">
+    <button type="button" class="btn-icone" id="btn-tema" aria-label="Alternar tema"></button>
+    <button type="button" class="btn btn-secundario btn-mini btn-login" id="btn-login" hidden></button>
+  </div>
+</header>
+<div class="faixa-aviso" id="faixa-offline" hidden>Sem conexão com a nuvem: mostrando só os contatos de exemplo, sem edição.</div>
+
+<main class="pagina">
+  <div class="faixa-sinc" id="faixa-sinc" role="status" aria-live="polite" hidden></div>
+  <div class="faixa-hoje" id="faixa-hoje" aria-live="polite"></div>
+  <p class="lgpd" id="aviso-lgpd" hidden><strong>LGPD:</strong> aqui entram só dados corporativos. Não cadastre CPF, RG, endereço residencial, data de nascimento, celular pessoal nem dados de saúde.</p>
+  <div class="abas-grupo" role="tablist" aria-label="Grupos de contatos" id="abas-grupo"></div>
+  <div class="sub-areas" id="sub-areas" hidden></div>
+  <div class="barra" role="toolbar" aria-label="Ferramentas da planilha">
+    <label class="busca"><span class="sr-only">Buscar contatos</span><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-busca"/></svg>
+      <input type="search" id="busca" placeholder="Buscar por nome, área, assunto, e-mail…" autocomplete="off"></label>
+    <label class="sr-only" for="visao">Visão</label>
+    <select id="visao" title="Visões prontas e salvas"></select>
+    <label class="sr-only" for="agrupar">Agrupar por</label>
+    <select id="agrupar" title="Agrupar por">
+      <option value="">Sem agrupar</option><option value="area">Agrupar por Área</option><option value="diretoria">Agrupar por Diretoria</option>
+      <option value="empresa">Agrupar por Empresa</option><option value="nivel">Agrupar por Nível</option><option value="assuntos">Agrupar por Assunto</option>
+    </select>
+    <button type="button" class="btn btn-secundario btn-mini" id="btn-limpar-filtros"></button>
+    <span class="sep so-largo" aria-hidden="true"></span>
+    <button type="button" class="btn-icone so-largo" id="btn-colunas" title="Mostrar/ocultar colunas" aria-label="Mostrar ou ocultar colunas"></button>
+    <button type="button" class="btn-icone so-largo" id="btn-densidade" title="Densidade compacta" aria-label="Densidade compacta" aria-pressed="false"></button>
+    <button type="button" class="btn-icone" id="btn-cartoes" title="Ver como cartões" aria-label="Ver como cartões" aria-pressed="false"></button>
+    <button type="button" class="btn-icone so-largo" id="btn-csv" title="Exportar CSV (linhas filtradas)" aria-label="Exportar CSV"></button>
+    <button type="button" class="btn-icone so-largo" id="btn-imprimir" title="Imprimir" aria-label="Imprimir"></button>
+    <span class="sep editor-so" aria-hidden="true" hidden></span>
+    <button type="button" class="btn btn-mini editor-so" id="btn-adicionar" hidden></button>
+    <button type="button" class="btn btn-secundario btn-mini editor-so" id="btn-importar" hidden></button>
+    <button type="button" class="btn-icone editor-so" id="btn-desfazer" hidden title="Desfazer (Ctrl+Z)" aria-label="Desfazer última ação"></button>
+    <button type="button" class="btn btn-perigo btn-mini admin-so" id="btn-apagar-exemplos" hidden></button>
+    <span class="contagem" id="contagem" aria-live="polite"></span>
+  </div>
+  <div id="area-dados"></div>
+  <div class="tabela-impressao" id="tabela-impressao"></div>
+</main>
+<aside class="ficha" id="ficha" aria-label="Ficha do contato" hidden></aside>
+
+<script type="module">
+  import { $, $$, escapar, normalizar, svg, slug, mostrarAviso, ligarTema, ligarLogin, aoMudarSessao, ehAdmin, sessao,
+    registrarAuditoria, criarDialogo, confirmar, abrirSugestao, lerLocal, gravarLocal, partesBrasilia, formatarData,
+    baixarArquivo, copiarTexto } from "./comum/base.js";
+
+  /* ============================================================
+   *  QUEM EDITA
+   *  Administradoras sempre editam. Para liberar outras contas,
+   *  inclua o e-mail (minúsculas) aqui E em podeEditarContatos()
+   *  no firestore.rules.
+   *  CONTATOS_ABERTO = true deixaria qualquer pessoa editar
+   *  assinando com o nome (como os cadernos); para isso, troque
+   *  também contatosAbertos() no firestore.rules para true.
+   * ============================================================ */
+  const CONTATOS_EDITORES = [
+    // "nome.sobrenome@valid.com",
+  ];
+  const CONTATOS_ABERTO = false;
+
+  /* ============================================================
+   *  DE ONDE VÊM OS CONTATOS
+   *  "planilha": cópia da planilha Google em planilha-contatos/ no
+   *    Firestore, gravada pelo Apps Script de integracoes/planilha-contatos/
+   *    (muda aqui em segundos depois de editar a planilha). Só leitura.
+   *  "csv": Plano B, sem Apps Script. Lê as abas publicadas na web
+   *    (Arquivo > Compartilhar > Publicar na Web > CSV) a cada 60 s.
+   *    Cole os links em CSV_ABAS.
+   *  "site": os contatos cadastrados no próprio site (como antes).
+   *  PLANILHA_CONTATOS_ID: o mesmo valor de Codigo.gs. Ao converter o
+   *  .xlsx para Planilhas Google o ID muda: troque nos dois lugares.
+   * ============================================================ */
+  const ORIGEM_CONTATOS = "planilha";
+  const PLANILHA_CONTATOS_ID = "1xVGktv0h25mGgPwLQ269vzvUlFHEZC70";
+  const CSV_ABAS = [
+    // { nome: "Gestores", url: "https://docs.google.com/spreadsheets/d/e/.../pub?gid=0&single=true&output=csv" },
+  ];
+  const CSV_INTERVALO_MS = 60000;
+  const SINC_ATRASO_MIN = 5;
+  const CHAVE_PLANILHA = "suporte-n2-contatos-planilha";
+  const CHAVE_ORIGEM_ADMIN = "suporte-n2-contatos-origem";
+  const CHAVE_LGPD_PLANILHA = "suporte-n2-contatos-lgpd-planilha";
+
+  /* ============================================================
+   *  LGPD — NÃO EXISTEM (e não devem ser criados) campos para
+   *  CPF, RG, endereço residencial, data de nascimento, celular
+   *  pessoal ou dados de saúde. Só dados corporativos.
+   *  As regras do Firestore recusam qualquer campo fora da lista.
+   * ============================================================ */
+  const NIVEIS = ["Diretoria", "Gerência", "Coordenação", "Supervisão", "Liderança", "Analista/Especialista", "Técnico"];
+  const EMPRESAS = ["V/Cert", "Valid Corporativo", "Parceiro"];
+  const MODELOS_TRABALHO = ["Presencial", "Híbrido", "Remoto"];
+  const FUSOS = ["Brasília (UTC−3)", "Amazonas (UTC−4)", "Acre (UTC−5)", "Fernando de Noronha (UTC−2)", "Outro"];
+  const ESCALONAMENTO = ["N1", "N2", "N3", "Gestão", "Diretoria"];
+  const STATUS = ["Ativo", "Férias", "Licença", "Afastado", "Desligado"];
+  const ASSUNTOS_PADRAO = ["Certificados", "VIDaaS", "SSL", "Faturamento", "Contratos", "Infraestrutura", "Segurança", "Sistemas", "Comercial", "Jurídico", "RH"];
+  const AREAS_PARCEIRAS = ["Comercial", "Financeiro/Faturamento", "Jurídico", "Compliance/LGPD", "TI Corporativa/Infra", "Segurança da Informação", "Produto", "Desenvolvimento", "Atendimento N1/SAC", "N3", "RH", "Facilities"];
+  const GRUPOS = [
+    { id: "lideranca", nome: "Liderança do Suporte" },
+    { id: "gestao", nome: "Gestão V/Cert" },
+    { id: "diretoria", nome: "Diretoria" },
+    { id: "parceiras", nome: "Áreas parceiras" },
+    { id: "fornecedores", nome: "Fornecedores e parceiros externos" },
+    { id: "plantao", nome: "Plantão e emergência" },
+    { id: "orgaos", nome: "Órgãos e clientes institucionais" }
+  ];
+  const GRUPOS_COLUNAS = [
+    { id: "identificacao", nome: "Identificação" },
+    { id: "organizacao", nome: "Organização" },
+    { id: "localizacao", nome: "Localização" },
+    { id: "contato", nome: "Contato corporativo" },
+    { id: "atendimento", nome: "Atendimento e escalonamento" },
+    { id: "situacao", nome: "Situação" }
+  ];
+  const COLUNAS = [
+    { id: "nome", rotulo: "Nome completo", grupo: "identificacao", tipo: "texto", max: 120, largura: 230 },
+    { id: "apelido", rotulo: "Como prefere ser chamado", grupo: "identificacao", tipo: "texto", max: 60, largura: 150 },
+    { id: "foto", rotulo: "Foto", grupo: "identificacao", tipo: "foto", largura: 64 },
+    { id: "cargo", rotulo: "Cargo", grupo: "identificacao", tipo: "texto", max: 100, largura: 180 },
+    { id: "nivel", rotulo: "Nível", grupo: "identificacao", tipo: "lista", opcoes: NIVEIS, largura: 150 },
+    { id: "empresa", rotulo: "Empresa/unidade", grupo: "organizacao", tipo: "lista", opcoes: EMPRESAS, largura: 140 },
+    { id: "diretoria", rotulo: "Diretoria", grupo: "organizacao", tipo: "texto", max: 100, largura: 150 },
+    { id: "area", rotulo: "Área/departamento", grupo: "organizacao", tipo: "texto", max: 100, largura: 170, sugestoes: AREAS_PARCEIRAS },
+    { id: "equipe", rotulo: "Equipe", grupo: "organizacao", tipo: "texto", max: 100, largura: 140 },
+    { id: "grupo", rotulo: "Grupo (aba)", grupo: "organizacao", tipo: "lista", opcoes: GRUPOS.map((g) => g.id), nomes: GRUPOS.map((g) => g.nome), largura: 170 },
+    { id: "gestorId", rotulo: "Gestor imediato", grupo: "organizacao", tipo: "pessoa", largura: 170 },
+    { id: "centroCusto", rotulo: "Centro de custo", grupo: "organizacao", tipo: "texto", max: 40, largura: 120 },
+    { id: "cidade", rotulo: "Cidade/UF", grupo: "localizacao", tipo: "texto", max: 80, largura: 140 },
+    { id: "unidade", rotulo: "Unidade/prédio/andar", grupo: "localizacao", tipo: "texto", max: 100, largura: 170 },
+    { id: "modelo", rotulo: "Modelo de trabalho", grupo: "localizacao", tipo: "lista", opcoes: MODELOS_TRABALHO, largura: 140 },
+    { id: "fuso", rotulo: "Fuso", grupo: "localizacao", tipo: "lista", opcoes: FUSOS, largura: 150 },
+    { id: "email", rotulo: "E-mail corporativo", grupo: "contato", tipo: "email", max: 120, largura: 220 },
+    { id: "ramal", rotulo: "Telefone fixo/ramal", grupo: "contato", tipo: "telefone", max: 40, largura: 150 },
+    { id: "celular", rotulo: "Celular corporativo", grupo: "contato", tipo: "telefone", max: 40, largura: 150 },
+    { id: "teams", rotulo: "Teams", grupo: "contato", tipo: "teams", largura: 90, derivado: true },
+    { id: "canal", rotulo: "Canal/grupo (link)", grupo: "contato", tipo: "link", max: 300, largura: 120 },
+    { id: "assuntos", rotulo: "Assuntos que atende", grupo: "atendimento", tipo: "etiquetas", largura: 220 },
+    { id: "quando", rotulo: "Quando acionar", grupo: "atendimento", tipo: "textoLongo", max: 500, largura: 220 },
+    { id: "quandoNao", rotulo: "Quando NÃO acionar", grupo: "atendimento", tipo: "textoLongo", max: 500, largura: 220 },
+    { id: "escalonamento", rotulo: "Nível de escalonamento", grupo: "atendimento", tipo: "lista", opcoes: ESCALONAMENTO, largura: 120 },
+    { id: "sla", rotulo: "SLA de resposta", grupo: "atendimento", tipo: "texto", max: 60, largura: 130 },
+    { id: "horario", rotulo: "Horário de atendimento", grupo: "atendimento", tipo: "texto", max: 80, largura: 160 },
+    { id: "plantao", rotulo: "Sobreaviso/plantão", grupo: "atendimento", tipo: "booleano", largura: 110 },
+    { id: "escala", rotulo: "Escala do plantão", grupo: "atendimento", tipo: "texto", max: 200, largura: 170 },
+    { id: "substitutoId", rotulo: "Substituto", grupo: "atendimento", tipo: "pessoa", largura: 170 },
+    { id: "status", rotulo: "Status", grupo: "situacao", tipo: "lista", opcoes: STATUS, largura: 110 },
+    { id: "ausenteDe", rotulo: "Ausente de", grupo: "situacao", tipo: "data", largura: 120 },
+    { id: "ausenteAte", rotulo: "Ausente até", grupo: "situacao", tipo: "data", largura: 120 },
+    { id: "observacoes", rotulo: "Observações", grupo: "situacao", tipo: "textoLongo", max: 500, largura: 220 },
+    { id: "atualizado", rotulo: "Atualizado em/por", grupo: "situacao", tipo: "atualizado", largura: 190, derivado: true }
+  ];
+  const COL = Object.fromEntries(COLUNAS.map((c) => [c.id, c]));
+  const CAMPOS_GRAVADOS = COLUNAS.filter((c) => !c.derivado).map((c) => c.id);
+  const COLUNAS_PADRAO = ["nome", "cargo", "nivel", "area", "equipe", "email", "ramal", "celular", "teams", "assuntos", "escalonamento", "horario", "status", "atualizado"];
+  const LARGURA_ACOES = 172;
+  const RE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const RE_DATA = /^\d{4}-\d{2}-\d{2}$/;
+  const RE_FOTO = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
+  const CHAVE_VISTA = "suporte-n2-contatos-vista";
+  const CHAVE_VISOES = "suporte-n2-contatos-visoes";
+
+  /* Colunas da planilha sem equivalente no site viram colunas de texto "x-…".
+     A última cópia da planilha fica no navegador (offline e abertura rápida). */
+  const IDS_EXTRAS = [];
+  function registrarExtras(extras) {
+    (Array.isArray(extras) ? extras : []).forEach((x) => {
+      if (!x || !/^x-[a-z0-9-]{1,50}$/.test(x.id || "") || COL[x.id]) return;
+      if (!GRUPOS_COLUNAS.some((g) => g.id === "planilha")) GRUPOS_COLUNAS.push({ id: "planilha", nome: "Outras colunas da planilha" });
+      const c = { id: x.id, rotulo: String(x.rotulo || x.id).slice(0, 60), grupo: "planilha", tipo: "texto", max: 1000, largura: 160, extra: true };
+      COLUNAS.push(c);
+      COL[c.id] = c;
+      IDS_EXTRAS.push(c.id);
+    });
+  }
+  /* Sem nenhuma sincronização ainda (Apps Script não instalado) e sem cópia local: mostra os contatos do site */
+  let semSincronizacao = false;
+  function origemAtual() {
+    if (ORIGEM_CONTATOS === "site" || semSincronizacao) return "site";
+    if (ehAdmin() && lerLocal(CHAVE_ORIGEM_ADMIN, "") === "site") return "site";
+    return ORIGEM_CONTATOS;
+  }
+  const daPlanilha = () => origemAtual() !== "site";
+  const cachePlanilha = ORIGEM_CONTATOS === "site" ? null : lerLocal(CHAVE_PLANILHA, null);
+  if (cachePlanilha) registrarExtras(cachePlanilha.extras);
+  let colunasPlanilha = cachePlanilha && Array.isArray(cachePlanilha.colunas) ? cachePlanilha.colunas.filter((c) => COL[c]) : null;
+  const colunasIniciais = () => (colunasPlanilha && origemAtual() !== "site" ? colunasPlanilha : COLUNAS_PADRAO);
+
+  /* Exemplos FICTÍCIOS (marcados "Exemplo — apagar"). Nunca use nomes reais aqui. */
+  const exemplo = (id, d) => ({ id, exemplo: true, status: "Ativo", observacoes: "Exemplo — apagar", empresa: "V/Cert", modelo: "Híbrido", fuso: "Brasília (UTC−3)", cidade: "São Paulo/SP", ramal: "(11) 0000-0000", celular: "(11) 0000-0000", ...d });
+  const EXEMPLOS = [
+    exemplo("exemplo-ana", { nome: "Ana Exemplo", apelido: "Ana", cargo: "Coordenadora de Suporte (exemplo)", nivel: "Coordenação", diretoria: "Operações (exemplo)", area: "Suporte", equipe: "Suporte N2", grupo: "lideranca", email: "ana.exemplo@exemplo.com", assuntos: ["Certificados", "VIDaaS"], escalonamento: "Gestão", horario: "Seg a sex, 8h às 17h", quando: "Casos críticos sem solução no N2.", quandoNao: "Dúvidas de procedimento já documentadas." }),
+    exemplo("exemplo-bruno", { nome: "Bruno Exemplo", cargo: "Analista de Suporte (exemplo)", nivel: "Analista/Especialista", area: "Suporte", equipe: "Suporte N2", grupo: "lideranca", gestorId: "exemplo-ana", email: "bruno.exemplo@exemplo.com", assuntos: ["SSL", "Sistemas"], escalonamento: "N2", horario: "Seg a sex, 9h às 18h", plantao: true, escala: "Plantão de exemplo: fins de semana alternados" }),
+    exemplo("exemplo-carla", { nome: "Carla Exemplo", cargo: "Gerente (exemplo)", nivel: "Gerência", diretoria: "Operações (exemplo)", area: "Operações", grupo: "gestao", email: "carla.exemplo@exemplo.com", assuntos: ["Contratos"], escalonamento: "Gestão", status: "Férias", ausenteDe: "2026-10-15", ausenteAte: "2026-10-30", substitutoId: "exemplo-ana" }),
+    exemplo("exemplo-diego", { nome: "Diego Exemplo", cargo: "Diretor (exemplo)", nivel: "Diretoria", diretoria: "Operações (exemplo)", area: "Diretoria", grupo: "diretoria", email: "diego.exemplo@exemplo.com", escalonamento: "Diretoria", quando: "Somente incidentes graves já escalados pela gestão." }),
+    exemplo("exemplo-elisa", { nome: "Elisa Exemplo", cargo: "Analista Comercial (exemplo)", nivel: "Analista/Especialista", area: "Comercial", grupo: "parceiras", email: "elisa.exemplo@exemplo.com", assuntos: ["Comercial", "Contratos"], escalonamento: "N2", empresa: "Valid Corporativo" }),
+    exemplo("exemplo-fabio", { nome: "Fábio Exemplo", cargo: "Analista de Faturamento (exemplo)", nivel: "Analista/Especialista", area: "Financeiro/Faturamento", grupo: "parceiras", email: "fabio.exemplo@exemplo.com", assuntos: ["Faturamento"], escalonamento: "N2", empresa: "Valid Corporativo", sla: "1 dia útil (exemplo)" }),
+    exemplo("exemplo-gabi", { nome: "Gabi Exemplo", cargo: "Especialista em Segurança (exemplo)", nivel: "Analista/Especialista", area: "Segurança da Informação", grupo: "parceiras", email: "gabi.exemplo@exemplo.com", assuntos: ["Segurança", "SSL"], escalonamento: "N3", empresa: "Valid Corporativo" }),
+    exemplo("exemplo-heitor", { nome: "Heitor Exemplo", cargo: "Técnico de Infraestrutura (exemplo)", nivel: "Técnico", area: "TI Corporativa/Infra", grupo: "plantao", email: "heitor.exemplo@exemplo.com", assuntos: ["Infraestrutura", "Sistemas"], escalonamento: "N3", plantao: true, escala: "Sobreaviso 24x7 (exemplo)", modelo: "Remoto" }),
+    exemplo("exemplo-iris", { nome: "Íris Exemplo", cargo: "Contato do fornecedor (exemplo)", nivel: "Analista/Especialista", empresa: "Parceiro", area: "Fornecedor (exemplo)", grupo: "fornecedores", email: "iris.exemplo@exemplo.com", assuntos: ["Sistemas"], escalonamento: "N3" }),
+    exemplo("exemplo-joao", { nome: "João Exemplo", cargo: "Contato institucional (exemplo)", nivel: "Analista/Especialista", empresa: "Parceiro", area: "Órgão (exemplo)", grupo: "orgaos", email: "joao.exemplo@exemplo.com", assuntos: ["Certificados"], escalonamento: "Gestão", status: "Licença" })
+  ];
+
+  /* ------------------------------------------------------------
+   *  Estado
+   * ------------------------------------------------------------ */
+  const VISTA_PADRAO = () => ({ colunas: [...colunasIniciais()], larguras: {}, ordenar: { col: "nome", dir: 1 }, filtros: {}, agrupar: "", compacta: false, cartoes: null, aba: "todos", subArea: "", especial: "" });
+  const vistaSalva = lerLocal(CHAVE_VISTA, null);
+  const estado = {
+    api: null,
+    contatos: daPlanilha() ? (cachePlanilha && Array.isArray(cachePlanilha.contatos) ? cachePlanilha.contatos : []) : EXEMPLOS.map((c) => ({ ...c })),
+    usandoReserva: !daPlanilha(),
+    planilha: {
+      abas: cachePlanilha && Array.isArray(cachePlanilha.abas) ? cachePlanilha.abas.filter((a) => a && /^[a-z0-9-]{1,60}$/.test(a.id || "")) : [],
+      contatos: cachePlanilha && Array.isArray(cachePlanilha.contatos) ? cachePlanilha.contatos : null,
+      sinc: null,
+      salvaEm: cachePlanilha ? cachePlanilha.salvaEm || "" : "",
+      dados: new Map(),
+      recebeu: false,
+      copiaLocal: false,
+      lidoEm: ""
+    },
+    piscar: new Map(),
+    config: { assuntos: ASSUNTOS_PADRAO, semExemplos: false },
+    vista: { ...VISTA_PADRAO(), ...(vistaSalva && typeof vistaSalva === "object" ? vistaSalva : {}) },
+    busca: "",
+    visao: "padrao",
+    gruposFechados: new Set(),
+    linhas: [],
+    celula: null,
+    editando: null,
+    desfazer: [],
+    cartoesLimite: 60,
+    exemplosGravados: false
+  };
+  estado.vista.colunas = (estado.vista.colunas || []).filter((c) => COL[c]);
+  if (!estado.vista.colunas.includes("nome")) estado.vista.colunas.unshift("nome");
+  const salvarVista = () => gravarLocal(CHAVE_VISTA, estado.vista);
+  const podeEditar = () => !!estado.api && !estado.usandoReserva && !daPlanilha() && (ehAdmin() || (sessao.email && CONTATOS_EDITORES.includes(sessao.email)) || CONTATOS_ABERTO);
+  const porId = (id) => estado.contatos.find((c) => c.id === id);
+  const hojeIso = () => { const p = partesBrasilia(); return `${p.ano}-${p.mes}-${p.dia}`; };
+
+  /* ------------------------------------------------------------
+   *  Valores das células
+   * ------------------------------------------------------------ */
+  const gruposAtivos = () => (daPlanilha() ? estado.planilha.abas.map((a) => ({ id: a.id, nome: a.nome })) : GRUPOS);
+  const nomeGrupo = (id) => (gruposAtivos().find((g) => g.id === id) || {}).nome || "";
+  const teamsUrl = (email) => (RE_EMAIL.test(email || "") ? `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(email).replace(/%40/g, "@")}` : "");
+  const telUrl = (t) => { const d = String(t || "").replace(/[^\d+]/g, ""); return d.replace(/\D/g, "").length >= 8 ? "tel:" + d : ""; };
+  function valorTexto(c, col) {
+    const v = c[col];
+    switch (COL[col].tipo) {
+      case "etiquetas": return Array.isArray(v) ? v.join(", ") : "";
+      case "pessoa": return (porId(v) || {}).nome || "";
+      case "booleano": return v ? "Sim" : "Não";
+      case "data": return v ? formatarData(v + "T12:00:00") : "";
+      case "teams": return c.email || "";
+      case "foto": return v ? "Sim" : "";
+      case "atualizado": return [c.atualizadoEm ? formatarData(c.atualizadoEm, true) : "", c.atualizadoPor || ""].filter(Boolean).join(" · ");
+      case "lista": return col === "grupo" ? nomeGrupo(v) : String(v || "");
+      default: return String(v == null ? "" : v);
+    }
+  }
+  const textoBusca = (c) => c._busca || (c._busca = normalizar([...CAMPOS_GRAVADOS, ...IDS_EXTRAS].map((k) => valorTexto(c, k)).join(" | ")));
+  function ausenteHoje(c) {
+    if (c.status === "Desligado") return false;
+    if (["Férias", "Licença", "Afastado"].includes(c.status)) return true;
+    const h = hojeIso();
+    return !!(c.ausenteDe && c.ausenteDe <= h && (!c.ausenteAte || c.ausenteAte >= h));
+  }
+  function htmlCelula(c, col) {
+    const v = c[col];
+    const t = COL[col].tipo;
+    if (col === "nome") {
+      return `${c.foto && RE_FOTO.test(c.foto) ? `<img class="mini-foto" src="${escapar(c.foto)}" alt="">` : ""}<span class="t"><strong>${escapar(v || "")}</strong></span>${c.exemplo ? '<span class="exemplo">Exemplo — apagar</span>' : ""}`;
+    }
+    switch (t) {
+      case "email": return v ? `<a href="mailto:${escapar(v)}" class="t">${escapar(v)}</a>` : "";
+      case "telefone": return v ? (telUrl(v) ? `<a href="${escapar(telUrl(v))}" class="t">${escapar(v)}</a>` : `<span class="t">${escapar(v)}</span>`) : "";
+      case "teams": return teamsUrl(c.email) ? `<a href="${escapar(teamsUrl(c.email))}" target="_blank" rel="noopener noreferrer">Abrir chat</a>` : "";
+      case "link": return /^https:\/\//i.test(v || "") ? `<a href="${escapar(v)}" target="_blank" rel="noopener noreferrer">Abrir</a>` : "";
+      case "foto": return v && RE_FOTO.test(v) ? `<img class="mini-foto" src="${escapar(v)}" alt="Foto de ${escapar(c.nome || "")}">` : "";
+      case "etiquetas": return (Array.isArray(v) ? v : []).map((x) => `<span class="etq">${escapar(x)}</span>`).join("");
+      case "booleano": return v ? '<span class="etq st-ativo">Sim</span>' : "";
+      case "lista":
+        if (col === "status" && v) return `<span class="etq st-${slug(v)}">${escapar(v)}</span>`;
+        return `<span class="t">${escapar(valorTexto(c, col))}</span>`;
+      default: return `<span class="t">${escapar(valorTexto(c, col))}</span>`;
+    }
+  }
+
+  /* ------------------------------------------------------------
+   *  Filtrar, ordenar, agrupar
+   * ------------------------------------------------------------ */
+  function contatosFiltrados() {
+    const vista = estado.vista;
+    let l = estado.contatos;
+    if (vista.aba === "plantao") l = l.filter((c) => c.grupo === "plantao" || c.plantao);
+    else if (vista.aba !== "todos") l = l.filter((c) => c.grupo === vista.aba);
+    if (vista.aba === "parceiras" && vista.subArea) l = l.filter((c) => normalizar(c.area) === normalizar(vista.subArea));
+    if (vista.especial === "ausentes") l = l.filter(ausenteHoje);
+    if (vista.especial === "plantao") l = l.filter((c) => c.plantao && c.status !== "Desligado");
+    const termos = normalizar(estado.busca).split(/\s+/).filter(Boolean);
+    if (termos.length) l = l.filter((c) => { const t = textoBusca(c); return termos.every((x) => t.includes(x)); });
+    Object.entries(vista.filtros || {}).forEach(([col, f]) => {
+      if (!COL[col] || !f) return;
+      if (Array.isArray(f.valores) && f.valores.length) {
+        const set = new Set(f.valores);
+        l = l.filter((c) => {
+          if (COL[col].tipo === "etiquetas") return (c[col] || []).some((x) => set.has(x));
+          return set.has(valorTexto(c, col) || "(vazio)");
+        });
+      }
+      if (f.texto) { const n = normalizar(f.texto); l = l.filter((c) => normalizar(valorTexto(c, col)).includes(n)); }
+    });
+    const { col, dir } = vista.ordenar || {};
+    if (col && COL[col]) {
+      const ordemLista = COL[col].opcoes;
+      const chaveOrd = (c) => (ordemLista && col !== "grupo" ? (ordemLista.indexOf(c[col]) + 1 || 99) : COL[col].tipo === "data" ? (c[col] || "9999") : col === "atualizado" ? (c.atualizadoEm || "") : normalizar(valorTexto(c, col)));
+      l = [...l].sort((a, b) => {
+        const x = chaveOrd(a), y = chaveOrd(b);
+        const vazioA = x === "" || x === 99, vazioB = y === "" || y === 99;
+        if (vazioA !== vazioB) return vazioA ? 1 : -1;
+        return (typeof x === "number" ? x - y : String(x).localeCompare(String(y), "pt-BR", { numeric: true })) * dir;
+      });
+    }
+    return l;
+  }
+  function montarLinhas() {
+    const filtrados = contatosFiltrados();
+    estado.filtrados = filtrados;
+    const g = estado.vista.agrupar;
+    if (!g) return filtrados.map((c) => ({ tipo: "linha", c }));
+    const grupos = new Map();
+    filtrados.forEach((c) => {
+      const chaves = g === "assuntos" ? ((c.assuntos || []).length ? c.assuntos : ["(sem assunto)"]) : [valorTexto(c, g) || "(sem " + COL[g].rotulo.toLowerCase() + ")"];
+      chaves.forEach((k) => { if (!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(c); });
+    });
+    const ordem = COL[g].opcoes;
+    const chaves = [...grupos.keys()].sort((a, b) => (ordem ? ((ordem.indexOf(a) + 1 || 99) - (ordem.indexOf(b) + 1 || 99)) : 0) || a.localeCompare(b, "pt-BR"));
+    const linhas = [];
+    chaves.forEach((k) => {
+      const fechado = estado.gruposFechados.has(k);
+      linhas.push({ tipo: "grupo", chave: k, n: grupos.get(k).length, fechado });
+      if (!fechado) grupos.get(k).forEach((c) => linhas.push({ tipo: "linha", c }));
+    });
+    return linhas;
+  }
+
+  /* ------------------------------------------------------------
+   *  Abas de grupo, sub-áreas e faixa "Hoje"
+   * ------------------------------------------------------------ */
+  function renderizarAbas() {
+    const abas = [{ id: "todos", nome: "Todos" }, ...gruposAtivos()];
+    const contar = (id) => (id === "todos" ? estado.contatos.length : id === "plantao" ? estado.contatos.filter((c) => c.grupo === "plantao" || c.plantao).length : estado.contatos.filter((c) => c.grupo === id).length);
+    $("#abas-grupo").innerHTML = abas.map((a) => `<button type="button" class="aba-grupo" role="tab" data-aba="${a.id}" aria-selected="${estado.vista.aba === a.id}" tabindex="${estado.vista.aba === a.id ? 0 : -1}">${escapar(a.nome)}<span class="n">${contar(a.id)}</span></button>`).join("");
+    const sub = $("#sub-areas");
+    sub.hidden = estado.vista.aba !== "parceiras";
+    if (!sub.hidden) {
+      sub.innerHTML = [`<button type="button" class="chip" data-sub="" aria-pressed="${!estado.vista.subArea}">Todas</button>`,
+        ...AREAS_PARCEIRAS.map((a) => `<button type="button" class="chip" data-sub="${escapar(a)}" aria-pressed="${estado.vista.subArea === a}">${escapar(a)}</button>`)].join("");
+    }
+  }
+  $("#abas-grupo").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-aba]");
+    if (!b) return;
+    estado.vista.aba = b.dataset.aba;
+    estado.vista.subArea = "";
+    salvarVista();
+    renderizarTudo();
+  });
+  $("#abas-grupo").addEventListener("keydown", (e) => {
+    if (!["ArrowLeft", "ArrowRight"].includes(e.key)) return;
+    const bs = $$("[data-aba]", $("#abas-grupo"));
+    const i = bs.findIndex((b) => b.dataset.aba === estado.vista.aba);
+    const n = bs[(i + (e.key === "ArrowRight" ? 1 : -1) + bs.length) % bs.length];
+    n.click();
+    $(`[data-aba="${n.dataset.aba}"]`).focus();
+  });
+  $("#sub-areas").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-sub]");
+    if (!b) return;
+    estado.vista.subArea = b.dataset.sub;
+    salvarVista();
+    renderizarTudo();
+  });
+  function renderizarFaixaHoje() {
+    const ausentes = estado.contatos.filter(ausenteHoje);
+    const plantao = estado.contatos.filter((c) => c.plantao && c.status !== "Desligado" && !ausenteHoje(c));
+    $("#faixa-hoje").innerHTML = `
+      <button type="button" data-especial="ausentes">${svg("i-calendario")}Hoje: <strong>${ausentes.length}</strong> de férias/ausentes</button>
+      <button type="button" data-especial="plantao">${svg("i-telefone")}Plantão: <strong>${escapar(plantao.slice(0, 3).map((c) => c.apelido || c.nome).join(", ") || "ninguém marcado")}</strong>${plantao.length > 3 ? ` +${plantao.length - 3}` : ""}</button>`;
+  }
+  $("#faixa-hoje").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-especial]");
+    if (b) aplicarVisao(b.dataset.especial === "ausentes" ? "ausentes" : "plantao");
+  });
+
+  /* ------------------------------------------------------------
+   *  Visões (prontas e salvas por pessoa no navegador)
+   * ------------------------------------------------------------ */
+  const VISOES_PRONTAS = {
+    padrao: { nome: "Todos os contatos", vista: () => ({ ...VISTA_PADRAO(), compacta: estado.vista.compacta, larguras: estado.vista.larguras }) },
+    assunto: { nome: "Quem acionar por assunto", vista: () => ({ ...VISTA_PADRAO(), colunas: ["nome", "area", "assuntos", "quando", "quandoNao", "escalonamento", "email", "ramal", "status"], agrupar: "assuntos", larguras: estado.vista.larguras, compacta: estado.vista.compacta }) },
+    matriz: { nome: "Matriz de escalonamento", vista: () => ({ ...estado.vista, especial: "matriz" }) },
+    ausentes: { nome: "Ausentes hoje", vista: () => ({ ...VISTA_PADRAO(), colunas: ["nome", "area", "status", "ausenteDe", "ausenteAte", "substitutoId", "email"], especial: "ausentes", larguras: estado.vista.larguras, compacta: estado.vista.compacta }) },
+    plantao: { nome: "Plantão", vista: () => ({ ...VISTA_PADRAO(), colunas: ["nome", "area", "escala", "celular", "ramal", "email", "teams", "horario"], especial: "plantao", larguras: estado.vista.larguras, compacta: estado.vista.compacta }) }
+  };
+  function renderizarVisoes() {
+    const salvas = lerLocal(CHAVE_VISOES, []);
+    $("#visao").innerHTML = `<optgroup label="Visões prontas">${Object.entries(VISOES_PRONTAS).map(([id, v]) => `<option value="${id}"${estado.visao === id ? " selected" : ""}>${escapar(v.nome)}</option>`).join("")}</optgroup>
+      ${salvas.length ? `<optgroup label="Minhas visões">${salvas.map((v, i) => `<option value="salva-${i}"${estado.visao === "salva-" + i ? " selected" : ""}>${escapar(v.nome)}</option>`).join("")}</optgroup>` : ""}
+      <optgroup label="Ações"><option value="__salvar">Salvar visão atual…</option>${salvas.length ? '<option value="__excluir">Excluir uma visão salva…</option>' : ""}</optgroup>`;
+  }
+  function aplicarVisao(id) {
+    if (VISOES_PRONTAS[id]) estado.vista = VISOES_PRONTAS[id].vista();
+    else if (id.startsWith("salva-")) {
+      const v = lerLocal(CHAVE_VISOES, [])[Number(id.slice(6))];
+      if (v) estado.vista = { ...VISTA_PADRAO(), ...v.vista };
+    }
+    estado.visao = id;
+    estado.vista.colunas = estado.vista.colunas.filter((c) => COL[c]);
+    salvarVista();
+    renderizarTudo();
+  }
+  $("#visao").addEventListener("change", async (e) => {
+    const v = e.target.value;
+    if (v === "__salvar") {
+      const d = criarDialogo({ titulo: "Salvar visão", corpo: `<label class="campo"><span class="rotulo">Nome da visão</span><input name="nome" maxlength="40" required></label>
+        <p class="apoio">Guarda colunas, ordem, filtros e agrupamento só neste navegador.</p>
+        <div class="form-botoes"><button type="button" class="btn btn-secundario" data-fechar>Cancelar</button><button class="btn" type="submit">Salvar</button></div>` });
+      d.querySelector("form").addEventListener("submit", (ev) => {
+        const nome = ev.target.nome.value.trim();
+        if (!nome) { ev.preventDefault(); return; }
+        const salvas = lerLocal(CHAVE_VISOES, []);
+        const { especial, ...resto } = estado.vista;
+        salvas.push({ nome, vista: { ...resto, especial: especial === "matriz" ? "" : especial } });
+        gravarLocal(CHAVE_VISOES, salvas.slice(-20));
+        estado.visao = "salva-" + (Math.min(salvas.length, 20) - 1);
+        mostrarAviso("Visão salva.");
+      });
+      d.addEventListener("close", renderizarVisoes);
+      d.showModal();
+      return;
+    }
+    if (v === "__excluir") {
+      const salvas = lerLocal(CHAVE_VISOES, []);
+      const d = criarDialogo({ titulo: "Excluir visão salva", corpo: `<div class="opcoes" style="display:grid;gap:6px">${salvas.map((s, i) => `<button type="button" class="btn btn-secundario" data-exc="${i}">${svg("i-lixeira")}${escapar(s.nome)}</button>`).join("")}</div>` });
+      d.addEventListener("click", (ev) => {
+        const b = ev.target.closest("[data-exc]");
+        if (!b) return;
+        salvas.splice(Number(b.dataset.exc), 1);
+        gravarLocal(CHAVE_VISOES, salvas);
+        estado.visao = "padrao";
+        d.close();
+      });
+      d.addEventListener("close", renderizarVisoes);
+      d.showModal();
+      return;
+    }
+    aplicarVisao(v);
+  });
+
+  /* ------------------------------------------------------------
+   *  Renderização: planilha virtualizada, cartões ou matriz
+   * ------------------------------------------------------------ */
+  const areaDados = $("#area-dados");
+  const usarCartoes = () => (estado.vista.cartoes == null ? matchMedia("(max-width: 768px)").matches : estado.vista.cartoes);
+  const largura = (col) => Number(estado.vista.larguras[col]) || COL[col].largura;
+  const alturaLinha = () => (estado.vista.compacta ? 32 : 40);
+
+  function renderizarTudo() {
+    const grupos = gruposAtivos();
+    COL.grupo.opcoes = grupos.map((g) => g.id);
+    COL.grupo.nomes = grupos.map((g) => g.nome);
+    if (estado.vista.aba !== "todos" && !grupos.some((g) => g.id === estado.vista.aba)) estado.vista.aba = "todos";
+    renderizarSinc();
+    estado.linhas = montarLinhas();
+    renderizarAbas();
+    renderizarFaixaHoje();
+    renderizarVisoes();
+    $("#agrupar").value = estado.vista.agrupar || "";
+    $("#btn-densidade").setAttribute("aria-pressed", String(!!estado.vista.compacta));
+    $("#btn-cartoes").setAttribute("aria-pressed", String(usarCartoes()));
+    const n = estado.filtrados.length;
+    const filtrosAtivos = Object.values(estado.vista.filtros || {}).some((f) => f && ((f.valores && f.valores.length) || f.texto)) || estado.busca || estado.vista.subArea || estado.vista.especial;
+    $("#contagem").textContent = `${n.toLocaleString("pt-BR")} de ${estado.contatos.length.toLocaleString("pt-BR")} contato${estado.contatos.length === 1 ? "" : "s"}`;
+    $("#btn-limpar-filtros").disabled = !filtrosAtivos;
+    if (estado.vista.especial === "matriz") renderizarMatriz();
+    else if (usarCartoes()) renderizarCartoes();
+    else renderizarPlanilha();
+  }
+
+  function renderizarPlanilha() {
+    const cols = estado.vista.colunas;
+    const total = cols.reduce((s, c) => s + largura(c), 0) + LARGURA_ACOES;
+    let planilha = $("#planilha");
+    if (!planilha) {
+      areaDados.innerHTML = `<div class="planilha" id="planilha" role="grid" aria-label="Planilha de contatos" tabindex="0">
+        <div class="cab-grupos" aria-hidden="true"></div><div class="cab" role="row"></div><div class="corpo" role="rowgroup"></div></div>`;
+      planilha = $("#planilha");
+      ligarPlanilha(planilha);
+    }
+    planilha.classList.toggle("compacta", !!estado.vista.compacta);
+    planilha.style.setProperty("--colunas", cols.map((c) => largura(c) + "px").join(" ") + ` ${LARGURA_ACOES}px`);
+    planilha.style.setProperty("--largura-total", total + "px");
+    planilha.setAttribute("aria-rowcount", String(estado.filtrados.length + 1));
+    // Grupos de colunas (faixas contínuas)
+    const faixas = [];
+    cols.forEach((c, i) => {
+      const g = COL[c].grupo;
+      if (faixas.length && faixas[faixas.length - 1].g === g) faixas[faixas.length - 1].n++;
+      else faixas.push({ g, n: 1, primeira: i === 0 });
+    });
+    $(".cab-grupos", planilha).innerHTML = faixas.map((f) => `<div class="cab-grupo${f.primeira ? " fixa" : ""}" style="grid-column: span ${f.n}">${escapar(GRUPOS_COLUNAS.find((g) => g.id === f.g).nome)}</div>`).join("") + `<div class="cab-grupo col-acoes"></div>`;
+    const ord = estado.vista.ordenar || {};
+    $(".cab", planilha).innerHTML = cols.map((c, i) => {
+      const f = (estado.vista.filtros || {})[c];
+      const ativo = f && ((f.valores && f.valores.length) || f.texto);
+      const sort = ord.col === c ? (ord.dir > 0 ? "ascending" : "descending") : "none";
+      return `<div class="cab-celula${i === 0 ? " fixa" : ""}" role="columnheader" aria-sort="${sort}" data-col="${c}" ${i === 0 ? "" : 'draggable="true"'}>
+        <button type="button" class="cab-ordenar" data-ordenar="${c}" title="Ordenar por ${escapar(COL[c].rotulo)}"><span>${escapar(COL[c].rotulo)}</span>${sort !== "none" ? svg(sort === "ascending" ? "i-seta-cima" : "i-seta-baixo") : ""}</button>
+        ${COL[c].tipo === "foto" ? "" : `<button type="button" class="cab-filtro${ativo ? " ativo" : ""}" data-filtrar="${c}" aria-label="Filtrar ${escapar(COL[c].rotulo)}">${svg("i-filtro")}</button>`}
+        <span class="cab-redim" data-redim="${c}" aria-hidden="true"></span></div>`;
+    }).join("") + `<div class="cab-celula col-acoes" role="columnheader">Ações</div>`;
+    const corpo = $(".corpo", planilha);
+    corpo.style.height = estado.linhas.length * alturaLinha() + "px";
+    if (!estado.linhas.length) corpo.innerHTML = `<div class="vazio">${textoVazio()}</div>`;
+    estado.ultimoIntervalo = null;
+    pintarLinhas(true);
+  }
+
+  function pintarLinhas(forcar) {
+    const planilha = $("#planilha");
+    if (!planilha || !estado.linhas.length) return;
+    const h = alturaLinha();
+    const topoCorpo = 64;
+    const inicio = Math.max(0, Math.floor((planilha.scrollTop - topoCorpo) / h) - 8);
+    const fim = Math.min(estado.linhas.length, Math.ceil((planilha.scrollTop + planilha.clientHeight) / h) + 8);
+    if (!forcar && estado.ultimoIntervalo && estado.ultimoIntervalo[0] === inicio && estado.ultimoIntervalo[1] === fim) return;
+    estado.ultimoIntervalo = [inicio, fim];
+    const focoNaGrade = planilha.contains(document.activeElement) && document.activeElement.classList.contains("celula");
+    const cols = estado.vista.colunas;
+    const editor = podeEditar();
+    let html = "";
+    for (let i = inicio; i < fim; i++) {
+      const l = estado.linhas[i];
+      if (l.tipo === "grupo") {
+        html += `<div class="linha-grupo${l.fechado ? " fechado" : ""}" style="top:${i * h}px" data-grupo="${escapar(l.chave)}" role="row" aria-expanded="${!l.fechado}"><span class="rot">${svg("i-chevron-baixo")}${escapar(l.chave)} <span class="selo">${l.n}</span></span></div>`;
+        continue;
+      }
+      const c = l.c;
+      html += `<div class="linha${c.status === "Desligado" ? " desligado" : ""}${piscando(c.id) ? " piscou" : ""}" style="top:${i * h}px" role="row" aria-rowindex="${i + 2}" data-id="${escapar(c.id)}">` +
+        cols.map((col, j) => `<div class="celula${j === 0 ? " fixa" : ""}" role="gridcell" tabindex="-1" data-col="${col}" title="${escapar(valorTexto(c, col)).slice(0, 300)}">${htmlCelula(c, col)}</div>`).join("") +
+        `<div class="celula col-acoes">${htmlAcoes(c, editor)}</div></div>`;
+    }
+    $(".corpo", planilha).innerHTML = html;
+    if (estado.celula) {
+      const el = celulaEl(estado.celula.id, estado.celula.col);
+      if (el) { el.classList.add("ativa"); el.tabIndex = 0; if (focoNaGrade) el.focus({ preventScroll: true }); }
+    }
+  }
+  function htmlAcoes(c, editor) {
+    const tel = telUrl(c.celular) || telUrl(c.ramal);
+    return `<a class="acao-linha${tel ? "" : " inativa"}" href="${escapar(tel || "#")}" title="Ligar" aria-label="Ligar para ${escapar(c.nome)}">${svg("i-telefone")}</a>
+      <a class="acao-linha${c.email ? "" : " inativa"}" href="${c.email ? "mailto:" + escapar(c.email) : "#"}" title="E-mail" aria-label="E-mail para ${escapar(c.nome)}">${svg("i-email")}</a>
+      <a class="acao-linha${teamsUrl(c.email) ? "" : " inativa"}" href="${escapar(teamsUrl(c.email) || "#")}" target="_blank" rel="noopener noreferrer" title="Conversar no Teams" aria-label="Teams com ${escapar(c.nome)}">${svg("i-conversa")}</a>
+      <button type="button" class="acao-linha" data-acao="copiar" title="Copiar contato" aria-label="Copiar contato">${svg("i-copiar")}</button>
+      <button type="button" class="acao-linha" data-acao="vcard" title="Baixar vCard (.vcf)" aria-label="Baixar vCard">${svg("i-cartao")}</button>
+      <button type="button" class="acao-linha" data-acao="ficha" title="Ver ficha completa" aria-label="Ver ficha de ${escapar(c.nome)}">${svg("i-olho")}</button>
+      ${editor ? `<button type="button" class="acao-linha" data-acao="mais" title="Duplicar ou excluir" aria-label="Mais ações">⋯</button>` : ""}`;
+  }
+  const celulaEl = (id, col) => $(`.linha[data-id="${CSS.escape(id)}"] .celula[data-col="${col}"]`);
+
+  function ligarPlanilha(planilha) {
+    let pedido = 0;
+    planilha.addEventListener("scroll", () => { cancelAnimationFrame(pedido); pedido = requestAnimationFrame(() => pintarLinhas(false)); }, { passive: true });
+    planilha.addEventListener("click", (e) => {
+      const ordenar = e.target.closest("[data-ordenar]");
+      if (ordenar) {
+        const col = ordenar.dataset.ordenar;
+        const o = estado.vista.ordenar || {};
+        estado.vista.ordenar = o.col !== col ? { col, dir: 1 } : o.dir === 1 ? { col, dir: -1 } : { col: "", dir: 1 };
+        salvarVista(); renderizarTudo(); return;
+      }
+      const filtrar = e.target.closest("[data-filtrar]");
+      if (filtrar) { abrirFiltro(filtrar.dataset.filtrar, filtrar); return; }
+      const grupo = e.target.closest("[data-grupo]");
+      if (grupo) {
+        const k = grupo.dataset.grupo;
+        if (estado.gruposFechados.has(k)) estado.gruposFechados.delete(k); else estado.gruposFechados.add(k);
+        renderizarTudo(); return;
+      }
+      const acao = e.target.closest("[data-acao]");
+      if (acao) { executarAcao(acao.dataset.acao, porId(acao.closest("[data-id]").dataset.id), acao); return; }
+      const cel = e.target.closest(".celula[data-col]");
+      if (cel && !e.target.closest("a")) selecionar(cel.closest("[data-id]").dataset.id, cel.dataset.col, true);
+    });
+    planilha.addEventListener("dblclick", (e) => {
+      const cel = e.target.closest(".celula[data-col]");
+      if (cel) iniciarEdicao(cel.closest("[data-id]").dataset.id, cel.dataset.col);
+    });
+    planilha.addEventListener("keydown", teclaPlanilha);
+    // Redimensionar colunas
+    planilha.addEventListener("pointerdown", (e) => {
+      const r = e.target.closest("[data-redim]");
+      if (!r) return;
+      e.preventDefault();
+      const col = r.dataset.redim;
+      const x0 = e.clientX, l0 = largura(col);
+      const mover = (ev) => { estado.vista.larguras[col] = Math.max(60, Math.min(600, Math.round(l0 + ev.clientX - x0))); renderizarPlanilha(); };
+      const soltar = () => { window.removeEventListener("pointermove", mover); window.removeEventListener("pointerup", soltar); salvarVista(); };
+      window.addEventListener("pointermove", mover);
+      window.addEventListener("pointerup", soltar);
+    });
+    // Reordenar colunas arrastando o cabeçalho
+    let arrastada = null;
+    planilha.addEventListener("dragstart", (e) => {
+      const cab = e.target.closest(".cab-celula[data-col]");
+      if (!cab || e.target.closest("[data-redim]")) return;
+      arrastada = cab.dataset.col;
+      cab.classList.add("arrastando");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", arrastada);
+    });
+    planilha.addEventListener("dragover", (e) => {
+      const cab = e.target.closest(".cab-celula[data-col]");
+      if (!arrastada || !cab || cab.dataset.col === "nome") return;
+      e.preventDefault();
+      $$(".alvo-soltar", planilha).forEach((x) => x.classList.remove("alvo-soltar"));
+      cab.classList.add("alvo-soltar");
+    });
+    planilha.addEventListener("drop", (e) => {
+      const cab = e.target.closest(".cab-celula[data-col]");
+      if (!arrastada || !cab || cab.dataset.col === "nome") return;
+      e.preventDefault();
+      const cols = estado.vista.colunas.filter((c) => c !== arrastada);
+      cols.splice(cols.indexOf(cab.dataset.col), 0, arrastada);
+      estado.vista.colunas = cols;
+      arrastada = null;
+      salvarVista(); renderizarPlanilha();
+    });
+    planilha.addEventListener("dragend", () => { arrastada = null; $$(".arrastando, .alvo-soltar", planilha).forEach((x) => x.classList.remove("arrastando", "alvo-soltar")); });
+  }
+
+  function selecionar(id, col, focar) {
+    $$(".celula.ativa").forEach((x) => { x.classList.remove("ativa"); x.tabIndex = -1; });
+    estado.celula = { id, col };
+    const el = celulaEl(id, col);
+    if (el) { el.classList.add("ativa"); el.tabIndex = 0; if (focar) el.focus({ preventScroll: false }); }
+  }
+  function moverSelecao(dLinha, dCol) {
+    const linhasDados = estado.linhas.map((l, i) => ({ ...l, i })).filter((l) => l.tipo === "linha");
+    if (!linhasDados.length) return;
+    const cols = estado.vista.colunas;
+    let li = estado.celula ? linhasDados.findIndex((l) => l.c.id === estado.celula.id) : 0;
+    let ci = estado.celula ? cols.indexOf(estado.celula.col) : 0;
+    li = Math.max(0, Math.min(linhasDados.length - 1, (li < 0 ? 0 : li) + dLinha));
+    ci = Math.max(0, Math.min(cols.length - 1, (ci < 0 ? 0 : ci) + dCol));
+    const alvo = linhasDados[li];
+    const planilha = $("#planilha");
+    const h = alturaLinha();
+    const y = alvo.i * h;
+    if (y < planilha.scrollTop) planilha.scrollTop = y;
+    else if (y + h + 64 > planilha.scrollTop + planilha.clientHeight) planilha.scrollTop = y + h + 64 - planilha.clientHeight;
+    pintarLinhas(true);
+    selecionar(alvo.c.id, cols[ci], true);
+  }
+  function teclaPlanilha(e) {
+    if (estado.editando || e.target.closest(".editor-celula")) return;
+    if (!e.target.classList.contains("celula") && e.target.id !== "planilha") return;
+    const mapa = { ArrowDown: [1, 0], ArrowUp: [-1, 0], ArrowRight: [0, 1], ArrowLeft: [0, -1], PageDown: [10, 0], PageUp: [-10, 0] };
+    if (mapa[e.key]) { e.preventDefault(); moverSelecao(...mapa[e.key]); return; }
+    if (e.key === "Enter" && estado.celula) { e.preventDefault(); iniciarEdicao(estado.celula.id, estado.celula.col); return; }
+    if (e.key === "Home" && estado.celula) { e.preventDefault(); moverSelecao(0, -99); }
+    if (e.key === "End" && estado.celula) { e.preventDefault(); moverSelecao(0, 99); }
+  }
+
+  /* Cartões (celular) */
+  function renderizarCartoes() {
+    const editor = podeEditar();
+    let html = "";
+    let n = 0;
+    for (const l of estado.linhas) {
+      if (n >= estado.cartoesLimite) break;
+      if (l.tipo === "grupo") { html += `<div class="cartao-grupo" data-grupo="${escapar(l.chave)}" role="button" tabindex="0">${escapar(l.chave)} <span class="selo">${l.n}</span></div>`; continue; }
+      const c = l.c;
+      n++;
+      html += `<article class="cartao-contato${piscando(c.id) ? " piscou" : ""}" data-id="${escapar(c.id)}">
+        <div class="topo">${c.foto && RE_FOTO.test(c.foto) ? `<img class="mini-foto" src="${escapar(c.foto)}" alt="">` : svg("i-usuario")}
+          <div><div class="nome">${escapar(c.nome)}${c.exemplo ? ' <span class="exemplo">Exemplo — apagar</span>' : ""}</div>
+          <div class="linha2">${escapar([c.cargo, c.area].filter(Boolean).join(" · "))}</div></div></div>
+        <div class="linha2">${c.status ? `<span class="etq st-${slug(c.status)}">${escapar(c.status)}</span> ` : ""}${(c.assuntos || []).map((a) => `<span class="etq">${escapar(a)}</span>`).join(" ")}</div>
+        ${c.email ? `<div class="linha2">${escapar(c.email)}</div>` : ""}
+        <div class="acoes-c">${htmlAcoes(c, editor)}</div></article>`;
+    }
+    const restantes = estado.filtrados.length - n;
+    areaDados.innerHTML = estado.linhas.length
+      ? `<div class="cartoes">${html}</div>${restantes > 0 ? `<p style="text-align:center;margin-top:12px"><button type="button" class="btn btn-secundario" id="mais-cartoes">Mostrar mais (${restantes})</button></p>` : ""}`
+      : `<div class="vazio">${textoVazio()}</div>`;
+  }
+  areaDados.addEventListener("click", (e) => {
+    if (e.target.closest("#mais-cartoes")) { estado.cartoesLimite += 60; renderizarCartoes(); return; }
+    if ($("#planilha")) return;
+    const acao = e.target.closest("[data-acao]");
+    if (acao) { executarAcao(acao.dataset.acao, porId(acao.closest("[data-id]").dataset.id), acao); return; }
+    const g = e.target.closest("[data-grupo]");
+    if (g) { const k = g.dataset.grupo; if (estado.gruposFechados.has(k)) estado.gruposFechados.delete(k); else estado.gruposFechados.add(k); renderizarTudo(); return; }
+    const m = e.target.closest("[data-matriz]");
+    if (m) abrirFicha(m.dataset.matriz);
+  });
+
+  /* Matriz de escalonamento: Assunto × N1/N2/N3/Gestão/Diretoria */
+  function renderizarMatriz() {
+    const lista = contatosFiltrados().filter((c) => c.status !== "Desligado");
+    const assuntos = [...new Set([...estado.config.assuntos, ...lista.flatMap((c) => c.assuntos || [])])];
+    const linhas = assuntos.map((a) => {
+      const celulas = ESCALONAMENTO.map((n) => lista.filter((c) => (c.assuntos || []).includes(a) && c.escalonamento === n)
+        .map((c) => `<button type="button" data-matriz="${escapar(c.id)}">${escapar(c.apelido || c.nome)}${ausenteHoje(c) ? " (ausente)" : ""}</button>`).join("") || '<span class="apoio">—</span>');
+      return `<tr><td>${escapar(a)}</td>${celulas.map((x) => `<td>${x}</td>`).join("")}</tr>`;
+    }).join("");
+    areaDados.innerHTML = `<div class="matriz"><table><caption class="sr-only">Matriz de escalonamento</caption><thead><tr><th scope="col">Assunto</th>${ESCALONAMENTO.map((n) => `<th scope="col">${n}</th>`).join("")}</tr></thead><tbody>${linhas}</tbody></table></div>`;
+  }
+
+  /* ------------------------------------------------------------
+   *  Filtro por coluna (popover)
+   * ------------------------------------------------------------ */
+  let popAtual = null;
+  function fecharPop() { if (popAtual) { popAtual.remove(); popAtual = null; } }
+  document.addEventListener("pointerdown", (e) => { if (popAtual && !e.target.closest(".pop") && !e.target.closest("[data-filtrar]")) fecharPop(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && popAtual) { fecharPop(); } });
+  function abrirFiltro(col, botao) {
+    fecharPop();
+    const tipo = COL[col].tipo;
+    const f = (estado.vista.filtros || {})[col] || {};
+    const soLista = ["lista", "etiquetas", "booleano", "pessoa"].includes(tipo);
+    const comTexto = !soLista;
+    const set = new Set();
+    estado.contatos.forEach((c) => { if (tipo === "etiquetas") (c[col] || []).forEach((x) => set.add(x)); else set.add(valorTexto(c, col) || "(vazio)"); });
+    const porLista = soLista || (tipo === "texto" && set.size <= 60);
+    let valores = [];
+    if (porLista) {
+      const ordem = COL[col].opcoes && col !== "grupo" ? COL[col].opcoes : null;
+      valores = [...set].sort((a, b) => (ordem ? (ordem.indexOf(a) + 1 || 99) - (ordem.indexOf(b) + 1 || 99) : 0) || a.localeCompare(b, "pt-BR"));
+    }
+    const pop = document.createElement("div");
+    pop.className = "pop";
+    pop.setAttribute("role", "dialog");
+    pop.setAttribute("aria-label", "Filtrar " + COL[col].rotulo);
+    pop.innerHTML = `<strong style="font-size:13px">Filtrar: ${escapar(COL[col].rotulo)}</strong>
+      ${comTexto ? `<input type="search" placeholder="Contém…" value="${escapar(f.texto || "")}" data-contem>` : ""}
+      ${porLista ? `<div class="opcoes">${valores.map((v) => `<label class="check"><input type="checkbox" value="${escapar(v)}"${(f.valores || []).includes(v) ? " checked" : ""}> ${escapar(v)}</label>`).join("") || '<span class="apoio">Sem valores.</span>'}</div>` : ""}
+      <div class="form-botoes"><button type="button" class="btn btn-secundario btn-mini" data-pop="limpar">Limpar</button><button type="button" class="btn btn-mini" data-pop="aplicar">Aplicar</button></div>`;
+    document.body.appendChild(pop);
+    const r = botao.getBoundingClientRect();
+    pop.style.left = Math.max(8, Math.min(innerWidth - 270, r.left - 200)) + "px";
+    pop.style.top = Math.min(innerHeight - 200, r.bottom + 6) + "px";
+    popAtual = pop;
+    const entrada = pop.querySelector("input");
+    if (entrada) entrada.focus();
+    const aplicar = (limpar) => {
+      estado.vista.filtros = estado.vista.filtros || {};
+      if (limpar) delete estado.vista.filtros[col];
+      else estado.vista.filtros[col] = { valores: $$("input[type=checkbox]:checked", pop).map((i) => i.value), texto: comTexto ? pop.querySelector("[data-contem]").value.trim() : "" };
+      fecharPop(); salvarVista(); renderizarTudo();
+    };
+    pop.addEventListener("click", (e) => { const b = e.target.closest("[data-pop]"); if (b) aplicar(b.dataset.pop === "limpar"); });
+    pop.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.matches("[data-contem]")) { e.preventDefault(); aplicar(false); } });
+  }
+
+  /* ------------------------------------------------------------
+   *  Barra: busca, agrupar, limpar, colunas, densidade, cartões
+   * ------------------------------------------------------------ */
+  let temporizadorBusca = 0;
+  $("#busca").addEventListener("input", (e) => { clearTimeout(temporizadorBusca); temporizadorBusca = setTimeout(() => { estado.busca = e.target.value; renderizarTudo(); }, 120); });
+  $("#agrupar").addEventListener("change", (e) => { estado.vista.agrupar = e.target.value; estado.gruposFechados.clear(); if (estado.vista.especial === "matriz") estado.vista.especial = ""; salvarVista(); renderizarTudo(); });
+  $("#btn-limpar-filtros").innerHTML = svg("i-fechar") + "Limpar filtros";
+  $("#btn-limpar-filtros").addEventListener("click", () => {
+    estado.vista.filtros = {}; estado.vista.subArea = ""; estado.vista.especial = ""; estado.busca = ""; $("#busca").value = "";
+    if (["ausentes", "plantao", "matriz"].includes(estado.visao)) estado.visao = "padrao";
+    salvarVista(); renderizarTudo();
+  });
+  $("#btn-colunas").innerHTML = svg("i-colunas");
+  $("#btn-densidade").innerHTML = svg("i-tabela");
+  $("#btn-cartoes").innerHTML = svg("i-grade");
+  $("#btn-csv").innerHTML = svg("i-download");
+  $("#btn-imprimir").innerHTML = svg("i-imprimir");
+  $("#btn-adicionar").innerHTML = svg("i-mais") + "Adicionar";
+  $("#btn-importar").innerHTML = svg("i-upload") + "Importar / colar do Excel";
+  $("#btn-desfazer").innerHTML = svg("i-desfazer");
+  $("#btn-apagar-exemplos").innerHTML = svg("i-lixeira") + "Apagar exemplos";
+  $("#btn-densidade").addEventListener("click", () => { estado.vista.compacta = !estado.vista.compacta; salvarVista(); renderizarTudo(); });
+  $("#btn-cartoes").addEventListener("click", () => { estado.vista.cartoes = !usarCartoes(); salvarVista(); renderizarTudo(); });
+  $("#btn-colunas").addEventListener("click", () => {
+    const vis = new Set(estado.vista.colunas);
+    const d = criarDialogo({
+      titulo: "Colunas",
+      corpo: `<div class="colunas-escolha">${GRUPOS_COLUNAS.map((g) => {
+        const cols = COLUNAS.filter((c) => c.grupo === g.id);
+        return `<fieldset><legend><label class="check"><input type="checkbox" data-grupo-col="${g.id}"${cols.every((c) => vis.has(c.id)) ? " checked" : ""}> ${escapar(g.nome)}</label></legend>
+          ${cols.map((c) => `<label class="check"><input type="checkbox" data-col-vis="${c.id}"${vis.has(c.id) ? " checked" : ""}${c.id === "nome" ? " disabled" : ""}> ${escapar(c.rotulo)}</label>`).join("")}</fieldset>`;
+      }).join("")}</div>
+      <div class="form-botoes"><button type="button" class="btn btn-secundario" data-col-padrao>Voltar ao padrão</button><button type="submit" class="btn">Aplicar</button></div>`
+    });
+    d.addEventListener("change", (e) => {
+      const g = e.target.dataset.grupoCol;
+      if (g) $$(`[data-col-vis]`, d).forEach((i) => { if (COL[i.dataset.colVis].grupo === g && i.dataset.colVis !== "nome") i.checked = e.target.checked; });
+    });
+    d.querySelector("[data-col-padrao]").addEventListener("click", () => { $$("[data-col-vis]", d).forEach((i) => { i.checked = colunasIniciais().includes(i.dataset.colVis); }); });
+    d.querySelector("form").addEventListener("submit", () => {
+      const marcadas = new Set($$("[data-col-vis]:checked", d).map((i) => i.dataset.colVis));
+      marcadas.add("nome");
+      const atuais = estado.vista.colunas.filter((c) => marcadas.has(c));
+      COLUNAS.forEach((c) => { if (marcadas.has(c.id) && !atuais.includes(c.id)) atuais.push(c.id); });
+      estado.vista.colunas = atuais;
+      salvarVista(); renderizarTudo();
+    });
+    d.showModal();
+  });
+
+  /* Exportar CSV (linhas filtradas, colunas visíveis) e imprimir */
+  const colunasExportaveis = () => estado.vista.colunas.filter((c) => COL[c].tipo !== "foto");
+  function csvCampo(t) { const s = String(t == null ? "" : t); return /[;"\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; }
+  $("#btn-csv").addEventListener("click", () => {
+    const cols = colunasExportaveis();
+    const linhas = [cols.map((c) => csvCampo(COL[c].rotulo)).join(";"), ...contatosFiltrados().map((c) => cols.map((col) => csvCampo(valorTexto(c, col))).join(";"))];
+    const p = partesBrasilia();
+    baixarArquivo(`contatos-${p.ano}-${p.mes}-${p.dia}.csv`, "\ufeff" + linhas.join("\r\n"), "text/csv;charset=utf-8");
+    mostrarAviso(`CSV com ${linhas.length - 1} contato(s) baixado.`);
+  });
+  $("#btn-imprimir").addEventListener("click", () => {
+    const cols = colunasExportaveis();
+    $("#tabela-impressao").innerHTML = `<h1 style="font-size:14pt;margin-bottom:6px">Contatos · ${escapar(formatarData(new Date(), true))}</h1><table><thead><tr>${cols.map((c) => `<th>${escapar(COL[c].rotulo)}</th>`).join("")}</tr></thead>
+      <tbody>${contatosFiltrados().map((c) => `<tr>${cols.map((col) => `<td>${escapar(valorTexto(c, col))}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    window.print();
+  });
+
+  /* ------------------------------------------------------------
+   *  Ações da linha: copiar, vCard, ficha, duplicar, excluir
+   * ------------------------------------------------------------ */
+  function textoContato(c) {
+    return [c.nome, c.cargo, [c.area, c.equipe].filter(Boolean).join(" · "), c.email && "E-mail: " + c.email, c.ramal && "Telefone/ramal: " + c.ramal, c.celular && "Celular corporativo: " + c.celular, c.horario && "Horário: " + c.horario].filter(Boolean).join("\n");
+  }
+  function vcard(c) {
+    const esc = (t) => String(t || "").replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/[,;]/g, (m) => "\\" + m);
+    const partes = String(c.nome || "").trim().split(/\s+/);
+    const sobrenome = partes.length > 1 ? partes.pop() : "";
+    return ["BEGIN:VCARD", "VERSION:3.0", `N:${esc(sobrenome)};${esc(partes.join(" "))};;;`, `FN:${esc(c.nome)}`,
+      c.empresa || c.area ? `ORG:${esc(c.empresa || "")}${c.area ? ";" + esc(c.area) : ""}` : "", c.cargo ? `TITLE:${esc(c.cargo)}` : "",
+      c.email ? `EMAIL;TYPE=INTERNET,WORK:${esc(c.email)}` : "", c.ramal ? `TEL;TYPE=WORK,VOICE:${esc(c.ramal)}` : "", c.celular ? `TEL;TYPE=WORK,CELL:${esc(c.celular)}` : "",
+      "END:VCARD"].filter(Boolean).join("\r\n");
+  }
+  async function executarAcao(acao, c, botao) {
+    if (!c) return;
+    if (acao === "copiar") { mostrarAviso((await copiarTexto(textoContato(c))) ? "Contato copiado." : "Não foi possível copiar."); }
+    else if (acao === "vcard") baixarArquivo(`${slug(c.nome || "contato")}.vcf`, vcard(c), "text/vcard;charset=utf-8");
+    else if (acao === "ficha") abrirFicha(c.id);
+    else if (acao === "mais") {
+      fecharPop();
+      const pop = document.createElement("div");
+      pop.className = "pop";
+      pop.style.width = "200px";
+      pop.innerHTML = `<button type="button" class="btn btn-secundario btn-mini" data-m="duplicar">${svg("i-duplicar")}Duplicar linha</button>
+        <button type="button" class="btn btn-secundario btn-mini" data-m="editar">${svg("i-lapis")}Editar na ficha</button>
+        <button type="button" class="btn btn-perigo btn-mini" data-m="excluir">${svg("i-lixeira")}Excluir linha</button>`;
+      document.body.appendChild(pop);
+      const r = botao.getBoundingClientRect();
+      pop.style.left = Math.max(8, r.right - 200) + "px";
+      pop.style.top = Math.min(innerHeight - 150, r.bottom + 4) + "px";
+      popAtual = pop;
+      pop.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-m]");
+        if (!b) return;
+        fecharPop();
+        if (b.dataset.m === "duplicar") duplicar(c);
+        if (b.dataset.m === "editar") abrirFicha(c.id, true);
+        if (b.dataset.m === "excluir") excluir(c);
+      });
+      pop.querySelector("button").focus();
+    }
+  }
+
+  /* ------------------------------------------------------------
+   *  Validação e gravação
+   * ------------------------------------------------------------ */
+  function formatarTelefone(t) {
+    const bruto = String(t || "").trim();
+    if (!bruto) return { ok: true, valor: "" };
+    let d = bruto.replace(/\D/g, "");
+    const ramal = /ramal|r\.|ext/i.test(bruto) ? (/(?:ramal|r\.|ext\.?)\s*(\d{2,6})/i.exec(bruto) || [])[1] : "";
+    if (ramal) d = d.slice(0, d.length - ramal.length);
+    if (d.length >= 12 && d.startsWith("55")) d = d.slice(2);
+    let valor;
+    if (!d && ramal) valor = "Ramal " + ramal;
+    else if (d.length >= 2 && d.length <= 6 && !ramal) valor = "Ramal " + d;
+    else if (d.length === 10) valor = `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+    else if (d.length === 11) valor = `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+    else if (d.length === 8 || d.length === 4 + 4) valor = `${d.slice(0, 4)}-${d.slice(4)}`;
+    else if (/^0?800\d{7}$/.test(d)) valor = `0800 ${d.slice(-7, -4)} ${d.slice(-4)}`;
+    else return { ok: false, erro: "Telefone inválido. Use (11) 0000-0000, (11) 90000-0000 ou só o ramal." };
+    return { ok: true, valor: ramal && d ? `${valor} ramal ${ramal}` : valor };
+  }
+  function validarCampo(col, bruto, contato) {
+    const def = COL[col];
+    let v = bruto;
+    switch (def.tipo) {
+      case "texto": case "textoLongo": v = String(v || "").trim().slice(0, def.max); if (col === "nome" && !v) return { ok: false, erro: "O nome é obrigatório." }; return { ok: true, valor: v };
+      case "email": v = String(v || "").trim().toLowerCase(); if (v && !RE_EMAIL.test(v)) return { ok: false, erro: "E-mail inválido." }; return { ok: true, valor: v.slice(0, 120) };
+      case "telefone": return formatarTelefone(v);
+      case "link": v = String(v || "").trim(); if (v && !/^https:\/\/[^\s"'<>]+$/i.test(v)) return { ok: false, erro: "Use um link que comece com https://" }; return { ok: true, valor: v.slice(0, 300) };
+      case "lista": v = String(v || ""); if (v && !def.opcoes.includes(v)) { const achado = def.opcoes.find((o, i) => normalizar(o) === normalizar(v) || (def.nomes && normalizar(def.nomes[i]) === normalizar(v))); if (!achado) return { ok: false, erro: "Escolha um valor da lista." }; v = achado; } return { ok: true, valor: v };
+      case "etiquetas": v = (Array.isArray(v) ? v : String(v || "").split(/[,;|]/)).map((x) => String(x).trim().slice(0, 40)).filter(Boolean); return { ok: true, valor: [...new Set(v)].slice(0, 20) };
+      case "booleano": return { ok: true, valor: v === true || /^(sim|s|true|1|x)$/i.test(String(v).trim()) };
+      case "data": {
+        v = String(v || "").trim();
+        if (!v) return { ok: true, valor: "" };
+        const br = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v);
+        if (br) v = `${br[3]}-${br[2]}-${br[1]}`;
+        if (!RE_DATA.test(v) || isNaN(new Date(v + "T12:00:00"))) return { ok: false, erro: "Data inválida (dd/mm/aaaa)." };
+        const de = col === "ausenteAte" ? contato && contato.ausenteDe : null;
+        if (de && v < de) return { ok: false, erro: "“Ausente até” não pode ser antes de “Ausente de”." };
+        return { ok: true, valor: v };
+      }
+      case "pessoa": v = String(v || ""); if (v && (!porId(v) || (contato && v === contato.id))) return { ok: false, erro: "Escolha uma pessoa da planilha." }; return { ok: true, valor: v };
+      case "foto": v = String(v || ""); if (v && (!RE_FOTO.test(v) || v.length > 40000)) return { ok: false, erro: "Foto inválida." }; return { ok: true, valor: v };
+      default: return { ok: true, valor: v };
+    }
+  }
+  function contatoVazio() {
+    const d = {};
+    CAMPOS_GRAVADOS.forEach((k) => { const t = COL[k].tipo; d[k] = t === "etiquetas" ? [] : t === "booleano" ? false : ""; });
+    d.status = "Ativo";
+    d.exemplo = false;
+    return d;
+  }
+  function dadosParaGravar(c) {
+    const d = contatoVazio();
+    CAMPOS_GRAVADOS.forEach((k) => { if (c[k] !== undefined) { const r = validarCampo(k, c[k], c); if (r.ok) d[k] = r.valor; } });
+    d.exemplo = !!c.exemplo;
+    return d;
+  }
+  const assinatura = () => ({ atualizadoEm: "__AGORA__", atualizadoPor: sessao.email || "" });
+  async function gravar(acao, fn, resumo) {
+    if (!podeEditar()) { mostrarAviso("Só quem tem permissão pode editar. Use “Sugerir correção”."); return false; }
+    try {
+      await fn();
+      if (acao) { estado.desfazer.push(acao); if (estado.desfazer.length > 30) estado.desfazer.shift(); }
+      if (resumo) registrarAuditoria({ acao: resumo.acao, alvo: "contatos", resumo: resumo.texto, detalhes: resumo.detalhes || "" });
+      atualizarBotoes();
+      return true;
+    } catch (e) {
+      console.error(e);
+      mostrarAviso("Não foi possível salvar. Verifique sua conexão e permissão.");
+      return false;
+    }
+  }
+  async function salvarCampo(id, col, valor) {
+    const c = porId(id);
+    if (!c) return false;
+    const antes = c[col];
+    if (JSON.stringify(antes ?? "") === JSON.stringify(valor ?? "")) return true;
+    return gravar({ tipo: "editar", id, col, antes }, () => estado.api.salvarDoc(`contatos/${id}`, { [col]: valor, ...assinatura() }, true),
+      { acao: "editar", texto: `Editou ${COL[col].rotulo} de ${c.nome}`.slice(0, 200), detalhes: id });
+  }
+  async function criarContato(dados, resumo = true) {
+    const id = estado.api.novoId("contatos");
+    const ok = await gravar({ tipo: "criar", id }, () => estado.api.salvarDoc(`contatos/${id}`, { ...dadosParaGravar(dados), criadoEm: "__AGORA__", ...assinatura() }),
+      resumo ? { acao: "criar", texto: `Adicionou o contato ${dados.nome}`.slice(0, 200), detalhes: id } : null);
+    return ok ? id : null;
+  }
+  async function duplicar(c) {
+    const copia = { ...c, nome: "Cópia de " + c.nome, email: "", celular: "", ramal: "", foto: "", exemplo: false };
+    const id = await criarContato(copia);
+    if (id) { mostrarAviso("Linha duplicada."); setTimeout(() => irPara(id, "nome", true), 300); }
+  }
+  async function excluir(c) {
+    if (!(await confirmar(`Excluir “${c.nome}” da planilha? Dá para desfazer logo em seguida.`, { titulo: "Excluir linha", botao: "Excluir", perigo: true }))) return;
+    const dados = dadosParaGravar(c);
+    const ok = await gravar({ tipo: "excluir", id: c.id, dados }, () => estado.api.excluirDoc(`contatos/${c.id}`), { acao: "excluir", texto: `Excluiu o contato ${c.nome}`.slice(0, 200), detalhes: c.id });
+    if (ok) { fecharFicha(); mostrarAviso("Linha excluída. Use Desfazer se foi sem querer."); }
+  }
+  async function desfazer() {
+    const a = estado.desfazer.pop();
+    if (!a) { mostrarAviso("Nada para desfazer."); return; }
+    try {
+      if (a.tipo === "editar") await estado.api.salvarDoc(`contatos/${a.id}`, { [a.col]: a.antes ?? (COL[a.col].tipo === "etiquetas" ? [] : COL[a.col].tipo === "booleano" ? false : ""), ...assinatura() }, true);
+      if (a.tipo === "editarVarios") await estado.api.salvarDoc(`contatos/${a.id}`, { ...a.antes, ...assinatura() }, true);
+      if (a.tipo === "criar") await estado.api.excluirDoc(`contatos/${a.id}`);
+      if (a.tipo === "excluir") await estado.api.salvarDoc(`contatos/${a.id}`, { ...a.dados, criadoEm: "__AGORA__", ...assinatura() });
+      if (a.tipo === "importar") await estado.api.lote(a.ids.map((id) => ({ op: "delete", caminho: `contatos/${id}` })));
+      registrarAuditoria({ acao: "desfazer", alvo: "contatos", resumo: "Desfez a última ação na planilha de contatos" });
+      mostrarAviso("Desfeito.");
+    } catch (e) { console.error(e); mostrarAviso("Não foi possível desfazer."); }
+    atualizarBotoes();
+  }
+  $("#btn-desfazer").addEventListener("click", desfazer);
+  document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !(e.target.closest && e.target.closest("input, textarea, select, [contenteditable]")) && podeEditar()) { e.preventDefault(); desfazer(); }
+  });
+  $("#btn-adicionar").addEventListener("click", async () => {
+    const aba = estado.vista.aba !== "todos" ? estado.vista.aba : "";
+    const id = await criarContato({ nome: "Novo contato", grupo: aba, area: estado.vista.subArea || "" });
+    if (id) setTimeout(() => irPara(id, "nome", true), 300);
+  });
+  function irPara(id, col, editar) {
+    if (!$("#planilha")) { abrirFicha(id, true); return; }
+    const i = estado.linhas.findIndex((l) => l.tipo === "linha" && l.c.id === id);
+    if (i < 0) { abrirFicha(id, true); return; }
+    $("#planilha").scrollTop = Math.max(0, i * alturaLinha() - 100);
+    pintarLinhas(true);
+    selecionar(id, col, true);
+    if (editar) iniciarEdicao(id, col);
+  }
+
+  /* ------------------------------------------------------------
+   *  Edição na célula (duplo clique ou Enter; Esc cancela)
+   * ------------------------------------------------------------ */
+  function iniciarEdicao(id, col) {
+    const c = porId(id);
+    const def = COL[col];
+    if (!c || def.derivado || def.tipo === "foto") { if (def && def.tipo === "foto" && podeEditar()) abrirFicha(id, true); return; }
+    if (!podeEditar()) { mostrarAviso(estado.api ? "Para corrigir um dado, use “Sugerir correção” na ficha." : "Sem conexão: edição indisponível."); return; }
+    const cel = celulaEl(id, col);
+    if (!cel) return;
+    const linha = cel.closest(".linha");
+    const box = document.createElement("div");
+    box.className = "editor-celula";
+    box.style.left = cel.offsetLeft + "px";
+    box.style.top = "0px";
+    box.style.width = Math.max(cel.offsetWidth, def.tipo === "textoLongo" ? 320 : 160) + "px";
+    box.style.height = def.tipo === "textoLongo" ? "auto" : "100%";
+    let campo;
+    const valor = c[col];
+    if (def.tipo === "lista") campo = `<select>${['<option value="">—</option>', ...def.opcoes.map((o, i) => `<option value="${escapar(o)}"${o === valor ? " selected" : ""}>${escapar(def.nomes ? def.nomes[i] : o)}</option>`)].join("")}</select>`;
+    else if (def.tipo === "pessoa") campo = `<select><option value="">—</option>${estado.contatos.filter((x) => x.id !== id).sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")).map((x) => `<option value="${escapar(x.id)}"${x.id === valor ? " selected" : ""}>${escapar(x.nome)}</option>`).join("")}</select>`;
+    else if (def.tipo === "booleano") campo = `<select><option value="nao">Não</option><option value="sim"${valor ? " selected" : ""}>Sim</option></select>`;
+    else if (def.tipo === "data") campo = `<input type="date" value="${escapar(valor || "")}">`;
+    else if (def.tipo === "textoLongo") campo = `<textarea maxlength="${def.max}">${escapar(valor || "")}</textarea>`;
+    else if (def.tipo === "etiquetas") campo = `<input value="${escapar((valor || []).join(", "))}" list="lista-assuntos" placeholder="Separe por vírgula">`;
+    else campo = `<input value="${escapar(valor || "")}" ${def.max ? `maxlength="${def.max}"` : ""} ${def.tipo === "email" ? 'type="email"' : def.tipo === "telefone" ? 'inputmode="tel"' : ""} ${def.sugestoes ? 'list="lista-areas"' : ""}>`;
+    box.innerHTML = campo;
+    linha.appendChild(box);
+    linha.style.zIndex = 3;
+    const entrada = box.firstElementChild;
+    estado.editando = { id, col, box };
+    entrada.focus();
+    if (entrada.select && entrada.tagName === "INPUT" && entrada.type !== "date") entrada.select();
+    let terminado = false;
+    const terminar = async (salvar) => {
+      if (terminado) return;
+      let bruto = entrada.value;
+      if (def.tipo === "booleano") bruto = entrada.value === "sim";
+      if (salvar) {
+        const r = validarCampo(col, bruto, c);
+        if (!r.ok) {
+          entrada.setAttribute("aria-invalid", "true");
+          let erro = box.querySelector(".editor-erro");
+          if (!erro) { erro = document.createElement("div"); erro.className = "editor-erro"; erro.setAttribute("role", "alert"); box.appendChild(erro); }
+          erro.textContent = r.erro;
+          entrada.focus();
+          return;
+        }
+        terminado = true;
+        estado.editando = null;
+        box.remove();
+        linha.style.zIndex = "";
+        await salvarCampo(id, col, r.valor);
+      } else {
+        terminado = true;
+        estado.editando = null;
+        box.remove();
+        linha.style.zIndex = "";
+      }
+      const el = celulaEl(id, col);
+      if (el) el.focus();
+    };
+    entrada.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); terminar(false); }
+      if (e.key === "Enter" && !(def.tipo === "textoLongo" && e.shiftKey)) { e.preventDefault(); terminar(true); }
+      if (e.key === "Tab") { e.preventDefault(); terminar(true).then(() => moverSelecao(0, e.shiftKey ? -1 : 1)); }
+    });
+    entrada.addEventListener("blur", () => setTimeout(() => { if (!terminado && document.activeElement !== entrada) terminar(true); }, 0));
+    if (def.tipo === "telefone") entrada.addEventListener("input", () => { const r = formatarTelefone(entrada.value); entrada.toggleAttribute("aria-invalid", !r.ok && entrada.value.replace(/\D/g, "").length > 11); });
+  }
+
+  /* ------------------------------------------------------------
+   *  Ficha lateral (ver tudo; editar tudo; sugerir correção)
+   * ------------------------------------------------------------ */
+  const ficha = $("#ficha");
+  function fecharFicha() { ficha.classList.remove("aberta"); setTimeout(() => { if (!ficha.classList.contains("aberta")) ficha.hidden = true; }, 220); }
+  function abrirFicha(id, editar = false) {
+    const c = porId(id);
+    if (!c) return;
+    const podeE = podeEditar();
+    if (editar && !podeE) editar = false;
+    const campos = (g) => COLUNAS.filter((k) => k.grupo === g.id && !(editar && k.derivado));
+    let corpo;
+    if (!editar) {
+      corpo = GRUPOS_COLUNAS.map((g) => {
+        const itens = campos(g).filter((k) => k.id !== "foto" && valorTexto(c, k.id) && !(k.tipo === "booleano" && !c[k.id]));
+        if (!itens.length) return "";
+        return `<section class="ficha-grupo"><h3>${escapar(g.nome)}</h3><dl>${itens.map((k) => `<dt>${escapar(k.rotulo)}</dt><dd>${["email", "telefone", "teams", "link", "etiquetas"].includes(k.tipo) || k.id === "status" ? htmlCelula(c, k.id) : escapar(valorTexto(c, k.id))}</dd>`).join("")}</dl></section>`;
+      }).join("");
+    } else {
+      corpo = `<p class="lgpd"><strong>LGPD:</strong> só dados corporativos. Não informe CPF, RG, endereço residencial, data de nascimento, celular pessoal nem dados de saúde.</p>` +
+        GRUPOS_COLUNAS.map((g) => `<section class="ficha-grupo"><h3>${escapar(g.nome)}</h3>${campos(g).map((k) => campoFicha(k, c)).join("")}</section>`).join("") +
+        `<p class="form-erro" role="alert" id="ficha-erro"></p>`;
+    }
+    ficha.innerHTML = `<form class="ficha-corpo" novalidate>
+      <div class="form-topo"><div style="display:flex;align-items:center;gap:12px">${c.foto && RE_FOTO.test(c.foto) ? `<img class="foto-grande" src="${escapar(c.foto)}" alt="">` : ""}<h2>${escapar(c.nome)}</h2></div>
+        <button type="button" class="perfil-fechar" data-ficha="fechar" aria-label="Fechar ficha">${svg("i-fechar")}</button></div>
+      ${c.exemplo ? '<span class="exemplo" style="justify-self:start">Exemplo — apagar</span>' : ""}
+      <div class="acoes-c" style="display:flex;gap:4px;flex-wrap:wrap">${htmlAcoes(c, false)}</div>
+      ${corpo}
+      <div class="form-botoes">
+        ${editar ? `<button type="button" class="btn btn-secundario" data-ficha="ver">Cancelar</button><button type="submit" class="btn">${svg("i-salvar")}Salvar</button>`
+          : podeE ? `<button type="button" class="btn btn-perigo btn-mini" data-ficha="excluir">${svg("i-lixeira")}Excluir</button><button type="button" class="btn btn-secundario" data-ficha="duplicar">${svg("i-duplicar")}Duplicar</button><button type="button" class="btn" data-ficha="editar">${svg("i-lapis")}Editar</button>`
+          : `<button type="button" class="btn btn-secundario" data-ficha="sugerir">${svg("i-anotacao")}Sugerir correção</button>`}
+      </div></form>`;
+    ficha.dataset.id = id;
+    ficha.hidden = false;
+    requestAnimationFrame(() => ficha.classList.add("aberta"));
+    const primeiro = ficha.querySelector(editar ? "input, select, textarea" : "[data-ficha]");
+    if (primeiro) primeiro.focus();
+  }
+  function campoFicha(k, c) {
+    const v = c[k.id];
+    const id = "f-" + k.id;
+    let entrada;
+    if (k.tipo === "lista") entrada = `<select id="${id}" name="${k.id}"><option value="">—</option>${k.opcoes.map((o, i) => `<option value="${escapar(o)}"${o === v ? " selected" : ""}>${escapar(k.nomes ? k.nomes[i] : o)}</option>`).join("")}</select>`;
+    else if (k.tipo === "pessoa") entrada = `<select id="${id}" name="${k.id}"><option value="">—</option>${estado.contatos.filter((x) => x.id !== c.id).sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")).map((x) => `<option value="${escapar(x.id)}"${x.id === v ? " selected" : ""}>${escapar(x.nome)}</option>`).join("")}</select>`;
+    else if (k.tipo === "booleano") return `<label class="check"><input type="checkbox" name="${k.id}"${v ? " checked" : ""}> ${escapar(k.rotulo)}</label>`;
+    else if (k.tipo === "data") entrada = `<input id="${id}" name="${k.id}" type="date" value="${escapar(v || "")}">`;
+    else if (k.tipo === "textoLongo") entrada = `<textarea id="${id}" name="${k.id}" maxlength="${k.max}" rows="3">${escapar(v || "")}</textarea>`;
+    else if (k.tipo === "etiquetas") entrada = `<input id="${id}" name="${k.id}" value="${escapar((v || []).join(", "))}" placeholder="Separe por vírgula: ${escapar(estado.config.assuntos.slice(0, 4).join(", "))}…">`;
+    else if (k.tipo === "foto") entrada = `<input id="${id}" type="file" accept="image/jpeg,image/png,image/webp" data-foto><input type="hidden" name="foto" value="${escapar(v || "")}">${v ? `<label class="check"><input type="checkbox" data-sem-foto> Remover a foto</label>` : ""}`;
+    else entrada = `<input id="${id}" name="${k.id}" value="${escapar(v || "")}" ${k.max ? `maxlength="${k.max}"` : ""} ${k.tipo === "email" ? 'type="email"' : k.tipo === "telefone" ? 'inputmode="tel"' : ""} ${k.sugestoes ? 'list="lista-areas"' : ""}>`;
+    return `<label class="campo" for="${id}"><span class="rotulo">${escapar(k.rotulo)}</span>${entrada}</label>`;
+  }
+  function comprimirFoto(arquivo) {
+    return new Promise((resolver, rejeitar) => {
+      const url = URL.createObjectURL(arquivo);
+      const img = new Image();
+      img.onload = () => {
+        const lado = 96;
+        const cv = document.createElement("canvas");
+        cv.width = lado; cv.height = lado;
+        const menor = Math.min(img.width, img.height);
+        cv.getContext("2d").drawImage(img, (img.width - menor) / 2, (img.height - menor) / 2, menor, menor, 0, 0, lado, lado);
+        URL.revokeObjectURL(url);
+        resolver(cv.toDataURL("image/jpeg", 0.8));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); rejeitar(new Error("imagem")); };
+      img.src = url;
+    });
+  }
+  ficha.addEventListener("change", async (e) => {
+    if (e.target.matches("[data-foto]") && e.target.files[0]) {
+      try { ficha.querySelector('[name="foto"]').value = await comprimirFoto(e.target.files[0]); mostrarAviso("Foto pronta. Clique em Salvar."); }
+      catch (err) { mostrarAviso("Não foi possível ler a imagem."); }
+    }
+    if (e.target.matches("[data-sem-foto]")) ficha.querySelector('[name="foto"]').value = e.target.checked ? "" : (porId(ficha.dataset.id) || {}).foto || "";
+  });
+  ficha.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ficha]");
+    if (!b) return;
+    const c = porId(ficha.dataset.id);
+    const a = b.dataset.ficha;
+    if (a === "fechar") fecharFicha();
+    if (a === "editar") abrirFicha(c.id, true);
+    if (a === "ver") abrirFicha(c.id, false);
+    if (a === "excluir") excluir(c);
+    if (a === "duplicar") duplicar(c);
+    if (a === "sugerir") abrirSugestao({ titulo: `Correção em Contatos: ${c.nome}`.slice(0, 120), contexto: `Contato: ${c.nome}${c.area ? " (" + c.area + ")" : ""}`, dica: "Qual dado está errado e qual é o correto?" });
+  });
+  ficha.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const c = porId(ficha.dataset.id);
+    const form = e.target;
+    const novo = { ...c };
+    const erros = [];
+    COLUNAS.filter((k) => !k.derivado).forEach((k) => {
+      const el = form.elements[k.id];
+      if (!el) return;
+      const bruto = k.tipo === "booleano" ? el.checked : el.value;
+      const r = validarCampo(k.id, bruto, novo);
+      if (!r.ok) { erros.push(`${k.rotulo}: ${r.erro}`); if (el.setAttribute) el.setAttribute("aria-invalid", "true"); }
+      else { novo[k.id] = r.valor; if (el.removeAttribute) el.removeAttribute("aria-invalid"); }
+    });
+    if (erros.length) { $("#ficha-erro").textContent = erros.join(" · "); return; }
+    const mudou = CAMPOS_GRAVADOS.filter((k) => JSON.stringify(c[k] ?? "") !== JSON.stringify(novo[k] ?? ""));
+    if (!mudou.length) { abrirFicha(c.id, false); return; }
+    const alteracao = Object.fromEntries(mudou.map((k) => [k, novo[k]]));
+    const antes = Object.fromEntries(mudou.map((k) => [k, c[k] ?? (COL[k].tipo === "etiquetas" ? [] : COL[k].tipo === "booleano" ? false : "")]));
+    const ok = await gravar({ tipo: "editarVarios", id: c.id, antes }, () => estado.api.salvarDoc(`contatos/${c.id}`, { ...alteracao, ...assinatura() }, true),
+      { acao: "editar", texto: `Editou o contato ${novo.nome} (${mudou.length} campo${mudou.length > 1 ? "s" : ""})`.slice(0, 200), detalhes: c.id });
+    if (ok) { mostrarAviso("Contato salvo."); setTimeout(() => abrirFicha(c.id, false), 150); }
+  });
+  ficha.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.stopPropagation(); fecharFicha(); } });
+
+  /* ------------------------------------------------------------
+   *  Importar CSV / colar do Excel (com conferência e mapeamento)
+   * ------------------------------------------------------------ */
+  function lerTabelaTexto(texto) {
+    const t = String(texto || "").replace(/^\ufeff/, "");
+    const primeira = t.split(/\r?\n/)[0] || "";
+    const sep = primeira.includes("\t") ? "\t" : (primeira.split(";").length >= primeira.split(",").length ? ";" : ",");
+    const linhas = [];
+    let linha = [], campo = "", aspas = false;
+    for (let i = 0; i < t.length; i++) {
+      const ch = t[i];
+      if (aspas) {
+        if (ch === '"' && t[i + 1] === '"') { campo += '"'; i++; }
+        else if (ch === '"') aspas = false;
+        else campo += ch;
+      } else if (ch === '"' && campo === "") aspas = true;
+      else if (ch === sep) { linha.push(campo); campo = ""; }
+      else if (ch === "\n" || ch === "\r") {
+        if (ch === "\r" && t[i + 1] === "\n") i++;
+        linha.push(campo); campo = "";
+        if (linha.some((x) => x.trim())) linhas.push(linha);
+        linha = [];
+      } else campo += ch;
+    }
+    linha.push(campo);
+    if (linha.some((x) => x.trim())) linhas.push(linha);
+    return linhas;
+  }
+  const SINONIMOS = { nome: ["nome", "nome completo", "colaborador", "pessoa"], apelido: ["apelido", "como prefere ser chamado", "chamado"], cargo: ["cargo", "funcao", "função"], nivel: ["nivel", "nível", "hierarquia"],
+    empresa: ["empresa", "unidade de negocio", "empresa/unidade"], diretoria: ["diretoria"], area: ["area", "área", "departamento", "setor", "área/departamento"], equipe: ["equipe", "time"], grupo: ["grupo", "aba"],
+    centroCusto: ["centro de custo", "cc"], cidade: ["cidade", "cidade/uf", "uf", "local"], unidade: ["unidade", "predio", "andar", "unidade/prédio/andar"], modelo: ["modelo de trabalho", "modelo", "regime"], fuso: ["fuso", "fuso horario"],
+    email: ["e-mail", "email", "e-mail corporativo", "email corporativo"], ramal: ["ramal", "telefone", "telefone fixo", "fixo", "telefone fixo/ramal"], celular: ["celular", "celular corporativo", "movel"], canal: ["canal", "grupo teams", "link", "canal/grupo"],
+    assuntos: ["assuntos", "assunto", "temas", "assuntos que atende"], quando: ["quando acionar"], quandoNao: ["quando nao acionar", "quando não acionar"], escalonamento: ["escalonamento", "nivel de escalonamento", "nível de escalonamento"],
+    sla: ["sla", "sla de resposta"], horario: ["horario", "horário", "horario de atendimento"], plantao: ["plantao", "plantão", "sobreaviso", "sobreaviso/plantão"], escala: ["escala", "escala do plantao"], status: ["status", "situacao", "situação"],
+    ausenteDe: ["ausente de", "ferias de", "inicio ausencia"], ausenteAte: ["ausente ate", "ausente até", "ferias ate", "fim ausencia"], observacoes: ["observacoes", "observações", "obs"] };
+  const IMPORTAVEIS = CAMPOS_GRAVADOS.filter((k) => !["foto", "gestorId", "substitutoId"].includes(k));
+  function adivinharColuna(cabecalho) {
+    const n = normalizar(cabecalho).trim();
+    if (!n) return "";
+    const exato = IMPORTAVEIS.find((k) => normalizar(COL[k].rotulo) === n || (SINONIMOS[k] || []).some((s) => normalizar(s) === n));
+    if (exato) return exato;
+    return IMPORTAVEIS.find((k) => (SINONIMOS[k] || []).some((s) => n.includes(normalizar(s)) && normalizar(s).length > 3)) || "";
+  }
+  $("#btn-importar").addEventListener("click", () => {
+    const d = criarDialogo({
+      titulo: "Importar contatos",
+      largo: true,
+      corpo: `<p class="lgpd"><strong>LGPD:</strong> importe só dados corporativos. Colunas de CPF, RG, endereço residencial, nascimento, celular pessoal ou saúde devem ficar como “Ignorar”.</p>
+        <div class="campos-linha">
+          <label class="campo"><span class="rotulo">Colar do Excel (copie as células com o cabeçalho)</span><textarea name="colado" rows="6" placeholder="Nome&#9;Cargo&#9;E-mail…"></textarea></label>
+          <label class="campo"><span class="rotulo">Ou escolha um arquivo .csv</span><input type="file" name="arquivo" accept=".csv,text/csv,.txt"><span class="ajuda">CSV separado por ponto e vírgula, vírgula ou tabulação.</span>
+            <label class="check" style="margin-top:8px"><input type="checkbox" name="cabecalho" checked> A primeira linha é o cabeçalho</label></label>
+        </div>
+        <div id="import-conferencia"></div>
+        <p class="form-erro" role="alert" id="import-erro"></p>
+        <div class="form-botoes"><button type="button" class="btn btn-secundario" data-fechar>Cancelar</button><button type="submit" class="btn" id="import-ok" disabled>Importar</button></div>`
+    });
+    const form = d.querySelector("form");
+    let tabela = [];
+    const conferir = () => {
+      const cab = form.cabecalho.checked;
+      const titulos = cab ? tabela[0] || [] : (tabela[0] || []).map((_, i) => `Coluna ${i + 1}`);
+      const dados = cab ? tabela.slice(1) : tabela;
+      const usados = new Set();
+      const mapa = titulos.map((t) => { const k = adivinharColuna(t); if (k && !usados.has(k)) { usados.add(k); return k; } return ""; });
+      $("#import-conferencia", d).innerHTML = !tabela.length ? "" : `
+        <h3 style="font-size:15px">Conferência: ${dados.length} linha(s)</h3>
+        <div class="mapa-colunas">${titulos.map((t, i) => `<label><span>${escapar(t || "(sem título)")} <span class="apoio">ex.: ${escapar(String((dados[0] || [])[i] || "").slice(0, 30))}</span></span>
+          <select data-mapa="${i}"><option value="">Ignorar</option>${IMPORTAVEIS.map((k) => `<option value="${k}"${mapa[i] === k ? " selected" : ""}>${escapar(COL[k].rotulo)}</option>`).join("")}</select></label>`).join("")}</div>
+        <div class="previa-import"><table><thead><tr>${titulos.map((t) => `<th>${escapar(t)}</th>`).join("")}</tr></thead><tbody>${dados.slice(0, 5).map((l) => `<tr>${titulos.map((_, i) => `<td>${escapar(String(l[i] || "").slice(0, 40))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+      $("#import-ok", d).disabled = !dados.length;
+      $("#import-ok", d).textContent = `Importar ${dados.length} linha(s)`;
+    };
+    form.colado.addEventListener("input", () => { tabela = lerTabelaTexto(form.colado.value); conferir(); });
+    form.cabecalho.addEventListener("change", conferir);
+    form.arquivo.addEventListener("change", async () => {
+      const f = form.arquivo.files[0];
+      if (!f) return;
+      if (f.size > 3_000_000) { $("#import-erro", d).textContent = "Arquivo grande demais (máx. 3 MB)."; return; }
+      let texto = await f.text();
+      if (texto.includes("\ufffd")) { try { texto = new TextDecoder("windows-1252").decode(await f.arrayBuffer()); } catch (e) {} }
+      tabela = lerTabelaTexto(texto);
+      conferir();
+    });
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const cab = form.cabecalho.checked;
+      const dados = cab ? tabela.slice(1) : tabela;
+      const mapa = $$("[data-mapa]", d).map((s) => s.value);
+      if (!mapa.includes("nome")) { $("#import-erro", d).textContent = "Indique qual coluna é o “Nome completo”."; return; }
+      if (dados.length > 3000) { $("#import-erro", d).textContent = "Importe no máximo 3.000 linhas por vez."; return; }
+      const ops = [], ids = [];
+      let avisos = 0;
+      dados.forEach((linha) => {
+        const c = {};
+        mapa.forEach((k, i) => {
+          if (!k) return;
+          const r = validarCampo(k, linha[i] ?? "", c);
+          if (r.ok) c[k] = r.valor; else avisos++;
+        });
+        if (!c.nome) return;
+        const id = estado.api.novoId("contatos");
+        ids.push(id);
+        ops.push({ op: "set", caminho: `contatos/${id}`, dados: { ...dadosParaGravar(c), criadoEm: "__AGORA__", ...assinatura() } });
+      });
+      if (!ops.length) { $("#import-erro", d).textContent = "Nenhuma linha com nome para importar."; return; }
+      $("#import-ok", d).disabled = true;
+      const ok = await gravar({ tipo: "importar", ids }, () => estado.api.lote(ops), { acao: "importar", texto: `Importou ${ops.length} contato(s)` });
+      if (ok) { d.close(); mostrarAviso(`${ops.length} contato(s) importado(s).${avisos ? ` ${avisos} valor(es) inválido(s) ficaram em branco.` : ""}`, { ms: 6000 }); }
+      else $("#import-ok", d).disabled = false;
+    });
+    d.showModal();
+    form.colado.focus();
+  });
+
+  /* Apagar exemplos (administradoras) */
+  $("#btn-apagar-exemplos").addEventListener("click", async () => {
+    if (!ehAdmin()) return;
+    const exemplos = estado.contatos.filter((c) => c.exemplo);
+    if (!(await confirmar(`Apagar ${exemplos.length} contato(s) de exemplo? Os exemplos não voltam depois.`, { titulo: "Apagar exemplos", botao: "Apagar exemplos", perigo: true }))) return;
+    try {
+      await estado.api.lote([...exemplos.map((c) => ({ op: "delete", caminho: `contatos/${c.id}` })),
+        { op: "set", caminho: "contatos-config/colunas", dados: { assuntos: estado.config.assuntos, semExemplos: true, ...assinatura() } }]);
+      registrarAuditoria({ acao: "excluir", alvo: "contatos", resumo: `Apagou ${exemplos.length} contato(s) de exemplo` });
+      mostrarAviso("Exemplos apagados.");
+    } catch (e) { console.error(e); mostrarAviso("Não foi possível apagar os exemplos."); }
+  });
+
+  function atualizarBotoes() {
+    const ed = podeEditar();
+    $$(".editor-so").forEach((b) => { b.hidden = !ed; });
+    $("#btn-desfazer").disabled = !estado.desfazer.length;
+    $("#btn-apagar-exemplos").hidden = !(ehAdmin() && estado.contatos.some((c) => c.exemplo) && !estado.usandoReserva);
+    $("#aviso-lgpd").hidden = !ed;
+  }
+
+  /* Listas de sugestão para os campos */
+  document.body.insertAdjacentHTML("beforeend", `<datalist id="lista-areas">${AREAS_PARCEIRAS.map((a) => `<option value="${escapar(a)}">`).join("")}</datalist><datalist id="lista-assuntos"></datalist>`);
+  const atualizarListaAssuntos = () => { $("#lista-assuntos").innerHTML = estado.config.assuntos.map((a) => `<option value="${escapar(a)}">`).join(""); };
+
+  /* ------------------------------------------------------------
+   *  Carregamento
+   * ------------------------------------------------------------ */
+  ligarTema();
+  atualizarListaAssuntos();
+  renderizarTudo();
+  atualizarBotoes();
+  let larguraAntes = innerWidth;
+  window.addEventListener("resize", () => {
+    if ((larguraAntes <= 768) !== (innerWidth <= 768) && estado.vista.cartoes == null) renderizarTudo();
+    else pintarLinhas(true);
+    larguraAntes = innerWidth;
+  });
+
+  aoMudarSessao(() => { aplicarContatosNuvem(); garantirExemplos(); verAvisoLgpdPlanilha(); });
+  async function garantirExemplos() {
+    if (!estado.api || estado.exemplosGravados || !estado.carregado || !podeEditarSemReserva() || daPlanilha()) return;
+    if (estado.config.semExemplos || estado.contatosNuvem.length) return;
+    estado.exemplosGravados = true;
+    try {
+      await estado.api.lote(EXEMPLOS.map((c) => ({ op: "set", caminho: `contatos/${c.id}`, dados: { ...dadosParaGravar(c), criadoEm: "__AGORA__", ...assinatura() } })));
+      registrarAuditoria({ acao: "criar", alvo: "contatos", resumo: "Gravou os contatos de exemplo na planilha" });
+    } catch (e) { console.warn("Exemplos:", e); }
+  }
+  const podeEditarSemReserva = () => !!estado.api && (ehAdmin() || (sessao.email && CONTATOS_EDITORES.includes(sessao.email)) || CONTATOS_ABERTO);
+
+  ligarLogin().then((api) => {
+    estado.api = api;
+    $("#faixa-offline").hidden = !!api || ORIGEM_CONTATOS !== "site";
+    if (ORIGEM_CONTATOS !== "site") iniciarPlanilha(api);
+    if (!api) { atualizarBotoes(); return; }
+    api.ouvirDoc("contatos-config/colunas", (d) => {
+      estado.config = {
+        assuntos: d && Array.isArray(d.assuntos) && d.assuntos.length ? d.assuntos.map(String).slice(0, 60) : ASSUNTOS_PADRAO,
+        semExemplos: !!(d && d.semExemplos)
+      };
+      atualizarListaAssuntos();
+      if (estado.carregado) { aplicarContatosNuvem(); }
+    }, () => {});
+    api.ouvirColecao("contatos", (lista) => {
+      estado.contatosNuvem = lista.filter((c) => c && typeof c.nome === "string");
+      estado.carregado = true;
+      aplicarContatosNuvem();
+      garantirExemplos();
+    }, (erro) => { console.warn("contatos:", erro); if (!daPlanilha()) $("#faixa-offline").hidden = false; });
+  });
+  function aplicarContatosNuvem() {
+    if (daPlanilha()) { aplicarPlanilha(); return; }
+    const nuvem = estado.contatosNuvem || [];
+    estado.usandoReserva = !nuvem.length && !estado.config.semExemplos;
+    estado.contatos = estado.usandoReserva ? EXEMPLOS.map((c) => ({ ...c })) : nuvem.map((c) => ({ ...c, _busca: "" }));
+    estado.contatos.forEach((c) => { delete c._busca; });
+    const fichaId = ficha.hidden ? null : ficha.dataset.id;
+    renderizarTudo();
+    atualizarBotoes();
+    if (fichaId && !porId(fichaId)) fecharFicha();
+  }
+
+  /* ------------------------------------------------------------
+   *  Planilha Google (ORIGEM_CONTATOS = "planilha" ou "csv")
+   *  Firestore: planilha-contatos/_estado (abas e situação),
+   *  planilha-contatos/{aba} (cabeçalhos) e .../{aba}/partes/{n} (linhas).
+   *  Uma aba só é trocada quando todas as partes têm o mesmo hash
+   *  do documento da aba (evita mostrar meia gravação).
+   * ------------------------------------------------------------ */
+  const RE_ID_ABA = /^[a-z0-9-]{1,60}$/;
+  const RE_ID_PLANILHA = /^[\w-]{20,100}$/;
+  const RE_COLUNA_SUSPEITA = /cpf|\brg\b|identidade|nascimento|anivers|endere[cç]o|residencia|residência|pessoal|particular|sa[uú]de|m[eé]dic|sal[aá]rio|banc[aáo]|\bpis\b|\bcnh\b/i;
+  function minutosDesde(iso) { const t = new Date(iso).getTime(); return isNaN(t) ? Infinity : (Date.now() - t) / 60000; }
+  function haQuanto(iso) {
+    const m = minutosDesde(iso);
+    if (!isFinite(m)) return "";
+    if (m < 1) return "agora há pouco";
+    if (m < 60) return `há ${Math.floor(m)} min`;
+    return `em ${formatarData(iso, true)}`;
+  }
+  function piscando(id) {
+    const ate = estado.piscar.get(id);
+    if (!ate) return false;
+    if (ate < Date.now()) { estado.piscar.delete(id); return false; }
+    return true;
+  }
+  function textoVazio() {
+    if (estado.contatos.length) return "Nenhum contato com esses filtros.";
+    if (!daPlanilha()) return "Nenhum contato cadastrado ainda.";
+    if (estado.planilha.falhou) return "Não foi possível carregar a planilha Google agora. Tente de novo em instantes.";
+    return estado.planilha.recebeu ? "A planilha Google ainda não tem contatos." : "Carregando os contatos da planilha Google…";
+  }
+
+  function mapaCabecalhos(cabecalhos) {
+    const usados = new Set();
+    const mapa = cabecalhos.map((t) => {
+      const rotulo = String(t || "").trim().slice(0, 60);
+      const k = adivinharColuna(rotulo);
+      if (k && k !== "grupo" && !usados.has(k)) { usados.add(k); return { campo: k }; }
+      let id = "x-" + slug(rotulo || "coluna", 40), n = 2;
+      while (usados.has(id)) id = `x-${slug(rotulo || "coluna", 36)}-${n++}`;
+      usados.add(id);
+      return { campo: id, rotulo: rotulo || "Coluna", extra: true };
+    });
+    if (mapa.length && !usados.has("nome")) mapa[0] = { campo: "nome" };
+    return mapa;
+  }
+  function valorDaPlanilha(campo, bruto) {
+    const v = String(bruto == null ? "" : bruto).trim();
+    const col = COL[campo];
+    if (!v || !col) return v;
+    switch (col.tipo) {
+      case "etiquetas": return v.split(/[;,\n]/).map((x) => x.trim().slice(0, 60)).filter(Boolean).slice(0, 20);
+      case "booleano": return /^(sim|s|x|ok|true|verdadeiro|1|yes)$/i.test(v);
+      case "data": { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(v); return m ? `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}` : RE_DATA.test(v) ? v : ""; }
+      case "email": return v.toLowerCase().slice(0, 120);
+      case "link": return /^https:\/\/[^\s"<>]+$/i.test(v) ? v.slice(0, 300) : "";
+      case "lista": return (col.opcoes || []).find((o) => normalizar(o) === normalizar(v)) || v.slice(0, 100);
+      default: return v.slice(0, col.max || 500);
+    }
+  }
+  /* abas: [{ id, nome, ordem, gid, cabecalhos, atualizadoEm, linhas: [{ n, v: [...] }] }] */
+  function converterPlanilha(abas) {
+    const extras = new Map(), contatos = [], ids = new Set(), colunas = ["nome"];
+    abas.forEach((aba) => {
+      const mapa = mapaCabecalhos(aba.cabecalhos || []);
+      mapa.forEach((m) => {
+        if (m.extra && !extras.has(m.campo)) extras.set(m.campo, m.rotulo);
+        if (!colunas.includes(m.campo)) colunas.push(m.campo);
+      });
+      (aba.linhas || []).forEach((l) => {
+        const c = { grupo: aba.id, planilha: true, linhaPlanilha: Number(l.n) || 0, atualizadoEm: aba.atualizadoEm || "", atualizadoPor: "Planilha Google" };
+        mapa.forEach((m, i) => {
+          const v = Array.isArray(l.v) ? l.v[i] : "";
+          if (v == null || String(v).trim() === "") return;
+          c[m.campo] = m.extra ? String(v).trim().slice(0, 1000) : valorDaPlanilha(m.campo, v);
+        });
+        if (!c.nome) c.nome = mapa.map((m) => c[m.campo]).find((x) => typeof x === "string" && x) || `Linha ${c.linhaPlanilha}`;
+        const base = `${aba.id}-${slug(c.email || c.nome, 40)}`;
+        let id = base, n = 2;
+        while (ids.has(id)) id = `${base}-${n++}`;
+        ids.add(id);
+        c.id = id;
+        contatos.push(c);
+      });
+    });
+    const iEmail = colunas.indexOf("email");
+    if (iEmail >= 0) colunas.splice(iEmail + 1, 0, "teams");
+    return { contatos, extras: [...extras].map(([id, rotulo]) => ({ id, rotulo })), colunas };
+  }
+  const assinaturaContato = (c) => JSON.stringify(Object.entries(c).filter(([k]) => !["atualizadoEm", "_busca"].includes(k)).sort());
+
+  /* Recalcula os contatos a partir das abas recebidas e mostra (se a origem for a planilha) */
+  function receberAbas(abas, sinc) {
+    const conv = converterPlanilha(abas);
+    registrarExtras(conv.extras);
+    const atuais = new Set(conv.extras.map((x) => x.id));
+    for (let i = IDS_EXTRAS.length - 1; i >= 0; i--) {
+      const id = IDS_EXTRAS[i];
+      if (atuais.has(id)) continue;
+      IDS_EXTRAS.splice(i, 1);
+      COLUNAS.splice(COLUNAS.findIndex((c) => c.id === id), 1);
+      delete COL[id];
+    }
+    const anteriores = new Map((estado.planilha.contatos || []).map((c) => [c.id, assinaturaContato(c)]));
+    const ate = Date.now() + 6000;
+    const mudaram = anteriores.size ? conv.contatos.filter((c) => anteriores.get(c.id) !== assinaturaContato(c)) : [];
+    /* Troca em massa (outra planilha, primeira carga depois de muito tempo): não pisca tudo */
+    if (mudaram.length && mudaram.length <= 50) {
+      mudaram.forEach((c) => estado.piscar.set(c.id, ate));
+      setTimeout(() => { if (daPlanilha()) renderizarTudo(); }, 6200);
+    }
+    estado.planilha.contatos = conv.contatos;
+    estado.planilha.abas = abas.map((a) => ({ id: a.id, nome: a.nome, ordem: a.ordem, gid: a.gid }));
+    estado.planilha.cabecalhos = abas.map((a) => ({ nome: a.nome, cabecalhos: (a.cabecalhos || []).map(String) }));
+    estado.planilha.recebeu = true;
+    estado.planilha.copiaLocal = false;
+    estado.planilha.falhou = false;
+    colunasPlanilha = conv.colunas;
+    const salvaEm = new Date().toISOString();
+    estado.planilha.salvaEm = salvaEm;
+    gravarLocal(CHAVE_PLANILHA, { versao: 1, salvaEm, sinc: sinc || null, abas: estado.planilha.abas, extras: conv.extras, colunas: conv.colunas, contatos: conv.contatos });
+    aplicarPlanilha();
+    verAvisoLgpdPlanilha();
+  }
+  function aplicarPlanilha() {
+    if (!daPlanilha()) { aplicarContatosNuvem(); return; }
+    if (!estado.planilha.contatos) estado.planilha.contatos = estado.contatos;
+    estado.usandoReserva = false;
+    estado.contatos = estado.planilha.contatos.map((c) => ({ ...c }));
+    const assinatura = (colunasPlanilha || []).join("|");
+    if (colunasPlanilha && estado.vista.assinaturaPlanilha !== assinatura) {
+      estado.vista.colunas = [...colunasPlanilha];
+      estado.vista.assinaturaPlanilha = assinatura;
+      salvarVista();
+    }
+    estado.vista.colunas = estado.vista.colunas.filter((c) => COL[c]);
+    if (!estado.vista.colunas.includes("nome")) estado.vista.colunas.unshift("nome");
+    const fichaId = ficha.hidden ? null : ficha.dataset.id;
+    renderizarTudo();
+    atualizarBotoes();
+    if (fichaId && !porId(fichaId)) fecharFicha();
+  }
+  function usarCopiaLocal() {
+    estado.planilha.copiaLocal = !!(cachePlanilha || estado.planilha.recebeu);
+    estado.planilha.falhou = !estado.planilha.copiaLocal;
+    renderizarSinc();
+    if (daPlanilha()) renderizarTudo();
+  }
+  window.addEventListener("offline", () => { if (ORIGEM_CONTATOS !== "site" && (cachePlanilha || estado.planilha.recebeu)) { estado.planilha.copiaLocal = true; renderizarSinc(); } });
+  window.addEventListener("online", () => { if (estado.planilha.copiaLocal && estado.api) { estado.planilha.copiaLocal = false; renderizarSinc(); } });
+
+  /* Firestore: escuta _estado e, para cada aba listada, o documento da aba e as partes */
+  const ouvintesAbas = new Map();
+  let agendado = null;
+  function iniciarPlanilha(api) {
+    if (ORIGEM_CONTATOS === "csv") { lerCsv(); setInterval(lerCsv, CSV_INTERVALO_MS); return; }
+    if (!api) { usarCopiaLocal(); return; }
+    api.ouvirDoc("planilha-contatos/_estado", (d) => {
+      if (!d) {
+        estado.planilha.sinc = null;
+        if (!cachePlanilha && !estado.planilha.recebeu && !semSincronizacao) { semSincronizacao = true; aplicarContatosNuvem(); }
+        renderizarSinc();
+        return;
+      }
+      const sinc = {
+        status: d.status === "erro" ? "erro" : "ok",
+        erro: String(d.erro || "").slice(0, 300),
+        planilhaId: RE_ID_PLANILHA.test(d.planilhaId || "") ? d.planilhaId : "",
+        sincronizadoEm: d.sincronizadoEm || "",
+        verificadoEm: d.verificadoEm || "",
+        abas: (Array.isArray(d.abas) ? d.abas : []).filter((a) => a && RE_ID_ABA.test(a.id || "")).slice(0, 30)
+      };
+      estado.planilha.sinc = sinc;
+      estado.planilha.copiaLocal = false;
+      estado.planilha.falhou = false;
+      if (semSincronizacao) { semSincronizacao = false; aplicarPlanilha(); }
+      const ids = new Set(sinc.abas.map((a) => a.id));
+      ouvintesAbas.forEach((o, id) => { if (!ids.has(id)) { o.parar.forEach((f) => f && f()); ouvintesAbas.delete(id); } });
+      sinc.abas.forEach((a) => {
+        if (ouvintesAbas.has(a.id)) return;
+        const o = { doc: null, partes: [], parar: [] };
+        ouvintesAbas.set(a.id, o);
+        o.parar.push(api.ouvirDoc(`planilha-contatos/${a.id}`, (doc) => { o.doc = doc; agendarMontagem(); }, (e) => { console.warn("aba", a.id, e); usarCopiaLocal(); }));
+        o.parar.push(api.ouvirColecao(`planilha-contatos/${a.id}/partes`, (lista) => { o.partes = lista; agendarMontagem(); }, (e) => { console.warn("partes", a.id, e); usarCopiaLocal(); }));
+      });
+      agendarMontagem();
+      renderizarSinc();
+    }, (erro) => { console.warn("planilha-contatos:", erro); usarCopiaLocal(); });
+  }
+  function agendarMontagem() {
+    clearTimeout(agendado);
+    agendado = setTimeout(montarAbasRecebidas, 150);
+  }
+  function montarAbasRecebidas() {
+    const sinc = estado.planilha.sinc;
+    if (!sinc) return;
+    const montadas = [];
+    for (const a of sinc.abas) {
+      const o = ouvintesAbas.get(a.id);
+      const doc = o && o.doc;
+      const anterior = estado.planilha.dados.get(a.id);
+      const partes = o ? o.partes.filter((p) => p.hash === (doc && doc.hash)).sort((x, y) => (x.indice || 0) - (y.indice || 0)) : [];
+      const completa = doc && Array.isArray(doc.cabecalhos) && partes.length === (Number(doc.partes) || 0);
+      if (!completa) {
+        if (anterior) { montadas.push(anterior); continue; }
+        return;
+      }
+      const aba = {
+        id: a.id, nome: String(doc.nome || a.nome || a.id).slice(0, 100), ordem: Number(doc.ordem) || 0, gid: Number(doc.gid) || 0,
+        atualizadoEm: doc.atualizadoEm || "", cabecalhos: doc.cabecalhos.slice(0, 60).map((t) => String(t).slice(0, 100)),
+        linhas: partes.flatMap((p) => (Array.isArray(p.linhas) ? p.linhas : [])).filter((l) => l && Array.isArray(l.v))
+      };
+      estado.planilha.dados.set(a.id, aba);
+      montadas.push(aba);
+    }
+    [...estado.planilha.dados.keys()].forEach((id) => { if (!sinc.abas.some((a) => a.id === id)) estado.planilha.dados.delete(id); });
+    receberAbas(montadas.sort((x, y) => x.ordem - y.ordem), sinc);
+  }
+
+  /* Plano B: abas publicadas como CSV (sem Apps Script) */
+  async function lerCsv() {
+    if (!CSV_ABAS.length) { estado.planilha.erro = "nenhum link em CSV_ABAS no contatos.html"; renderizarSinc(); return; }
+    try {
+      const abas = await Promise.all(CSV_ABAS.map(async (x, i) => {
+        if (!/^https:\/\/docs\.google\.com\/spreadsheets\/d\/e\/[\w-]+\/pub\?/.test(x.url || "")) throw new Error(`link inválido na aba ${x.nome || i + 1}`);
+        const r = await fetch(x.url, { cache: "no-store" });
+        if (!r.ok) throw new Error(`aba ${x.nome || i + 1}: HTTP ${r.status}`);
+        const tabela = lerTabelaTexto(await r.text());
+        const cab = tabela[0] || [];
+        const usar = cab.map((t, j) => (String(t).trim() && !/^[#_]/.test(String(t).trim()) ? j : -1)).filter((j) => j >= 0);
+        return {
+          id: (slug(x.nome || `aba-${i + 1}`, 60) || `aba-${i + 1}`), nome: String(x.nome || `Aba ${i + 1}`).slice(0, 100), ordem: i,
+          gid: Number((/[?&]gid=(\d+)/.exec(x.url) || [])[1]) || 0, atualizadoEm: new Date().toISOString(),
+          cabecalhos: usar.map((j) => String(cab[j]).trim()),
+          linhas: tabela.slice(1).map((l, k) => ({ n: k + 2, v: usar.map((j) => String(l[j] == null ? "" : l[j])) })).filter((l) => l.v.some((v) => v.trim()))
+        };
+      }));
+      estado.planilha.erro = "";
+      estado.planilha.lidoEm = new Date().toISOString();
+      receberAbas(abas, { status: "ok", sincronizadoEm: estado.planilha.lidoEm, verificadoEm: estado.planilha.lidoEm });
+    } catch (e) {
+      console.warn("CSV da planilha:", e);
+      estado.planilha.erro = String(e.message || e).slice(0, 200);
+      if (!estado.planilha.recebeu) usarCopiaLocal();
+      renderizarSinc();
+    }
+  }
+
+  /* Faixa de sincronização (verde = em dia; amarelo = atrasada, com erro ou cópia local) */
+  function linkPlanilha() {
+    const id = (estado.planilha.sinc && estado.planilha.sinc.planilhaId) || PLANILHA_CONTATOS_ID;
+    const aba = estado.planilha.abas.find((a) => a.id === estado.vista.aba);
+    return `https://docs.google.com/spreadsheets/d/${encodeURIComponent(id)}/edit${aba && aba.gid ? `#gid=${aba.gid}` : ""}`;
+  }
+  function renderizarSinc() {
+    const faixa = $("#faixa-sinc");
+    const admin = ehAdmin() && ORIGEM_CONTATOS !== "site";
+    if (ORIGEM_CONTATOS === "site" || (!daPlanilha() && !admin && !semSincronizacao)) { faixa.hidden = true; faixa.dataset.chave = ""; return; }
+    const p = estado.planilha;
+    let texto, atrasada = false;
+    if (!daPlanilha()) {
+      atrasada = semSincronizacao;
+      texto = semSincronizacao ? "A planilha Google ainda não foi sincronizada (o Apps Script não foi instalado). Mostrando os contatos cadastrados no site."
+        : "Você está vendo os contatos cadastrados no site. Só as administradoras veem esta opção.";
+    } else if (p.copiaLocal) {
+      atrasada = true;
+      texto = `Mostrando a última cópia salva neste navegador${p.salvaEm ? ` (de ${formatarData(p.salvaEm, true)})` : ""}.`;
+    } else if (p.falhou) {
+      atrasada = true;
+      texto = "Sem conexão com a planilha Google e sem cópia salva neste navegador.";
+    } else if (ORIGEM_CONTATOS === "csv") {
+      atrasada = !!p.erro || minutosDesde(p.lidoEm) > SINC_ATRASO_MIN;
+      texto = p.erro ? `Não foi possível ler a planilha publicada: ${p.erro}.` : p.lidoEm ? `Planilha Google publicada na web, lida ${haQuanto(p.lidoEm)}. Atualiza a cada minuto.` : "Lendo a planilha Google publicada…";
+    } else if (!p.sinc) {
+      atrasada = true;
+      texto = "Conectando à planilha Google…";
+    } else {
+      const min = minutosDesde(p.sinc.verificadoEm);
+      atrasada = p.sinc.status === "erro" || min > SINC_ATRASO_MIN;
+      texto = p.sinc.status === "erro" ? `A última sincronização com a planilha falhou${p.sinc.erro ? ` (${p.sinc.erro})` : ""}. Mostrando a última versão recebida.`
+        : min > SINC_ATRASO_MIN ? `Sincronização atrasada: a planilha não é conferida ${haQuanto(p.sinc.verificadoEm) || "há algum tempo"}. Mostrando a última versão recebida.`
+        : `Sincronizado com a planilha Google${p.sinc.sincronizadoEm ? ` · última mudança ${haQuanto(p.sinc.sincronizadoEm)}` : ""}.`;
+    }
+    const origemAdmin = lerLocal(CHAVE_ORIGEM_ADMIN, "") === "site" ? "site" : "planilha";
+    const chave = [texto, atrasada, admin, origemAdmin, daPlanilha(), linkPlanilha()].join("|");
+    if (faixa.dataset.chave === chave) return;
+    faixa.dataset.chave = chave;
+    faixa.hidden = false;
+    faixa.classList.toggle("atrasada", atrasada);
+    faixa.innerHTML = `<span class="estado"><span class="ponto" aria-hidden="true"></span><span>${escapar(texto)}</span></span>
+      <span class="acoes-sinc">
+        ${daPlanilha() ? `<a class="btn btn-secundario btn-mini" href="${escapar(linkPlanilha())}" target="_blank" rel="noopener noreferrer">${svg("i-externo")}Editar na planilha Google</a>
+          <button type="button" class="btn btn-secundario btn-mini" data-sinc="sugerir">${svg("i-anotacao")}Sugerir correção</button>` : ""}
+        ${admin && !semSincronizacao ? `<label class="sr-only" for="origem-admin">Origem dos contatos</label>
+          <select id="origem-admin" title="Origem dos contatos (só administradoras)"><option value="planilha"${origemAdmin === "planilha" ? " selected" : ""}>Origem: planilha Google</option><option value="site"${origemAdmin === "site" ? " selected" : ""}>Origem: site</option></select>` : ""}
+      </span>`;
+  }
+  setInterval(() => { if (ORIGEM_CONTATOS !== "site") renderizarSinc(); }, 30000);
+  $("#faixa-sinc").addEventListener("click", (e) => {
+    if (!e.target.closest('[data-sinc="sugerir"]')) return;
+    const aba = estado.planilha.abas.find((a) => a.id === estado.vista.aba);
+    abrirSugestao({ titulo: "Correção na planilha de contatos", contexto: `Contatos (planilha Google)${aba ? ` · aba ${aba.nome}` : ""}`, dica: "De quem é o contato, qual dado está errado e qual é o correto? A correção é feita na planilha Google." });
+  });
+  $("#faixa-sinc").addEventListener("change", (e) => {
+    if (e.target.id !== "origem-admin" || !ehAdmin()) return;
+    gravarLocal(CHAVE_ORIGEM_ADMIN, e.target.value === "site" ? "site" : "planilha");
+    estado.vista = { ...VISTA_PADRAO(), larguras: estado.vista.larguras, compacta: estado.vista.compacta, assinaturaPlanilha: estado.vista.assinaturaPlanilha };
+    salvarVista();
+    aplicarContatosNuvem();
+    garantirExemplos();
+  });
+
+  /* LGPD: na primeira sincronização (e quando as colunas mudam) a administradora confere as colunas recebidas */
+  function verAvisoLgpdPlanilha() {
+    const recebidas = estado.planilha.cabecalhos;
+    if (!ehAdmin() || !daPlanilha() || !recebidas || !recebidas.length || document.querySelector("dialog[open]")) return;
+    const assinatura = JSON.stringify(recebidas);
+    if (lerLocal(CHAVE_LGPD_PLANILHA, "") === assinatura) return;
+    const suspeitas = recebidas.flatMap((a) => a.cabecalhos.filter((t) => RE_COLUNA_SUSPEITA.test(normalizar(t)) || RE_COLUNA_SUSPEITA.test(t)));
+    const d = criarDialogo({
+      titulo: "LGPD: colunas recebidas da planilha",
+      largo: true,
+      corpo: `<p class="lgpd"><strong>LGPD:</strong> a página Contatos é aberta para todo o time. A planilha deve ter só dados corporativos: nada de CPF, RG, endereço residencial, data de nascimento, celular pessoal ou dados de saúde.</p>
+        <p class="apoio">Estas colunas chegaram da planilha Google${suspeitas.length ? `. <strong>Confira as marcadas em vermelho.</strong>` : "."}</p>
+        ${recebidas.map((a) => `<h3 style="font-size:14px;margin:10px 0 2px">${escapar(a.nome)}</h3><ul class="colunas-recebidas">${a.cabecalhos.map((t) => `<li${suspeitas.includes(t) ? ' class="suspeita"' : ""}>${escapar(t)}</li>`).join("") || "<li>(sem colunas)</li>"}</ul>`).join("")}
+        <p class="apoio">Para deixar uma coluna ou aba fora do site sem apagá-la, comece o nome dela com <code>#</code> ou <code>_</code> na planilha (ex.: <code>#CPF</code>).</p>
+        <div class="form-botoes"><a class="btn btn-secundario" href="${escapar(linkPlanilha())}" target="_blank" rel="noopener noreferrer">Abrir a planilha</a><button type="submit" class="btn" value="ok">Conferi as colunas</button></div>`
+    });
+    d.querySelector("form").addEventListener("submit", () => {
+      gravarLocal(CHAVE_LGPD_PLANILHA, assinatura);
+      registrarAuditoria({ acao: "conferir", alvo: "contatos", resumo: `Conferiu as colunas da planilha de contatos (${recebidas.reduce((s, a) => s + a.cabecalhos.length, 0)} colunas)`, detalhes: recebidas.map((a) => `${a.nome}: ${a.cabecalhos.join(", ")}`).join(" | ").slice(0, 800) });
+    });
+    d.showModal();
+  }
+  window.__contatos = { estado };
+</script>
+</body>
+</html>

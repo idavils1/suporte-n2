@@ -1,0 +1,87 @@
+Reunião - 21.01 
+
+ Pauta > esclarecimentos referente aos pontos expostos no e-mail enviado 16.01 
+
+ 
+
+Acessos:  
+
+O contrato contempla uma licença master (Free) que atualmente está em uso pelo time de engenharia da Vcert (Aislan), tal perfil consegue cadastrar novos gestores bem como limitar suas atividades na plataforma. 
+
+_Resolução VALID// 
+
+ 
+
+  
+
+Pausa da videoconferência cliente x atendente: 
+
+Questionamos a possibilidade de configurar ou ainda inativar a função *pausa* para o atendente, entretanto até o momento isso não é possível, a contratada replicará essa demanda para o time de produtos que estudarão as possibilidades. 
+
+ 
+
+Essa funcionalidade poderá ser melhorada numa possível V2, visto que hoje não é um modelo aplicável no modelo de negócio. 
+
+ 
+
+ 
+
+  
+
+Remanejamento de clientes em pausa – após videoconferência iniciada: 
+
+Uma vez que o atendente pausa a videoconferência (em curso), o cliente permanecerá aguardando a retomada da chamada. Questionamos se é configurável esse tempo de pausa, senão a possibilidade de ele ser transferido para o próximo atendente com disponibilidade.  
+
+Vale ressaltar que se o atendente encerrar a videoconferência, antes pausada o cliente retornará para a fila, mas não assumirá uma posição de prioridade. 
+
+Até o presente momento essa atuação será manual, ou seja, caberá ao gestor fazer o monitoramento. 
+
+  
+
+Resolução da 2 sala de espera (quando o atendente pausa a chamada) 
+
+Configuramos a exibição de um vídeo informativo, entretanto a opção de ativar o áudio do video fica indisponível, para tal ação o cliente deverá expandir a exibição para então ativar o áudio. 
+
+  
+
+Acesso duplicado em mais de uma estação. 
+
+Realizamos testes de acesso com o mesmo usuário e senha em máquinas diferentes e não houve nenhum bloqueio ou ainda desativação. O teste foi aplicado nos perfis ADM e atendente. 
+
+Se faz necessário aplicar ajustes nesse comportamento. 
+
+ Não possui bloqueio para o msm login em mais de uma estação. 
+
+ 
+
+ 
+
+  
+
+Personalização do menu inicial – perfil Gestor 
+
+A Nuvidio se comprometeu em verificar a possibilidade de permitir a customização da tela inicial no perfil do Gestor. Reforço ainda que tal personalização deve refletir no perfil do atendente que pertence a determinado departamento. 
+
+  
+
+Retorno até sexta - 24.01 (entre 11h e 16h) repasse entre os times. 
+
+ 
+
+ 
+
+ 
+
+Criar um material interno com os perfis e permissões de telas 
+
+Perfil de gestor - parceiro AR 
+
+Perfil do atendente - parceiro AR 
+
+ 
+
+Recorrente - com a Nuvidio para criação do manual. 
+
+ 
+
+ 

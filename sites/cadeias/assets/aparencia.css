@@ -1,0 +1,198 @@
+/*
+ * Aparência livre da planilha (mesmo arquivo nos três motores; ver aparencia.js).
+ * Tudo aqui só vale com html[data-ap] (ou os outros data-ap-*): quem nunca abriu o painel vê o site como antes.
+ */
+
+/* ---------- Botão na barra ---------- */
+.btn-aparencia .icone { stroke: currentColor; }
+.btn-aparencia[aria-expanded="true"] { background: var(--lilas-destaque); border-color: var(--lilas); }
+
+/* ---------- Grade ---------- */
+html[data-ap] .planilha { border-radius: var(--ap-raio, var(--raio-md)); box-shadow: var(--ap-sombra, none); font-family: var(--ap-fonte, inherit); border-color: var(--ap-borda, var(--borda)); }
+html[data-ap] .cab, html[data-ap] .cab-celula, html[data-ap] .cab-grupos, html[data-ap] .cab-grupo { background-color: var(--ap-cab-fundo); color: var(--ap-cab-texto); }
+html[data-ap] .cab-celula { font-weight: var(--ap-cab-peso, 700); text-transform: var(--ap-cab-caixa, none); border-right: var(--ap-borda-v); }
+html[data-ap] .cab-grupo { border-right: var(--ap-borda-v); border-bottom-color: var(--ap-borda); }
+html[data-ap] .cab-celula .cab-ordenar { color: inherit; font-weight: inherit; text-transform: inherit; }
+html[data-ap] .cab-celula .icone { stroke: currentColor; }
+html[data-ap] .linha { background: var(--ap-linha, var(--superficie)); }
+html[data-ap] .linha.par { background: var(--ap-linha-par, var(--superficie-suave)); }
+html[data-ap] .linha:hover { background: var(--ap-linha-hover, var(--superficie-quente)); }
+html[data-ap] .linha.selecionada { background: var(--ap-selecao, var(--lilas-destaque)); }
+html[data-ap] .celula { border-right: var(--ap-borda-v); border-bottom: var(--ap-borda-h); }
+html[data-ap] .celula:focus, html[data-ap] .celula.ativa { box-shadow: inset 0 0 0 2px var(--ap-ativa, var(--lilas)); }
+html[data-ap] .linha .celula[data-col].ativa:hover, html[data-ap] .linha .celula[data-col]:focus:hover { box-shadow: inset 0 0 0 2px var(--ap-ativa, var(--lilas)), inset 0 0 0 999px color-mix(in srgb, var(--lilas) 12%, transparent); }
+html[data-ap] .linha > .celula.fixa { background-image: linear-gradient(var(--ap-fixa, transparent), var(--ap-fixa, transparent)); }
+html[data-ap] .linha-nova { background: var(--ap-nova, var(--superficie-quente)); border-top-color: var(--ap-ativa, var(--lilas)); }
+html[data-ap] .linha-nova .celula { border-right: var(--ap-borda-v); }
+/* Célula inteira com a cor da opção da lista (Colunas › "Usar a cor da opção na célula inteira") */
+.linha > .celula.ap-cheia { background-color: var(--f); color: var(--c); }
+.linha > .celula.ap-cheia .etq { box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 35%, transparent); }
+/* Ícones das regras de cor ficam alinhados ao texto */
+.linha > .celula::before { display: inline-block; }
+
+/* Grade translúcida sobre o fundo. A 1ª coluna e Ações grudam por cima do conteúdo: ficam opacas
+   (numa linha pintada por regra de cor, herdam a cor da regra, que já é opaca). */
+html[data-ap-vidro] .planilha { background: transparent; }
+html[data-ap-vidro] .corpo { background: transparent; }
+html[data-ap-vidro-blur] .planilha { -webkit-backdrop-filter: blur(10px) saturate(1.1); backdrop-filter: blur(10px) saturate(1.1); }
+html[data-ap-vidro] .linha:not(.ap-pintada):not(.selecionada) > .celula.fixa, html[data-ap-vidro] .linha:not(.ap-pintada):not(.selecionada) > .celula.col-acoes { background-color: var(--superficie); }
+html[data-ap-vidro] .linha.par:not(.ap-pintada):not(.selecionada) > .celula.fixa, html[data-ap-vidro] .linha.par:not(.ap-pintada):not(.selecionada) > .celula.col-acoes { background-color: var(--ap-zebra, var(--superficie-suave)); }
+@media (prefers-reduced-transparency: reduce) {
+  html[data-ap-vidro] .planilha { background: var(--superficie); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  html[data-ap-vidro] .linha { background: var(--superficie); }
+  html[data-ap-vidro] .linha.par { background: var(--ap-zebra, var(--superficie-suave)); }
+}
+
+/* ---------- Fundo personalizado (atrás de tudo) ---------- */
+html[data-ap-fundo] { background-color: var(--ap-bg-cor, var(--fundo)); }
+html[data-ap-fundo] body { background: transparent; }
+html[data-ap-fundo]::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-color: var(--ap-bg-cor, var(--fundo)); background-image: var(--ap-bg-img, none);
+  background-size: var(--ap-bg-tam, cover); background-position: var(--ap-bg-pos, center); background-repeat: var(--ap-bg-rep, no-repeat);
+}
+#ap-imagem {
+  position: fixed; inset: -30px; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.45s ease;
+  background-size: var(--ap-img-tam, cover); background-position: var(--ap-img-pos, center); background-repeat: var(--ap-img-rep, no-repeat);
+  filter: var(--ap-img-filtro, none);
+}
+#ap-imagem.visivel { opacity: 1; }
+html:not([data-ap-fundo="imagem"]) #ap-imagem { display: none; }
+html[data-ap-fundo="imagem"]::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: var(--ap-veu, transparent); }
+/* "Em toda a página": barras sobre um painel para o texto continuar legível */
+html[data-ap-area="pagina"] .pagina > .barra, html[data-ap-area="pagina"] .pagina > .resumo, html[data-ap-area="pagina"] .pagina > .abas-grupo,
+html[data-ap-area="pagina"] .pagina > .barra-selecao { background: var(--ap-painel); border-radius: 10px; padding: 6px 8px; }
+html[data-ap-area="pagina"] .pagina > .abas-grupo { padding-bottom: 0; }
+/* "Só nas bordas (moldura)": a página fica numa caixa e o fundo aparece em volta */
+html[data-ap-area="moldura"] .pagina { margin: clamp(8px, 2.2vw, 28px); background: var(--fundo); border-radius: 16px; box-shadow: 0 10px 40px #00000033; }
+/* O mascote continua visível em qualquer fundo */
+html[data-ap-fundo] .mascote { filter: drop-shadow(0 0 1px #ffffffe6) drop-shadow(0 1px 3px #00000073); }
+
+/* ---------- Painel lateral ---------- */
+html.ap-painel-aberto #app { margin-right: var(--ap-largura, 380px); }
+.ap-painel {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 112; width: var(--ap-largura, 380px); max-width: 100vw;
+  display: flex; background: var(--superficie); color: var(--cor-acao); border-left: 1px solid var(--borda); box-shadow: -10px 0 30px var(--sombra);
+  font-family: "Bricolage Grotesque", system-ui, sans-serif; font-size: 14px;
+}
+.ap-redim { width: 8px; flex-shrink: 0; cursor: col-resize; touch-action: none; background: transparent; border-right: 1px solid var(--borda); }
+.ap-redim:hover, .ap-redim:focus-visible { background: var(--lilas-destaque); }
+.ap-conteudo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ap-topo { padding: 12px 14px 8px; border-bottom: 1px solid var(--borda); display: grid; gap: 8px; }
+.ap-titulo { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ap-titulo h2 { font-size: 18px; }
+.ap-acoes-topo { display: flex; flex-wrap: wrap; gap: 6px; }
+.ap-origem { font-size: 12px; color: var(--texto-secundario); line-height: 1.4; }
+.ap-abas { display: flex; gap: 2px; overflow-x: auto; padding: 6px 10px 0; border-bottom: 1px solid var(--borda); scrollbar-width: thin; flex-shrink: 0; }
+.ap-abas [role="tab"] { flex-shrink: 0; height: 34px; padding: 0 10px; border: 0; border-bottom: 2px solid transparent; background: none; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--texto-secundario); }
+.ap-abas [role="tab"][aria-selected="true"] { color: var(--cor-acao); border-bottom-color: var(--lilas); }
+.ap-abas [role="tab"]:hover { color: var(--cor-acao); }
+.ap-contraste { margin: 10px 12px 0; padding: 10px 12px; border-radius: 8px; background: var(--f-amarelo); color: var(--c-amarelo); font-size: 13px; display: grid; gap: 6px; }
+.ap-contraste ul { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 4px; }
+.ap-contraste li { display: flex; align-items: center; gap: 8px; }
+.ap-corpo { flex: 1; overflow: auto; padding: 12px 14px 28px; display: grid; gap: 12px; align-content: start; }
+.ap-grupo { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 10px; background: var(--superficie); }
+.ap-grupo h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texto-secundario); }
+.ap-grupo h4 { font-size: 13px; }
+.ap-titulo-grupo { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ap-em-foco { border-color: var(--lilas); box-shadow: 0 0 0 2px var(--lilas-destaque); }
+.ap-nota { font-size: 13px; color: var(--texto-secundario); line-height: 1.45; }
+.ap-dica { font-size: 12px; color: var(--texto-secundario); line-height: 1.4; }
+.ap-cor { display: grid; gap: 4px; }
+.ap-cor-rotulo { font-size: 12px; font-weight: 600; display: flex; flex-wrap: wrap; gap: 0 6px; align-items: baseline; }
+.ap-cor-linha { display: flex; align-items: center; gap: 4px; }
+.ap-cor-linha input[type="color"] { width: 36px; height: 30px; padding: 1px; border: 1px solid var(--borda); border-radius: 6px; background: var(--superficie); cursor: pointer; flex-shrink: 0; }
+.ap-hex { width: 104px; height: 30px; padding: 0 8px; border: 1px solid var(--borda); border-radius: 6px; background: var(--superficie); font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+.ap-hex[aria-invalid="true"] { border-color: var(--erro-borda); }
+.ap-hex:focus, .ap-campo input:focus, .ap-campo select:focus, .ap-campo textarea:focus { outline: none; border-color: var(--lilas); box-shadow: 0 0 0 3px var(--lilas-destaque); }
+.ap-botao-icone { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--cor-acao); cursor: pointer; }
+.ap-botao-icone:hover:not(:disabled) { background: var(--superficie-quente); border-color: var(--borda); }
+.ap-botao-icone .icone, .ap-mini .icone { width: 15px; height: 15px; stroke: currentColor; }
+.ap-botao-icone:disabled { opacity: 0.4; cursor: default; }
+.ap-mini { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 30px; padding: 0 10px; border: 1px solid var(--borda); border-radius: 6px; background: var(--superficie); color: var(--cor-acao); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.ap-mini:hover:not(:disabled) { border-color: var(--borda-forte); background: var(--superficie-quente); }
+.ap-mini:disabled { opacity: 0.45; cursor: default; }
+.ap-mini-forte { background: var(--btn-fundo); color: var(--btn-texto); border-color: var(--btn-fundo); }
+.ap-mini-forte:hover:not(:disabled) { background: var(--btn-fundo-hover); border-color: var(--btn-fundo-hover); color: var(--btn-texto); }
+.ap-campo { display: grid; gap: 4px; font-size: 12px; font-weight: 600; }
+.ap-campo select, .ap-campo input:not([type="range"]):not([type="checkbox"]), .ap-campo textarea { width: 100%; min-height: 32px; padding: 4px 8px; border: 1px solid var(--borda); border-radius: 6px; background: var(--superficie); font: inherit; font-size: 13px; font-weight: 400; }
+.ap-campo textarea { font-family: ui-monospace, Consolas, monospace; font-size: 11px; resize: vertical; }
+.ap-faixa span { display: flex; justify-content: space-between; }
+.ap-faixa output { font-weight: 400; color: var(--texto-secundario); font-variant-numeric: tabular-nums; }
+.ap-faixa input { width: 100%; accent-color: var(--lilas); }
+.ap-check { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.ap-check input { width: 16px; height: 16px; accent-color: var(--cor-icone); flex-shrink: 0; }
+.ap-botoes-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ap-botoes-linha .ap-campo { flex: 1 1 100px; }
+.ap-segmento { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--borda); border-radius: 8px; overflow: hidden; width: fit-content; }
+.ap-segmento-largo { width: 100%; }
+.ap-segmento button { flex: 1; min-height: 30px; padding: 0 10px; border: 0; background: var(--superficie); color: var(--cor-acao); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.ap-segmento button + button { border-left: 1px solid var(--borda); }
+.ap-segmento button[aria-pressed="true"] { background: var(--lilas-destaque); color: var(--cor-acao); box-shadow: inset 0 -2px 0 var(--lilas); }
+.ap-amostra { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 22px; padding: 0 6px; border-radius: 5px; border: 1px solid #00000022; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.ap-recentes { display: grid; gap: 4px; }
+.ap-recentes > div { display: flex; flex-wrap: wrap; gap: 4px; }
+.ap-amostra-cor { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--borda-forte); cursor: pointer; padding: 0; }
+.ap-amostra-cor:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
+/* Galeria de temas */
+.ap-galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.ap-tema-cartao { display: grid; gap: 4px; padding: 6px; border: 1px solid var(--borda); border-radius: 10px; background: var(--superficie); color: var(--cor-acao); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; }
+.ap-tema-cartao:hover { border-color: var(--borda-forte); }
+.ap-tema-cartao[aria-current="true"] { border-color: var(--lilas); box-shadow: 0 0 0 2px var(--lilas-destaque); }
+.ap-mini-tema { display: block; height: 64px; padding: 7px; border-radius: 6px; overflow: hidden; }
+.ap-mini-grade { display: grid; height: 100%; border: 1px solid; overflow: hidden; font-size: 7px; line-height: 1; }
+.ap-mini-cab, .ap-mini-linha { display: flex; align-items: center; gap: 3px; padding: 0 4px; letter-spacing: -1px; overflow: hidden; white-space: nowrap; }
+.ap-mini-linha i { width: 9px; height: 5px; border-radius: 3px; margin-left: auto; }
+/* Listas, colunas, regras, meus temas */
+.ap-listas { display: grid; gap: 10px; }
+.ap-lista-cor { display: grid; gap: 6px; padding-bottom: 8px; border-bottom: 1px dashed var(--borda); }
+.ap-lista-cor:last-child { border-bottom: 0; }
+.ap-lista-colunas { display: grid; gap: 4px; max-height: 220px; overflow: auto; border: 1px solid var(--borda); border-radius: 8px; padding: 6px 10px; margin: 0; }
+.ap-lista-colunas legend { font-size: 12px; font-weight: 700; padding: 0 4px; }
+.ap-atalhos { display: grid; gap: 8px; }
+.ap-regras { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ap-regra { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px; border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); }
+.ap-regra.desligada { opacity: 0.55; }
+.ap-regra-texto { flex: 1 1 150px; min-width: 0; font-size: 12px; overflow-wrap: break-word; }
+.ap-regra-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin-left: auto; }
+.ap-alca { cursor: grab; }
+.ap-editor-regra { display: grid; gap: 8px; padding: 10px; border: 1px solid var(--lilas); border-radius: 8px; background: var(--superficie-suave); }
+.ap-meus { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ap-meus li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 6px; border: 1px solid var(--borda); border-radius: 8px; }
+.ap-meu-mini .ap-mini-tema { width: 64px; height: 40px; padding: 4px; }
+.ap-meu-nome { flex: 1; min-width: 80px; font-weight: 600; }
+.ap-admin { border-color: var(--borda-forte); background: var(--superficie-suave); }
+/* Fundo: roda do ângulo, foco da imagem */
+.ap-roda-linha { display: flex; align-items: center; gap: 12px; }
+.ap-roda-linha .ap-campo { flex: 1; }
+.ap-roda { position: relative; width: 76px; height: 76px; flex-shrink: 0; border-radius: 50%; border: 2px solid var(--borda-forte); background: var(--superficie-suave); cursor: grab; touch-action: none; }
+.ap-roda:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
+.ap-roda-ponto { position: absolute; left: calc(50% - 6px); top: calc(50% - 6px); width: 12px; height: 12px; border-radius: 50%; background: var(--lilas); box-shadow: 0 0 0 2px var(--superficie); }
+.ap-foco { position: relative; height: 110px; border: 1px dashed var(--borda-forte); border-radius: 8px; background: var(--superficie-suave); cursor: crosshair; touch-action: none; }
+.ap-foco-ponto { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; border: 2px solid var(--superficie); background: var(--lilas); box-shadow: 0 0 0 1px var(--cor-acao); }
+.ap-nove { display: grid; grid-template-columns: repeat(3, 26px); gap: 4px; }
+.ap-nove button { width: 26px; height: 22px; border: 1px solid var(--borda); border-radius: 4px; background: var(--superficie); cursor: pointer; }
+.ap-nove button[aria-pressed="true"] { background: var(--lilas); border-color: var(--lilas); }
+.ap-imagem-envio { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+/* Celular: o painel vem de baixo para cima */
+@media (max-width: 760px) {
+  html.ap-painel-aberto #app { margin-right: 0; padding-bottom: 58vh; }
+  .ap-painel { top: auto; left: 0; width: 100%; height: 58vh; border-left: 0; border-top: 1px solid var(--borda); border-radius: 16px 16px 0 0; box-shadow: 0 -10px 30px var(--sombra); }
+  .ap-redim { display: none; }
+}
+
+/* Alto contraste pedido pelo sistema: contorno mais forte na célula ativa e no foco */
+@media (prefers-contrast: more) {
+  html[data-ap] .celula:focus, html[data-ap] .celula.ativa { box-shadow: inset 0 0 0 3px var(--ap-ativa, var(--lilas)); }
+}
+
+/* Impressão: sem fundo, grade branca e texto preto */
+@media print {
+  .ap-painel, #ap-imagem, #btn-aparencia { display: none !important; }
+  html[data-ap-fundo]::before, html[data-ap-fundo]::after { display: none !important; }
+  html[data-ap], html[data-ap-fundo] { background: #ffffff !important;
+    --fundo: #ffffff !important; --superficie: #ffffff !important; --cor-acao: #111212 !important; --texto-secundario: #333333 !important; }
+  html.ap-painel-aberto #app { margin-right: 0 !important; }
+  html[data-ap-area="moldura"] .pagina { margin: 0; box-shadow: none; }
+}

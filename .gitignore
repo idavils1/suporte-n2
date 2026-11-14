@@ -1,0 +1,12 @@
+# Dependências e caches gerados
+node_modules/
+.firebase/
+*.log
+firebase-debug*.log
+firestore-debug*.log
+ui-debug*.log
+
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store

@@ -1,0 +1,546 @@
+=================== SLIDE 1 ===================
+MATERIAL DE CAPACITAÇÃO — SUPORTE N1 / N2
+---
+VIDaaS — Certificado em Nuvem
+---
+e Carimbo do Tempo (SGACT)
+---
+Suporte a desenvolvedores parceiros na integração com a API do Valid PSC
+---
+Baseado em: Manual VIDaaS v1.5  ·  Manual SGACT/TST v1.02  ·  Postman Collection PSC API v1.4
+---
+[NOTAS]
+Boas-vindas. Objetivo do treinamento: capacitar o suporte a atender desenvolvedores parceiros que integram com o VIDaaS (assinatura com certificado em nuvem) e com o SGACT (carimbo do tempo). A apostila e o guia rápido complementam estes slides.
+[/NOTAS]
+=================== SLIDE 2 ===================
+OBJETIVOS
+---
+O que você vai dominar hoje
+---
+1
+---
+Entender os produtos
+---
+O que são VIDaaS e SGACT e para que os parceiros os usam.
+---
+2
+---
+Decorar o fluxo de 5 passos
+---
+Cadastro → user-discovery → autorização → token → assinatura.
+---
+3
+---
+Diagnosticar por etapa
+---
+Reconhecer em que passo o cliente travou e as causas mais comuns.
+---
+4
+---
+Atender e escalar bem
+---
+Coletar as informações certas e saber quando escalar para a Valid.
+---
+[NOTAS]
+N1: foco em triagem — reconhecer produto, ambiente e etapa. N2: foco em análise técnica — reproduzir chamadas no Postman e orientar correções de integração.
+[/NOTAS]
+=================== SLIDE 3 ===================
+OS PRODUTOS
+---
+Dois serviços, dois tipos de chamado
+---
+VIDaaS
+---
+Certificado digital em nuvem (Valid PSC)
+---
+A chave privada do titular fica na nuvem da Valid
+O titular autoriza cada uso pelo app VIDaaS (QR Code ou push)
+A aplicação do parceiro integra via API OAuth 2.0 para assinar documentos
+---
+SGACT
+---
+Carimbo do tempo — TST (RFC 3161)
+---
+Prova que um documento existia em determinada data/hora
+A aplicação envia o hash e recebe o Time-Stamp Token (TST)
+Conexão exige mTLS: certificado ICP-Brasil cadastrado no SGACT
+---
+Primeira pergunta da triagem: o chamado é de VIDaaS (assinatura) ou de carimbo do tempo?
+---
+[NOTAS]
+Deixe claro que são serviços independentes, com URLs, autenticação e erros diferentes. VIDaaS = OAuth + app no celular. SGACT = mTLS + requisição binária RFC 3161.
+[/NOTAS]
+=================== SLIDE 4 ===================
+FUNDAMENTOS
+---
+Conceitos que você vai ouvir todo dia
+---
+Certificado digital
+---
+Identidade eletrônica (e-CPF/e-CNPJ) na cadeia ICP-Brasil. Tipos A1 (arquivo) e A3 (mídia/nuvem).
+---
+PSC / nuvem
+---
+Prestador de Serviço de Confiança: guarda a chave privada. O titular autoriza o uso pelo app VIDaaS.
+---
+Hash
+---
+“Impressão digital” do documento (ex.: SHA-256). É o hash que se assina — não o arquivo.
+---
+Assinatura digital
+---
+Chave privada aplicada sobre o hash. Qualquer alteração no documento invalida a assinatura.
+---
+[NOTAS]
+Glossário completo na seção 3 da apostila. Reforçar: em nuvem o titular NUNCA informa senha do certificado à aplicação do parceiro — tudo passa pelo app VIDaaS.
+[/NOTAS]
+=================== SLIDE 5 ===================
+FUNDAMENTOS
+---
+OAuth 2.0 sem mistério
+---
+O mesmo padrão do “Entrar com Google”: a aplicação do parceiro nunca vê a senha nem a chave privada do titular.
+---
+1
+---
+Aplicação se identifica
+---
+client_id + client_secret
+---
+→
+---
+2
+---
+Pede autorização
+---
+para o CPF/CNPJ do titular
+---
+→
+---
+3
+---
+Titular aprova no celular
+---
+QR Code ou notificação push
+---
+→
+---
+4
+---
+Troca código por token
+---
+access token temporário
+---
+→
+---
+5
+---
+Assina com o token
+---
+dentro do prazo e escopo
+---
+PKCE (RFC 7636): a aplicação gera um code_verifier, envia o code_challenge (S256) na autorização e prova o original ao pedir o token. Se não baterem, o token é negado — causa clássica de erro de integração.
+---
+[NOTAS]
+O passo 3 (amarelo) é o único que depende do titular — grande parte dos chamados de 'não funciona' está aí (QR Code expirado, app deslogado, push não recebido).
+[/NOTAS]
+=================== SLIDE 6 ===================
+FUNDAMENTOS
+---
+Ambientes: o erro nº 1 é misturá-los
+---
+[TABELA]
+| Ambiente | VIDaaS (URI base) | SGACT — carimbo do tempo |
+| Produção | https://certificado.vidaas.com.br | https://act-icp-brasil.validcertificadora.com.br/act-request/tstRequest |
+| Homologação (HML) | https://hml-certificado.vidaas.com.br | https://hml-act-icp-brasil.validcertificadora.com.br/act-request/tstRequest |
+| Demonstração | https://demo-certificado.vidaas.com.br | — |
+[/TABELA]
+Regra de ouro: credenciais (client_id/client_secret) são por ambiente. Par de HML não funciona em produção — e vice-versa. Sempre confirme a URL completa que o parceiro está chamando antes de qualquer análise.
+---
+[NOTAS]
+Peça sempre a URL completa no chamado. 'invalid client' com credenciais corretas quase sempre é ambiente trocado.
+[/NOTAS]
+=================== SLIDE 7 ===================
+VIDAAS
+---
+O fluxo VIDaaS em 5 passos
+---
+1
+---
+Cadastro da aplicação
+---
+POST /v0/oauth/application/
+---
+Uma única vez. Devolve client_id e client_secret.
+---
+2
+---
+User-discovery
+---
+POST /v0/oauth/user-discovery
+---
+CPF/CNPJ tem certificado? Lista os slots.
+---
+3
+---
+Autorização
+---
+GET /v0/oauth/authorize
+---
+Titular aprova no app: QR Code ou PUSH.
+---
+4
+---
+Token
+---
+POST /v0/oauth/token
+---
+Troca o código pelo access token (Bearer).
+---
+5
+---
+Assinatura
+---
+POST .../trusted-services/signatures
+---
+Envia hashes; recebe as assinaturas.
+---
+Decorou esta sequência? Então você já sabe classificar 90% dos chamados de VIDaaS.
+---
+[NOTAS]
+Slide âncora do treinamento. Triagem N1: 'em qual desses passos aparece o erro?'. Cada passo tem um slide próprio na sequência e uma seção na apostila (4.1 a 4.5).
+[/NOTAS]
+=================== SLIDE 8 ===================
+VIDAAS
+---
+Passo 1 — Cadastro da aplicação
+---
+Feito uma única vez por aplicação e por ambiente. Campos obrigatórios:
+---
+name
+---
+nome/descrição da aplicação
+---
+comments
+---
+observações gerais de uso
+---
+redirect_uris
+---
+URIs autorizadas para redirecionamento
+---
+email
+---
+contato para indisponibilidade e mudanças de versão
+---
+Resposta
+---
+{ "status": "success",
+  "client_id": "4c9fb552-…",
+  "client_secret": "Ny2n…" }
+---
+Gera chamado: o redirect_uri usado na autorização precisa ser igual/contido ao cadastrado aqui. Alterações via PUT /v0/oauth/client_maintenance; consulta via GET /v0/oauth/application/<client_id>. O client_secret é confidencial — nunca deve aparecer em chamado.
+---
+[NOTAS]
+Cadastro é raro de dar problema por si, mas os dados cadastrados (redirect_uris) causam erros no passo 3. N2 pode conferir o cadastro com a chamada 9 da collection (client details).
+[/NOTAS]
+=================== SLIDE 9 ===================
+VIDAAS
+---
+Passo 2 — User-discovery
+---
+Verifica se o CPF/CNPJ tem certificado no Valid PSC e lista os certificados (slots) disponíveis.
+---
+Envia: client_id, client_secret, user_cpf_cnpj (“CPF” ou “CNPJ”) e val_cpf_cnpj (o número).
+---
+Status "S" — encontrado
+---
+Devolve a lista de slots do titular
+slot_alias + label (ex.: “e-CPF A3 em nuvem gold”)
+Siga para a autorização
+---
+Status "N" — não encontrado
+---
+CPF/CNPJ sem certificado no Valid PSC
+NÃO é erro de integração nem bug
+Titular precisa de certificado em nuvem Valid ativo no app VIDaaS
+---
+N1 já resolve: status “N” é orientação ao titular, não escalonamento técnico.
+---
+[NOTAS]
+Chamado típico: 'a API diz que o cliente não existe'. Verificar com o titular se o certificado em nuvem está emitido e ativo no app. Só escale se o titular garantir que tem certificado Valid ativo e o discovery continuar retornando N.
+[/NOTAS]
+=================== SLIDE 10 ===================
+VIDAAS
+---
+Passo 3 — Autorização: QR Code × PUSH
+---
+QR CODE
+---
+HTTP 302 → página de autenticação com QR Code
+Página vale 2 minutos
+Titular lê com o app VIDaaS e escolhe o certificado
+Redireciona ao redirect_uri com code na URL
+---
+PUSH (redirect_uri push://…)
+---
+Titular recebe notificação no app — sem QR Code
+Resposta imediata traz um code (id da autorização)
+Aplicação consulta GET …/authentications?code=
+Quando aprovado, devolve o authorizationToken
+---
+“Tempo para autenticação expirado” = titular não autorizou em 2 min. Não é falha: basta gerar nova autorização com o app aberto e logado.
+---
+[NOTAS]
+Parâmetros da autorização (query): client_id, code_challenge, code_challenge_method=S256, response_type=code, scope, login_hint (CPF/CNPJ), lifetime (segundos) e redirect_uri. Push não chega: app deslogado, notificações bloqueadas ou push:// incorreto — teste por QR Code para isolar.
+[/NOTAS]
+=================== SLIDE 11 ===================
+VIDAAS
+---
+Escopos: o que o token pode fazer
+---
+single_signature
+---
+Assina um único hash; token invalidado após o uso.
+---
+multi_signature
+---
+Vários hashes em uma única requisição; token invalidado após o uso.
+---
+signature_session
+---
+Sessão: várias assinaturas em várias chamadas enquanto o token for válido.
+---
+authentication_session
+---
+Só autentica o titular; não usa a chave privada.
+---
+Se omitido, assume single_signature — mas o padrão pode mudar. Oriente o parceiro a sempre informar o scope. “Segunda assinatura falhou”? Provavelmente scope single/multi: use signature_session.
+---
+[NOTAS]
+Erro clássico: parceiro usa single_signature e tenta assinar de novo com o mesmo token. O token foi invalidado por design — não é bug.
+[/NOTAS]
+=================== SLIDE 12 ===================
+VIDAAS
+---
+Passo 4 — Token
+---
+POST /v0/oauth/token  (application/x-www-form-urlencoded)
+---
+grant_type = authorization_code
+client_id + client_secret
+code  (veja o quadro ao lado!)
+code_verifier — o original do code_challenge (PKCE)
+redirect_uri — igual ao da autorização (se usado)
+---
+Qual valor vai no campo “code”?
+---
+QR Code: o code devolvido na URL de redirecionamento.
+PUSH: o authorizationToken devolvido pelo serviço de authentications.
+---
+Trocar os dois = “código inválido”. Confusão nº 1 dos integradores.
+---
+Resposta: access_token (Bearer), expires_in em segundos (ex.: 900 = 15 min), scope e identificação autorizada. Token expirado ou código reutilizado ⇒ refazer a autorização.
+---
+[NOTAS]
+Erros aqui: PKCE divergente (verifier ≠ challenge), código expirado/já usado, code × authorizationToken trocados, credenciais de outro ambiente. Sempre perguntar o horário do erro — códigos e tokens têm vida curta.
+[/NOTAS]
+=================== SLIDE 13 ===================
+VIDAAS
+---
+Passo 5 — Assinatura
+---
+POST …/trusted-services/signatures  ·  Authorization: Bearer <access_token>
+---
+hashes[]: id, alias, hash, hash_algorithm (OID), signature_format
+SHA-256 ⇒ OID 2.16.840.1.101.3.4.2.1
+certificate_alias e padding_method (NONE, PKCS1V1_5, PSS) opcionais
+base64_content: conteúdo (texto/PDF) em base64, opcional
+pdf_signature_page: “true” acrescenta página de assinatura no PDF (padrão “false”)
+---
+Formatos aceitos
+---
+RAW · CMS · CAdES_AD_RT · CAdES_AD_RB · PAdES_AD_RT · PAdES_AD_RB · RAW_DIGESTED_DATA · RAW_DATA
+---
+> 20 MB? Documento deve ser enviado como hash, nunca inteiro.
+---
+Resposta: raw_signature em base64 por item. Em CMS/CAdES/PAdES, inclui signingTime (hora do PSC), messageDigest e signingCertificateV2.
+---
+[NOTAS]
+Erros comuns: OID errado no hash_algorithm, formato não suportado, token expirado entre a autorização e a assinatura, arquivo grande enviado inteiro. Endpoints auxiliares: encrypt/decrypt, certificate-discovery, client_maintenance — seção 4.6 da apostila.
+[/NOTAS]
+=================== SLIDE 14 ===================
+CARIMBO DO TEMPO
+---
+SGACT — Carimbo do tempo (TST)
+---
+1
+---
+Montar o TSR
+---
+TimeStamp Request com o hash do dado
+---
+→
+---
+2
+---
+Canal mTLS
+---
+certificado de cliente + cadeia do servidor
+---
+→
+---
+3
+---
+POST binário
+---
+Content-Type: application/timestamp-query
+---
+→
+---
+4
+---
+Resposta TST
+---
+status 0 = sucesso; traz o nº de série
+---
+Pré-requisitos
+---
+Certificado ICP-Brasil A1/A3 (pref. cadeia Valid)
+Previamente cadastrado no SGACT da Valid
+Cadeia do servidor confiável no ambiente (truststore)
+---
+Exemplos oficiais do manual
+---
+Java SE 6+: PFX (keystore) + JKS (truststore), Bouncy Castle, Commons IO
+C#: PFX + BouncyCastle.Crypto.dll; política 2.16.76.1.6.5, nonce aleatório
+---
+Triagem: falha SSL = certificado/cadastro · HTTP ≠ 200 = URL ou Content-Type · status ≠ 0 = TSR malformado
+---
+[NOTAS]
+Aderente à RFC 3161. URLs: produção act-icp-brasil.validcertificadora.com.br e HML hml-act-icp-brasil... (/act-request/tstRequest). O cadastro do certificado no SGACT é feito pela Valid — se for essa a pendência, escalar.
+[/NOTAS]
+=================== SLIDE 15 ===================
+FERRAMENTAS
+---
+Collection Postman: a ferramenta do N2
+---
+“PSC API Integração V1.4 (for developers)” — pastas HML e PRD com o fluxo completo, na ordem numérica:
+---
+0 Client token → 1 Application → 2 User-discovery → 3 Autorização (QR Code / PUSH) → 3.1 Exibir QR Code → 4 Authentication → 5 Token → 6 Signature (CAdES / PKCS1) → 6.1 Encrypt / 6.2 Decrypt → 7 Certificado público → 8 Client maintenance → 9 Client details
+---
+✓
+---
+Confirme a pasta (HML × PRD) antes de qualquer teste — nunca cruze credenciais de ambientes.
+---
+✓
+---
+Preencha as variáveis: client_id, client_secret, user_cpf, code_verifier, tokens.
+---
+✓
+---
+Reproduza na ordem numérica — a maioria dos erros vem de pular etapa ou reutilizar código expirado.
+---
+✓
+---
+Peça request + response completos ao parceiro (sem o client_secret) e compare com a collection.
+---
+[NOTAS]
+Reproduzir o problema na collection oficial é o critério para escalar à Valid: se a chamada correta falha também no Postman, o problema não é do código do parceiro.
+[/NOTAS]
+=================== SLIDE 16 ===================
+SUPORTE
+---
+Troubleshooting: os 8 campeões de chamado
+---
+“invalid client”
+---
+Credenciais de outro ambiente (HML × PRD)
+---
+user-discovery “N”
+---
+Titular sem certificado no Valid PSC — orientar, não escalar
+---
+QR Code expirou
+---
+Página vale 2 min — gerar nova autorização
+---
+Push não chega
+---
+App deslogado, notificação bloqueada ou push:// errado
+---
+Erro no /oauth/token
+---
+PKCE divergente ou code × authorizationToken trocados
+---
+2ª assinatura falha
+---
+Escopo single/multi invalida o token — usar signature_session
+---
+Arquivo grande falha
+---
+> 20 MB deve ir como hash
+---
+SSL no carimbo do tempo
+---
+Certificado não cadastrado no SGACT ou cadeia não confiável
+---
+Tabelas completas por etapa: apostila, seção 7 + Guia Rápido impresso.
+---
+[NOTAS]
+Exercício sugerido: leia cada sintoma e peça à turma para dizer em qual passo do fluxo ele acontece e o que perguntar primeiro ao cliente.
+[/NOTAS]
+=================== SLIDE 17 ===================
+SUPORTE
+---
+Roteiro de atendimento e escalonamento
+---
+Colete sempre (checklist)
+---
+Ambiente + URL completa
+Etapa do fluxo (1 a 5, ou carimbo do tempo)
+Request e response completos (sem secrets)
+Data/hora do erro (expiração!)
+client_id + CPF/CNPJ do titular
+Escopo, formato e algoritmo usados
+Reproduzível? Todos os titulares ou um só?
+---
+N1
+---
+Triagem: produto, ambiente, etapa. Resolve orientações simples (QR expirado, status N, app deslogado).
+---
+N2
+---
+Analisa request/response, reproduz no Postman, orienta PKCE, redirect_uri, escopos, OIDs, 20 MB.
+---
+Valid
+---
+Indisponibilidade, erro reproduzido com requisição correta, cadastro no SGACT, emissão do certificado.
+---
+Escalonamento à Valid: suportecorp.certificadora@valid.com — sempre com o checklist completo.
+---
+[NOTAS]
+Critério objetivo de escalonamento: o N2 reproduziu a chamada correta na collection oficial e o erro persiste — ou a pendência é algo que só a Valid executa (cadastro no SGACT, estado do certificado do titular).
+[/NOTAS]
+=================== SLIDE 18 ===================
+Segurança em primeiro lugar
+---
+!
+---
+NUNCA peça nem registre: client_secret, senha de PFX, senha do app VIDaaS.
+---
+!
+---
+Secret exposto em chamado? Oriente o parceiro a rotacioná-lo (client_maintenance).
+---
+!
+---
+A chave privada do titular nunca sai da nuvem da Valid — desconfie de quem pedir o contrário.
+---
+Próximos passos
+---
+Leia a apostila (seções 2 e 3 para N1; 4 a 7 para N2) · Mantenha o Guia Rápido na mesa · Faça o quiz da seção 9 ao final do treinamento
+---
+[NOTAS]
+Encerramento: reforçar os 5 passos do fluxo, a regra de ambientes e a postura de segurança. Aplicar o quiz da seção 9 da apostila.
+[/NOTAS]

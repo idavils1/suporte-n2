@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aprendizagem - Tire suas dúvidas · Central do Suporte V/CERT</title>
+<link rel="icon" type="image/png" sizes="32x32" href="fotos/icone-32.png">
+<link rel="apple-touch-icon" href="fotos/icone-apple.png">
+<script>
+  (function () {
+    try {
+      var tema = localStorage.getItem("suporte-n2-tema");
+      if (tema !== "claro" && tema !== "escuro") {
+        tema = window.matchMedia("(prefers-color-scheme: dark)").matches ? "escuro" : "claro";
+      }
+      document.documentElement.setAttribute("data-tema", tema);
+    } catch (e) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="comum/base.css">
+<link rel="stylesheet" href="comum/markdown.css">
+<link rel="stylesheet" href="comum/aprender.css">
+</head>
+<body>
+<header class="topo-pagina">
+  <a class="btn btn-secundario btn-mini voltar" href="index.html#aprendizagem" aria-label="Voltar para a Central">← <span>Central</span></a>
+  <h1><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-aprender"/></svg>Aprendizagem - Tire suas dúvidas</h1>
+  <div class="topo-acoes">
+    <button type="button" class="btn btn-secundario btn-mini btn-edicao" id="btn-edicao" aria-pressed="false" hidden></button>
+    <button type="button" class="btn-icone" id="btn-tema" aria-label="Alternar tema"></button>
+    <button type="button" class="btn btn-secundario btn-mini btn-login" id="btn-login" hidden></button>
+  </div>
+</header>
+<div class="barra-edicao" id="barra-edicao" hidden></div>
+<div class="faixa-aviso" id="faixa-offline" hidden>Sem conexão com a nuvem: mostrando o conteúdo embutido (somente leitura).</div>
+<main class="conteudo" id="conteudo">
+  <div id="topo-busca">
+    <div class="barra-busca" id="barra-busca" role="search">
+      <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-busca"/></svg>
+      <label class="sr-only" for="busca">Buscar na Aprendizagem - Tire suas dúvidas</label>
+      <input type="search" id="busca" placeholder="Busque uma aula, um termo ou um código de erro (ex.: token, 400204)" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="resultados" aria-autocomplete="list">
+      <kbd aria-hidden="true">Ctrl K</kbd>
+      <div class="resultados" id="resultados" role="listbox" aria-label="Sugestões" hidden></div>
+    </div>
+  </div>
+  <div id="pagina" tabindex="-1"></div>
+</main>
+<script type="module" src="comum/aprender.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "cadeias-testes",
+  "private": true,
+  "type": "module",
+  "description": "Testes das regras do Cadeias V6 / V12 no Emulador do Firestore (não vão para o Firebase).",
+  "scripts": {
+    "test": "cd ../.. && firebase emulators:exec --only firestore --project demo-cadeias \"node --test sites/cadeias-testes/regras.test.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.10.0"
+  }
+}

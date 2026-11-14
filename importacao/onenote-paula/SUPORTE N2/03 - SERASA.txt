@@ -1,0 +1,42 @@
+Plataforma da Serasa link -  https://serasa-agent-application.vcert.com.br/ 
+Utilizada para visualizar os certificados e revogar tickets, para que os tickets sejam revogados é necessário que o AGR seja cadastrado e tenha permissão para realizar a revogação, caso não possua o botão fica desabilitado.  
+ 
+
+000002000636262 
+e-CPF A3 36 MESES CARTAO 
+Detalhes 
+CPF 
+30097705079 
+Cliente 
+IVANILDO VIANA DA SILVA 
+Data de Nascimento 
+01/07/1982 
+E-mail 
+IVANRDP@HOTMAIL.COM 
+Status 
+Emitido 
+Data da criação 
+24/04/2024 
+Validade inicial 
+24/04/2024 
+Validade final 
+24/04/2027 
+Data de revogação 
+Data indefinida 
+Unidade de atendimento 
+SERASA / ESSENCIAL - METRO SHOPPING JABAQUARA / 
+AGR - Validação 
+DANILLO CAVALCANTE 
+AGR - Conferência da informação 
+FELIPE CESAR FERREIRA BORGES 
+Sistema emissor 
+AR 20 
+Dados do Certificado 
+Número de série 
+3F99677F8DBFAD7E 
+IDN 
+4LrTYHJ0X2p0H1CV/IJ03KnYMMDRSpRixjAupgT/WvlagC6f/opbd9LeTnm4PqpObkTt+/19c3PHRL|Hhol/VQ == 
+Voltar 
+Revogar 
+ Obs: Os certificados da Serasa não é possível visualizar ou ter qualquer ação no SAR também não é possível fazer revogação ou alteração de status via Infra.  
+O N2 não possuí acesso e nem visão da ferramenta.  

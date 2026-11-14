@@ -1,0 +1,135 @@
+ 
+
+ 
+
+Fluxo e Script de acionamento nível 3 (Produtos ou Infra): 
+
+Parceiro - Abertura chamado – Suporte Técnico; (JIRA, CHAT ou telefone) 
+
+Suporte técnico avaliar se indisponibilidade ou instabilidade; 
+
+Suporte Técnico aciona " Produtos ou Infra"  
+No grupo de Infra marcar Marcilio/Luisão e Leticia 
+
+Qual o problema? (sistema, produto, etapa) 
+
+Como deveria ser o comportamento? 
+
+Descrever o problema com evidências: (ticket, linha do SAR, erro) 
+
+Quais ações que o Suporte N2 tentou executar para sanar o problema? 
+
+Classificação da forma de comunica (Alto impacto, baixa complexidade);  
+
+N2 dispara comunicado (REDE, Cliente, Interno) informando se indisponibilidade ou instabilidade; 
+
+Comunica grupo interno whats. 
+
+Infra informa problema, informa previsão; 
+
+N2 dispara comunicados de atualização de status (REDE, Cliente, Interno) 
+
+Comunica grupo interno whats. 
+
+__________________________________________________________________________________________________- 
+
+ 
+
+COMUNICADO REDE - INSTABILIDADES. 
+
+ 
+Informamos que estamos enfrentando uma instabilidade temporária no (ESPECIFICAR O SISTEMA E A ETAPA), detalhar o comportamento e mensagem exibida no erro. 
+
+ 
+Se tiver mais serviços impactados é necessário também detalhar. 
+ 
+
+Nossa equipe técnica já está trabalhando para normalizar o serviço o mais breve possível. 
+
+ 
+
+SLA: Em analise pelo setor de infraestrutura.  
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Validação de CSR. 
+
+Quando  houver a venda de produtos cuja a validação depende da CSR, o time operacional obrigatoriamente precisa acionar o time N2 via JIRA para que os técnicos validem a CSR. 
+
+No chamado deve conter a CSR, dados do responsável e do técnico. 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ERRO RENOVAÇÃO ONLINE 
+
+Acionamento: Parceiro via JIRA 
+
+Indisponibilidade para renovação online https://renovar.vpki.com.br/renovar-endEntity/pages/public/client/testDeviceComputer.jsf?faces-redirect=true&rd=RD01&store=RD01&campaign=151&partnerCode=&skin=&ticket= 
+
+Time técnico acompanhou o processo junto com o cliente final e em paralelo realizamos alguns testes (com o link construído - ticket). 
+
+Ticket da renovação:  21930702846> CBRRFB05010 
+
+Ticket antigo: 50045360200  > CBRRFB05010 
+
+ 
+
+ evidencia erro:  
+
+ 

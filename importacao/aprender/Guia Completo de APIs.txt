@@ -1,0 +1,2505 @@
+=== PAGINA 1 ===
+G U I A D E F I N I T I V O · E D I Ç Ã O 2 0 2 6
+API
+O Guia Completo
+Do garçom ao OAuth: tudo o que você precisa saber sobre
+Interfaces de Programação de Aplicações — com analogias,
+exemplos práticos e desenhos.
+API
+📱
+💻
+⌚
+🗄️
+💳
+🗺️
+☁️
+🤖
+$ curl https://voce.dev/conhecimento/apis
+HTTP/1.1 200 OK
+{ "status": "pronto para aprender" }
+21 capítulos · 4 apêndices
+Fundamentos · Arquitetura · Segurança · Prática
+
+=== PAGINA 2 ===
+2
+API: O Guia Completo
+≡
+Sumário
+P A R T E I — F U N D A M E N T O S
+1
+O que é uma API?
+2
+Uma breve história das APIs
+3
+Como a conversa acontece: cliente, servidor e HTTP
+4
+Métodos HTTP: os verbos da web
+5
+Códigos de status: o "humor" do servidor
+6
+Formatos de dados: JSON, XML & cia.
+P A R T E I I — E S T I L O S E A R Q U I T E T U R A S
+7
+Tipos de API
+8
+REST a fundo
+9
+Além do REST: SOAP, GraphQL, gRPC, WebSocket, SSE e Webhooks
+10
+Comparativo: qual estilo escolher?
+P A R T E I I I — S E G U R A N Ç A
+11
+Autenticação e autorização
+12
+Segurança de APIs e o OWASP Top 10
+P A R T E I V — D E S I G N P R O F I S S I O N A L
+13
+Boas práticas de design
+14
+Performance: cache, rate limiting e resiliência
+15
+Documentação com OpenAPI
+P A R T E V — M Ã O N A M A S S A
+16
+Consumindo APIs
+17
+Criando sua primeira API
+18
+Testando APIs
+P A R T E V I — A P I S N O M U N D O R E A L
+19
+Arquitetura: gateways, microsserviços e BFF
+20
+Observabilidade e ciclo de vida
+21
+APIs no Brasil, no mundo e na era da IA
+A P Ê N D I C E S
+A
+Checklist da API perfeita
+B
+Glossário
+C
+Quiz + gabarito
+D
+Referências para ir além
+🧭 Como ler este guia
+Se você está começando, leia a Parte I com calma: ela é a base de tudo. Se já programa, pule para a Parte
+II ou direto para a Parte V e coloque a mão na massa. Os quadros coloridos ajudam na navegação:
+🍽️ Analogia   💡 Dica   ⚠️ Cuidado   🤓 Curiosidade   📘 Definição
+
+=== PAGINA 3 ===
+3
+API: O Guia Completo
+P A R T E I · F U N D A M E N T O S
+1
+O que é uma API?
+API significa Application Programming Interface — em português, Interface de Programação
+de Aplicações. É um contrato que define como um software pode pedir coisas a outro software,
+e o que ele vai receber de volta.
+Toda vez que você abre o app do clima, paga com Pix, faz login com o Google ou vê um mapa dentro do app
+de delivery, há APIs trabalhando nos bastidores. Elas são a "cola" que conecta sistemas diferentes, escritos em
+linguagens diferentes, rodando em computadores diferentes — às vezes em continentes diferentes.
+A analogia clássica: o garçom
+MENU
+COZINHA
+1. Pedido (requisição)
+2. Leva à cozinha
+3. Prato pronto
+4. Entrega (resposta)
+VOCÊ
+o Cliente (app, site)
+GARÇOM
+a API
+COZINHA
+o Servidor + Banco de Dados
+Figura 1.1 — A API é o garçom: leva seu pedido à cozinha e traz a resposta. Você nunca entra na cozinha.
+🍽️ Analogia: o restaurante
+Você (o cliente) não entra na cozinha, não sabe a receita e nem precisa saber quem é o cozinheiro. Você
+olha o cardápio (a documentação da API), faz um pedido dentro das regras (a requisição) e o garçom (a
+API) traz o prato (a resposta). Se pedir algo que não está no cardápio, o garçom diz "não temos" (um erro
+404). Se a cozinha pegar fogo, ele diz "estamos com problemas" (um erro 500).
+
+=== PAGINA 4 ===
+4
+API: O Guia Completo
+Outra analogia: a tomada
+🍹 Liquidificador
+📺 Televisão
+🔋 Carregador
+Tomada = API
+parede
+O que você NÃO precisa saber
+⚡ Fiação e disjuntores
+🏭 Transformadores e subestações
+🌊 Usina hidrelétrica de Itaipu
+Figura 1.2 — Uma interface padronizada esconde a complexidade. Qualquer aparelho que respeite o "contrato" (formato do plugue,
+127/220 V) funciona.
+A tomada é uma interface: ela define um padrão (formato dos pinos, voltagem) e qualquer aparelho que siga
+esse padrão funciona — sem saber nada sobre a usina. Da mesma forma, uma API abstrai a complexidade de
+um sistema e expõe apenas o necessário para usá-lo.
+Definição formal
+📘 Definição
+Uma API é um conjunto de regras, protocolos e definições que permite que dois componentes de
+software se comuniquem. Ela especifica quais operações estão disponíveis, como chamá-las (formato da
+requisição), o que esperar de volta (formato da resposta) e quais erros podem acontecer.
+Por que APIs são tão importantes?
+🧩
+Reutilização
+Ninguém precisa reinventar mapas,
+pagamentos ou envio de SMS. Você
+usa a API de quem já faz isso bem.
+🔒
+Encapsulamento
+O servidor expõe só o necessário. O
+banco de dados e as regras internas
+ficam protegidos.
+🔄
+Independência
+Front-end e back-end evoluem
+separadamente, desde que
+respeitem o contrato.
+🌐
+Integração
+Sistemas em Java, Python, Go ou
+COBOL conversam pela mesma
+"língua": HTTP + JSON.
+📈
+Escala
+Um único back-end atende site, app
+Android, app iOS, relógio
+inteligente e parceiros.
+💰
+Negócio
+APIs viram produtos: Stripe, Twilio e
+Google Maps cobram por chamada.
+É a "economia das APIs".
+API não é só "coisa da web"
+Quando se fala em API hoje, quase sempre se pensa em Web APIs (acessadas pela internet via HTTP). Mas o
+conceito é muito mais amplo:
+
+=== PAGINA 5 ===
+5
+API: O Guia Completo
+Tipo
+O que é
+Exemplo
+Web API
+Acessada pela rede via HTTP
+GET https://api.github.com/users/octocat
+API de biblioteca
+Funções e classes públicas de uma
+biblioteca
+Math.max(3, 7) em JavaScript
+API de sistema
+operacional
+Como programas pedem recursos ao
+SO
+Win32 API, chamadas POSIX como open()
+API do navegador
+Recursos que o browser oferece ao
+JavaScript
+navigator.geolocation , fetch() ,
+localStorage
+API de hardware
+Acesso a dispositivos físicos
+Câmera, GPS, Bluetooth, GPU (Vulkan, CUDA)
+🤓 API × Endpoint × SDK × Web Service
+API: o contrato completo (todas as operações, regras e formatos).
+Endpoint: um "endereço" específico da API, como GET /usuarios/42 . Uma API tem vários
+endpoints.
+SDK (Software Development Kit): uma biblioteca pronta que chama a API para você, por exemplo
+stripe.charges.create() .
+Web Service: termo mais antigo para "API acessível pela rede", muito associado ao SOAP.
+
+=== PAGINA 6 ===
+6
+API: O Guia Completo
+P A R T E I · F U N D A M E N T O S
+2
+Uma breve história das APIs
+As APIs nasceram muito antes da internet que conhecemos. Elas evoluíram de chamadas de
+funções dentro de um mesmo computador até ecossistemas globais consumidos por bilhões de
+dispositivos — e agora, por agentes de inteligência artificial.
+🤓 Curiosidade: o "mandato das APIs" de Bezos
+Por volta de 2002, segundo relato famoso de um ex-engenheiro, Jeff Bezos teria determinado que todas
+as equipes da Amazon deveriam expor seus dados e funcionalidades somente por meio de interfaces de
+serviço — sem acesso direto ao banco de dados de outro time. Quem não cumprisse seria demitido. Essa
+cultura "API-first" é apontada como uma das sementes da AWS.
+1968 O termo "application program interface" aparece em um artigo acadêmico sobre computação gráfica
+remota. A ideia: separar o que um módulo faz de como ele faz.
+Anos 80–90 APIs de sistemas operacionais e bibliotecas dominam: POSIX (1988), Win32. Surgem tecnologias
+de objetos distribuídos como CORBA (1991), DCOM e Java RMI — poderosas, mas complexas.
+1998 Nasce o XML-RPC, que evolui para o SOAP. Começa a era dos Web Services corporativos, com XML e
+contratos WSDL.
+2000 Roy Fielding descreve o estilo arquitetural REST em sua tese de doutorado. No mesmo ano, Salesforce e
+eBay lançam algumas das primeiras APIs web comerciais.
+2002–2006 Amazon lança seus primeiros web services (2002). Flickr (2004), Google Maps (2005) e Twitter
+(2006) abrem APIs e surge a "era dos mashups". Em 2006, a AWS lança S3 e EC2: infraestrutura inteira via API.
+2007–2010 Facebook Platform, iPhone e App Store: os smartphones explodem e todo app precisa de um
+back-end. APIs REST + JSON viram padrão.
+2011 Criado o Swagger, para descrever APIs REST de forma legível por máquinas.
+2015 Ano agitado: Facebook publica o GraphQL, Google publica o gRPC, o HTTP/2 é padronizado e o Swagger
+é doado para a recém-criada OpenAPI Initiative.
+2017 Lançada a especificação OpenAPI 3.0. Arquiteturas de microsserviços e API Gateways se popularizam.
+2020–2021 No Brasil, o Pix estreia (nov/2020) e o Open Banking, depois Open Finance Brasil, começa em
+2021: bancos são obrigados a compartilhar dados via APIs padronizadas, com consentimento do cliente. Sai o
+OpenAPI 3.1.
+2022–2023 HTTP/3 é padronizado (RFC 9114). A OWASP atualiza o API Security Top 10 (2023). APIs de
+modelos de linguagem (LLMs) se tornam um dos produtos mais consumidos do planeta.
+2024–hoje Surge o MCP (Model Context Protocol), que padroniza como agentes de IA descobrem e usam
+ferramentas e APIs. As APIs passam a ter um novo tipo de consumidor: máquinas que raciocinam.
+
+=== PAGINA 7 ===
+7
+API: O Guia Completo
+P A R T E I · F U N D A M E N T O S
+3
+Como a conversa acontece: cliente,
+servidor e HTTP
+Toda interação com uma Web API segue o mesmo roteiro: o cliente envia uma requisição e o
+servidor devolve uma resposta. A língua que eles falam, na imensa maioria dos casos, é o
+HTTP.
+{ }
+Cliente
+navegador, app, script, IoT
+Servidor (API)
+regras de negócio
+Banco de dados
+dados persistidos
+Requisição: GET /usuarios/42
+Resposta: 200 OK + JSON
+SQL
+Figura 3.1 — O ciclo requisição → resposta. O cliente nunca fala diretamente com o banco de dados.
+Um diálogo HTTP, traduzido
+📱 Cliente
+Oi, servidor! GET /pizzas?sabor=calabresa . Aceito a resposta em JSON, tá? ( Accept:
+application/json )
+🖥️ Servidor
+200 OK ! Aqui está: [{"id": 7, "sabor": "calabresa", "preco": 54.9}]
+📱 Cliente
+Ótimo! Quero pedir: POST /pedidos com {"pizza_id": 7}
+🖥️ Servidor
+401 Unauthorized . Quem é você? Mande seu token no cabeçalho Authorization .
+📱 Cliente
+Desculpa! POST /pedidos + Authorization: Bearer eyJhbGci...
+🖥️ Servidor
+201 Created . Pedido nº 987 criado! Acompanhe em Location: /pedidos/987 🍕
+
+=== PAGINA 8 ===
+8
+API: O Guia Completo
+Anatomia de uma URL
+https://
+protocolo
+api.loja.com.br
+domínio (host)
+:443
+porta
+/v1
+versão
+/produtos
+recurso
+/123
+path param
+?cor=azul&tam=M
+query string
+#topo
+fragmento
+Figura 3.2 — Cada pedaço da URL tem uma função. O fragmento nunca é enviado ao servidor: ele é usado só pelo navegador.
+Path params (parâmetros de caminho) identificam qual recurso: /produtos/123 .
+Query params (parâmetros de consulta) filtram, ordenam ou paginam: ?cor=azul&ordenar=preco .
+A porta 443 é o padrão do HTTPS (e a 80, do HTTP), por isso quase nunca aparece.
+Anatomia de uma requisição HTTP
+Linha inicial
+POST /v1/pedidos HTTP/1.1
+Cabeçalhos
+Host: api.pizzaria.com.br
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+Content-Type: application/json
+Accept: application/json
+User-Agent: AppPizzaria/3.2 (Android 15)
+Linha em branco
+Corpo (body)
+{ "sabor": "calabresa", "tamanho": "G", "borda": "catupiry" }
+Anatomia de uma resposta HTTP
+Linha de status
+HTTP/1.1 201 Created
+Cabeçalhos
+Content-Type: application/json
+Location: /v1/pedidos/987
+X-Request-Id: 7f3a9c21
+Corpo
+{ "id": 987, "status": "recebido", "previsao_min": 40 }
+método + caminho +
+versão
+metadados (chave: valor)
+separa cabeçalhos do corpo
+os dados enviados
+versão + código + frase
+
+=== PAGINA 9 ===
+9
+API: O Guia Completo
+Cabeçalhos (headers) que você vai ver sempre
+Cabeçalho
+Para que serve
+Exemplo
+Content-Type
+Formato do corpo que está sendo enviado
+application/json
+Accept
+Formato que o cliente aceita receber
+application/json
+Authorization
+Credenciais de acesso
+Bearer eyJhbGci...
+Cache-Control
+Regras de cache
+max-age=3600
+ETag / If-None-Match
+"Impressão digital" da versão do recurso
+"a1b2c3"
+Location
+Onde está o recurso recém-criado
+/pedidos/987
+Retry-After
+Quanto esperar antes de tentar de novo
+30 (segundos)
+Accept-Language
+Idioma preferido
+pt-BR
+Idempotency-Key
+Evita processar a mesma operação duas
+vezes
+8e03978e-40d5...
+🤓 HTTP/1.1, HTTP/2 e HTTP/3
+O HTTP/1.1 (1997) é texto puro e envia uma requisição por vez em cada conexão. O HTTP/2 (2015) é
+binário e multiplexa várias requisições na mesma conexão. O HTTP/3 (2022) troca o TCP pelo QUIC
+(sobre UDP), reduzindo a latência em redes instáveis, como o 4G no ônibus. Para quem usa a API, a
+semântica (métodos, status, headers) é a mesma.
+⚠️ HTTP × HTTPS
+HTTP puro trafega tudo em texto aberto: qualquer um na mesma rede Wi-Fi pode ler senhas e tokens.
+HTTPS = HTTP + TLS (criptografia). Em APIs, HTTPS não é opcional: é obrigatório.
+
+=== PAGINA 10 ===
+10
+API: O Guia Completo
+P A R T E I · F U N D A M E N T O S
+4
+Métodos HTTP: os verbos da web
+Se a URL é o substantivo (o "quê"), o método HTTP é o verbo (a "ação"). GET /livros/7 lê o
+livro 7; DELETE /livros/7 apaga o livro 7. Mesma URL, ações diferentes.
+Método
+Para quê
+Exemplo
+Seguro?
+Idempotente?
+Corpo?
+GET
+Ler / buscar
+GET /livros/7
+✅
+✅
+Não
+POST
+Criar / executar ações
+POST /livros
+❌
+❌
+Sim
+PUT
+Substituir por completo
+PUT /livros/7
+❌
+✅
+Sim
+PATCH
+Alterar parcialmente
+PATCH /livros/7
+❌
+⚠️ depende
+Sim
+DELETE
+Remover
+DELETE /livros/7
+❌
+✅
+Raro
+HEAD
+Igual ao GET, mas só cabeçalhos
+HEAD /livros/7
+✅
+✅
+Não
+OPTIONS
+"O que posso fazer aqui?"
+OPTIONS /livros
+✅
+✅
+Não
+Seguro e idempotente: duas palavras que valem ouro
+🛡️ Seguro (safe)
+O método não altera nada no servidor. É "só
+olhar". GET, HEAD e OPTIONS são seguros. Por
+isso navegadores, crawlers e caches podem
+repeti-los à vontade.
+🔁 Idempotente
+Fazer a mesma chamada 1 vez ou 100 vezes
+deixa o servidor no mesmo estado final. DELETE
+/livros/7 repetido continua com o livro 7
+apagado. Já POST /pedidos repetido cria 100
+pedidos!
+🍽️ Analogia: o botão do elevador
+Apertar o botão do 5º andar uma vez ou dez vezes (com impaciência) tem o mesmo efeito: o elevador vai
+ao 5º andar. Isso é idempotência. Agora imagine a máquina de café: cada aperto sai um café novo (e
+uma cobrança nova). Isso é um POST. É por isso que, quando a rede falha, é seguro repetir um PUT, mas
+repetir um POST de pagamento pode cobrar o cliente duas vezes.
+PUT × PATCH, na prática
+Imagine o livro abaixo no servidor. Veja o que acontece com cada método ao "mudar o estoque para 10":
+
+=== PAGINA 11 ===
+11
+API: O Guia Completo
+CRUD: as quatro operações básicas
+Operação (CRUD)
+Método HTTP
+SQL equivalente
+Exemplo
+Create (criar)
+POST
+INSERT
+POST /clientes
+Read (ler)
+GET
+SELECT
+GET /clientes/42
+Update (atualizar)
+PUT / PATCH
+UPDATE
+PATCH /clientes/42
+Delete (apagar)
+DELETE
+DELETE
+DELETE /clientes/42
+⚠️ Nunca use GET para alterar dados
+Um GET /usuarios/42/apagar parece inofensivo até que um robô de busca, um pré-carregamento do
+navegador ou um link compartilhado no WhatsApp o acione. GET deve ser sempre seguro.
+ESTADO ORIGINAL
+{
+"titulo": "Dom Casmurro",
+"autor": "Machado de
+Assis",
+"ano": 1899,
+"estoque": 3
+}
+PATCH { ESTOQUE: 10 } ✅
+{
+"titulo": "Dom Casmurro",
+"autor": "Machado de
+Assis",
+"ano": 1899,
+"estoque": 10
+}
+PUT { TITULO, ESTOQUE } 😱
+{
+"titulo": "Dom Casmurro",
+"estoque": 10
+}
+// autor e ano sumiram!
+// PUT substitui TUDO.
+
+=== PAGINA 12 ===
+12
+API: O Guia Completo
+P A R T E I · F U N D A M E N T O S
+5
+Códigos de status: o "humor" do servidor
+Toda resposta HTTP vem com um código de três dígitos que resume o que aconteceu. O
+primeiro dígito já conta metade da história.
+Faixa
+Categoria
+Em uma frase
+1xx
+Informativo
+"Recebi, continue..." (raros no dia a dia)
+2xx
+Sucesso
+"Deu certo!" 🎉
+3xx
+Redirecionamento
+"Não é aqui, procure ali" ou "use o que você já tem"
+4xx
+Erro do cliente
+"O problema é com você" — pedido errado, sem permissão etc.
+5xx
+Erro do servidor
+"O problema é comigo" — falhei ao processar um pedido válido
+O cardápio de emoções
+😄
+200
+OK
+Tudo certo, aqui está.
+🎉
+201
+Created
+Criei o recurso novo!
+⏳
+202
+Accepted
+Recebi; vou processar
+depois.
+👍
+204
+No Content
+Feito. Nada a acrescentar.
+🏠
+301
+Moved Permanently
+Mudei de endereço para
+sempre.
+♻️
+304
+Not Modified
+Nada mudou: use seu
+cache.
+↪️
+307
+Temporary Redirect
+Por ora, vá ali (mesmo
+método).
+🧭
+308
+Permanent Redirect
+Como o 301, mas mantém
+o método.
+🤨
+400
+Bad Request
+Não entendi seu pedido
+(JSON quebrado?).
+🪪
+401
+Unauthorized
+Quem é você? Faltou
+autenticar.
+🚫
+403
+Forbidden
+Sei quem você é, mas não
+pode.
+🔍
+404
+Not Found
+Procurei e não achei.
+✋
+405
+Method Not Allowed
+Esse verbo não vale aqui.
+⚔️
+409
+Conflict
+Conflita com o estado
+atual.
+📝
+422
+Unprocessable
+Content
+Entendi, mas os dados são
+inválidos.
+🐢
+429
+Too Many Requests
+Calma! Você passou do
+limite.
+💥
+500
+Internal Server Error
+Eu quebrei. A culpa é
+minha.
+🔌
+502
+Bad Gateway
+O serviço lá atrás me
+respondeu errado.
+🛠️
+503
+Service Unavailable
+Sobrecarregado ou em
+manutenção.
+⌛
+504
+Gateway Timeout
+O serviço lá atrás demorou
+demais.
+
+=== PAGINA 13 ===
+13
+API: O Guia Completo
+401 ou 403? A dúvida mais comum
+🍽️ Analogia: a balada
+401 é o segurança na porta dizendo: "Cadê seu documento?" — você ainda não provou quem é. 403 é
+quando você mostra o documento, ele confere e diz: "Ok, você é o João... mas não está na lista VIP."
+Identificado, mas sem permissão.
+Escolhendo o código certo
+Criou algo com POST? Use 201 e devolva o cabeçalho Location .
+Apagou com DELETE e não há nada para devolver? 204.
+JSON mal formado? 400. JSON válido, mas com e-mail inválido? 422 (ou 400, se sua API preferir simplificar
+— o importante é ser consistente).
+Tentou criar um usuário com e-mail já cadastrado? 409.
+Processamento demorado (gerar um relatório)? 202 + um link para consultar o andamento.
+⚠️ O anti-padrão do "200 com erro"
+Responder 200 OK com o corpo {"sucesso": false, "erro": "Usuário não encontrado"} engana
+proxies, caches, monitoramento e as bibliotecas dos clientes, que acham que deu tudo certo. Use o
+código HTTP adequado.
+🤓 Curiosidade: 418 I'm a teapot ☕
+O código 418 ("Eu sou um bule de chá") nasceu como piada de 1º de abril em 1998, na RFC 2324 (o
+"protocolo de controle de cafeteiras"). Ele virou tão querido que, quando tentaram removê-lo de
+bibliotecas populares, a comunidade protestou. Hoje ele é reservado e não deve ser usado para outra
+coisa.
+
+=== PAGINA 14 ===
+14
+API: O Guia Completo
+P A R T E I · F U N D A M E N T O S
+6
+Formatos de dados: JSON, XML & cia.
+Cliente e servidor precisam concordar não só no "como pedir", mas no formato dos dados. O
+cabeçalho Content-Type diz qual formato está sendo usado.
+JSON — o rei das APIs modernas
+JSON (JavaScript Object Notation) é leve, legível por humanos e suportado por praticamente todas as
+linguagens. Tem apenas seis tipos de dados:
+Tipo
+Exemplo
+string
+"Ana Souza"
+number
+42 , 1520.75
+boolean
+true / false
+null
+null
+array
+["a", "b"]
+object
+{"chave": "valor"}
+💡 Convenções que evitam dor de cabeça
+Datas sempre em ISO 8601 com fuso: "2026-10-27T12:00:00Z" ou "2026-10-27T09:00:00-
+03:00" .
+Dinheiro: evite float (0.1 + 0.2 ≠ 0.3!). Use centavos inteiros ( 14990 ) ou string decimal
+( "149.90" ) + a moeda ( "BRL" ).
+Nomes de campos: escolha snake_case ou camelCase e seja consistente em toda a API.
+IDs grandes como string, porque JavaScript perde precisão acima de 253.
+Os mesmos dados em outros formatos
+APPLICATION/JSON
+{
+"id": 42,
+"nome": "Ana Souza",
+"ativo": true,
+"saldo": 1520.75,
+"apelido": null,
+"interesses": ["música", "café", "APIs"],
+"endereco": {
+"cidade": "Recife",
+"uf": "PE"
+}
+}
+XML (APPLICATION/XML)
+<cliente id="42">
+<nome>Ana Souza</nome>
+<ativo>true</ativo>
+<endereco>
+<cidade>Recife</cidade>
+<uf>PE</uf>
+</endereco>
+</cliente>
+YAML (MUITO USADO EM CONFIGS)
+cliente:
+id: 42
+nome: Ana Souza
+ativo: true
+endereco:
+cidade: Recife
+uf: PE
+
+=== PAGINA 15 ===
+15
+API: O Guia Completo
+Formato
+Content-Type
+Pontos fortes
+Onde aparece
+JSON
+application/json
+Leve, legível, universal
+REST, GraphQL, webhooks
+XML
+application/xml
+Esquemas rígidos (XSD),
+namespaces
+SOAP, NF-e, sistemas
+bancários legados
+YAML
+application/yaml
+Muito legível
+OpenAPI, Kubernetes,
+CI/CD
+Protocol
+Buffers
+application/protobuf
+Binário, compacto e
+rapidíssimo
+gRPC, comunicação interna
+Form URL-
+encoded
+application/x-www-form-urlencoded
+Simples
+Formulários HTML, OAuth
+/token
+Multipart
+multipart/form-data
+Envia arquivos + campos
+Upload de fotos e
+documentos
+CSV
+text/csv
+Abre no Excel
+Exportação de relatórios
+🤓 Serialização
+Transformar um objeto da memória (um dict em Python, um objeto em Java) em texto ou bytes para
+enviar pela rede se chama serialização. O caminho inverso é a desserialização. Quando você chama
+JSON.stringify() e JSON.parse() , está fazendo exatamente isso.
+
+=== PAGINA 16 ===
+16
+API: O Guia Completo
+P A R T E I I · E S T I L O S E A R Q U I T E T U R A S
+7
+Tipos de API
+APIs podem ser classificadas de duas formas principais: quem pode usá-las (público-alvo) e
+como elas funcionam (estilo arquitetural).
+Por público-alvo
+🏢
+Privadas (internas)
+Usadas apenas dentro da empresa. Ex.: o app do banco
+falando com o back-end do próprio banco, ou um
+microsserviço de estoque falando com o de pedidos.
+🤝
+De parceiros
+Expostas a parceiros selecionados, com contrato. Ex.:
+uma transportadora que oferece API de rastreio só para
+lojas clientes.
+🌍
+Públicas (abertas)
+Qualquer desenvolvedor pode se cadastrar e usar, muitas
+vezes com plano gratuito. Ex.: ViaCEP, OpenWeather,
+GitHub, PokéAPI.
+🧱
+Compostas
+Uma única chamada que orquestra várias APIs por trás.
+Ex.: POST /checkout que reserva estoque, cobra o
+cartão e agenda a entrega.
+Por estilo arquitetural
+🌐
+REST
+Recursos + verbos HTTP. O padrão
+mais popular da web.
+🧼
+SOAP
+Protocolo baseado em XML, com
+contratos rígidos (WSDL). Forte no
+mundo corporativo e
+governamental.
+◈
+GraphQL
+O cliente pergunta exatamente os
+campos que quer, em um único
+endpoint.
+⚡
+gRPC
+Chamadas de função remotas,
+binárias e ultrarrápidas sobre
+HTTP/2.
+🔌
+WebSocket
+Conexão aberta e bidirecional para
+tempo real (chat, jogos).
+🪝
+Webhook
+"Não me ligue, eu te ligo": o
+servidor avisa você quando algo
+acontece.
+Há ainda JSON-RPC e XML-RPC (chamadas de procedimento simples sobre HTTP), SSE (Server-Sent Events,
+para streaming do servidor para o cliente) e APIs orientadas a eventos/mensageria (Kafka, RabbitMQ, MQTT),
+documentadas com a especificação AsyncAPI.
+
+=== PAGINA 17 ===
+17
+API: O Guia Completo
+Síncrono × assíncrono
+📞 Síncrono
+Como uma ligação telefônica: você pergunta e
+fica esperando a resposta na linha. REST, gRPC
+unário e SOAP costumam funcionar assim.
+✉️ Assíncrono
+Como um e-mail: você envia e segue a vida; a
+resposta chega depois. Webhooks, filas de
+mensagens e o padrão 202 Accepted
+funcionam assim.
+
+=== PAGINA 18 ===
+18
+API: O Guia Completo
+P A R T E I I · E S T I L O S E A R Q U I T E T U R A S
+8
+REST a fundo
+REST (Representational State Transfer) não é um protocolo nem uma biblioteca: é um estilo
+arquitetural, um conjunto de restrições descrito por Roy Fielding em 2000. Uma API que segue
+essas restrições é chamada de RESTful.
+A ideia central: recursos e representações
+Em REST, tudo é um recurso (um cliente, um pedido, uma foto), identificado por uma URI. O que trafega pela
+rede não é o recurso em si, mas uma representação do seu estado — geralmente em JSON. Daí o nome:
+transferência de estado representacional.
+As 6 restrições do REST
+↔️
+1. Cliente-servidor
+Interface e armazenamento são
+separados. Cada lado evolui de
+forma independente.
+🧠
+2. Sem estado (stateless)
+Cada requisição carrega tudo o que
+é necessário (incluindo o token). O
+servidor não guarda "sessão" entre
+chamadas.
+⚡
+3. Cacheável
+As respostas dizem se podem ser
+guardadas em cache, e por quanto
+tempo.
+📐
+4. Interface uniforme
+URIs para recursos, verbos
+padronizados, mensagens
+autodescritivas e hipermídia.
+🧅
+5. Sistema em camadas
+O cliente não sabe se fala com o
+servidor final, um cache, um
+balanceador ou um gateway.
+📦
+6. Código sob demanda
+(opcional)
+O servidor pode enviar código
+executável ao cliente (como
+JavaScript).
+🍽️ Analogia: stateless é o atendente com amnésia
+Imagine um atendente de lanchonete que esquece você assim que entrega o pedido. Para pedir de novo,
+você precisa mostrar a comanda (o token) toda vez. Parece chato, mas tem uma vantagem enorme:
+qualquer atendente pode atender você. É isso que permite colocar 50 servidores idênticos atrás de um
+balanceador de carga.
+
+=== PAGINA 19 ===
+19
+API: O Guia Completo
+O Modelo de Maturidade de Richardson
+Nível 3 🏆
+Nível 2
+Nível 1
+Nível 0
+Controles hipermídia (HATEOAS)
+Respostas trazem links para os próximos pass
+Verbos HTTP + status codes
+GET lê, POST cria, DELETE apaga; 201, 404...
+Recursos
+URIs distintas: /clientes/42, /pedidos/7
+O "pântano do POX"
+Um único endpoint, tudo via POST
+Figura 8.1 — Quanto mais alto na pirâmide, mais "RESTful" é a API. A maioria das APIs do mercado está no nível 2.
+Exemplo de nível 0 versus nível 2
+Nível 3: HATEOAS
+HATEOAS (Hypermedia As The Engine Of Application State) significa que a resposta diz ao cliente o que ele
+pode fazer em seguida — como os links de uma página web. Assim, o cliente não precisa "adivinhar" URLs.
+Se o pedido já estivesse pago, o link pagar simplesmente não apareceria. A própria resposta guia o fluxo.
+NÍVEL 0 — TUDO EM UM ENDPOINT
+POST /api
+{ "acao": "buscarCliente", "id": 42 }
+POST /api
+{ "acao": "apagarCliente", "id": 42 }
+NÍVEL 2 — RECURSOS + VERBOS
+GET /clientes/42
+→ 200 OK
+DELETE /clientes/42
+→ 204 No Content
+GET /PEDIDOS/987
+{
+"id": 987,
+"status": "aguardando_pagamento",
+"total": 149.90,
+"_links": {
+"self":     { "href": "/pedidos/987" },
+"pagar":    { "href": "/pedidos/987/pagamento", "method": "POST" },
+"cancelar": { "href": "/pedidos/987", "method": "DELETE" },
+"itens":    { "href": "/pedidos/987/itens" }
+}
+}
+
+=== PAGINA 20 ===
+20
+API: O Guia Completo
+Desenhando rotas RESTful
+Ação
+Rota
+Resposta típica
+Listar clientes
+GET /clientes
+200 + lista
+Criar cliente
+POST /clientes
+201 + Location
+Ver um cliente
+GET /clientes/42
+200 ou 404
+Substituir cliente
+PUT /clientes/42
+200 ou 204
+Atualizar parte
+PATCH /clientes/42
+200
+Remover cliente
+DELETE /clientes/42
+204
+Pedidos de um cliente
+GET /clientes/42/pedidos
+200 + lista
+Ação que não é CRUD
+POST /pedidos/987/cancelamento
+201 ou 202
+💡 E quando a ação não é um CRUD?
+"Cancelar", "aprovar" e "reenviar" são verbos, não recursos. Uma saída elegante é transformá-los em
+substantivos: POST /pedidos/987/cancelamento cria um "cancelamento". Outra prática aceita (usada
+pelo Google) é o sufixo de ação: POST /pedidos/987:cancelar .
+
+=== PAGINA 21 ===
+21
+API: O Guia Completo
+P A R T E I I · E S T I L O S E A R Q U I T E T U R A S
+9
+Além do REST
+REST é ótimo, mas não é a resposta para tudo. Conheça os outros estilos, quando cada um
+brilha e como eles se parecem na prática.
+🧼 SOAP — o veterano engravatado
+SOAP (Simple Object Access Protocol) usa sempre XML, dentro de um "envelope" padronizado, e é descrito por
+um contrato WSDL. É verboso, mas tem padrões robustos de segurança (WS-Security) e transações. Ainda é
+comum em bancos, seguradoras e sistemas de governo.
+◈ GraphQL — "peça exatamente o que quer"
+Criado no Facebook, o GraphQL expõe um único endpoint (geralmente POST /graphql ) e um esquema
+tipado. O cliente escreve uma query dizendo exatamente quais campos quer, e recebe uma resposta com o
+mesmo formato. Ele resolve dois problemas clássicos do REST:
+Over-fetching: o REST devolve 40 campos quando a tela só precisa de 2.
+Under-fetching: para montar uma tela, o app precisa de 4 chamadas REST diferentes.
+Além de queries (leitura), o GraphQL tem mutations (escrita) e subscriptions (eventos em tempo real). Os
+pontos de atenção: o cache HTTP é mais difícil (tudo é POST no mesmo endpoint) e é preciso limitar a
+profundidade e o custo das queries para evitar abusos.
+REQUISIÇÃO SOAP
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+<soap:Header/>
+<soap:Body>
+<ConsultarSaldo xmlns="http://banco.exemplo.com/contas">
+<NumeroConta>12345-6</NumeroConta>
+</ConsultarSaldo>
+</soap:Body>
+</soap:Envelope>
+QUERY GRAPHQL (1 CHAMADA)
+query {
+usuario(id: 42) {
+nome
+pedidos(ultimos: 2) {
+id
+total
+}
+}
+}
+RESPOSTA: SÓ O QUE FOI PEDIDO
+{
+"data": {
+"usuario": {
+"nome": "Ana",
+"pedidos": [
+{ "id": 987, "total": 149.9 },
+{ "id": 950, "total": 59.0 }
+]
+}
+}
+}
+
+=== PAGINA 22 ===
+22
+API: O Guia Completo
+⚡ gRPC — velocidade máxima entre serviços
+Criado pelo Google, o gRPC permite chamar uma função em outro servidor como se ela fosse local. O contrato
+é escrito em um arquivo .proto (Protocol Buffers), e ferramentas geram automaticamente o código de
+cliente e servidor em várias linguagens. Os dados trafegam em binário sobre HTTP/2, o que o torna muito
+eficiente — ideal para comunicação entre microsserviços.
+Os números ( = 1 , = 2 ) não são valores: são identificadores de campo no formato binário. Nunca os reutilize ao evoluir o
+contrato.
+🔌 WebSocket — conversa em tempo real
+Começa como HTTP e faz um "upgrade" ( 101 Switching Protocols ) para uma conexão persistente e
+bidirecional: cliente e servidor podem mandar mensagens a qualquer momento. Perfeito para chats, jogos
+multiplayer, painéis de cotação e edição colaborativa.
+📡 SSE — Server-Sent Events
+Mais simples que WebSocket: uma conexão HTTP comum em que só o servidor envia eventos, um atrás do
+outro. É o que muitas APIs de IA usam para "digitar" a resposta aos poucos, palavra por palavra.
+FRETE.PROTO
+syntax = "proto3";
+service Frete {
+rpc Calcular (FreteRequest) returns (FreteResponse);
+rpc Rastrear (RastreioRequest) returns (stream Posicao); // streaming!
+}
+message FreteRequest {
+string cep_origem  = 1;
+string cep_destino = 2;
+double peso_kg     = 3;
+}
+message FreteResponse {
+double valor      = 1;
+int32  prazo_dias = 2;
+}
+const ws = new WebSocket("wss://chat.exemplo.com/salas/42");
+ws.onopen = () => ws.send(JSON.stringify({ tipo: "entrar", nome: "Ana" }));
+ws.onmessage = (evento) => console.log("Nova mensagem:", JSON.parse(evento.data));
+const fonte = new EventSource("/api/pedidos/987/status");
+fonte.onmessage = (e) => console.log("Status:", e.data); // "preparando", "saiu para entrega"...
+
+=== PAGINA 23 ===
+23
+API: O Guia Completo
+🪝 Webhooks — "não me ligue, eu te ligo"
+Polling — "Já chegou? Já chegou?"
+Sua loja
+Gateway Pgto
+Pagou?
+Ainda não.
+E agora, pagou?
+Não.
+E agora???
+Sim! Pago ✅
+Muitas chamadas inúteis e atraso 💸
+Webhook — "Eu te aviso!"
+Sua loja
+Gateway Pgto
+Avise em /webhooks
+Combinado!
+⏳ ... o tempo passa, ninguém pergunta nada ...
+POST /webhooks {pago} ✅
+200 OK, valeu!
+Uma chamada, no momento certo ⚡
+Figura 9.1 — Polling é a criança no banco de trás perguntando "já chegou?". Webhook é o motorista avisando quando chega.
+No webhook, sua aplicação vira o servidor: você expõe uma URL e o serviço externo faz um POST nela
+quando um evento acontece (pagamento aprovado, commit no GitHub, mensagem recebida).
+⚠️ Webhooks exigem cuidados
+Verifique a assinatura (geralmente um HMAC no cabeçalho): qualquer um pode fazer POST na sua
+URL fingindo ser o gateway.
+Responda rápido (2xx) e processe em segundo plano; senão o remetente acha que falhou e reenvia.
+Seja idempotente: o mesmo evento pode chegar mais de uma vez. Guarde o ID do evento e ignore
+repetidos.
+O QUE CHEGA NO SEU SERVIDOR
+POST /webhooks/pagamentos HTTP/1.1
+Host: minhaloja.com.br
+Content-Type: application/json
+X-Assinatura: sha256=5d41402abc4b2a76b9719d911017c592...
+{ "evento": "pagamento.aprovado", "pedido_id": 987, "valor": 149.90 }
+
+=== PAGINA 24 ===
+24
+API: O Guia Completo
+P A R T E I I · E S T I L O S E A R Q U I T E T U R A S
+10
+Comparativo: qual estilo escolher?
+Não existe "o melhor" estilo; existe o mais adequado ao problema. Muitas empresas usam vários
+ao mesmo tempo: REST para o público, gRPC entre microsserviços e webhooks para notificar
+parceiros.
+Estilo
+Formato
+Transporte
+Brilha em...
+Ponto fraco
+REST
+JSON
+(geralmente)
+HTTP/1.1, 2, 3
+APIs públicas, CRUD, web e
+mobile; cache HTTP nativo
+Over/under-fetching; sem
+contrato obrigatório
+SOAP
+XML
+HTTP, SMTP...
+Ambientes corporativos com
+contratos rígidos e WS-Security
+Verboso, pesado, curva de
+aprendizado
+GraphQL
+JSON
+HTTP (+
+WebSocket)
+Telas complexas, muitos
+clientes diferentes, dados
+aninhados
+Cache e controle de custo de
+queries mais difíceis
+gRPC
+Protobuf
+(binário)
+HTTP/2
+Microsserviços, baixa latência,
+streaming
+Pouco suporte direto em
+navegadores; não é legível
+WebSocket
+Livre
+TCP (upgrade
+HTTP)
+Chat, jogos, colaboração em
+tempo real
+Conexões persistentes são
+mais difíceis de escalar
+SSE
+Texto
+HTTP
+Notificações e streaming
+servidor → cliente
+Só uma direção
+Webhook
+JSON
+HTTP
+Avisar sistemas externos sobre
+eventos
+Seu servidor precisa estar
+acessível; entregas podem
+falhar
+Guia rápido de decisão
+🤔 "Vou expor dados para desenvolvedores
+externos."
+Comece com REST + OpenAPI. É o que todo mundo
+sabe usar.
+🤔 "Meu app tem telas com dados de 5
+fontes diferentes."
+Considere GraphQL ou um BFF (capítulo 19).
+🤔 "Tenho 30 microsserviços conversando o
+tempo todo."
+gRPC internamente, ou mensageria para fluxos
+assíncronos.
+🤔 "Preciso atualizar a tela
+instantaneamente."
+WebSocket (bidirecional) ou SSE (só servidor → cliente).
+
+=== PAGINA 25 ===
+25
+API: O Guia Completo
+🤔 "Quero avisar o parceiro quando o pedido
+mudar."
+Webhook, com assinatura e reenvio automático.
+🤔 "Vou integrar com o sistema de um banco
+de 2005."
+Prepare-se para SOAP. Respire fundo. ☕
+
+=== PAGINA 26 ===
+26
+API: O Guia Completo
+P A R T E I I I · S E G U R A N Ç A
+11
+Autenticação e autorização
+Duas perguntas que toda API precisa responder em cada requisição: "Quem é você?"
+(autenticação) e "O que você pode fazer?" (autorização).
+🍽️ Analogia: o hotel
+No check-in, você mostra o documento na recepção: isso é autenticação. Em troca, recebe um cartão-
+chave (o token). O cartão abre o seu quarto e a academia, mas não o quarto do vizinho nem a sala do
+gerente: isso é autorização. E no dia do check-out o cartão para de funcionar: o token expira.
+Os métodos mais comuns
+🔑 API Key (chave de API)
+Uma string secreta que identifica a aplicação (não necessariamente o usuário). Simples e muito usada em APIs
+públicas.
+👤 HTTP Basic
+Envia usuario:senha codificado em Base64. Atenção: Base64 não é criptografia, é só uma codificação
+reversível. Só use com HTTPS e, de preferência, apenas em casos simples ou internos.
+🎫 Bearer Token e JWT
+O cliente faz login uma vez, recebe um token e passa a enviá-lo em todas as chamadas: Authorization:
+Bearer <token> . "Bearer" significa "portador": quem tiver o token, tem o acesso — por isso ele deve ser
+protegido como uma senha. O formato mais popular de token é o JWT (JSON Web Token):
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MiIsIm5vbWUiOiJBbmEiLCJwYXBlbCI6ImFkb
+WluIiwiZXhwIjoxNzkzMTA0MDAwfQ.8M7_W9lPq0kyslPSgg1lNrCwg62DmoWfwCGLZdDC7As
+GET /v1/previsao?cidade=Fortaleza HTTP/1.1
+Host: api.clima.exemplo.com
+X-API-Key: ck_live_8f2a7c1e9b4d4e0f
+Authorization: Basic YW5hOnNlbmhhMTIz
+# decodificando: "ana:senha123"  (viu como é fácil?)
+
+=== PAGINA 27 ===
+27
+API: O Guia Completo
+Header
+Algoritmo e tipo do token.
+Payload
+As "claims": quem é, papel,
+validade.
+Assinatura
+HMAC-SHA256 de header +
+payload com uma chave secreta.
+Garante que ninguém alterou o
+token.
+⚠️ JWT é assinado, não criptografado
+Qualquer pessoa consegue decodificar o payload (cole o token acima em um decodificador e veja).
+Nunca coloque senhas ou dados sensíveis no JWT. A assinatura apenas impede que alguém troque
+"papel": "usuario" por "papel": "admin" sem ser descoberto. Ah, e o exp acima corresponde a
+27/10/2026, 12:26 UTC.
+{"alg": "HS256",
+"typ": "JWT"}
+{"sub": "42",
+"nome": "Ana",
+"papel": "admin",
+"exp": 1793104000}
+
+=== PAGINA 28 ===
+28
+API: O Guia Completo
+🔐 OAuth 2.0 — o "Entrar com Google"
+OAuth 2.0 é um protocolo de autorização delegada: ele permite que um app acesse seus dados em outro
+serviço sem nunca ver sua senha. Quando um app de edição de fotos pede "acesso às suas fotos do Google", é
+o OAuth em ação. O fluxo recomendado para apps é o Authorization Code com PKCE:
+👤 Usuário
+📱 App (cliente)
+🔐 Servidor de
+Autorização
+🗄️ API
+(recursos)
+1. "Entrar com Google"
+1. "Entrar com Google"
+2. Redireciona p/ /authorize
+2. Redireciona p/ /authorize
+3. Tela de login + consentimento
+3. Tela de login + consentimento
+4. Faz login e clica "Permitir"
+4. Faz login e clica "Permitir"
+5. Devolve ?code=abc123
+5. Devolve ?code=abc123
+6. POST /token (code + PKCE)
+6. POST /token (code + PKCE)
+7. access_token + refresh_token
+7. access_token + refresh_token
+8. GET /perfil + Bearer access_token
+8. GET /perfil + Bearer access_token
+9. 200 OK { dados do perfil }
+9. 200 OK { dados do perfil }
+✅ O app NUNCA vê a senha do usuário — só recebe um token com permissões limitadas (escopos).
+Figura 11.1 — Fluxo Authorization Code + PKCE do OAuth 2.0, simplificado.
+Peças do quebra-cabeça OAuth
+Termo
+Significado
+Escopos (scopes)
+As permissões pedidas: fotos.leitura , email , calendario.escrita .
+Access token
+Token de vida curta (minutos ou horas) usado nas chamadas à API.
+Refresh token
+Token de vida longa usado só para obter novos access tokens sem pedir login de novo.
+PKCE
+"Pixy": um desafio criptográfico que impede que alguém que intercepte o code o troque
+por um token.
+OpenID Connect
+Camada sobre o OAuth 2.0 que adiciona autenticação: devolve um id_token (JWT)
+dizendo quem é o usuário. É o que está por trás do "Entrar com...".
+Fluxos (grant types) e quando usar
+Authorization Code + PKCE → apps web, mobile e SPAs com usuário. ✅ Padrão recomendado.
+Client Credentials → máquina falando com máquina, sem usuário (um job noturno chamando uma API).
+
+=== PAGINA 29 ===
+29
+API: O Guia Completo
+Device Code → dispositivos sem teclado, como Smart TVs ("acesse exemplo.com/tv e digite o código
+ABCD").
+Implicit e Password → ❌ obsoletos e desaconselhados; foram removidos no OAuth 2.1.
+Comparativo dos métodos
+Método
+Identifica
+Complexidade
+Bom para
+API Key
+A aplicação
+⭐
+APIs públicas, controle de cota
+Basic
+Usuário
+⭐
+Ferramentas internas simples
+Bearer / JWT
+Usuário ou app
+⭐⭐
+APIs stateless em geral
+OAuth 2.0 + OIDC
+Usuário + app + escopos
+⭐⭐⭐
+Acesso delegado, login social, ecossistemas
+mTLS
+A máquina (certificado)
+⭐⭐⭐
+Bancos, Open Finance, comunicação B2B
+📘 Modelos de autorização
+RBAC (Role-Based Access Control): permissões por papel ("admin pode tudo, vendedor só vê seus
+pedidos"). ABAC (Attribute-Based): regras por atributos ("pode editar se for do mesmo departamento e
+em horário comercial"). Em qualquer caso, a regra de ouro é o privilégio mínimo: cada token deve poder
+fazer apenas o necessário.
+
+=== PAGINA 30 ===
+30
+API: O Guia Completo
+P A R T E I I I · S E G U R A N Ç A
+12
+Segurança de APIs e o OWASP Top 10
+APIs são a porta de entrada dos dados de uma empresa — e, por isso, um dos alvos favoritos de
+atacantes. A OWASP mantém uma lista dos 10 riscos mais críticos específicos de APIs.
+OWASP API Security Top 10 (2023)
+#
+Risco
+Em português claro
+1
+Broken Object Level Authorization (BOLA)
+Trocar /pedidos/1001 por /pedidos/1002 e ver o pedido
+de outra pessoa.
+2
+Broken Authentication
+Login fraco, tokens que não expiram, sem proteção contra
+força bruta.
+3
+Broken Object Property Level Authorization
+Expor campos demais ( senha_hash ) ou aceitar campos que
+não deveria ( "admin": true ).
+4
+Unrestricted Resource Consumption
+Sem limites: alguém pede 1 milhão de itens por página ou faz
+10 mil chamadas por segundo.
+5
+Broken Function Level Authorization
+Usuário comum consegue chamar
+DELETE /admin/usuarios/7 .
+6
+Unrestricted Access to Sensitive Business
+Flows
+Robôs comprando todos os ingressos do show em segundos.
+7
+Server Side Request Forgery (SSRF)
+A API busca uma URL informada pelo usuário e acaba
+acessando a rede interna.
+8
+Security Misconfiguration
+CORS liberado para todos, mensagens de erro com stack trace,
+TLS desatualizado.
+9
+Improper Inventory Management
+A /v1 antiga e esquecida, sem as correções da /v2 ,
+continua no ar.
+10
+Unsafe Consumption of APIs
+Confiar cegamente nos dados que vêm de APIs de terceiros.
+O risco nº 1 na prática: BOLA
+❌ VULNERÁVEL: QUALQUER USUÁRIO LOGADO VÊ QUALQUER PEDIDO
+app.get("/pedidos/:id", autenticar, async (req, res) => {
+const pedido = await Pedido.findById(req.params.id);
+res.json(pedido);
+});
+
+=== PAGINA 31 ===
+31
+API: O Guia Completo
+CORS: o porteiro do navegador
+Por padrão, o navegador impede que JavaScript de app.loja.com leia respostas de api.outrosite.com (é a
+Same-Origin Policy). O CORS (Cross-Origin Resource Sharing) é como a API diz ao navegador quais origens
+estão autorizadas. Para requisições "não simples", o navegador faz antes uma pergunta, o preflight:
+🌐 Navegador (app.loja.com)
+🖥️ API (api.loja.com)
+1. OPTIONS /pedidos — "Posso fazer um POST daqui?" (preflight)
+2. 204 · Access-Control-Allow-Origin: https://app.loja.com
+3. POST /pedidos — a requisição de verdade
+4. 201 Created ✅
+Figura 12.1 — O preflight do CORS. Quem bloqueia é o navegador, não o servidor.
+⚠️ CORS não protege sua API
+CORS só vale dentro de navegadores. Um script em Python ou o curl ignoram completamente o CORS.
+Ele protege os usuários contra sites maliciosos, não substitui autenticação. E evite Access-Control-
+Allow-Origin: * em APIs que usam cookies ou dados privados.
+Checklist de segurança essencial
+🔒 HTTPS em tudo, com TLS 1.2 ou superior.
+🧾 Valide toda entrada com esquemas (tipo,
+tamanho, formato).
+💉 Queries parametrizadas: nunca concatene
+SQL com dados do usuário.
+🙈 Nunca coloque tokens ou senhas na URL: elas
+vão parar em logs e no histórico.
+🎯 Devolva só os campos necessários (nada de
+senha_hash ).
+🚦 Rate limiting e limites de paginação.
+🗝️ Segredos em cofres (Vault, Key Vault, Secrets
+Manager), nunca no Git.
+🤐 Erros genéricos para o cliente; detalhes só nos
+logs internos.
+📋 Inventário de APIs: desligue versões e
+endpoints antigos.
+📜 Logs de auditoria de quem acessou o quê —
+sem registrar dados sensíveis.
+✅ SEGURO: O PEDIDO PRECISA PERTENCER A QUEM PEDIU
+app.get("/pedidos/:id", autenticar, async (req, res) => {
+const pedido = await Pedido.findOne({ id: req.params.id, donoId: req.usuario.id });
+if (!pedido) return res.status(404).end(); // 404 em vez de 403: não revela que existe
+res.json(pedido);
+});
+
+=== PAGINA 32 ===
+32
+API: O Guia Completo
+P A R T E I V · D E S I G N P R O F I S S I O N A L
+13
+Boas práticas de design
+Uma API é uma interface para humanos (os desenvolvedores) tanto quanto para máquinas.
+Uma API bem desenhada é previsível: quem aprendeu um endpoint consegue adivinhar como os
+outros funcionam.
+Nomenclatura de rotas: ❌ × ✅
+❌ Evite
+✅ Prefira
+GET /getUsuarios
+GET /usuarios
+POST /criarUsuario
+POST /usuarios
+POST /usuarios/42/deletar
+DELETE /usuarios/42
+GET /usuario/42/Pedido
+GET /usuarios/42/pedidos
+GET /usuarios_ativos
+GET /usuarios?status=ativo
+GET /clientes/1/pedidos/2/itens/3/notas/4
+GET /notas/4 (evite mais de 2 níveis)
+200 OK { "erro": true }
+404 Not Found + corpo de erro
+Substantivos no plural para coleções; o método HTTP já é o verbo.
+Letras minúsculas e kebab-case nas URLs: /notas-fiscais .
+Consistência acima de tudo: se um campo se chama criado_em em um lugar, não chame de
+dataCriacao em outro.
+Filtros, ordenação, campos e paginação
+Estratégia
+Como é
+Prós
+Contras
+Offset /
+limit
+?offset=40&limit=20
+Simples; permite "pular para a
+página 7"
+Lenta em tabelas enormes; itens
+"pulam" se houver inserções
+Página
+?pagina=3&tamanho=20
+Intuitiva para humanos
+Mesmos problemas do offset
+Cursor
+?cursor=eyJpZCI6MTIzfQ
+Rápida e estável; ideal para
+feeds e scroll infinito
+Não permite pular páginas
+GET /produtos?categoria=livros&preco_max=100&ordenar=-
+preco,nome&campos=id,nome,preco&limite=20&cursor=eyJpZCI6MTIzfQ
+
+=== PAGINA 33 ===
+33
+API: O Guia Completo
+⚠️ Sempre imponha um limite máximo
+Sem um teto (por exemplo, limite ≤ 100), alguém pede ?limite=10000000 e derruba seu banco de
+dados (risco nº 4 da OWASP).
+Erros que ajudam: o padrão Problem Details (RFC 9457)
+Uma boa mensagem de erro diz o que aconteceu, por quê e, se possível, como resolver. A RFC 9457 define
+um formato padrão para isso:
+Idempotência para operações críticas
+A rede falhou no meio de um pagamento. O cliente não sabe se a cobrança foi feita. Ele tenta de novo? Com
+uma chave de idempotência, sim, sem medo: o servidor guarda o resultado associado à chave e, se receber a
+mesma chave de novo, devolve o mesmo resultado em vez de cobrar duas vezes.
+Versionamento
+APIs mudam. A pergunta é: como mudar sem quebrar quem já usa?
+RESPOSTA PAGINADA COM CURSOR
+{
+"dados": [
+{ "id": 124, "nome": "O Cortiço", "preco": 39.9 },
+{ "id": 125, "nome": "Iracema", "preco": 29.9 }
+],
+"paginacao": { "proximo_cursor": "eyJpZCI6MTI1fQ", "tem_mais": true }
+}
+ERRO BEM FEITO
+HTTP/1.1 422 Unprocessable Content
+Content-Type: application/problem+json
+{
+"type": "https://api.loja.com.br/erros/estoque-insuficiente",
+"title": "Estoque insuficiente",
+"status": 422,
+"detail": "Você pediu 5 unidades do produto 123, mas só há 2 em estoque.",
+"instance": "/v1/pedidos/987",
+"estoque_disponivel": 2
+}
+POST /v1/pagamentos
+Idempotency-Key: 8e03978e-40d5-43e8-bc93-6894a57f9324
+Content-Type: application/json
+{ "pedido_id": 987, "valor_centavos": 14990, "moeda": "BRL" }
+
+=== PAGINA 34 ===
+34
+API: O Guia Completo
+Estratégia
+Exemplo
+Comentário
+Na URL
+/v2/clientes
+A mais popular: explícita e fácil de testar no navegador.
+Em cabeçalho
+Api-Version: 2026-10-01
+URLs limpas; usado pela Stripe, com versões por data.
+No media type
+Accept: application/vnd.loja.v2+json
+Mais "purista" REST, porém menos intuitivo.
+Query string
+/clientes?versao=2
+Simples, mas mistura versão com filtros.
+✅ Mudanças compatíveis (não quebram)
+Adicionar um endpoint novo
+Adicionar um campo opcional na resposta
+Adicionar um parâmetro opcional
+💔 Mudanças que quebram (exigem nova
+versão)
+Remover ou renomear campos
+Mudar o tipo de um campo (número →
+string)
+Tornar obrigatório algo que era opcional
+Ao aposentar uma versão, avise com antecedência e use os cabeçalhos Deprecation e Sunset (RFC 8594),
+que informam a data em que ela será desligada.
+
+=== PAGINA 35 ===
+35
+API: O Guia Completo
+P A R T E I V · D E S I G N P R O F I S S I O N A L
+14
+Performance: cache, rate limiting e
+resiliência
+A requisição mais rápida é aquela que nem precisa chegar ao servidor. A segunda mais rápida é
+a que chega a um servidor que não está sobrecarregado.
+Cache HTTP
+📱 Cliente
+tem cache local
+→
+🌎 CDN
+cache perto do
+usuário
+→
+🚪 Gateway
+cache
+compartilhado
+→
+🖥️ Servidor
+cache em
+memória (Redis)
+→
+🗄️ Banco
+a fonte da
+verdade
+Cada camada pode responder sem incomodar a seguinte. Quem controla isso são os cabeçalhos:
+Cache-Control: public, max-age=3600 → qualquer cache pode guardar por 1 hora.
+Cache-Control: private, max-age=60 → só o navegador do usuário pode guardar (dados pessoais).
+Cache-Control: no-store → não guarde de jeito nenhum (dados bancários, por exemplo).
+Validação com ETag: "mudou alguma coisa?"
+Rate limiting: o balde de fichas
++10 fichas por segundo
+capacidade: 100 fichas
+GET
+POST
+GET
+Requisições chegando
+Tem ficha? Passa! ✅
+consome 1 ficha
+Balde vazio? 429 ❌
++ Retry-After: 5
+Figura 14.1 — O algoritmo token bucket: permite rajadas curtas (até 100) mas limita a média (10/s).
+Rate limiting protege a API contra abusos, robôs e clientes com bugs que entram em loop. Outros algoritmos
+comuns são janela fixa, janela deslizante e leaky bucket. Informe os limites ao cliente com cabeçalhos como
+1ª CHAMADA
+GET /produtos/123
+→ 200 OK
+ETag: "v7-a1b2c3"
+{ ...produto completo... }
+CHAMADAS SEGUINTES
+GET /produtos/123
+If-None-Match: "v7-a1b2c3"
+→ 304 Not Modified
+(corpo vazio: use o que você tem!)
+
+=== PAGINA 36 ===
+36
+API: O Guia Completo
+RateLimit-Limit , RateLimit-Remaining e Retry-After .
+Resiliência: falhar com elegância
+⏱️ Timeouts
+Toda chamada externa deve ter tempo máximo. Sem
+timeout, uma API lenta trava a sua junto.
+🔁 Retentativas com backoff
+Tente de novo esperando cada vez mais (1s, 2s, 4s...) e
+com um pouco de aleatoriedade (jitter), só em operações
+idempotentes.
+🔌 Circuit breaker
+Como o disjuntor de casa: se um serviço falha muito,
+"desarma" e para de chamá-lo por um tempo, evitando
+efeito cascata.
+📨 Processamento assíncrono
+Tarefas pesadas vão para uma fila; a API responde 202
+Accepted na hora.
+💡 Outras otimizações rápidas
+Compressão ( Content-Encoding: gzip ou br ), HTTP/2 ou 3, reaproveitamento de conexões,
+paginação, seleção de campos e índices no banco de dados. Meça antes de otimizar: a lentidão quase
+sempre está em uma consulta ao banco.
+RETENTATIVA COM BACKOFF EXPONENCIAL + JITTER
+async function comRetentativas(fn, tentativas = 5) {
+for (let i = 0; i < tentativas; i++) {
+try {
+return await fn();
+} catch (erro) {
+if (i === tentativas - 1) throw erro;
+const espera = Math.min(1000 * 2 ** i, 30000) + Math.random() * 250;
+await new Promise((r) => setTimeout(r, espera));
+}
+}
+}
+
+=== PAGINA 37 ===
+37
+API: O Guia Completo
+P A R T E I V · D E S I G N P R O F I S S I O N A L
+15
+Documentação com OpenAPI
+Uma API sem documentação é como um restaurante sem cardápio: você até pode tentar
+adivinhar os pratos, mas vai passar fome. A OpenAPI Specification (antiga Swagger) é o padrão
+para descrever APIs REST.
+Um arquivo OpenAPI (em YAML ou JSON) descreve endpoints, parâmetros, corpos, respostas, erros e
+autenticação. A partir dele, ferramentas geram automaticamente:
+📖
+Documentação
+interativa (Swagger UI,
+Redoc)
+🧰
+SDKs
+clientes em várias
+linguagens
+🎭
+Mocks
+servidores falsos para
+testes
+✅
+Validação
+e testes de contrato
+OPENAPI.YAML
+openapi: 3.1.0
+info:
+title: API de Tarefas
+version: 1.0.0
+paths:
+/tarefas/{id}:
+get:
+summary: Busca uma tarefa pelo ID
+parameters:
+- name: id
+in: path
+required: true
+schema:
+type: integer
+responses:
+"200":
+description: Tarefa encontrada
+content:
+application/json:
+schema:
+$ref: "#/components/schemas/Tarefa"
+"404":
+description: Tarefa não encontrada
+components:
+schemas:
+Tarefa:
+type: object
+required: [id, titulo]
+properties:
+id: { type: integer, example: 1 }
+titulo: { type: string, example: "Estudar APIs" }
+feita: { type: boolean, default: false }
+
+=== PAGINA 38 ===
+38
+API: O Guia Completo
+Design-first × Code-first
+📐 Design-first
+Escreve-se o contrato OpenAPI antes do código.
+Front-end e back-end trabalham em paralelo (o
+front usa um mock). Ideal para APIs públicas e
+times grandes.
+💻 Code-first
+Escreve-se o código e o framework gera o
+OpenAPI (como o FastAPI faz sozinho). Mais
+rápido para começar; exige disciplina para
+manter o contrato bom.
+O que uma boa documentação tem
+☐ Um "Primeiros passos" que leva o dev do zero à primeira chamada em menos de 5 minutos.
+☐ Como obter credenciais e como autenticar.
+☐ Exemplos reais de requisição e resposta para cada endpoint, em várias linguagens.
+☐ Todos os códigos de erro possíveis e o que fazer em cada um.
+☐ Limites de uso (rate limits), política de versionamento e um changelog.
+☐ Um ambiente de testes (sandbox) com dados falsos.
+🤓 DX: Developer Experience
+Assim como produtos têm UX, APIs têm DX. Empresas como Stripe e Twilio ficaram famosas em grande
+parte por sua documentação excelente. Uma métrica popular é o TTFC (Time To First Call): quanto tempo
+um desenvolvedor novo leva para fazer a primeira chamada com sucesso.
+
+=== PAGINA 39 ===
+39
+API: O Guia Completo
+P A R T E V · M Ã O N A M A S S A
+16
+Consumindo APIs
+Chega de teoria! Vamos usar uma API pública brasileira de verdade: o ViaCEP, que devolve o
+endereço a partir de um CEP. Não precisa de cadastro nem de chave.
+1. No terminal, com curl
+💡 Dica: veja os bastidores
+Use curl -i para ver também os cabeçalhos da resposta, ou curl -v para ver a conversa HTTP inteira,
+incluindo a requisição.
+2. Em JavaScript, com fetch
+curl https://viacep.com.br/ws/01001000/json/
+RESPOSTA (RESUMIDA)
+{
+"cep": "01001-000",
+"logradouro": "Praça da Sé",
+"complemento": "lado ímpar",
+"bairro": "Sé",
+"localidade": "São Paulo",
+"uf": "SP",
+"ibge": "3550308",
+"ddd": "11"
+}
+async function buscarCep(cep) {
+const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+if (!resposta.ok) {
+throw new Error(`Erro HTTP: ${resposta.status}`);
+}
+const dados = await resposta.json();
+if (dados.erro) throw new Error("CEP não encontrado");
+return dados;
+}
+buscarCep("01001000")
+.then((e) => console.log(`${e.logradouro}, ${e.localidade}-${e.uf}`))
+.catch(console.error);
+// → Praça da Sé, São Paulo-SP
+
+=== PAGINA 40 ===
+40
+API: O Guia Completo
+3. Em Python, com requests
+4. Enviando dados com POST
+O JSONPlaceholder é uma API falsa, ótima para treinar: ela aceita POST e devolve como se tivesse criado o
+recurso.
+Ferramentas do dia a dia
+Ferramenta
+Para quê
+curl / HTTPie
+Linha de comando. O curl está em todo lugar (inclusive no Windows); o HTTPie tem
+saída colorida e sintaxe amigável.
+Postman / Insomnia
+Interfaces gráficas para montar requisições, salvar coleções, usar variáveis de ambiente e
+automatizar testes.
+Bruno / Hoppscotch
+Alternativas open source; o Bruno salva as coleções como arquivos, versionáveis no Git.
+REST Client (extensão)
+Arquivos .http direto no editor: escreva a requisição e clique em "Send Request".
+DevTools do navegador
+Aba "Network" (Rede): veja todas as chamadas de API que um site faz. Ótimo para
+aprender!
+import requests
+def buscar_cep(cep: str) -> dict:
+url = f"https://viacep.com.br/ws/{cep}/json/"
+resposta = requests.get(url, timeout=5)  # sempre use timeout!
+resposta.raise_for_status()               # lança exceção se 4xx/5xx
+dados = resposta.json()
+if dados.get("erro"):
+raise ValueError("CEP não encontrado")
+return dados
+endereco = buscar_cep("01001000")
+print(endereco["logradouro"], "-", endereco["localidade"])
+curl -X POST https://jsonplaceholder.typicode.com/posts \
+-H "Content-Type: application/json" \
+-d '{"title": "Olá, API!", "body": "Meu primeiro POST", "userId": 1}'
+RESPOSTA: 201 CREATED
+{ "title": "Olá, API!", "body": "Meu primeiro POST", "userId": 1, "id": 101 }
+
+=== PAGINA 41 ===
+41
+API: O Guia Completo
+APIs públicas para praticar
+📮 ViaCEP
+Endereços por CEP.
+viacep.com.br
+🇧🇷 BrasilAPI
+CEP, CNPJ, bancos, feriados, DDD.
+brasilapi.com.br
+📊 IBGE
+Estados, municípios, nomes.
+servicodados.ibge.gov.br
+⚡ PokéAPI
+Todos os Pokémon.
+pokeapi.co
+🧪 JSONPlaceholder
+API falsa para testes.
+jsonplaceholder.typicode.com
+🐙 GitHub
+Repositórios, usuários.
+api.github.com
+⚠️ Etiqueta ao consumir APIs
+Respeite os limites de uso, faça cache do que não muda, trate erros e nunca exponha chaves de API no
+código do front-end ou em repositórios públicos — robôs varrem o GitHub atrás delas em minutos.
+
+=== PAGINA 42 ===
+42
+API: O Guia Completo
+P A R T E V · M Ã O N A M A S S A
+17
+Criando sua primeira API
+Vamos criar a mesma API de tarefas (um CRUD completo) em duas das stacks mais populares:
+Node.js com Express e Python com FastAPI.
+
+=== PAGINA 43 ===
+43
+API: O Guia Completo
+Versão Node.js + Express
+APP.JS — NPM INIT -Y && NPM INSTALL EXPRESS
+const express = require("express");
+const app = express();
+app.use(express.json()); // entende corpos JSON
+let tarefas = [{ id: 1, titulo: "Estudar APIs", feita: false }];
+let proximoId = 2;
+const buscar = (id) => tarefas.find((t) => t.id === Number(id));
+// Listar todas (com filtro opcional ?feita=true)
+app.get("/tarefas", (req, res) => {
+const { feita } = req.query;
+res.json(feita ? tarefas.filter((t) => String(t.feita) === feita) : tarefas);
+});
+// Buscar uma
+app.get("/tarefas/:id", (req, res) => {
+const tarefa = buscar(req.params.id);
+if (!tarefa) return res.status(404).json({ erro: "Tarefa não encontrada" });
+res.json(tarefa);
+});
+// Criar
+app.post("/tarefas", (req, res) => {
+const { titulo } = req.body;
+if (!titulo) return res.status(422).json({ erro: "O campo 'titulo' é obrigatório" });
+const nova = { id: proximoId++, titulo, feita: false };
+tarefas.push(nova);
+res.status(201).location(`/tarefas/${nova.id}`).json(nova);
+});
+// Atualizar parcialmente (só os campos permitidos!)
+app.patch("/tarefas/:id", (req, res) => {
+const tarefa = buscar(req.params.id);
+if (!tarefa) return res.status(404).json({ erro: "Tarefa não encontrada" });
+const { titulo, feita } = req.body;
+if (titulo !== undefined) tarefa.titulo = titulo;
+if (feita !== undefined) tarefa.feita = Boolean(feita);
+res.json(tarefa);
+});
+// Remover
+app.delete("/tarefas/:id", (req, res) => {
+if (!buscar(req.params.id)) return res.status(404).json({ erro: "Tarefa não encontrada" });
+tarefas = tarefas.filter((t) => t.id !== Number(req.params.id));
+res.status(204).end();
+});
+module.exports = app;
+if (require.main === module) {
+app.listen(3000, () => console.log("API rodando em http://localhost:3000"));
+}
+
+=== PAGINA 44 ===
+44
+API: O Guia Completo
+Rode com node app.js e teste com curl http://localhost:3000/tarefas . Repare que o PATCH copia
+apenas titulo e feita : se copiássemos o req.body inteiro, alguém poderia alterar o id (risco nº 3 da
+OWASP, "mass assignment").
+Versão Python + FastAPI
+MAIN.PY — PIP INSTALL FASTAPI UVICORN
+from fastapi import FastAPI, HTTPException, Response
+from pydantic import BaseModel, Field
+app = FastAPI(title="API de Tarefas", version="1.0.0")
+class TarefaIn(BaseModel):
+titulo: str = Field(min_length=1, max_length=200)
+feita: bool = False
+class Tarefa(TarefaIn):
+id: int
+tarefas: dict[int, Tarefa] = {}
+proximo_id = 1
+@app.get("/tarefas")
+def listar() -> list[Tarefa]:
+return list(tarefas.values())
+@app.post("/tarefas", status_code=201)
+def criar(dados: TarefaIn) -> Tarefa:
+global proximo_id
+nova = Tarefa(id=proximo_id, **dados.model_dump())
+tarefas[nova.id] = nova
+proximo_id += 1
+return nova
+@app.get("/tarefas/{id}")
+def buscar(id: int) -> Tarefa:
+if id not in tarefas:
+raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+return tarefas[id]
+@app.delete("/tarefas/{id}", status_code=204)
+def remover(id: int):
+if tarefas.pop(id, None) is None:
+raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+return Response(status_code=204)
+# Rode com: uvicorn main:app --reload
+# Documentação automática (Swagger UI) em: http://localhost:8000/docs
+
+=== PAGINA 45 ===
+45
+API: O Guia Completo
+💡 A mágica do FastAPI
+Com as anotações de tipo, o FastAPI valida a entrada sozinho (um titulo vazio já devolve 422 com
+uma mensagem explicativa) e gera o OpenAPI automaticamente. Acesse /docs e você terá uma
+documentação interativa sem escrever uma linha extra.
+Próximos passos para uma API "de verdade"
+🗄️ Banco
+PostgreSQL,
+MySQL,
+MongoDB
+→
+🔐 Auth
+JWT / OAuth
+→
+✅ Testes
+automatizados
+→
+🐳 Container
+Docker
+→
+☁️ Deploy
+nuvem + HTTPS
+Outros frameworks populares: Spring Boot (Java), ASP.NET Core (C#), NestJS e Fastify (Node.js), Django
+REST Framework e Flask (Python), Laravel (PHP), Gin e Echo (Go), Ruby on Rails (Ruby).
+
+=== PAGINA 46 ===
+46
+API: O Guia Completo
+P A R T E V · M Ã O N A M A S S A
+18
+Testando APIs
+Uma API é um contrato, e contratos precisam ser verificados. Testes automatizados garantem
+que uma mudança de hoje não quebre o app de alguém amanhã.
+E2E
+Integração / Contrato
+Unitários
+Ponta a ponta (E2E)
+Fluxo completo, como o usuário. Poucos.
+Integração e contrato
+API + banco real; o contrato é respeitado?
+Unitários
+Regras de negócio isoladas. Muitos e rápidos.
+↑ mais lentos e caros
+↓ mais rápidos e baratos
+Figura 18.1 — A pirâmide de testes: muitos testes rápidos na base, poucos testes lentos no topo.
+Tipos de teste de API
+Tipo
+Pergunta que responde
+Ferramentas
+Funcional
+O endpoint faz o que deveria? Devolve o status e o corpo
+certos?
+Jest + Supertest, pytest +
+httpx, Postman/Newman
+Contrato
+A resposta continua no formato que os consumidores
+esperam?
+Pact, Schemathesis, Dredd
+Carga / performance
+Aguenta 5 mil usuários simultâneos? Qual a latência no
+pico?
+k6, JMeter, Gatling, Locust
+Segurança
+Dá para burlar a autenticação? Há injeção?
+OWASP ZAP, Burp Suite
+Fuzzing
+O que acontece com entradas bizarras e aleatórias?
+Schemathesis, RESTler
+
+=== PAGINA 47 ===
+47
+API: O Guia Completo
+Exemplo: testando a API de tarefas
+Exemplo: teste de carga com k6
+💡 Mocks: testar sem depender dos outros
+Quando sua API depende de um serviço externo (gateway de pagamento, por exemplo), use mocks ou
+servidores falsos (WireMock, Prism, Mockoon) para simular respostas, inclusive as de erro e de lentidão,
+que são as mais difíceis de reproduzir.
+APP.TEST.JS — NPM INSTALL -D JEST SUPERTEST
+const request = require("supertest");
+const app = require("./app");
+test("POST /tarefas cria uma tarefa e devolve 201", async () => {
+const res = await request(app).post("/tarefas").send({ titulo: "Testar API" });
+expect(res.status).toBe(201);
+expect(res.headers.location).toMatch(/\/tarefas\/\d+/);
+expect(res.body).toMatchObject({ titulo: "Testar API", feita: false });
+});
+test("POST /tarefas sem título devolve 422", async () => {
+const res = await request(app).post("/tarefas").send({});
+expect(res.status).toBe(422);
+});
+test("GET /tarefas/999 devolve 404", async () => {
+const res = await request(app).get("/tarefas/999");
+expect(res.status).toBe(404);
+});
+CARGA.JS — K6 RUN CARGA.JS
+import http from "k6/http";
+import { check, sleep } from "k6";
+export const options = {
+vus: 50,              // 50 usuários virtuais
+duration: "30s",
+thresholds: { http_req_duration: ["p(95)<300"] }, // 95% abaixo de 300 ms
+};
+export default function () {
+const res = http.get("http://localhost:3000/tarefas");
+check(res, { "status é 200": (r) => r.status === 200 });
+sleep(1);
+}
+
+=== PAGINA 48 ===
+48
+API: O Guia Completo
+P A R T E V I · A P I S N O M U N D O R E A L
+19
+Arquitetura: gateways, microsserviços e
+BFF
+Em sistemas grandes, não existe "a" API, mas dezenas ou centenas delas. Organizar essa
+conversa é um desafio de arquitetura.
+Monólito × microsserviços
+🏛️ Monólito
+Uma única aplicação com todas as
+funcionalidades. Simples de desenvolver e
+implantar no começo; difícil de escalar times e
+partes específicas conforme cresce.
+🧩 Microsserviços
+Vários serviços pequenos, cada um com seu
+banco e sua API, implantados de forma
+independente. Escala bem, mas adiciona
+complexidade de rede, monitoramento e
+consistência.
+API Gateway: a portaria do condomínio
+CLIENTES
+MICROSSERVIÇOS
+📱 App mobile
+💻 Site (SPA)
+🤝 Parceiros
+API GATEWAY
+🔐 Autenticação
+🚦 Rate limiting
+🧭 Roteamento
+⚡ Cache
+📊 Logs e métricas
+🔄 Transformação
+👤 Usuários
+📦 Pedidos
+💳 Pagamentos
+Figura 19.1 — O API Gateway é o ponto único de entrada. Cada microsserviço tem seu próprio banco de dados.
+Como a portaria de um condomínio, o gateway identifica quem chega, barra quem não deve entrar, controla o
+fluxo e indica o caminho certo — e os moradores (os serviços) não precisam fazer nada disso. Exemplos: Kong,
+AWS API Gateway, Azure API Management, Google Apigee, Tyk, NGINX e Traefik.
+BFF — Backend For Frontend
+O app de celular precisa de pouco dado e economiza bateria; o painel web mostra tudo de uma vez. Em vez de
+uma API genérica que agrada ninguém, cria-se um back-end específico para cada front-end, que agrega e
+adapta as chamadas aos microsserviços.
+
+=== PAGINA 49 ===
+49
+API: O Guia Completo
+📱 App
+→
+BFF Mobile
+respostas
+enxutas
+→
+Microsserviços
+usuários · pedidos ·
+pagamentos
+←
+BFF Web
+respostas ricas
+←
+💻 Web
+Outros conceitos que você vai ouvir
+Service mesh (Istio, Linkerd): uma camada de infraestrutura que cuida de TLS, retentativas e
+observabilidade entre serviços.
+Arquitetura orientada a eventos: serviços publicam eventos ("pedido criado") em um broker (Kafka,
+RabbitMQ) e outros reagem, sem chamadas diretas.
+Saga: como manter consistência em uma transação que envolve vários serviços (com ações de
+compensação se algo falhar).
+API-first: projetar a API como um produto antes de escrever a implementação.
+
+=== PAGINA 50 ===
+50
+API: O Guia Completo
+P A R T E V I · A P I S N O M U N D O R E A L
+20 Observabilidade e ciclo de vida
+Colocar a API no ar é só o começo. Você precisa saber, a qualquer momento, se ela está
+saudável — e, quando não estiver, descobrir o porquê rapidamente.
+Os três pilares da observabilidade
+📜
+Logs
+O "diário" de eventos. Use logs
+estruturados (JSON) com um
+request_id para correlacionar.
+📈
+Métricas
+Números ao longo do tempo:
+requisições por segundo, latência,
+taxa de erro, uso de CPU.
+🧵
+Traces
+O caminho completo de uma
+requisição por vários serviços, com
+o tempo gasto em cada um.
+Um painel de saúde (dashboard)
+Requisições/min
+12.430
+Latência p95
+120 ms
+Taxa de erro 5xx
+0,4%
+Disponibilidade (30d)
+99,95%
+Figura 20.1 — As métricas "RED": Rate (taxa de requisições), Errors (erros) e Duration (duração).
+📘 SLI, SLO e SLA
+SLI (indicador): o que você mede. Ex.: "% de requisições respondidas em menos de 300 ms".
+SLO (objetivo): a meta interna. Ex.: "99,9% das requisições abaixo de 300 ms".
+SLA (acordo): a promessa contratual ao cliente, com multa se descumprida. Ex.: "disponibilidade de
+99,5% ao mês".
+Por que p95 e não a média? Porque a média esconde os usuários que sofrem. Se 5% das chamadas levam
+4 segundos, a média pode parecer ótima.
+Ferramentas comuns: OpenTelemetry (padrão aberto para coletar tudo), Prometheus + Grafana, Jaeger,
+Datadog, New Relic, Elastic. Exponha também um endpoint de saúde, como 
+GET /health , para
+balanceadores e orquestradores saberem se a instância está viva.
+UM LOG ESTRUTURADO
+{ "ts": "2026-10-27T12:00:03.214Z", "nivel": "info", "request_id": "7f3a9c21",
+"metodo": "POST", "rota": "/v1/pedidos", "status": 201, "duracao_ms": 87, "usuario_id": "42" }
+
+=== PAGINA 51 ===
+51
+API: O Guia Completo
+O ciclo de vida de uma API
+1. Planejar
+quem usa? para quê?
+→
+2. Desenhar
+contrato OpenAPI
+→
+3. Mockar
+validar com
+consumidores
+→
+4. Implementar
+e testar
+5. Publicar
+docs + portal
+→
+6. Monitorar
+métricas e feedback
+→
+7. Evoluir
+novas versões
+→
+8. Aposentar
+Deprecation + Sunset
+
+=== PAGINA 52 ===
+52
+API: O Guia Completo
+P A R T E V I · A P I S N O M U N D O R E A L
+21
+APIs no Brasil, no mundo e na era da IA
+APIs deixaram de ser um detalhe técnico para se tornarem infraestrutura de países inteiros e a
+forma como a inteligência artificial interage com o mundo.
+🇧🇷 O Brasil é referência em APIs
+⚡
+Pix
+O sistema de pagamentos instantâneos do Banco Central
+funciona sobre APIs padronizadas que todos os bancos e
+instituições de pagamento implementam. A cobrança via
+QR Code dinâmico, por exemplo, é criada por meio da
+API Pix.
+🏦
+Open Finance Brasil
+Com o seu consentimento, um banco pode ler seus
+dados de outro banco (contas, cartões, investimentos) e
+até iniciar pagamentos. Tudo via APIs com especificações
+públicas e segurança de alto nível (perfil FAPI, mTLS e
+OAuth 2.0).
+🧾
+Nota fiscal eletrônica
+A NF-e é transmitida às Secretarias da Fazenda por web
+services SOAP com XML assinado digitalmente — um
+exemplo vivo de SOAP no dia a dia.
+🏛️
+Dados abertos do governo
+IBGE, Banco Central (séries históricas, cotações PTAX),
+Portal da Transparência e dados.gov.br oferecem APIs
+para qualquer pessoa usar.
+🌍 A economia das APIs
+Algumas das empresas de tecnologia mais valiosas do mundo têm uma API como produto principal: Stripe
+(pagamentos), Twilio (SMS, voz, WhatsApp), Google Maps Platform, AWS (praticamente tudo é uma
+chamada de API), Plaid (dados financeiros). Os modelos de cobrança mais comuns são por chamada, por
+volume mensal, freemium e por receita compartilhada.
+🤖 APIs na era da inteligência artificial
+Os grandes modelos de linguagem (LLMs) são, eles mesmos, consumidos via API: você envia um texto em uma
+requisição HTTP e recebe a resposta gerada, muitas vezes em streaming via SSE. Mas a grande mudança é o
+caminho inverso: a IA chamando as suas APIs.
+1. Tool use / function calling: você descreve suas funções (nome, parâmetros em JSON Schema) e o modelo
+decide quando chamá-las. Ex.: o usuário pergunta "qual o endereço do CEP 01001-000?" e o modelo pede
+para executar buscar_cep("01001000") .
+2. MCP (Model Context Protocol): um protocolo aberto que padroniza como aplicações de IA se conectam
+a ferramentas e fontes de dados. Em vez de cada integração ser feita sob medida, um "servidor MCP"
+expõe ferramentas que qualquer cliente compatível consegue descobrir e usar — algo como uma "tomada
+universal" para IAs.
+
+=== PAGINA 53 ===
+53
+API: O Guia Completo
+3. Agentes: sistemas que encadeiam várias chamadas de API sozinhos para cumprir um objetivo ("reserve um
+voo e adicione ao meu calendário").
+💡 Desenhando APIs para humanos E para IAs
+Tudo o que torna uma API boa para pessoas a torna boa para agentes de IA: nomes claros, descrições
+precisas no OpenAPI, erros explicativos (o agente lê a mensagem e corrige a chamada), operações
+idempotentes (agentes repetem chamadas) e permissões mínimas (não dê a um agente um token que
+pode apagar tudo).
+ILUSTRATIVO: COMO UMA FERRAMENTA É DESCRITA PARA UM MODELO DE IA
+{
+"nome": "buscar_cep",
+"descricao": "Retorna o endereço completo de um CEP brasileiro.",
+"parametros": {
+"type": "object",
+"properties": { "cep": { "type": "string", "pattern": "^[0-9]{8}$" } },
+"required": ["cep"]
+}
+}
+
+=== PAGINA 54 ===
+54
+API: O Guia Completo
+A P Ê N D I C E S
+A
+Checklist da API perfeita
+Use esta lista antes de publicar (ou revisar) uma API.
+📐 Design
+☐ Recursos com substantivos no plural
+☐ Métodos HTTP usados corretamente
+☐ Códigos de status adequados (nada de "200 com
+erro")
+☐ Nomes de campos consistentes
+☐ Datas em ISO 8601 com fuso horário
+☐ Paginação com limite máximo
+☐ Filtros e ordenação padronizados
+☐ Erros no formato Problem Details
+☐ Estratégia de versionamento definida
+📖 Documentação
+☐ Contrato OpenAPI atualizado
+☐ Guia de primeiros passos
+☐ Exemplos de requisição e resposta
+☐ Changelog e política de depreciação
+🔐 Segurança
+☐ HTTPS obrigatório
+☐ Autenticação em todos os endpoints privados
+☐ Autorização por objeto (evita BOLA)
+☐ Validação de toda entrada
+☐ Rate limiting configurado
+☐ CORS restrito às origens necessárias
+☐ Segredos fora do código-fonte
+☐ Nenhum dado sensível em URLs ou logs
+⚙️ Operação
+☐ Timeouts em todas as chamadas externas
+☐ Idempotência nas operações críticas
+☐ Cache onde faz sentido
+☐ Logs estruturados com request_id
+☐ Métricas RED e alertas
+☐ Endpoint /health
+☐ Testes automatizados no CI
+
+=== PAGINA 55 ===
+55
+API: O Guia Completo
+A P Ê N D I C E S
+B
+Glossário
+API Gateway
+Ponto único de entrada que roteia, autentica e limita
+chamadas para vários serviços.
+API Key
+Chave secreta que identifica a aplicação que está
+chamando a API.
+Autenticação
+Provar quem você é.
+Autorização
+Definir o que você pode fazer.
+Backoff
+Aumentar o tempo de espera entre retentativas.
+BFF
+Backend For Frontend: back-end dedicado a um tipo de
+cliente.
+BOLA
+Falha em verificar se o usuário pode acessar aquele
+objeto específico.
+Cache
+Cópia temporária de uma resposta para evitar refazer o
+trabalho.
+CORS
+Mecanismo do navegador que controla chamadas entre
+origens diferentes.
+CRUD
+Create, Read, Update, Delete: as quatro operações
+básicas.
+Endpoint
+Combinação de método + caminho, como GET
+/pedidos .
+ETag
+Identificador da versão de um recurso, usado em cache e
+controle de concorrência.
+GraphQL
+Linguagem de consulta em que o cliente escolhe os
+campos.
+gRPC
+Framework de chamadas remotas binárias sobre HTTP/2.
+HATEOAS
+Respostas com links para as próximas ações possíveis.
+Header
+Metadado de uma requisição ou resposta HTTP.
+Idempotência
+Repetir a operação não muda o resultado final.
+JSON
+Formato de dados textual, leve e universal.
+JWT
+Token assinado em três partes: header, payload e
+assinatura.
+Latência
+Tempo entre enviar a requisição e receber a resposta.
+MCP
+Model Context Protocol: padrão para conectar IAs a
+ferramentas.
+Mock
+Simulação de uma API para testes ou desenvolvimento.
+mTLS
+TLS mútuo: cliente e servidor apresentam certificados.
+OAuth 2.0
+Protocolo de autorização delegada via tokens.
+OpenAPI
+Especificação padrão para descrever APIs REST.
+Payload
+O conteúdo "útil" de uma mensagem (o corpo).
+Polling
+Perguntar repetidamente se algo mudou.
+Rate limiting
+Limite de chamadas por período de tempo.
+REST
+Estilo arquitetural baseado em recursos e na semântica
+do HTTP.
+SDK
+Biblioteca pronta que facilita o uso de uma API.
+Serialização
+Converter objetos em texto ou bytes para transmissão.
+
+=== PAGINA 56 ===
+56
+API: O Guia Completo
+SOAP
+Protocolo de mensagens XML com contrato WSDL.
+Stateless
+O servidor não guarda estado de sessão entre
+requisições.
+Throughput
+Quantidade de requisições processadas por unidade de
+tempo.
+TLS
+Protocolo de criptografia por trás do HTTPS.
+Webhook
+Chamada HTTP que um serviço faz para avisar você de
+um evento.
+WebSocket
+Conexão persistente e bidirecional entre cliente e
+servidor.
+
+=== PAGINA 57 ===
+57
+API: O Guia Completo
+A P Ê N D I C E S
+C
+Quiz: teste seus conhecimentos
+Responda mentalmente (ou num papel!) e confira o gabarito no final da página.
+1. Na analogia do restaurante, quem é a API e o que é a documentação?
+2. Qual a diferença entre os códigos 401 e 403?
+3. Qual destes métodos é idempotente: POST ou PUT? Por quê?
+4. Você mandou PUT /livros/7 com apenas o campo estoque . O que acontece com os outros campos?
+5. O que significa dizer que o REST é stateless?
+6. Por que nunca se deve colocar um token na URL ( ?token=abc )?
+7. O que o par ETag / If-None-Match permite? Qual status indica sucesso nesse caso?
+8. Qual fluxo do OAuth 2.0 é indicado para dois servidores conversarem sem nenhum usuário envolvido?
+9. Que dois problemas clássicos do REST o GraphQL resolve?
+10. Um usuário troca /pedidos/1001 por /pedidos/1002 na URL e vê o pedido de outra pessoa. Qual é o
+nome dessa vulnerabilidade?
+11. Quando usar webhook em vez de polling?
+12. Um JWT é criptografado? É seguro colocar o CPF do usuário no payload?
+✅ Gabarito
+1. O garçom é a API; o cardápio é a documentação.
+2. 401: não autenticado ("quem é você?"). 403: autenticado, mas sem permissão ("sei quem é, mas não pode").
+3. PUT. Repetir o mesmo PUT deixa o recurso no mesmo estado; repetir um POST normalmente cria novos
+recursos.
+4. São removidos ou zerados: PUT substitui o recurso inteiro. Para alterar só um campo, use PATCH.
+5. Cada requisição traz tudo o que é necessário para ser entendida; o servidor não guarda sessão entre chamadas.
+6. URLs ficam registradas em logs de servidores e proxies, no histórico do navegador e podem vazar pelo
+cabeçalho Referer .
+7. Validar se o recurso mudou sem baixá-lo de novo. Se não mudou, o servidor responde 304 Not Modified.
+8. Client Credentials.
+9. Over-fetching (dados demais) e under-fetching (precisar de várias chamadas).
+10. BOLA — Broken Object Level Authorization, o risco nº 1 do OWASP API Top 10.
+11. Quando você quer ser avisado de eventos que acontecem em momentos imprevisíveis, sem desperdiçar
+chamadas.
+12. Não, ele é apenas assinado (qualquer um decodifica o payload). Não coloque dados sensíveis nele.
+
+=== PAGINA 58 ===
+58
+API: O Guia Completo
+A P Ê N D I C E S
+D
+Referências para ir além
+📜 Especificações e padrões
+RFC 9110 — HTTP Semantics (métodos, status, cabeçalhos).
+RFC 9111 — HTTP Caching.
+RFC 9457 — Problem Details for HTTP APIs.
+RFC 6749 — The OAuth 2.0 Authorization Framework; RFC 7636 — PKCE.
+RFC 7519 — JSON Web Token (JWT).
+RFC 8594 — The Sunset HTTP Header Field.
+OpenAPI Specification — spec.openapis.org
+GraphQL — graphql.org · gRPC — grpc.io · AsyncAPI — asyncapi.com
+Model Context Protocol — modelcontextprotocol.io
+📚 Leituras fundamentais
+Roy T. Fielding — Architectural Styles and the Design of Network-based Software Architectures (tese de
+doutorado, 2000), capítulo 5: REST.
+OWASP — API Security Top 10 (2023), owasp.org.
+MDN Web Docs — seção sobre HTTP, developer.mozilla.org.
+🧭 Guias de estilo de grandes empresas
+Microsoft REST API Guidelines (GitHub).
+Google API Design Guide (cloud.google.com/apis/design).
+Zalando RESTful API Guidelines (opensource.zalando.com).
+🇧🇷 Recursos brasileiros
+Open Finance Brasil — portal do desenvolvedor e especificações das APIs.
+Banco Central do Brasil — regulamento e manuais da API Pix; Portal de Dados Abertos.
+BrasilAPI, ViaCEP e API de serviços de dados do IBGE.
+🚀
+Parabéns, você chegou ao fim!
+Agora você fala a língua que conecta o mundo digital. O próximo passo é simples:
+escolha uma API pública, abra o terminal e faça sua primeira requisição.
+HTTP/1.1 200 OK — { "aprendizado": "concluído" }

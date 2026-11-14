@@ -1,0 +1,145 @@
+Usuarios > comando: netplwiz 
+ 
+
+ 
+
+IP: 200.160.7.186 
+
+ 
+
+ 
+
+CAPICOM:  
+
+ 
+
+  ABRIR O CMD como ADM e executar o comando:  
+
+regsvr32 "C:\Program Files (x86)\Microsoft CAPICOM 2.1.0.2 SDK\Lib\X86\capicom.dll" 
+
+ 
+
+ 
+
+ 
+
+ANTIVIRUS: CrowdStrike 
+
+ 
+
+ 
+
+ 
+
+Usuários que estão de licença, precisamos programar a auditoria quando retornarem, imediatamente. 
+
+O relatório é solicitado sempre no último dia útil do mês. 
+
+Cada gestor precisa sinalizar o time técnico sobre a troca da máquina (formatação),c adastro de DNA e renomeação de hostname > projeto futuro. 
+
+Enquanto o projeto não entra em curso nós precisamos cobrar essas informações  de cada depto. 
+
+Quando uma máquina é formatada, precisa inativar o DNA anterior e atualizar na planilha o novo que fora cadastrado. 
+
+IMPORTANTE: Não deletar os dados antigos, mas acrescentar os novos dados para registro/histórico. 
+
+ 
+
+Atalho EDITOR DE REGISTRO: 
+
+Lixeira: 
+
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer 
+
+ 
+
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\W32Ti me\TimeProviders\NtpClient 
+
+ 
+
+Alteração de nome de máquina: Se fizer precisa cadastrar um novo DNA 
+
+ 
+
+Painel de controle > programas > programas  e recursos> modo de exibição > lista> detalhes >   
+
+ 
+
+ 
+
+PCN > plano de continuidade de negocio. 
+
+ 
+
+ 
+
+  
+
+ 
+
+ 
+
+Redefinir nome de PC > POWERSHELL 
+COMANDO:  
+Rename-Computer -NewName "LINKCERT_01" -Restart 
+
+ 
+
+ 
+
+ 
+
+S.O > WINDOWS 11 Home Sigle Linguage   > não possui: Gpedit. Necessário atualizar para a versão PRO 
+
+ 
+
+N2CERT-13719 - script POWERSHELL - remover driver 
+ 
+ 
+Como desbloquear o CMD: 
+ 
+
+
+ 
+ 
+
+Pressione Windows + R 
+
+Digite:  
+gpedit.msc 
+ 
+
+Navegue até:  
+Configuração do Usuário > Modelos Administrativos > Sistema 
+ 
+
+Procure a opção: → Impedir acesso ao prompt de comando 
+
+Clique duas vezes e marque: → Desativado ou Não configurado 
+
+Clique em Aplicar > OK 
+
+ 
+ 
+
+✅ 2. Ajuste via Registro (caso não tenha gpedit) 
+
+Pressione Windows + R 
+
+Digite: 
+regedit 
+ 
+
+Vá até o caminho: 
+HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\System 
+ 
+
+No lado direito, encontre: → DisableCMD 
+
+Altere o valor: 
+
+0 = permitido 
+
+1 = bloqueado 
+
+✔️ Defina como 0 ou exclua a chave 

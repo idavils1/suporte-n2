@@ -1,0 +1,378 @@
+{
+ "caderno": "crm-coren",
+ "copiadoEm": "2026-10-21T16:33:33.530Z",
+ "nos": [
+  {
+   "id": "n-mvgvugq37qwzz6",
+   "criadoEm": "2026-10-20T16:13:30.667Z",
+   "excluidoEm": null,
+   "tipo": "nota",
+   "cor": "",
+   "nome": "ABERTURAS",
+   "ordem": 1,
+   "criadoPor": "lays.almeida@valid.com",
+   "paiId": "p-mvgvtfkqfz0hy1",
+   "icone": "i-pessoas",
+   "atualizadoEm": "2026-10-21T12:03:14.736Z",
+   "atualizadoPor": "lays.almeida@valid.com"
+  },
+  {
+   "id": "n-mvgvvd2u18xxsh",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "tipo": "nota",
+   "nome": "FECHAMENTOS",
+   "ordem": 2,
+   "cor": "",
+   "atualizadoEm": "2026-10-20T16:14:41.937Z",
+   "criadoEm": "2026-10-20T16:14:12.599Z",
+   "paiId": "p-mvgvtfkqfz0hy1",
+   "excluidoEm": null,
+   "criadoPor": "lays.almeida@valid.com",
+   "icone": "i-erro"
+  },
+  {
+   "id": "n-mvgvvpoz2jfew4",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "ordem": 3,
+   "criadoEm": "2026-10-20T16:14:28.956Z",
+   "excluidoEm": null,
+   "nome": "RESPOSTA RAPIDA",
+   "icone": "i-megafone",
+   "cor": "",
+   "tipo": "nota",
+   "atualizadoEm": "2026-10-20T16:14:49.132Z",
+   "criadoPor": "lays.almeida@valid.com",
+   "paiId": "p-mvgvtfkqfz0hy1"
+  },
+  {
+   "id": "n-mvgvzzcjfeea8v",
+   "cor": "",
+   "criadoEm": "2026-10-20T16:17:48.074Z",
+   "atualizadoPor": "Lays",
+   "ordem": 1,
+   "excluidoEm": null,
+   "tipo": "nota",
+   "icone": "",
+   "paiId": "p-mvgvttkcjeyqyy",
+   "atualizadoEm": "2026-10-21T14:24:24.895Z",
+   "criadoPor": "lays.almeida@valid.com",
+   "nome": "SCRIPT"
+  },
+  {
+   "id": "n-mvgw03k7s87xu9",
+   "icone": "",
+   "criadoEm": "2026-10-20T16:17:53.540Z",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "paiId": "p-mvgvttkcjeyqyy",
+   "criadoPor": "lays.almeida@valid.com",
+   "excluidoEm": null,
+   "atualizadoEm": "2026-10-20T16:19:44.917Z",
+   "ordem": 2,
+   "nome": "DESCRIÇÃO",
+   "cor": "",
+   "tipo": "nota"
+  },
+  {
+   "id": "n-mvgw3qs4a7yz10",
+   "criadoEm": "2026-10-20T16:20:43.603Z",
+   "nome": "INICIO ATENDIMENTO",
+   "excluidoEm": null,
+   "ordem": 3,
+   "atualizadoPor": "lays.almeida@valid.com",
+   "tipo": "nota",
+   "atualizadoEm": "2026-10-20T16:23:12.604Z",
+   "paiId": "p-mvgvt5lmuh4vde",
+   "cor": "",
+   "icone": "",
+   "criadoPor": "lays.almeida@valid.com"
+  },
+  {
+   "id": "n-mvgw3w6qsb09b3",
+   "criadoEm": "2026-10-20T16:20:50.604Z",
+   "excluidoEm": null,
+   "ordem": 4,
+   "cor": "",
+   "icone": "",
+   "criadoPor": "lays.almeida@valid.com",
+   "nome": "INTERNO ATENDIMENTO",
+   "tipo": "nota",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "atualizadoEm": "2026-10-20T16:23:16.234Z",
+   "paiId": "p-mvgvt5lmuh4vde"
+  },
+  {
+   "id": "n-mvgw67bekz4wkh",
+   "icone": "",
+   "criadoEm": "2026-10-20T16:22:38.341Z",
+   "criadoPor": "lays.almeida@valid.com",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "paiId": "p-mvgvt5lmuh4vde",
+   "atualizadoEm": "2026-10-20T16:23:23.748Z",
+   "ordem": 5,
+   "nome": "PERDIDO ATENDIMENTO",
+   "cor": "",
+   "tipo": "nota",
+   "excluidoEm": null
+  },
+  {
+   "id": "n-mvgw6t7y5vbxb8",
+   "tipo": "nota",
+   "criadoPor": "lays.almeida@valid.com",
+   "cor": "",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "excluidoEm": null,
+   "nome": "STATUS INICIO ATENDIMENTO",
+   "ordem": 6,
+   "atualizadoEm": "2026-10-20T16:23:26.371Z",
+   "criadoEm": "2026-10-20T16:23:06.757Z",
+   "paiId": "p-mvgvt5lmuh4vde",
+   "icone": ""
+  },
+  {
+   "id": "nota-guia-formatacao",
+   "criadoEm": "2026-10-21T14:24:24.991Z",
+   "ordem": 2,
+   "atualizadoPor": "Lays",
+   "cor": "",
+   "nome": "Guia de formatação",
+   "excluidoEm": null,
+   "icone": "i-lampada",
+   "tipo": "nota",
+   "criadoPor": "Lays",
+   "paiId": null,
+   "atualizadoEm": "2026-10-21T14:24:24.991Z"
+  },
+  {
+   "id": "p-mvgvt5lmuh4vde",
+   "icone": "i-headset",
+   "criadoEm": "2026-10-20T16:12:29.601Z",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "paiId": null,
+   "atualizadoEm": "2026-10-20T16:33:17.015Z",
+   "nome": "ATENDIMENTO",
+   "ordem": 1,
+   "ordenacao": "manual",
+   "excluidoEm": null,
+   "cor": "",
+   "tipo": "pasta",
+   "criadoPor": "lays.almeida@valid.com"
+  },
+  {
+   "id": "p-mvgvtfkqfz0hy1",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "ordenacao": "manual",
+   "nome": "FOLLOW-UP",
+   "criadoEm": "2026-10-20T16:12:42.514Z",
+   "criadoPor": "lays.almeida@valid.com",
+   "tipo": "pasta",
+   "ordem": 1,
+   "cor": "",
+   "atualizadoEm": "2026-10-20T16:12:42.514Z",
+   "paiId": "p-mvgvt5lmuh4vde",
+   "excluidoEm": null,
+   "icone": ""
+  },
+  {
+   "id": "p-mvgvttkcjeyqyy",
+   "criadoEm": "2026-10-20T16:13:00.645Z",
+   "ordenacao": "manual",
+   "tipo": "pasta",
+   "cor": "",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "ordem": 2,
+   "nome": "RESPOSTA GENÉRICA",
+   "criadoPor": "lays.almeida@valid.com",
+   "paiId": "p-mvgvt5lmuh4vde",
+   "atualizadoEm": "2026-10-20T16:13:00.645Z",
+   "icone": "",
+   "excluidoEm": null
+  }
+ ],
+ "conteudos": [
+  {
+   "id": "n-mvgvugq37qwzz6",
+   "propriedades": {
+    "larguraTotal": "sim"
+   },
+   "ultimaVersaoEm": "2026-10-21T12:03:14.427Z",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "links": [],
+   "tags": [],
+   "sessao": "s-mvi2980piv46s9",
+   "atualizadoEm": "2026-10-21T12:03:14.427Z",
+   "markdown": "dfsewfwfwfwfwfwef"
+  },
+  {
+   "id": "n-mvgvvd2u18xxsh",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "tags": [],
+   "propriedades": {},
+   "atualizadoEm": "2026-10-20T16:14:12.599Z",
+   "markdown": "",
+   "links": [],
+   "sessao": "s-mvgvlzhkoeffzb"
+  },
+  {
+   "id": "n-mvgvvpoz2jfew4",
+   "atualizadoEm": "2026-10-20T16:14:28.956Z",
+   "tags": [],
+   "markdown": "",
+   "sessao": "s-mvgvlzhkoeffzb",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "propriedades": {},
+   "links": []
+  },
+  {
+   "id": "n-mvgvzzcjfeea8v",
+   "atualizadoEm": "2026-10-21T14:24:24.765Z",
+   "sessao": "s-mvi7drmydmlprm",
+   "links": [],
+   "tags": [],
+   "ultimaVersaoEm": "2026-10-21T14:24:24.765Z",
+   "atualizadoPor": "Lays",
+   "propriedades": {},
+   "markdown": "Irei realizar uma atualização em seu status, ok?\n\nPeço que:\n\n- Desinstale o APP VIDAAS;\n- Desligue TOTALMENTE seu dispositivo móvel (celular) por 5 minutos; \n- Após o tempo de 5 minutos, ligue novamente o dispositivo; \n- Com o dispositivo ligado,  instale novamente o APP VIDAAS; \nRealize o procedimento citado anteriormente novamente; \n\nAguardo seu retorno."
+  },
+  {
+   "id": "n-mvgw03k7s87xu9",
+   "propriedades": {},
+   "atualizadoPor": "lays.almeida@valid.com",
+   "ultimaVersaoEm": "2026-10-20T16:19:44.848Z",
+   "markdown": "Procedimento genérico para problemas simples, que costumam ser resolvidos apenas reiniciando o celular. Basta o colaborador desligar o aparelho por alguns instantes e ligá-lo novamente para que tudo volte a funcionar normalmente.",
+   "tags": [],
+   "links": [],
+   "atualizadoEm": "2026-10-20T16:19:44.848Z",
+   "sessao": "s-mvgvlzhkoeffzb"
+  },
+  {
+   "id": "n-mvgw3qs4a7yz10",
+   "propriedades": {},
+   "ultimaVersaoEm": "2026-10-20T16:23:12.519Z",
+   "atualizadoPor": "lays.almeida@valid.com",
+   "atualizadoEm": "2026-10-20T16:23:12.519Z",
+   "links": [],
+   "tags": [],
+   "sessao": "s-mvgvlzhkoeffzb",
+   "markdown": "Olá, XXXXXXX!\n\nAqui é o Davi, da equipe de Suporte N2 da V/Cert.\nMeu contato é referente ao protocolo nº: XXXXXXX\n\nPodemos iniciar o atendimento neste canal de comunicação?\n\nEquipe de Suporte,\nV/Cert.\n"
+  },
+  {
+   "id": "n-mvgw3w6qsb09b3",
+   "atualizadoEm": "2026-10-20T16:23:16.149Z",
+   "sessao": "s-mvgvlzhkoeffzb",
+   "markdown": "Olá, XXXXXXX!\n\nAqui é o Davi, da equipe de Suporte N2 da V/Cert.\nPodemos iniciar o atendimento neste canal de comunicação?\n\nEquipe de Suporte,\nV/Cert.",
+   "links": [],
+   "atualizadoPor": "lays.almeida@valid.com",
+   "tags": [],
+   "ultimaVersaoEm": "2026-10-20T16:23:16.149Z",
+   "propriedades": {}
+  },
+  {
+   "id": "n-mvgw67bekz4wkh",
+   "tags": [],
+   "sessao": "s-mvgvlzhkoeffzb",
+   "propriedades": {},
+   "atualizadoPor": "lays.almeida@valid.com",
+   "links": [],
+   "markdown": "Olá, XXXXXXX!\n\nAqui é o Davi, da equipe de Suporte N2 da V/Cert.\nPerdemos a conexão do outro canal de atendimento, será que podemos continuar por aqui?\n\nEquipe de Suporte,\nV/Cert.",
+   "ultimaVersaoEm": "2026-10-20T16:23:23.672Z",
+   "atualizadoEm": "2026-10-20T16:23:23.672Z"
+  },
+  {
+   "id": "n-mvgw6t7y5vbxb8",
+   "links": [],
+   "ultimaVersaoEm": "2026-10-20T16:23:26.287Z",
+   "markdown": "Olá, XXXXXXX!\n\nAqui é o Davi, da equipe de Suporte N2 da V/Cert.\nPerdemos a conexão do outro canal de atendimento, será que podemos continuar por aqui?\n\nEquipe de Suporte,\nV/Cert.",
+   "atualizadoEm": "2026-10-20T16:23:26.287Z",
+   "propriedades": {},
+   "sessao": "s-mvgvlzhkoeffzb",
+   "tags": [],
+   "atualizadoPor": "lays.almeida@valid.com"
+  },
+  {
+   "id": "nota-guia-formatacao",
+   "tags": [],
+   "sessao": "s-mvi7drmydmlprm",
+   "atualizadoEm": "2026-10-21T14:24:24.991Z",
+   "markdown": "Esta nota mostra como escrever no caderno. Ela é criada uma única vez em cada caderno e pode ser editada à vontade.\n\n> [!dica] Jeito mais rápido\n> No modo **Editar**, digite **/** no começo de uma linha (por exemplo **/tab**) para inserir tabela, imagem, galeria, destaque e mais. Ao selecionar um trecho aparece uma barra flutuante. Clicar de novo num formato já aplicado tira o formato.\n\n## Texto\n\n| Você escreve | Aparece assim |\n| --- | --- |\n| `**negrito**` | **negrito** |\n| `*itálico*` | *itálico* |\n| `~~tachado~~` | ~~tachado~~ |\n| `==realce==` | ==realce== |\n| `` `código` `` | `código` |\n| `{cor:azul}texto{/cor}` | {cor:azul}texto{/cor} |\n| `{fundo:amarelo}texto{/fundo}` | {fundo:amarelo}texto{/fundo} |\n| `[texto](https://site.com)` | [texto](https://www.validcertificadora.com.br) |\n| `[[Nome da nota]]` | link para outra nota |\n{tabela: listrada largura=total legenda=\"Formatação do texto\"}\n\nCores da paleta: cinza, vermelho, laranja, amarelo, verde, azul, roxo e rosa. Num link, `\"nova aba\"` ou `\"mesma aba\"` depois do endereço troca onde ele abre: `[texto](https://site.com \"mesma aba\")`.\n\n## Tabelas\n\nUse o botão **Tabela** (ou **/tabela**) para editar numa grade, como no Excel. Com o cursor dentro de uma tabela, o mesmo botão abre a tabela que já existe; no modo Ler, passe o mouse sobre ela e use **Editar tabela**.\n\n```\n| Nome     | Ramal |\n| :---     | ----: |\n| Suporte  |  1234 |\n{tabela: listrada bordas=horizontais compacta largura=total cabecalho=azul legenda=\"Contatos\"}\n```\n\n| Opção da linha {tabela: …} | O que faz |\n| --- | --- |\n| `listrada` | linhas alternadas (zebra) |\n| `bordas=todas`, `bordas=horizontais`, `bordas=nenhuma` | bordas da tabela |\n| `compacta`, `normal`, `espacosa` | espaço dentro das células |\n| `largura=auto`, `largura=total` | largura da tabela |\n| `cabecalho=azul` (ou outra cor, ou `lilas`) | cor do cabeçalho |\n| `primeira-coluna` | primeira coluna em destaque |\n| `coluna-fixa` | primeira coluna fica parada ao rolar para o lado |\n| `sem-cabecalho` | a primeira linha vira linha comum |\n| `legenda=\"Título\"` | título acima da tabela |\n{tabela: listrada compacta largura=total}\n\nAlinhamento da coluna na linha de traços: `:---` esquerda, `:---:` centro, `---:` direita. Quebra de linha dentro da célula: `<br>` (no editor, Shift+Enter). Um \"|\" dentro da célula fica `\\|`.\n\n## Imagens\n\nCole o print com **Ctrl+V** ou arraste o arquivo. No modo Ler, passe o mouse sobre a imagem para a barra dela (tamanho, alinhamento, estilo, legenda, anotar…); arraste o canto para mudar a largura.\n\n```\n![[img:<id>|Legenda|media]]\n![[img:<id>|Legenda|grande|alinhar=direita|ao-lado|sombra|larg=40]]\n```\n\n| Parâmetro | O que faz |\n| --- | --- |\n| `pequena`, `media`, `grande`, `inteira` | tamanho |\n| `larg=40` | largura livre, de 10 a 100 (% da coluna) |\n| `alinhar=esquerda`, `alinhar=centro`, `alinhar=direita` | posição |\n| `ao-lado` | o texto contorna a imagem (no celular ela volta para o centro) |\n| `borda`, `sombra`, `arredondada`, `moldura` | estilo |\n| `alt=Descrição` | texto alternativo para leitor de tela |\n| `link=https://…` ou `link=nota:Nome da nota` | clicar abre o link em vez de ampliar |\n| `original=<id>` | guardado ao anotar, para “Voltar à original” |\n{tabela: listrada compacta largura=total}\n\nA legenda aceita **negrito**, *itálico* e [link](https://…). Parâmetro desconhecido é ignorado.\n\n## Galeria, passo a passo e comparar\n\n```\n:::galeria 3\n![[img:<id>|Passo 1]]\n![[img:<id>|Passo 2]]\n![[img:<id>|Passo 3]]\n:::\n\n:::passo\n![[img:<id>|Tela de login]]\nClique em **Entrar** e informe o CPF do cliente.\n:::\n\n:::comparar\n![[img:<id>|Antes]]\n![[img:<id>|Depois]]\n:::\n```\n\nGaleria com 2, 3 ou 4 colunas. Os passos são numerados sozinhos. Sem a linha `:::` de fechamento, o bloco aparece como texto normal.\n\n## Destaques (callouts)\n\n> [!info] Informação\n> `> [!info]`, e também `dica`, `atencao`, `erro`, `sucesso`, `nota` e `pergunta`.\n\n> [!dica]- Recolhível\n> Com `-` depois do tipo começa fechado; com `+`, aberto.\n\n:::detalhes Detalhes recolhíveis\nConteúdo que fica escondido até clicar.\n:::\n\n## Código e divisórias\n\n```powershell quebrar\nGet-ChildItem C:\\Temp -Recurse | Where-Object { $_.Length -gt 1MB }\n```\n\nLinguagens: texto, bash, powershell, sql, json, xml, html, js e python. `quebrar` depois da linguagem quebra as linhas longas. No modo Ler, o botão **Copiar** copia o código.\n\nDivisórias: `---` linha simples, `* * *` pontilhada e `_ _ _` com espaço extra.\n\n* * *\n\n## Tarefas\n\n- [x] Tarefa feita\n- [ ] Tarefa pendente (marque no modo Ler)\n\nNo menu **Listas**: “Mover tarefas concluídas para o fim”. Atalhos: veja o ícone **?** no topo.",
+   "atualizadoPor": "Lays",
+   "links": [],
+   "propriedades": {}
+  }
+ ],
+ "modelos": [],
+ "versoes": [
+  {
+   "id": "v-mvgvwkg7govrv4",
+   "noId": "n-mvgvugq37qwzz6",
+   "markdown": "dsdasd",
+   "por": "lays.almeida@valid.com",
+   "em": "2026-10-20T16:15:08.829Z"
+  },
+  {
+   "id": "v-mvgw2e5bg3jwsk",
+   "markdown": "Irei realizar uma atualização em seu status, ok?\n\nPeço que:\n\n- Desinstale o APP VIDAAS;\n- Desligue TOTALMENTE seu dispositivo móvel (celular) por 5 minutos; \n- Após o tempo de 5 minutos, ligue novamente o dispositivo; \n- Com o dispositivo ligado,  instale novamente o APP VIDAAS; \n- Realize o procedimento citado anteriormente novamente; \n\nAguardo seu retorno.",
+   "por": "lays.almeida@valid.com",
+   "em": "2026-10-20T16:19:40.662Z",
+   "noId": "n-mvgvzzcjfeea8v"
+  },
+  {
+   "id": "v-mvgw2hip9nvvjx",
+   "por": "lays.almeida@valid.com",
+   "markdown": "Procedimento genérico para problemas simples, que costumam ser resolvidos apenas reiniciando o celular. Basta o colaborador desligar o aparelho por alguns instantes e ligá-lo novamente para que tudo volte a funcionar normalmente.",
+   "em": "2026-10-20T16:19:44.931Z",
+   "noId": "n-mvgw03k7s87xu9"
+  },
+  {
+   "id": "v-mvgw6xrnjzeys2",
+   "noId": "n-mvgw3qs4a7yz10",
+   "por": "lays.almeida@valid.com",
+   "markdown": "Olá, XXXXXXX!\n\nAqui é o Davi, da equipe de Suporte N2 da V/Cert.\nMeu contato é referente ao protocolo nº: XXXXXXX\n\nPodemos iniciar o atendimento neste canal de comunicação?\n\nEquipe de Suporte,\nV/Cert.\n",
+   "em": "2026-10-20T16:23:12.622Z"
+  },
+  {
+   "id": "v-mvgw70k5vkeul0",
+   "markdown": "Olá, XXXXXXX!\n\nAqui é o Davi, da equipe de Suporte N2 da V/Cert.\nPodemos iniciar o atendimento neste canal de comunicação?\n\nEquipe de Suporte,\nV/Cert.",
+   "em": "2026-10-20T16:23:16.254Z",
+   "noId": "n-mvgw3w6qsb09b3",
+   "por": "lays.almeida@valid.com"
+  },
+  {
+   "id": "v-mvgw76d6l2mtze",
+   "em": "2026-10-20T16:23:23.765Z",
+   "por": "lays.almeida@valid.com",
+   "markdown": "Olá, XXXXXXX!\n\nAqui é o Davi, da equipe de Suporte N2 da V/Cert.\nPerdemos a conexão do outro canal de atendimento, será que podemos continuar por aqui?\n\nEquipe de Suporte,\nV/Cert.",
+   "noId": "n-mvgw67bekz4wkh"
+  },
+  {
+   "id": "v-mvgw78e2trbg3u",
+   "por": "lays.almeida@valid.com",
+   "em": "2026-10-20T16:23:26.386Z",
+   "markdown": "Olá, XXXXXXX!\n\nAqui é o Davi, da equipe de Suporte N2 da V/Cert.\nPerdemos a conexão do outro canal de atendimento, será que podemos continuar por aqui?\n\nEquipe de Suporte,\nV/Cert.",
+   "noId": "n-mvgw6t7y5vbxb8"
+  },
+  {
+   "id": "v-mvgxao44c9u46w",
+   "markdown": "=",
+   "por": "lays.almeida@valid.com",
+   "noId": "n-mvgvugq37qwzz6",
+   "em": "2026-10-20T16:54:06.484Z"
+  },
+  {
+   "id": "v-mvi2ch2hgtb9w4",
+   "markdown": "dfsewfwfwfwfwfwef",
+   "em": "2026-10-21T12:03:14.783Z",
+   "por": "lays.almeida@valid.com",
+   "noId": "n-mvgvugq37qwzz6"
+  },
+  {
+   "id": "v-mvi7e0jro5juaz",
+   "markdown": "Irei realizar uma atualização em seu status, ok?\n\nPeço que:\n\n- Desinstale o APP VIDAAS;\n- Desligue TOTALMENTE seu dispositivo móvel (celular) por 5 minutos; \n- Após o tempo de 5 minutos, ligue novamente o dispositivo; \n- Com o dispositivo ligado,  instale novamente o APP VIDAAS; \nRealize o procedimento citado anteriormente novamente; \n\nAguardo seu retorno.",
+   "noId": "n-mvgvzzcjfeea8v",
+   "por": "Lays",
+   "em": "2026-10-21T14:24:24.940Z"
+  }
+ ],
+ "imagens": [],
+ "imagens-grandes": [],
+ "documento": null
+}
