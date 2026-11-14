@@ -27,40 +27,144 @@ export const ICONES = ["i-servidor", "i-mapa", "i-grade", "i-globo", "i-plug", "
   "i-conversa", "i-pessoas", "i-documento", "i-tabela", "i-lista", "i-engrenagem", "i-ferramenta", "i-lampada", "i-alerta", "i-info", "i-livro", "i-aprender",
   "i-calendario", "i-relogio", "i-estrela", "i-tag", "i-link", "i-imagem", "i-megafone"];
 
-export const TIPOS = {
-  sistema: { nome: "Sistema", icone: "i-servidor", cor: "roxo", ajuda: "Raiz do mapa: o sistema." },
-  sintoma: { nome: "Sintoma", icone: "i-alerta", cor: "vermelho", ajuda: "O problema que o analista observa." },
-  teste: { nome: "Teste", icone: "i-busca", cor: "azul", ajuda: "Verificação a fazer e o que cada resultado significa." },
-  contato: { nome: "Quem resolve", icone: "i-telefone", cor: "laranja", ajuda: "Com quem falar, por qual canal, horário e prazo." },
-  solucao: { nome: "Solução", icone: "i-sucesso", cor: "verde", ajuda: "Correção conhecida (paliativa ou definitiva)." },
-  link: { nome: "Link", icone: "i-link", cor: "cinza", ajuda: "Manual, status do serviço, caderno ou aula." },
-  nota: { nome: "Nota", icone: "i-anotacao", cor: "amarelo", ajuda: "Informação livre." }
-};
-export const ORDEM_TIPOS = ["sistema", "sintoma", "teste", "contato", "solucao", "link", "nota"];
-/* Tipo sugerido para um filho novo (Tab) */
-export const FILHO_PADRAO = { sistema: "sintoma", sintoma: "teste", teste: "teste", contato: "nota", solucao: "nota", link: "link", nota: "nota" };
+/* ============================================================
+ *  ESTRUTURA (tipos, campos, listas de opções, modelos)
+ *  Os PADRÕES ficam aqui no código (fallback: offline, documento inexistente ou campo faltando).
+ *  O Painel de edição grava mapas-config/estrutura e mapas-config/modelos; aplicarEstrutura()
+ *  e aplicarModelos() MESCLAM essa configuração com os padrões.
+ *  TIPOS, CAMPOS, ORDEM_TIPOS, FILHO_PADRAO e MODELOS são a ESTRUTURA ATIVA: objetos "vivos",
+ *  atualizados no lugar a cada mudança (quem importou vê os valores novos). obterEstrutura()
+ *  devolve a mesma estrutura ativa.
+ *  Os IDs dos 7 tipos e dos campos nativos nunca mudam (dados e regras continuam válidos);
+ *  só muda o que aparece na tela. Campos personalizados ficam em no.extras.
+ * ============================================================ */
+export const IDS_TIPOS = ["sistema", "sintoma", "teste", "contato", "solucao", "link", "nota"];
+export const TIPOS_CAMPO = { texto: "Texto curto", area: "Texto longo", url: "Endereço (URL)", lista: "Lista (um por linha)", escolha: "Escolha (lista de opções)" };
+export const LIMITE_EXTRAS = 20;
+/* Ícones disponíveis para os tipos de nó (inclui os ícones padrão dos tipos) */
+export const ICONES_TIPOS = [...new Set(["i-servidor", "i-alerta", "i-busca", "i-telefone", "i-sucesso", "i-link", "i-anotacao", ...ICONES, "i-check", "i-erro", "i-ajuda", "i-roteiro", "i-usuario", "i-olho", "i-filtro", "i-trofeu"])];
 
-/* Campos próprios de cada tipo (ficam em no.campos) */
+const TIPOS_PADRAO = {
+  sistema: { nome: "Sistema", icone: "i-servidor", cor: "roxo", ajuda: "Raiz do mapa: o sistema.", filhoPadrao: "sintoma" },
+  sintoma: { nome: "Sintoma", icone: "i-alerta", cor: "vermelho", ajuda: "O problema que o analista observa.", filhoPadrao: "teste" },
+  teste: { nome: "Teste", icone: "i-busca", cor: "azul", ajuda: "Verificação a fazer e o que cada resultado significa.", filhoPadrao: "teste" },
+  contato: { nome: "Quem resolve", icone: "i-telefone", cor: "laranja", ajuda: "Com quem falar, por qual canal, horário e prazo.", filhoPadrao: "nota" },
+  solucao: { nome: "Solução", icone: "i-sucesso", cor: "verde", ajuda: "Correção conhecida (paliativa ou definitiva).", filhoPadrao: "nota" },
+  link: { nome: "Link", icone: "i-link", cor: "cinza", ajuda: "Manual, status do serviço, caderno ou aula.", filhoPadrao: "link" },
+  nota: { nome: "Nota", icone: "i-anotacao", cor: "amarelo", ajuda: "Informação livre.", filhoPadrao: "nota" }
+};
+/* Opções: id estável + rótulo. Migração: o texto antigo gravado nos nós vira o id (e o rótulo inicial). */
+const op = (...rotulos) => rotulos.map((r) => (typeof r === "string" ? { id: r, rotulo: r } : r));
 const escolha = (id, rotulo, opcoes) => ({ id, rotulo, tipo: "escolha", opcoes });
 const texto = (id, rotulo, dica = "") => ({ id, rotulo, tipo: "texto", dica });
 const area = (id, rotulo, dica = "") => ({ id, rotulo, tipo: "area", dica });
-export const CAMPOS = {
+const CAMPOS_PADRAO = {
   sistema: [{ id: "url", rotulo: "Endereço do sistema", tipo: "url", dica: "https://…" }, texto("dono", "Responsável / dono"),
-    escolha("criticidade", "Criticidade", ["Baixa", "Média", "Alta", "Crítica"])],
+    escolha("criticidade", "Criticidade", op("Baixa", "Média", "Alta", { id: "Crítica", rotulo: "Crítica", cor: "vermelho" }))],
   sintoma: [area("palavrasChave", "Palavras-chave / mensagens de erro", "Uma por linha (ajuda a busca)"),
-    escolha("frequencia", "Frequência", ["Raro", "Às vezes", "Frequente", "Constante"]),
-    escolha("impacto", "Impacto", ["Baixo", "Médio", "Alto", "Parada total"])],
+    escolha("frequencia", "Frequência", op("Raro", "Às vezes", "Frequente", "Constante")),
+    escolha("impacto", "Impacto", op("Baixo", "Médio", "Alto", { id: "Parada total", rotulo: "Parada total", cor: "vermelho" }))],
   teste: [{ id: "passos", rotulo: "Passos", tipo: "lista", dica: "Um passo por linha" }, area("esperado", "Resultado esperado / o que significa"),
     texto("tempo", "Tempo estimado", "ex.: 5 min")],
-  contato: [texto("nome", "Nome"), texto("area", "Área / equipe"), escolha("canal", "Canal", ["Teams", "E-mail", "Telefone", "Chamado", "Outro"]),
+  contato: [texto("nome", "Nome"), texto("area", "Área / equipe"), escolha("canal", "Canal", op("Teams", "E-mail", "Telefone", "Chamado", "Outro")),
     texto("email", "E-mail"), texto("telefone", "Telefone / ramal"), texto("horario", "Horário de atendimento", "ex.: seg a sex, 8h às 18h"),
-    texto("sla", "SLA / prazo", "ex.: 4 h úteis"), escolha("nivel", "Nível", ["N1", "N2", "N3", "Fornecedor"]), area("observacoes", "Observações")],
-  solucao: [{ id: "passos", rotulo: "Passos", tipo: "lista", dica: "Um passo por linha" }, escolha("natureza", "Natureza", ["Paliativa", "Definitiva"]),
+    texto("sla", "SLA / prazo", "ex.: 4 h úteis"), escolha("nivel", "Nível", op("N1", "N2", "N3", "Fornecedor")), area("observacoes", "Observações")],
+  solucao: [{ id: "passos", rotulo: "Passos", tipo: "lista", dica: "Um passo por linha" }, escolha("natureza", "Natureza", op("Paliativa", { id: "Definitiva", rotulo: "Definitiva", cor: "verde" })),
     area("observacoes", "Observações")],
   link: [{ id: "url", rotulo: "Endereço", tipo: "url", dica: "https://…, caderno.html?c=slug ou aprender.html#aula" }],
   nota: []
 };
-export const CAMPOS_PERMITIDOS = [...new Set(Object.values(CAMPOS).flat().map((c) => c.id))];
+/* Chaves aceitas em no.campos (fixas; iguais às de noMapaValido() no firestore.rules) */
+export const CAMPOS_PERMITIDOS = [...new Set(Object.values(CAMPOS_PADRAO).flat().map((c) => c.id))];
+
+/* Estrutura ativa (objetos vivos) */
+export const TIPOS = {};
+export const CAMPOS = {};
+export const ORDEM_TIPOS = [];
+export const FILHO_PADRAO = {};
+const clonar = (v) => JSON.parse(JSON.stringify(v));
+const substituir = (alvo, novo) => { Object.keys(alvo).forEach((k) => delete alvo[k]); Object.assign(alvo, novo); };
+export const estruturaPadrao = () => ({ tipos: clonar(TIPOS_PADRAO), ordemTipos: [...IDS_TIPOS], campos: clonar(CAMPOS_PADRAO) });
+export const obterEstrutura = () => ({ TIPOS, CAMPOS, ORDEM_TIPOS, FILHO_PADRAO, MODELOS });
+
+const txtE = (v, max) => String(v == null ? "" : v).trim().slice(0, max);
+const ID_OPCAO = /^[^\n]{1,60}$/;
+export const ID_CAMPO_EXTRA = /^[a-z][a-z0-9-]{0,39}$/;
+function mesclarOpcoes(padrao, gravadas) {
+  if (!Array.isArray(gravadas)) return clonar(padrao || []);
+  const vistas = new Set();
+  return gravadas.filter((o) => o && ID_OPCAO.test(String(o.id || "")) && !vistas.has(o.id) && vistas.add(o.id)).slice(0, 60).map((o) => ({
+    id: String(o.id).slice(0, 60), rotulo: txtE(o.rotulo, 60) || String(o.id).slice(0, 60),
+    ...(CORES[o.cor] ? { cor: o.cor } : {}), ...(o.arquivada ? { arquivada: true } : {})
+  }));
+}
+function mesclarCampo(padrao, gravado) {
+  const g = gravado || {};
+  const tipo = padrao ? padrao.tipo : (TIPOS_CAMPO[g.tipo] ? g.tipo : "texto");
+  const c = {
+    id: padrao ? padrao.id : g.id, tipo,
+    rotulo: txtE(g.rotulo, 60) || (padrao ? padrao.rotulo : g.id),
+    dica: g.dica != null ? txtE(g.dica, 120) : (padrao ? padrao.dica || "" : ""),
+    obrigatorio: !!g.obrigatorio, oculto: !!g.oculto, personalizado: !padrao
+  };
+  if (tipo === "escolha") c.opcoes = mesclarOpcoes(padrao && padrao.opcoes, g.opcoes);
+  return c;
+}
+/* Configuração gravada (pode ser parcial ou antiga) + padrões = estrutura completa e válida */
+export function mesclarEstrutura(config) {
+  const cfg = config && typeof config === "object" ? config : {};
+  const p = estruturaPadrao();
+  const tipos = {};
+  IDS_TIPOS.forEach((id) => {
+    const g = (cfg.tipos && cfg.tipos[id]) || {};
+    const d = p.tipos[id];
+    tipos[id] = {
+      nome: txtE(g.nome, 40) || d.nome,
+      icone: /^i-[a-z-]{1,36}$/.test(g.icone || "") ? g.icone : d.icone,
+      cor: CORES[g.cor] ? g.cor : d.cor,
+      ajuda: g.ajuda != null ? txtE(g.ajuda, 200) : d.ajuda,
+      filhoPadrao: IDS_TIPOS.includes(g.filhoPadrao) && g.filhoPadrao !== "sistema" ? g.filhoPadrao : d.filhoPadrao
+    };
+  });
+  const ordem = Array.isArray(cfg.ordemTipos) ? cfg.ordemTipos.filter((t, i, a) => IDS_TIPOS.includes(t) && a.indexOf(t) === i) : [];
+  IDS_TIPOS.forEach((t) => { if (!ordem.includes(t)) ordem.push(t); });
+  const campos = {};
+  IDS_TIPOS.forEach((t) => {
+    const padroes = p.campos[t];
+    const gravados = cfg.campos && Array.isArray(cfg.campos[t]) ? cfg.campos[t] : null;
+    if (!gravados) { campos[t] = padroes.map((d) => mesclarCampo(d, null)); return; }
+    const lista = [];
+    const usados = new Set();
+    gravados.forEach((g) => {
+      if (!g || typeof g.id !== "string" || usados.has(g.id)) return;
+      const d = padroes.find((x) => x.id === g.id);
+      if (!d && (!ID_CAMPO_EXTRA.test(g.id) || CAMPOS_PERMITIDOS.includes(g.id))) return;
+      if (!d && lista.filter((x) => x.personalizado).length >= LIMITE_EXTRAS) return;
+      usados.add(g.id);
+      lista.push(mesclarCampo(d || null, g));
+    });
+    /* Campo nativo que a configuração não conhece (ex.: criado depois): entra no fim */
+    padroes.forEach((d) => { if (!usados.has(d.id)) lista.push(mesclarCampo(d, null)); });
+    campos[t] = lista;
+  });
+  return { tipos, ordemTipos: ordem, campos };
+}
+export function aplicarEstrutura(config) {
+  const e = mesclarEstrutura(config);
+  substituir(TIPOS, e.tipos);
+  substituir(CAMPOS, e.campos);
+  ORDEM_TIPOS.length = 0; ORDEM_TIPOS.push(...e.ordemTipos);
+  substituir(FILHO_PADRAO, Object.fromEntries(IDS_TIPOS.map((t) => [t, e.tipos[t].filhoPadrao])));
+  return e;
+}
+/* Rótulo e cor de uma opção (aceita o id ou um rótulo antigo); valor fora da lista aparece como está */
+export function acharOpcao(def, valor) {
+  if (!def || !def.opcoes || valor == null || valor === "") return null;
+  return def.opcoes.find((o) => o.id === valor) || def.opcoes.find((o) => o.rotulo === valor) || null;
+}
+export const rotuloOpcao = (def, valor) => { const o = acharOpcao(def, valor); return o ? o.rotulo : String(valor == null ? "" : valor); };
+export const campoDoTipo = (tipo, id) => (CAMPOS[tipo] || []).find((c) => c.id === id) || null;
+export const valorDoCampo = (no, def) => (def.personalizado ? (no.extras || {})[def.id] : (no.campos || {})[def.id]);
 
 /* ------------------------------------------------------------
  *  Normalização (mesmo formato no exemplo embutido, no JSON e no Firestore)
@@ -72,23 +176,41 @@ export function urlSegura(u) {
   if (/^(caderno\.html\?c=[a-z0-9-]{1,40}|aprender\.html#[A-Za-z0-9/_-]{1,120}|contatos\.html(#[A-Za-z0-9_-]{0,60})?|index\.html(#[a-z0-9-]{0,60})?)$/.test(s)) return s;
   return "";
 }
+/* Tipo de valor de cada campo nativo (igual em todos os tipos de nó que o usam) */
+const TIPO_NATIVO = Object.fromEntries(Object.values(CAMPOS_PADRAO).flat().map((c) => [c.id, c.tipo]));
+function normalizarValor(tipoCampo, v, def) {
+  if (tipoCampo === "lista") {
+    const lista = (Array.isArray(v) ? v : String(v || "").split("\n")).map((x) => txt(x, LIMITES.passo).trim()).filter(Boolean).slice(0, LIMITES.passos);
+    return lista.length ? lista : undefined;
+  }
+  if (tipoCampo === "url") return urlSegura(v) || undefined;
+  const s = txt(Array.isArray(v) ? v.join("\n") : v, LIMITES.campo).trim();
+  if (!s) return undefined;
+  /* Escolha: guarda o id da opção (rótulo antigo vira o id). Valor fora da lista é MANTIDO como está,
+     nunca descartado em silêncio (o Painel mostra quantos nós têm valores assim). */
+  if (tipoCampo === "escolha") { const o = acharOpcao(def, s); return o ? o.id : s.slice(0, 60); }
+  return s;
+}
+/* Mantém todos os campos nativos conhecidos, mesmo os de outro tipo (trocar o tipo do nó não apaga dados) */
 function normalizarCampos(tipo, c) {
   const r = {};
   if (!c || typeof c !== "object") return r;
-  (CAMPOS[tipo] || []).forEach((def) => {
-    const v = c[def.id];
-    if (def.tipo === "lista") {
-      const lista = (Array.isArray(v) ? v : String(v || "").split("\n")).map((x) => txt(x, LIMITES.passo).trim()).filter(Boolean).slice(0, LIMITES.passos);
-      if (lista.length) r[def.id] = lista;
-    } else if (def.tipo === "escolha") {
-      if (def.opcoes.includes(v)) r[def.id] = v;
-    } else if (def.tipo === "url") {
-      const u = urlSegura(v);
-      if (u) r[def.id] = u;
-    } else {
-      const s = txt(v, LIMITES.campo).trim();
-      if (s) r[def.id] = s;
-    }
+  CAMPOS_PERMITIDOS.forEach((id) => {
+    if (c[id] == null) return;
+    const v = normalizarValor(TIPO_NATIVO[id], c[id], campoDoTipo(tipo, id) || Object.values(CAMPOS).flat().find((x) => x.id === id));
+    if (v !== undefined) r[id] = v;
+  });
+  return r;
+}
+/* Campos personalizados (Painel de edição): no.extras = { idDoCampo: texto | [lista] } */
+function normalizarExtras(tipo, e) {
+  const r = {};
+  if (!e || typeof e !== "object") return r;
+  Object.keys(e).filter((k) => ID_CAMPO_EXTRA.test(k)).slice(0, LIMITE_EXTRAS).forEach((k) => {
+    const def = campoDoTipo(tipo, k);
+    const tipoCampo = def ? def.tipo : (Array.isArray(e[k]) ? "lista" : "area");
+    const v = normalizarValor(tipoCampo, e[k], def);
+    if (v !== undefined) r[k] = v;
   });
   return r;
 }
@@ -107,6 +229,7 @@ export function normalizarNo(d) {
     recolhido: !!d.recolhido,
     pos,
     campos: normalizarCampos(tipo, d.campos),
+    extras: normalizarExtras(tipo, d.extras),
     ligacoes: (Array.isArray(d.ligacoes) ? d.ligacoes : []).filter((l) => l && ID_VALIDO.test(l.para || "") && l.para !== d.id)
       .slice(0, LIMITES.ligacoes).map((l) => ({ para: l.para, rotulo: txt(l.rotulo, LIMITES.rotulo).trim() })),
     revisadoEm: typeof d.revisadoEm === "string" && !isNaN(Date.parse(d.revisadoEm)) ? d.revisadoEm.slice(0, 30) : "",
@@ -136,6 +259,8 @@ export function dadosNo(no, por) {
     tags: no.tags || [], recolhido: !!no.recolhido, pos: no.pos || null, campos: no.campos || {}, ligacoes: no.ligacoes || [],
     revisadoEm: no.revisadoEm || "", atualizadoEm: "__AGORA__", atualizadoPor: por
   };
+  /* "extras" só vai quando existe (nós antigos continuam no formato de antes) */
+  if (no.extras && Object.keys(no.extras).length) d.extras = no.extras;
   return d;
 }
 export function dadosMapa(m, por, novo = false) {
@@ -203,9 +328,20 @@ export const revisaoVencida = (no) => (no.tipo === "teste" || no.tipo === "conta
 /* ------------------------------------------------------------
  *  Busca
  * ------------------------------------------------------------ */
+/* Campos visíveis do tipo, com o valor já pronto para mostrar (rótulo da opção, lista, texto) */
+export function camposComValor(no, { incluirOcultos = false } = {}) {
+  return (CAMPOS[no.tipo] || []).filter((def) => incluirOcultos || !def.oculto).map((def) => {
+    const v = valorDoCampo(no, def);
+    if (v == null || v === "" || (Array.isArray(v) && !v.length)) return null;
+    return { def, valor: v, texto: Array.isArray(v) ? v.join("\n") : (def.tipo === "escolha" ? rotuloOpcao(def, v) : String(v)), opcao: def.tipo === "escolha" ? acharOpcao(def, v) : null };
+  }).filter(Boolean);
+}
 export function textoDoNo(no) {
-  const campos = Object.values(no.campos || {}).map((v) => (Array.isArray(v) ? v.join(" ") : v)).join(" ");
-  return normalizar([no.titulo, no.descricao, campos, (no.tags || []).join(" "), TIPOS[no.tipo].nome].join(" "));
+  const valores = [...Object.entries(no.campos || {}), ...Object.entries(no.extras || {})].map(([id, v]) => {
+    const def = campoDoTipo(no.tipo, id);
+    return Array.isArray(v) ? v.join(" ") : (def && def.tipo === "escolha" ? `${v} ${rotuloOpcao(def, v)}` : v);
+  }).join(" ");
+  return normalizar([no.titulo, no.descricao, valores, (no.tags || []).join(" "), (TIPOS[no.tipo] || {}).nome].join(" "));
 }
 export function corresponde(texto, termo) {
   const t = normalizar(termo).trim();
@@ -223,26 +359,49 @@ export function idCurto(prefixo = "n") {
 }
 const no = (tipo, titulo, paiId, ordem, extra = {}) => ({ id: extra.id || idCurto(), tipo, titulo, paiId, ordem, descricao: "", tags: [], campos: {}, ligacoes: [], ...extra });
 
-export const MODELOS = {
-  branco: { nome: "Em branco", descricao: "Só o nó do sistema." },
-  diagnostico: { nome: "Diagnóstico padrão", descricao: "Sistema → sintoma de exemplo → 3 testes genéricos → Quem resolve." }
-};
-export function nosDoModelo(modelo, nomeSistema) {
-  const raiz = no("sistema", nomeSistema, null, 0);
-  if (modelo !== "diagnostico") return [raiz];
-  const s = no("sintoma", "Sintoma de exemplo (renomeie)", raiz.id, 0, { descricao: "Descreva o que o usuário vê: mensagem, tela, horário em que acontece." });
-  const contato = no("contato", "Quem resolve", s.id, 3, { campos: { nome: "[Preencher: equipe responsável]" } });
+/* ---------- Modelos de mapa ("+ Novo mapa"): padrões no código; o Painel grava mapas-config/modelos ---------- */
+export const LIMITE_MODELOS = 30, LIMITE_NOS_MODELO = 200;
+function modelosPadrao() {
+  const raiz = (id) => no("sistema", "Sistema", null, 0, { id });
+  const s = no("sintoma", "Sintoma de exemplo (renomeie)", "d-raiz", 0, { id: "d-sintoma", descricao: "Descreva o que o usuário vê: mensagem, tela, horário em que acontece." });
+  const contato = no("contato", "Quem resolve", s.id, 3, { id: "d-contato", campos: { nome: "[Preencher: equipe responsável]" } });
   const t1 = no("teste", "Só comigo ou geral?", s.id, 0, {
-    campos: { passos: ["Peça para um colega abrir o sistema em outra máquina", "Teste com outro usuário na sua máquina"], esperado: "Descobrir se o problema é local (só você) ou geral (todos)." }
+    id: "d-teste-1", campos: { passos: ["Peça para um colega abrir o sistema em outra máquina", "Teste com outro usuário na sua máquina"], esperado: "Descobrir se o problema é local (só você) ou geral (todos)." }
   });
   const t2 = no("teste", "Limpar cache / testar outro navegador", s.id, 1, {
-    campos: { passos: ["Abra o sistema numa janela anônima", "Limpe o cache e os cookies do site", "Teste em outro navegador"] }
+    id: "d-teste-2", campos: { passos: ["Abra o sistema numa janela anônima", "Limpe o cache e os cookies do site", "Teste em outro navegador"] }
   });
   const t3 = no("teste", "Conexão / VPN / rede", s.id, 2, {
-    campos: { passos: ["Confira se a VPN está conectada", "Abra outro site interno", "Faça ping no servidor do sistema"] }
+    id: "d-teste-3", campos: { passos: ["Confira se a VPN está conectada", "Abra outro site interno", "Faça ping no servidor do sistema"] }
   });
   t1.ligacoes = [{ para: contato.id, rotulo: "Geral (todos afetados)" }, { para: t2.id, rotulo: "Só comigo" }];
-  return [raiz, s, t1, t2, t3, contato];
+  return [
+    { id: "branco", nome: "Em branco", descricao: "Só o nó do sistema.", nos: [raiz("b-raiz")] },
+    { id: "diagnostico", nome: "Diagnóstico padrão", descricao: "Sistema → sintoma de exemplo → 3 testes genéricos → Quem resolve.", nos: [raiz("d-raiz"), s, t1, t2, t3, contato] }
+  ];
+}
+export const MODELOS = [];
+export function normalizarModelo(m) {
+  if (!m || !ID_VALIDO.test(m.id || "")) return null;
+  const nos = (Array.isArray(m.nos) ? m.nos : []).slice(0, LIMITE_NOS_MODELO).map(normalizarNo).filter(Boolean)
+    .map(({ atualizadoEm, atualizadoPor, recolhido, pos, revisadoEm, ...resto }) => resto);
+  if (!nos.some((n) => !n.paiId)) return null;
+  return { id: m.id, nome: txtE(m.nome, 60) || m.id, descricao: txtE(m.descricao, 200), nos };
+}
+export const modelosPadraoNormalizados = () => modelosPadrao().map(normalizarModelo);
+export function aplicarModelos(config) {
+  const lista = config && Array.isArray(config.lista) ? config.lista.map(normalizarModelo).filter(Boolean).slice(0, LIMITE_MODELOS) : [];
+  MODELOS.length = 0;
+  MODELOS.push(...(lista.length ? lista : modelosPadraoNormalizados()));
+  return MODELOS;
+}
+/* Nós de um modelo com ids novos; a raiz recebe o nome do sistema */
+export function nosDoModelo(modeloId, nomeSistema) {
+  const m = MODELOS.find((x) => x.id === modeloId) || MODELOS[0];
+  const { nos } = clonarNos(m ? m.nos : [no("sistema", nomeSistema, null, 0)], true);
+  const raiz = nos.find((n) => !n.paiId);
+  if (raiz) { raiz.titulo = nomeSistema; raiz.tipo = "sistema"; }
+  return nos;
 }
 /* Mapa de exemplo SCDA (sem nomes, e-mails ou telefones reais: marcadores [Preencher: …]) */
 export const TAG_EXEMPLO = "exemplo-revisar";
@@ -282,12 +441,12 @@ export function mapaExemploSCDA() {
  *  Textos: roteiro (resumo copiável), Markdown e JSON
  * ------------------------------------------------------------ */
 const ROTULO_RESULTADO = { resolveu: "Resolveu", "nao-resolveu": "Não resolveu", pulado: "Pulado" };
+/* Contato numa linha: todos os campos visíveis do tipo, com os rótulos e opções atuais do Painel */
 export function textoContato(c) {
   if (!c) return "";
-  const f = c.campos || {};
-  return [`${c.titulo}${f.nome && f.nome !== c.titulo ? ` (${f.nome})` : ""}`,
-    f.area && `Área: ${f.area}`, f.canal && `Canal: ${f.canal}`, f.email && `E-mail: ${f.email}`, f.telefone && `Telefone: ${f.telefone}`,
-    f.horario && `Horário: ${f.horario}`, f.sla && `SLA: ${f.sla}`, f.nivel && `Nível: ${f.nivel}`].filter(Boolean).join(" · ");
+  const nome = (c.campos || {}).nome;
+  return [`${c.titulo}${nome && nome !== c.titulo ? ` (${nome})` : ""}`,
+    ...camposComValor(c).filter((x) => x.def.id !== "nome" && x.def.tipo !== "area" && x.def.tipo !== "lista").map((x) => `${x.def.rotulo}: ${x.texto}`)].join(" · ");
 }
 export function resumoRoteiro({ mapa, sintoma, passos, desfecho, contato, quando = new Date() }) {
   const linhas = [
@@ -311,11 +470,9 @@ export function mapaParaMarkdown(mapa, nos) {
     const rec = "  ".repeat(nivel);
     linhas.push(`${rec}- **${TIPOS[n.tipo].nome}: ${n.titulo}**`);
     if (n.descricao) n.descricao.split("\n").forEach((l) => linhas.push(`${rec}  ${l}`));
-    (CAMPOS[n.tipo] || []).forEach((def) => {
-      const v = n.campos[def.id];
-      if (!v) return;
-      if (Array.isArray(v)) { linhas.push(`${rec}  ${def.rotulo}:`); v.forEach((p, i) => linhas.push(`${rec}    ${i + 1}. ${p}`)); }
-      else linhas.push(`${rec}  ${def.rotulo}: ${v}`);
+    camposComValor(n).forEach(({ def, valor, texto }) => {
+      if (Array.isArray(valor)) { linhas.push(`${rec}  ${def.rotulo}:`); valor.forEach((p, i) => linhas.push(`${rec}    ${i + 1}. ${p}`)); }
+      else linhas.push(`${rec}  ${def.rotulo}: ${texto}`);
     });
     (n.ligacoes || []).forEach((l) => { const alvo = idx.porId.get(l.para); if (alvo) linhas.push(`${rec}  → ${l.rotulo ? l.rotulo + ": " : ""}${alvo.titulo}`); });
     (idx.filhos.get(n.id) || []).forEach((f) => escrever(f, nivel + 1));
@@ -343,4 +500,33 @@ export function clonarNos(nos, idsNovos = true, mapa = null) {
     ligacoes: (n.ligacoes || []).filter((l) => troca.has(l.para)).map((l) => ({ ...l, para: troca.get(l.para) }))
   }));
   return { mapa: mapa ? normalizarMapa({ ...mapa, id: ID_VALIDO.test(mapa.id || "") ? mapa.id : "mapa" }) : null, nos: copia };
+}
+
+/* Estrutura e modelos iniciais = padrões do código (a configuração da nuvem chega depois) */
+aplicarEstrutura(null);
+aplicarModelos(null);
+
+/* ------------------------------------------------------------
+ *  Comparação de configurações (Histórico do Painel)
+ * ------------------------------------------------------------ */
+export function diferencas(a, b, caminho = "", saida = []) {
+  if (saida.length > 200) return saida;
+  const ehObj = (v) => v && typeof v === "object";
+  if (ehObj(a) && ehObj(b) && Array.isArray(a) === Array.isArray(b)) {
+    /* Listas de itens com id (campos, opções, modelos): compara pelo id */
+    const porId = Array.isArray(a) && [...a, ...b].every((x) => ehObj(x) && typeof x.id === "string");
+    if (porId) {
+      const ma = new Map(a.map((x) => [x.id, x])), mb = new Map(b.map((x) => [x.id, x]));
+      new Set([...ma.keys(), ...mb.keys()]).forEach((id) => diferencas(ma.get(id), mb.get(id), `${caminho}[${id}]`, saida));
+      const oa = a.map((x) => x.id).filter((id) => mb.has(id)).join(","), ob = b.map((x) => x.id).filter((id) => ma.has(id)).join(",");
+      if (oa !== ob) saida.push({ caminho: `${caminho} (ordem)`, antes: oa, depois: ob });
+      return saida;
+    }
+    new Set([...Object.keys(a), ...Object.keys(b)]).forEach((k) => diferencas(a[k], b[k], caminho ? `${caminho}.${k}` : k, saida));
+    return saida;
+  }
+  const ta = a === undefined ? "" : (ehObj(a) ? JSON.stringify(a) : String(a));
+  const tb = b === undefined ? "" : (ehObj(b) ? JSON.stringify(b) : String(b));
+  if (ta !== tb) saida.push({ caminho, antes: ta.slice(0, 160), depois: tb.slice(0, 160) });
+  return saida;
 }

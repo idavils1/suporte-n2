@@ -135,13 +135,73 @@
   .guia-v { top: 0; bottom: 0; width: 0; border-left: 1px dashed #00a2ff; }
   .guia-h { left: 0; right: 0; height: 0; border-top: 1px dashed #00a2ff; }
   .aviso-oficial { font-size: 13px; padding: 8px 10px; border-radius: var(--raio-sm); background: var(--f-azul); color: var(--c-azul); }
+
+  /* ---------- Visual (cartões, etapas, abas em pílula); só aparência, a lógica não muda ---------- */
+  .pagina { padding: 24px 24px 56px; gap: 24px; }
+  .pagina-topo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; }
+  .etapas { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; font-weight: 600; color: var(--texto-secundario); }
+  .etapas li { display: inline-flex; align-items: center; gap: 8px; }
+  .etapa-num { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--lilas-destaque); color: var(--cor-acao); font-size: 12px; font-weight: 700; }
+  .etapas li + li::before { content: ""; width: 24px; height: 1px; background: var(--borda-forte); margin-right: 12px; }
+  .pagina-topo .apoio { font-size: 13px; }
+  .cartao { padding: 24px; border: 1px solid var(--borda); border-radius: var(--raio-md); background: var(--superficie); }
+  .cartao-titulo { font-size: 17px; letter-spacing: -0.01em; }
+  .cartao-form { display: grid; gap: 16px; align-content: start; }
+  .cartao-cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+  .legenda { font-size: 12px; color: var(--texto-secundario); }
+  .previa-coluna.cartao { gap: 16px; }
+  /* Abas de tipo: controle segmentado em pílulas, mantendo o ponto de cor */
+  .abas { justify-self: start; max-width: 100%; gap: 4px; padding: 4px; border: 1px solid var(--borda); border-radius: 999px; background: var(--superficie-suave); }
+  .aba { height: 40px; margin-bottom: 0; padding: 0 16px; border: 0; border-radius: 999px; transition: background-color var(--transicao), color var(--transicao), box-shadow var(--transicao); }
+  .aba:hover { background: var(--superficie-quente); }
+  .aba[aria-selected="true"] { background: var(--superficie); color: var(--cor-acao); box-shadow: 0 1px 3px var(--sombra), 0 0 0 1px var(--borda-forte); }
+  .aba:focus-visible { outline-offset: 0; }
+  /* Ações: Baixar em destaque; Copiar e Texto agrupados; Limpar afastado (destrutivo) */
+  .acoes { align-items: center; gap: 8px; padding-top: 16px; border-top: 1px solid var(--borda); }
+  .acoes-grupo { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+  #btn-baixar { padding-left: 20px; padding-right: 20px; }
+  #btn-limpar { margin-left: auto; color: var(--texto-secundario); }
+  #btn-limpar:hover { color: var(--erro-texto); border-color: var(--erro-borda); background: var(--erro-fundo); }
+  #btn-limpar:hover .icone { stroke: var(--erro-texto); }
+  .previa-quadro { border-radius: var(--raio-sm); }
+  /* Barra de formatação: um bloco único com separadores entre os grupos */
+  .barra-formato { gap: 2px; padding: 4px; border: 1px solid var(--borda); border-radius: var(--raio-sm); background: var(--superficie-suave); align-self: start; justify-self: start; }
+  .btn-formato { border-color: transparent; background: transparent; transition: background-color var(--transicao), border-color var(--transicao); }
+  .btn-formato:hover { background: var(--superficie); border-color: var(--borda); }
+  .btn-formato[aria-pressed="true"], .btn-formato[aria-expanded="true"] { background: var(--lilas-destaque); border-color: var(--lilas); }
+  .barra-formato > .cor-menu, .barra-formato > [data-fmt="limpar"] { margin-left: 4px; }
+  .barra-formato > .cor-menu { padding-left: 6px; border-left: 1px solid var(--borda-forte); }
+  .barra-formato > [data-fmt="limpar"] { position: relative; margin-left: 10px; }
+  .barra-formato > [data-fmt="limpar"]::before { content: ""; position: absolute; left: -7px; top: 6px; bottom: 6px; border-left: 1px solid var(--borda-forte); }
+  /* Histórico: grade de miniaturas */
+  .historico { gap: 16px; }
+  .historico-lista { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .hist-item { padding: 8px; gap: 6px; transition: border-color var(--transicao), background-color var(--transicao), transform var(--transicao), box-shadow var(--transicao); }
+  .hist-item:hover, .hist-item:focus-visible { transform: translateY(-2px); box-shadow: 0 6px 16px var(--sombra); }
+  .hist-item .t { font-size: 13px; }
+  .hist-item .d { font-size: 12px; }
+  .hist-apagar { background: var(--superficie); border: 1px solid var(--borda); opacity: 0; transition: opacity var(--transicao); }
+  .hist-item:hover .hist-apagar, .hist-item:focus-within .hist-apagar { opacity: 1; }
+  @media (hover: none) { .hist-apagar { opacity: 1; } }
+  .hist-vazio { display: flex; align-items: center; gap: 12px; padding: 20px; border: 1px dashed var(--borda-forte); border-radius: var(--raio-md); background: var(--superficie-suave); }
+  .hist-vazio .icone { width: 28px; height: 28px; flex-shrink: 0; }
+  @media (prefers-reduced-motion: reduce) { .hist-item:hover, .hist-item:focus-visible { transform: none; } }
+
   @media (max-width: 900px) {
     .editor { grid-template-columns: minmax(0, 1fr); }
     .previa-coluna { position: static; order: -1; }
   }
   @media (max-width: 640px) {
-    .pagina { padding: 14px 12px 40px; }
-    .aba { padding: 0 10px; font-size: 14px; }
+    .pagina { padding: 14px 12px 40px; gap: 16px; }
+    .aba { padding: 0 12px; font-size: 14px; }
+    .abas { border-radius: var(--raio-md); }
+    .cartao { padding: 16px; }
+    .etapas li + li::before { display: none; }
+    .btn-formato { min-width: 40px; height: 40px; }
+    .pronto { min-height: 40px; padding: 0 14px; }
+    .hist-apagar { width: 40px; height: 40px; top: 4px; right: 4px; }
+    .acoes .btn { min-height: 44px; }
+    #btn-limpar { margin-left: 0; }
   }
 </style>
 </head>
@@ -158,20 +218,36 @@
 <div class="faixa-aviso" id="faixa-offline" hidden>Sem conexão com a nuvem: usando os templates embutidos e os modelos de recado salvos só neste computador. Gerar e baixar continua funcionando.</div>
 
 <main class="pagina">
-  <p class="apoio">Escolha o tipo, preencha os textos e baixe a imagem pronta. O layout é fixo: só os textos mudam.</p>
+  <div class="pagina-topo">
+    <ol class="etapas" aria-label="Como usar">
+      <li><span class="etapa-num" aria-hidden="true">1</span>Escolha o tipo</li>
+      <li><span class="etapa-num" aria-hidden="true">2</span>Preencha o recado</li>
+      <li><span class="etapa-num" aria-hidden="true">3</span>Baixe ou copie</li>
+    </ol>
+    <p class="apoio">O layout é fixo: só os textos mudam.</p>
+  </div>
   <div class="abas" role="tablist" aria-label="Tipo de comunicado" id="abas"></div>
   <section id="painel" role="tabpanel" class="editor" tabindex="-1">
-    <form class="formulario" id="formulario" novalidate autocomplete="off"></form>
-    <div class="previa-coluna">
+    <div class="cartao cartao-form">
+      <h2 class="cartao-titulo">Preencha o comunicado</h2>
+      <form class="formulario" id="formulario" novalidate autocomplete="off"></form>
+    </div>
+    <div class="previa-coluna cartao">
+      <div class="cartao-cab">
+        <h2 class="cartao-titulo">Prévia</h2>
+        <span class="legenda">A imagem final sai exatamente como a prévia.</span>
+      </div>
       <div class="previa-quadro" id="previa-quadro">
         <canvas id="tela" aria-label="Prévia do comunicado" role="img"></canvas>
         <div class="camada-ajuste" id="camada-ajuste" hidden></div>
       </div>
       <p class="aviso-modelo" id="aviso-modelo"></p>
       <div class="acoes">
-        <button type="button" class="btn" id="btn-baixar"></button>
-        <button type="button" class="btn btn-secundario" id="btn-copiar"></button>
-        <button type="button" class="btn btn-secundario" id="btn-texto"></button>
+        <button type="button" class="btn" id="btn-baixar" title="Baixar (Ctrl+S)"></button>
+        <div class="acoes-grupo" role="group" aria-label="Outras ações">
+          <button type="button" class="btn btn-secundario" id="btn-copiar" title="Copiar a imagem (Ctrl+Shift+C)"></button>
+          <button type="button" class="btn btn-secundario" id="btn-texto"></button>
+        </div>
         <button type="button" class="btn btn-secundario" id="btn-limpar"></button>
       </div>
       <div class="opcoes-baixar" id="opcoes-baixar" hidden>
@@ -181,9 +257,9 @@
       <div class="painel-ajuste" id="painel-ajuste" hidden></div>
     </div>
   </section>
-  <section class="historico" aria-labelledby="titulo-historico">
-    <h2 id="titulo-historico" style="font-size:18px">Últimos 10 comunicados</h2>
-    <p class="apoio" id="historico-vazio">Os comunicados que você baixar ou copiar aparecem aqui (só neste navegador).</p>
+  <section class="historico cartao" aria-labelledby="titulo-historico">
+    <h2 id="titulo-historico" class="cartao-titulo">Últimos 10 comunicados</h2>
+    <p class="apoio hist-vazio" id="historico-vazio"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-imagem"/></svg><span>Os comunicados que você baixar ou copiar aparecem aqui (só neste navegador).</span></p>
     <div class="historico-lista" id="historico"></div>
   </section>
 </main>
@@ -2436,6 +2512,18 @@
       renderizarFormulario();
       desenhar();
     }, () => {});
+  });
+</script>
+<script>
+  /* Atalhos: Ctrl+S = Baixar, Ctrl+Shift+C = Copiar. Só clicam nos botões existentes (mesma lógica). */
+  document.addEventListener("keydown", function (e) {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey || document.querySelector("dialog[open]")) return;
+    var tecla = String(e.key || "").toLowerCase();
+    var alvo = tecla === "s" && !e.shiftKey ? document.getElementById("btn-baixar")
+      : tecla === "c" && e.shiftKey ? document.getElementById("btn-copiar") : null;
+    if (!alvo || alvo.disabled || alvo.offsetParent === null) return;
+    e.preventDefault();
+    alvo.click();
   });
 </script>
 </body>

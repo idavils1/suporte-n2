@@ -178,7 +178,7 @@ service cloud.firestore {
     }
     function noMapaValido() {
       let d = request.resource.data;
-      return d.keys().hasOnly(['tipo', 'titulo', 'descricao', 'paiId', 'ordem', 'tags', 'recolhido', 'pos', 'campos', 'ligacoes', 'revisadoEm', 'atualizadoEm', 'atualizadoPor'])
+      return d.keys().hasOnly(['tipo', 'titulo', 'descricao', 'paiId', 'ordem', 'tags', 'recolhido', 'pos', 'campos', 'extras', 'ligacoes', 'revisadoEm', 'atualizadoEm', 'atualizadoPor'])
         && d.tipo in ['sistema', 'sintoma', 'teste', 'contato', 'solucao', 'link', 'nota']
         && d.titulo is string && d.titulo.size() > 0 && d.titulo.size() <= 120
         && textoAte(d.get('descricao', ''), 20000)
@@ -191,9 +191,28 @@ service cloud.firestore {
         && d.get('campos', {}).keys().hasOnly(['url', 'dono', 'criticidade', 'palavrasChave', 'frequencia', 'impacto', 'passos', 'esperado', 'tempo',
             'nome', 'area', 'canal', 'email', 'telefone', 'horario', 'sla', 'nivel', 'observacoes', 'natureza'])
         && d.get('ligacoes', []) is list && d.get('ligacoes', []).size() <= 20
+        // Campos personalizados do Painel de edição (no máximo 20; o navegador limita cada valor a 2000 caracteres)
+        && d.get('extras', {}) is map && d.get('extras', {}).size() <= 20
         && textoAte(d.get('revisadoEm', ''), 30)
         && request.auth != null && d.atualizadoPor == request.auth.token.email && d.atualizadoEm == request.time;
     }
+    // Painel de edição dos mapas (mapas-config/estrutura e /modelos): SÓ administradoras.
+    // Os ids dos 7 tipos não mudam (só nome, cor, ícone etc.), por isso as chaves são fixas.
+    function configMapasValida(documento) {
+      let d = request.resource.data;
+      let tipos = ['sistema', 'sintoma', 'teste', 'contato', 'solucao', 'link', 'nota'];
+      return d.keys().hasOnly(['versao', 'tipos', 'ordemTipos', 'campos', 'lista', 'atualizadoEm', 'atualizadoPor'])
+        && d.get('versao', 1) is number
+        && (documento == 'estrutura'
+          ? (d.tipos is map && d.tipos.keys().hasOnly(tipos)
+            && d.ordemTipos is list && d.ordemTipos.size() <= 7 && d.ordemTipos.hasOnly(tipos)
+            && d.campos is map && d.campos.keys().hasOnly(tipos)
+            && !('lista' in d))
+          : (d.lista is list && d.lista.size() <= 30
+            && !('tipos' in d) && !('campos' in d) && !('ordemTipos' in d)))
+        && request.auth != null && d.atualizadoPor == request.auth.token.email && d.atualizadoEm == request.time;
+    }
+
     // "Registrar atendimento" no modo Roteiro: qualquer pessoa cria (assina com o nome, como a Galeria);
     // não dá para editar; só quem edita os mapas apaga.
     function usoMapaValido() {
@@ -2246,6 +2265,22 @@ service cloud.firestore {
         allow create: if usoId.matches('^[a-z0-9]{1,40}$') && usoMapaValido();
         allow update: if false;
         allow delete: if podeEditarMapas();
+      }
+    }
+    // Configuração do Painel de edição: leitura livre (a página de todos usa); escrita só administradoras.
+    match /mapas-config/{documento} {
+      allow read: if true;
+      allow create, update: if ehAdmin() && documento in ['estrutura', 'modelos'] && configMapasValida(documento);
+      allow delete: if false;
+      // Uma versão por salvamento (Histórico: comparar e restaurar); nunca é alterada
+      match /versoes/{versaoId} {
+        allow read: if ehAdmin();
+        allow create: if ehAdmin() && documento in ['estrutura', 'modelos'] && versaoId.matches('^[a-z0-9]{1,40}$')
+          && request.resource.data.keys().hasOnly(['dados', 'resumo', 'em', 'por'])
+          && request.resource.data.dados is map && textoAte(request.resource.data.resumo, 200)
+          && request.resource.data.em == request.time && request.resource.data.por == request.auth.token.email;
+        allow update: if false;
+        allow delete: if ehAdmin();
       }
     }
     // Lixeira dos mapas: mapas e ramos removidos (Restaurar ou Excluir de vez)

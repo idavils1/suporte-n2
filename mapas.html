@@ -29,12 +29,14 @@
   <a class="btn btn-secundario btn-mini voltar" href="index.html" aria-label="Voltar para a Central">← <span>Central</span></a>
   <h1 id="titulo-pagina"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mapa"/></svg><span>Mapas de Ajuda</span></h1>
   <div class="topo-acoes">
+    <a class="btn btn-secundario btn-mini btn-painel" id="btn-painel" href="#painel" aria-pressed="false" hidden title="Painel de edição (administradoras)"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-engrenagem"/></svg><span>Painel de edição</span></a>
     <button type="button" class="btn btn-secundario btn-mini btn-edicao" id="btn-edicao" aria-pressed="false" hidden></button>
     <button type="button" class="btn-icone" id="btn-tema" aria-label="Alternar tema"></button>
     <button type="button" class="btn btn-secundario btn-mini btn-login" id="btn-login" hidden></button>
   </div>
 </header>
 <div class="barra-edicao" id="barra-edicao" hidden></div>
+<div class="faixa-visitante" id="faixa-visitante" hidden role="status">Você está vendo os mapas como visitante (sem os controles de edição). <button type="button" class="btn btn-secundario btn-mini" id="sair-visitante">Voltar a ver como administradora</button></div>
 <div class="faixa-aviso" id="faixa-offline" hidden>Sem conexão com a nuvem: mostrando só o mapa de exemplo, em somente leitura.</div>
 <main class="conteudo" id="conteudo" tabindex="-1">
   <p class="apoio carregando">Carregando os mapas…</p>

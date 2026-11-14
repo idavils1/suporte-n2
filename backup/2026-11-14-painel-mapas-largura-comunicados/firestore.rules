@@ -1,0 +1,2269 @@
+rules_version = '2';
+
+// Conteúdo da Central do Suporte N2.
+// Leitura: qualquer pessoa que abre o site.
+// Escrita: somente as contas das administradoras no Firebase Authentication,
+// EXCETO Galeria, Anotações, modelos de recado dos Comunicados e TODOS os cadernos
+// (/cadernos/{slug}/...), que são abertos para qualquer pessoa. Os cadernos valem para qualquer slug (atuais e
+// futuros) e não dependem do documento /cadernos/{slug} existir.
+// Para fechar os cadernos: podeEscreverCaderno() aqui + CADERNO_ABERTO no caderno.html.
+// Ao incluir ou trocar um e-mail, mude aqui e em ADMINS no index.html.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function ehAdmin() {
+      return request.auth != null
+        && request.auth.token.email in ['lays.almeida@valid.com', 'paula.conceicao@valid.com'];
+    }
+    function ehLays() {
+      return request.auth != null && request.auth.token.email == 'lays.almeida@valid.com';
+    }
+    // Cadernos: administradoras + EDITORES_CADERNO. Mantenha esta lista igual a
+    // EDITORES_CADERNO no index.html e no caderno.html (e-mails em minúsculas).
+    function podeEditarCaderno() {
+      return ehAdmin()
+        || (request.auth != null && request.auth.token.email in [
+          // 'nome.sobrenome@valid.com',
+        ]);
+    }
+    function textoAte(valor, maximo) {
+      return valor is string && valor.size() <= maximo;
+    }
+    function dataUrlImagem(valor, maximo) {
+      return valor is string && valor.size() < maximo && valor.matches('^data:image/(jpeg|png|webp);base64,.*');
+    }
+    // Cadernos abertos: qualquer pessoa sem login também escreve (como a Galeria), assinando com o nome.
+    // Para voltar a exigir login, troque por: return podeEditarCaderno();
+    function podeEscreverCaderno() {
+      return request.auth == null || podeEditarCaderno();
+    }
+    function slugCaderno(caderno) {
+      return caderno.matches('^[a-z0-9-]{1,40}$');
+    }
+    // Conta logada assina com o próprio e-mail; sem login, com um nome sem "@" (não dá para se passar por uma conta).
+    function autorValido(valor) {
+      return (request.auth != null && valor == request.auth.token.email)
+        || (request.auth == null && valor is string && valor.size() > 0 && valor.size() <= 60 && !valor.matches('.*@.*'));
+    }
+    function autoriaAtual() {
+      return autorValido(request.resource.data.atualizadoPor)
+        && request.resource.data.atualizadoEm == request.time;
+    }
+    function noValido() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['tipo', 'nome', 'paiId', 'ordem', 'icone', 'cor', 'ordenacao', 'excluidoEm', 'criadoEm', 'criadoPor', 'atualizadoEm', 'atualizadoPor'])
+        && d.tipo in ['pasta', 'nota']
+        && d.nome is string && d.nome.size() > 0 && d.nome.size() <= 120
+        && (d.paiId == null || textoAte(d.paiId, 60))
+        && d.ordem is number
+        && textoAte(d.icone, 40) && textoAte(d.cor, 20)
+        && (!('ordenacao' in d) || d.ordenacao in ['manual', 'nome', 'alteracao'])
+        && (d.excluidoEm == null || d.excluidoEm is timestamp)
+        && d.criadoEm is timestamp && textoAte(d.criadoPor, 80)
+        && autoriaAtual();
+    }
+    function corValida(v) {
+      return v is string && v.matches('^#[0-9a-fA-F]{6}$');
+    }
+    function numeroEntre(v, minimo, maximo) {
+      return v is number && v >= minimo && v <= maximo;
+    }
+    // Capa do caderno: texto (formato antigo: id de imagem ou caminho) ou mapa da capa personalizada.
+    // Imagem só do próprio caderno (img-...) ou da pasta fotos/ do site: nunca URL externa.
+    function atalhoCapaValido(a) {
+      return a is map && a.keys().hasOnly(['notaId', 'rotulo', 'icone'])
+        && textoAte(a.notaId, 60) && textoAte(a.get('rotulo', ''), 40) && textoAte(a.get('icone', ''), 30);
+    }
+    function capaValida(c) {
+      return (c is string && c.size() <= 200)
+        || (c is map
+          && c.keys().hasOnly(['tipo', 'imagem', 'focoX', 'focoY', 'veu', 'veuForca', 'desfoque', 'cor1', 'cor2', 'angulo', 'desenho', 'altura', 'icone', 'titulo', 'subtitulo', 'mensagem', 'alinhamento', 'atalhos', 'secoes'])
+          && c.get('tipo', 'gradiente') in ['imagem', 'gradiente', 'cor', 'padrao']
+          && (c.get('imagem', '') == '' || (c.imagem is string && c.imagem.matches('^(img-[A-Za-z0-9_-]{1,60}|fotos/[A-Za-z0-9_./-]{1,180})$') && !c.imagem.matches('.*[.][.].*')))
+          && numeroEntre(c.get('focoX', 50), 0, 100) && numeroEntre(c.get('focoY', 50), 0, 100)
+          && c.get('veu', 'nenhum') in ['nenhum', 'escurecer', 'clarear']
+          && numeroEntre(c.get('veuForca', 0), 0, 60)
+          && c.get('desfoque', false) is bool
+          && corValida(c.get('cor1', '#000000')) && corValida(c.get('cor2', '#000000'))
+          && c.get('angulo', 0) in [0, 45, 90, 135, 180]
+          && c.get('desenho', 'pontos') in ['pontos', 'diagonais', 'grade', 'ondas', 'circulos', 'topografico']
+          && c.get('altura', 'media') in ['baixa', 'media', 'alta']
+          && c.get('icone', '') in ['', 'i-livro', 'i-estrela', 'i-lampada', 'i-info', 'i-alerta', 'i-sucesso', 'i-telefone', 'i-pessoas', 'i-imagem', 'i-cadeado', 'i-calendario', 'i-servidor', 'i-headset', 'i-grafico', 'i-balanca', 'i-megafone', 'i-casa', 'i-documento', 'i-pasta',
+                                    '📘', '📗', '📙', '📒', '🗂️', '🧭', '🛡️', '🔐', '🩺', '⚖️', '🏥', '💡', '🚀', '⭐', '🧩', '📞', '🖥️', '📋']
+          && textoAte(c.get('titulo', ''), 80) && textoAte(c.get('subtitulo', ''), 160) && textoAte(c.get('mensagem', ''), 600)
+          && c.get('alinhamento', 'esquerda') in ['esquerda', 'centro']
+          && c.get('atalhos', []) is list && c.get('atalhos', []).size() <= 6
+          && (c.get('atalhos', []).size() < 1 || atalhoCapaValido(c.atalhos[0]))
+          && (c.get('atalhos', []).size() < 2 || atalhoCapaValido(c.atalhos[1]))
+          && (c.get('atalhos', []).size() < 3 || atalhoCapaValido(c.atalhos[2]))
+          && (c.get('atalhos', []).size() < 4 || atalhoCapaValido(c.atalhos[3]))
+          && (c.get('atalhos', []).size() < 5 || atalhoCapaValido(c.atalhos[4]))
+          && (c.get('atalhos', []).size() < 6 || atalhoCapaValido(c.atalhos[5]))
+          && c.get('secoes', []) is list && c.get('secoes', []).size() <= 4
+          && c.get('secoes', []).hasOnly(['favoritas', 'atualizadas', 'revisar', 'estatisticas']));
+    }
+    // Aparência livre das planilhas (aparencia.js nos três motores): padrão da planilha definido pelas
+    // administradoras. Cores, regras e imagem são validadas de novo no navegador antes de virar CSS.
+    function temaPlanilhaValido(t) {
+      return t == null || (t is map
+        && t.keys().hasOnly(['v', 'nome', 'alto', 'base', 'avancado', 'listas', 'fundo', 'grade', 'colunas'])
+        && t.get('v', 1) == 1 && textoAte(t.get('nome', ''), 40) && t.get('alto', false) is bool
+        && t.get('base', {}) is map && t.get('base', {}).keys().hasOnly(['destaque', 'fundo', 'grade'])
+        && corValida(t.get('base', {}).get('destaque', '#000000')) && corValida(t.get('base', {}).get('fundo', '#000000')) && corValida(t.get('base', {}).get('grade', '#000000'))
+        && t.get('avancado', {}) is map && t.get('avancado', {}).keys().hasOnly(['claro', 'escuro'])
+        && t.get('avancado', {}).get('claro', {}) is map && t.get('avancado', {}).get('claro', {}).size() <= 40
+        && t.get('avancado', {}).get('escuro', {}) is map && t.get('avancado', {}).get('escuro', {}).size() <= 40
+        && t.get('listas', {}) is map && t.get('listas', {}).keys().hasOnly(['claro', 'escuro'])
+        && t.get('fundo', {}) is map && t.get('fundo', {}).keys().hasOnly(['tipo', 'area', 'cor', 'g', 'p', 'i', 'temImagem'])
+        && t.get('fundo', {}).get('tipo', 'nenhum') in ['nenhum', 'cor', 'gradiente', 'padrao', 'imagem']
+        && t.get('fundo', {}).get('area', 'pagina') in ['pagina', 'moldura']
+        && t.get('grade', {}) is map && t.get('grade', {}).size() <= 30
+        && t.get('colunas', {}) is map && t.get('colunas', {}).size() <= 80);
+    }
+    function aparenciaPlanilhaValida(d) {
+      return d is map && d.keys().hasOnly(['tema', 'regras', 'permitirPessoal', 'atualizadoEm', 'atualizadoPor'])
+        && temaPlanilhaValido(d.get('tema', null))
+        && d.regras is list && d.regras.size() <= 30
+        && d.permitirPessoal is bool
+        && d.atualizadoEm == request.time;
+    }
+    function aparenciaImagemValida(d) {
+      return d.keys().hasOnly(['imagem', 'atualizadoEm', 'atualizadoPor'])
+        && dataUrlImagem(d.imagem, 700001)
+        && d.atualizadoEm == request.time;
+    }
+    function aparenciaValida(a) {
+      return a is map && a.size() <= 5
+        && a.keys().hasOnly(['corDestaque', 'capa', 'semGuia'])
+        && (a.get('corDestaque', '') == '' || corValida(a.corDestaque))
+        && (!('capa' in a) || capaValida(a.capa))
+        && a.get('semGuia', false) is bool;
+    }
+
+    // Contatos (contatos.html): administradoras + CONTATOS_EDITORES (lista igual à do contatos.html).
+    // Para deixar aberto como os cadernos (assinando com o nome), troque contatosAbertos() para true
+    // E CONTATOS_ABERTO no contatos.html.
+    function contatosAbertos() {
+      return false;
+    }
+    function podeEditarContatos() {
+      return ehAdmin()
+        || (request.auth != null && request.auth.token.email in [
+          // 'nome.sobrenome@valid.com',
+        ])
+        || contatosAbertos();
+    }
+    // Mapas de Ajuda (mapas.html): administradoras + EDITORES_MAPAS. Mantenha esta lista igual a
+    // EDITORES_MAPAS no comum/mapas.js (e-mails em minúsculas). Para trocar a política, mude só aqui e lá.
+    function podeEditarMapas() {
+      return ehAdmin()
+        || (request.auth != null && request.auth.token.email in [
+          // 'nome.sobrenome@valid.com',
+        ]);
+    }
+    function idMapa(id) {
+      return id.matches('^[a-z0-9-]{1,60}$');
+    }
+    function mapaValido() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['nome', 'descricao', 'icone', 'cor', 'layout', 'tags', 'criadoEm', 'criadoPor', 'atualizadoEm', 'atualizadoPor', 'excluidoEm'])
+        && d.nome is string && d.nome.size() > 0 && d.nome.size() <= 80
+        && textoAte(d.get('descricao', ''), 500)
+        && textoAte(d.icone, 40) && d.icone.matches('^i-[a-z-]{1,36}$')
+        && d.cor in ['roxo', 'azul', 'verde', 'laranja', 'amarelo', 'vermelho', 'cinza']
+        && d.get('layout', 'arvore') in ['arvore', 'grafo']
+        && d.get('tags', []) is list && d.get('tags', []).size() <= 20
+        && d.criadoEm is timestamp && textoAte(d.criadoPor, 80)
+        && (d.get('excluidoEm', null) == null || d.excluidoEm is timestamp)
+        && request.auth != null && d.atualizadoPor == request.auth.token.email && d.atualizadoEm == request.time;
+    }
+    function noMapaValido() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['tipo', 'titulo', 'descricao', 'paiId', 'ordem', 'tags', 'recolhido', 'pos', 'campos', 'ligacoes', 'revisadoEm', 'atualizadoEm', 'atualizadoPor'])
+        && d.tipo in ['sistema', 'sintoma', 'teste', 'contato', 'solucao', 'link', 'nota']
+        && d.titulo is string && d.titulo.size() > 0 && d.titulo.size() <= 120
+        && textoAte(d.get('descricao', ''), 20000)
+        && (d.get('paiId', null) == null || (d.paiId is string && d.paiId.matches('^[a-z0-9-]{1,60}$')))
+        && d.ordem is number
+        && d.get('tags', []) is list && d.get('tags', []).size() <= 20
+        && d.get('recolhido', false) is bool
+        && (d.get('pos', null) == null || (d.pos is map && d.pos.keys().hasOnly(['x', 'y', 'v']) && d.pos.x is number && d.pos.y is number && d.pos.get('v', 'arvore') in ['arvore', 'grafo']))
+        && d.get('campos', {}) is map && d.get('campos', {}).size() <= 20
+        && d.get('campos', {}).keys().hasOnly(['url', 'dono', 'criticidade', 'palavrasChave', 'frequencia', 'impacto', 'passos', 'esperado', 'tempo',
+            'nome', 'area', 'canal', 'email', 'telefone', 'horario', 'sla', 'nivel', 'observacoes', 'natureza'])
+        && d.get('ligacoes', []) is list && d.get('ligacoes', []).size() <= 20
+        && textoAte(d.get('revisadoEm', ''), 30)
+        && request.auth != null && d.atualizadoPor == request.auth.token.email && d.atualizadoEm == request.time;
+    }
+    // "Registrar atendimento" no modo Roteiro: qualquer pessoa cria (assina com o nome, como a Galeria);
+    // não dá para editar; só quem edita os mapas apaga.
+    function usoMapaValido() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['sintomaId', 'resultado', 'resolvidoNo', 'contatoId', 'testes', 'em', 'por'])
+        && d.sintomaId is string && d.sintomaId.matches('^[a-z0-9-]{1,60}$')
+        && d.resultado in ['resolvido', 'escalado', 'sem-solucao']
+        && textoAte(d.resolvidoNo, 60) && textoAte(d.contatoId, 60)
+        && d.testes is list && d.testes.size() <= 60
+        && d.em == request.time
+        && autorValido(d.por);
+    }
+
+    // LGPD: só dados corporativos. Não existem (e são recusados) campos de CPF, RG, endereço
+    // residencial, data de nascimento, celular pessoal ou saúde: hasOnly() abaixo.
+    function contatoValido() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['nome', 'apelido', 'foto', 'cargo', 'nivel', 'empresa', 'diretoria', 'area', 'equipe', 'grupo', 'gestorId', 'centroCusto',
+          'cidade', 'unidade', 'modelo', 'fuso', 'email', 'ramal', 'celular', 'canal', 'assuntos', 'quando', 'quandoNao', 'escalonamento', 'sla',
+          'horario', 'plantao', 'escala', 'substitutoId', 'status', 'ausenteDe', 'ausenteAte', 'observacoes', 'exemplo', 'criadoEm', 'atualizadoEm', 'atualizadoPor'])
+        && d.nome is string && d.nome.size() > 0 && d.nome.size() <= 120
+        && textoAte(d.get('apelido', ''), 60) && textoAte(d.get('cargo', ''), 100) && textoAte(d.get('diretoria', ''), 100)
+        && textoAte(d.get('area', ''), 100) && textoAte(d.get('equipe', ''), 100) && textoAte(d.get('centroCusto', ''), 40)
+        && textoAte(d.get('cidade', ''), 80) && textoAte(d.get('unidade', ''), 100) && textoAte(d.get('ramal', ''), 40) && textoAte(d.get('celular', ''), 40)
+        && textoAte(d.get('quando', ''), 500) && textoAte(d.get('quandoNao', ''), 500) && textoAte(d.get('sla', ''), 60) && textoAte(d.get('horario', ''), 80)
+        && textoAte(d.get('escala', ''), 200) && textoAte(d.get('observacoes', ''), 500)
+        && textoAte(d.get('gestorId', ''), 60) && textoAte(d.get('substitutoId', ''), 60)
+        && d.get('nivel', '') in ['', 'Diretoria', 'Gerência', 'Coordenação', 'Supervisão', 'Liderança', 'Analista/Especialista', 'Técnico']
+        && d.get('empresa', '') in ['', 'V/Cert', 'Valid Corporativo', 'Parceiro']
+        && d.get('grupo', '') in ['', 'lideranca', 'gestao', 'diretoria', 'parceiras', 'fornecedores', 'plantao', 'orgaos']
+        && d.get('modelo', '') in ['', 'Presencial', 'Híbrido', 'Remoto']
+        && d.get('fuso', '') in ['', 'Brasília (UTC−3)', 'Amazonas (UTC−4)', 'Acre (UTC−5)', 'Fernando de Noronha (UTC−2)', 'Outro']
+        && d.get('escalonamento', '') in ['', 'N1', 'N2', 'N3', 'Gestão', 'Diretoria']
+        && d.get('status', '') in ['', 'Ativo', 'Férias', 'Licença', 'Afastado', 'Desligado']
+        && (d.get('email', '') == '' || (textoAte(d.email, 120) && d.email.matches('^[^@\\s]+@[^@\\s]+[.][^@\\s]{2,}$')))
+        && (d.get('canal', '') == '' || (textoAte(d.canal, 300) && d.canal.matches('^https://[^\\s"<>]+$')))
+        && (d.get('foto', '') == '' || dataUrlImagem(d.foto, 40000))
+        && (d.get('ausenteDe', '') == '' || (d.ausenteDe is string && d.ausenteDe.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')))
+        && (d.get('ausenteAte', '') == '' || (d.ausenteAte is string && d.ausenteAte.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')))
+        && d.get('assuntos', []) is list && d.get('assuntos', []).size() <= 20
+        && d.get('plantao', false) is bool && d.get('exemplo', false) is bool
+        && (!('criadoEm' in d) || d.criadoEm is timestamp)
+        && autoriaAtual();
+    }
+
+    // Aprendizagem - Tire suas dúvidas: aulas (conhecimento) e configuração (trilhas, categorias e glossário).
+    // "oculto" é o efetivo (a aula, o módulo, a trilha ou a categoria estão ocultos): quem não é administradora não lê.
+    function temaValido() {
+      let d = request.resource.data;
+      let s = d.get('secoes', {});
+      return d.keys().hasOnly(['trilha', 'modulo', 'paiId', 'ordem', 'titulo', 'resumo', 'nivel', 'palavrasChave', 'secoes', 'blocos', 'quiz', 'revisarEm',
+          'oculto', 'ocultaPropria', 'destaque', 'cor', 'icone', 'tempo', 'capa', 'atualizadoEm', 'atualizadoPor'])
+        && d.titulo is string && d.titulo.size() > 0 && d.titulo.size() <= 120
+        && textoAte(d.get('trilha', ''), 60) && (d.get('paiId', null) == null || textoAte(d.paiId, 60))
+        && textoAte(d.get('modulo', ''), 60)
+        && d.get('oculto', false) is bool && d.get('ocultaPropria', false) is bool
+        && numeroEntre(d.get('destaque', 0), 0, 99) && numeroEntre(d.get('tempo', 0), 0, 600)
+        && textoAte(d.get('cor', ''), 20) && textoAte(d.get('icone', ''), 40)
+        && (d.get('capa', null) == null || (d.capa is map && d.capa.keys().hasOnly(['tipo', 'estilo']) && d.capa.tipo in ['gradiente', 'imagem']))
+        && d.get('blocos', []) is list && d.get('blocos', []).size() <= 40
+        && d.get('ordem', 0) is number && textoAte(d.get('resumo', ''), 300)
+        && d.get('nivel', 'Básico') in ['Básico', 'Intermediário', 'Avançado']
+        && d.get('palavrasChave', []) is list && d.get('palavrasChave', []).size() <= 30
+        && s is map && s.keys().hasOnly(['frase', 'simples', 'funciona', 'exemplo', 'duvidas', 'termos', 'saibaMais'])
+        && textoAte(s.get('frase', ''), 60000) && textoAte(s.get('simples', ''), 60000) && textoAte(s.get('funciona', ''), 60000)
+        && textoAte(s.get('exemplo', ''), 60000) && textoAte(s.get('duvidas', ''), 60000) && textoAte(s.get('termos', ''), 60000)
+        && textoAte(s.get('saibaMais', ''), 60000)
+        && d.get('quiz', []) is list && d.get('quiz', []).size() <= 4
+        && (d.get('revisarEm', '') == '' || (d.revisarEm is string && d.revisarEm.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')))
+        && autoriaAtual();
+    }
+
+    function conteudoValido() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['markdown', 'propriedades', 'links', 'tags', 'sessao', 'ultimaVersaoEm', 'atualizadoEm', 'atualizadoPor'])
+        && d.markdown is string && d.markdown.size() < 800000
+        && d.propriedades is map && d.propriedades.size() <= 10
+        && d.links is list && d.links.size() <= 500
+        && d.tags is list && d.tags.size() <= 200
+        && (!('sessao' in d) || textoAte(d.sessao, 40))
+        && (!('ultimaVersaoEm' in d) || d.ultimaVersaoEm is timestamp)
+        && autoriaAtual();
+    }
+
+    // "comunicados" = modelos ajustados no Modo ajuste do comunicados.html (mesmo formato do site).
+    match /conteudo/{documento} {
+      allow read: if documento in ['site', 'hoje', 'comunicados'];
+      allow write: if documento in ['site', 'hoje', 'comunicados']
+        && ehAdmin()
+        && request.resource.data.keys().hasOnly(['dados', 'atualizadoEm', 'atualizadoPor'])
+        && request.resource.data.dados is string;
+    }
+
+    // Modelos de recado da equipe (comunicados.html › "Modelos de recado"). Leitura livre.
+    // Criar e editar: qualquer pessoa, assinando (sem login, com o nome; conta logada, com o e-mail).
+    // Excluir: só administradoras. texto = marcação do recado (**negrito**, _itálico_, {cor}…{/cor}).
+    // O limite de 50 modelos por aba fica no app (as regras não contam documentos).
+    function modeloRecadoValido() {
+      let d = request.resource.data;
+      let campos = ['aba', 'nome', 'texto', 'ordem', 'criadoPor', 'criadoPorNome', 'criadoEm', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoEm'];
+      return d.keys().hasOnly(campos) && d.keys().hasAll(campos)
+        && d.aba in ['instabilidade', 'restabelecimento']
+        && d.nome is string && d.nome.size() > 0 && d.nome.size() <= 60
+        && d.texto is string && d.texto.size() > 0 && d.texto.size() <= 1200
+        && d.ordem is number && d.ordem >= 0 && d.ordem <= 100000
+        && textoAte(d.criadoPor, 80) && d.criadoPor.size() > 0
+        && textoAte(d.criadoPorNome, 80) && d.criadoPorNome.size() > 0
+        && textoAte(d.atualizadoPorNome, 80) && d.atualizadoPorNome.size() > 0
+        && d.criadoEm is timestamp
+        && autoriaAtual();
+    }
+    match /comunicados-modelos/{modeloId} {
+      allow read: if true;
+      allow create: if modeloId.matches('^[A-Za-z0-9_-]{1,40}$') && modeloRecadoValido()
+        && request.resource.data.criadoEm == request.time
+        && autorValido(request.resource.data.criadoPor);
+      allow update: if modeloRecadoValido()
+        && request.resource.data.aba == resource.data.aba
+        && request.resource.data.criadoPor == resource.data.criadoPor
+        && request.resource.data.criadoPorNome == resource.data.criadoPorNome
+        && request.resource.data.criadoEm == resource.data.criadoEm;
+      allow delete: if ehAdmin();
+    }
+
+    // Galeria: qualquer pessoa envia; só as administradoras apagam.
+    match /galeria/{foto} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['miniatura', 'legenda', 'autor', 'criadoEm'])
+        && request.resource.data.miniatura is string && request.resource.data.miniatura.size() < 150000
+        && request.resource.data.miniatura.matches('^data:image/(jpeg|png|webp);base64,.*')
+        && request.resource.data.autor is string && request.resource.data.autor.size() > 0 && request.resource.data.autor.size() <= 60
+        && request.resource.data.legenda is string && request.resource.data.legenda.size() <= 140
+        && request.resource.data.criadoEm == request.time
+        && existsAfter(/databases/$(database)/documents/galeria-imagens/$(foto));
+      allow update: if false;
+      allow delete: if ehAdmin();
+    }
+
+    match /galeria-imagens/{foto} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['imagem'])
+        && request.resource.data.imagem is string && request.resource.data.imagem.size() < 900000
+        && request.resource.data.imagem.matches('^data:image/(jpeg|png|webp);base64,.*')
+        && existsAfter(/databases/$(database)/documents/galeria/$(foto));
+      allow update: if false;
+      allow delete: if ehAdmin();
+    }
+
+    // Anotações: qualquer pessoa cria; só Lays fixa, marca importante ou apaga.
+    match /anotacoes/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['titulo', 'texto', 'autor', 'criadoEm', 'fixada', 'importante', 'importanteEm', 'anexos'])
+        && request.resource.data.titulo is string && request.resource.data.titulo.size() > 0 && request.resource.data.titulo.size() <= 120
+        && request.resource.data.texto is string && request.resource.data.texto.size() <= 4000
+        && request.resource.data.autor is string && request.resource.data.autor.size() > 0 && request.resource.data.autor.size() <= 60
+        && request.resource.data.fixada == false
+        && request.resource.data.importante == false
+        && request.resource.data.importanteEm == null
+        && request.resource.data.criadoEm == request.time
+        && request.resource.data.anexos is list && request.resource.data.anexos.size() <= 5;
+      allow update: if ehLays()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fixada', 'importante', 'importanteEm'])
+        && request.resource.data.titulo == resource.data.titulo
+        && request.resource.data.texto == resource.data.texto
+        && request.resource.data.autor == resource.data.autor
+        && request.resource.data.anexos == resource.data.anexos
+        && request.resource.data.criadoEm == resource.data.criadoEm;
+      allow delete: if ehLays();
+    }
+
+    match /anotacoes-anexos/{idAnexo} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['imagem'])
+        && request.resource.data.imagem is string && request.resource.data.imagem.size() < 900000
+        && request.resource.data.imagem.matches('^data:image/(jpeg|png|webp);base64,.*');
+      allow update: if false;
+      allow delete: if ehLays();
+    }
+
+    match /alertas/importante {
+      allow read: if true;
+      allow write: if ehLays()
+        && request.resource.data.keys().hasOnly(['mensagem', 'anotacaoId', 'ativo', 'por', 'atualizadoEm'])
+        && request.resource.data.mensagem is string && request.resource.data.mensagem.size() <= 200
+        && request.resource.data.anotacaoId is string && request.resource.data.anotacaoId.size() <= 80
+        && request.resource.data.ativo is bool
+        && request.resource.data.por is string && request.resource.data.por.size() <= 80;
+    }
+
+    // Auditoria: append-only. Leitura só Lays. Create: visitante (porEmail==visitante) ou admin autenticado.
+    match /auditoria/{id} {
+      allow read: if ehLays();
+      allow create: if request.resource.data.keys().hasOnly(['acao', 'alvo', 'resumo', 'detalhes', 'porEmail', 'porNome', 'criadoEm'])
+        && request.resource.data.acao is string && request.resource.data.acao.size() > 0 && request.resource.data.acao.size() <= 40
+        && request.resource.data.alvo is string && request.resource.data.alvo.size() <= 40
+        && request.resource.data.resumo is string && request.resource.data.resumo.size() <= 200
+        && request.resource.data.detalhes is string && request.resource.data.detalhes.size() <= 800
+        && request.resource.data.porEmail is string && request.resource.data.porEmail.size() > 0 && request.resource.data.porEmail.size() <= 80
+        && request.resource.data.porNome is string && request.resource.data.porNome.size() <= 80
+        && request.resource.data.criadoEm == request.time
+        && (
+          (request.auth == null && request.resource.data.porEmail == 'visitante')
+          || (ehAdmin() && request.resource.data.porEmail == request.auth.token.email)
+          || (podeEditarCaderno() && request.resource.data.alvo == 'caderno' && request.resource.data.porEmail == request.auth.token.email)
+          || (request.auth != null && podeEditarContatos() && request.resource.data.alvo == 'contatos' && request.resource.data.porEmail == request.auth.token.email)
+          || (request.auth != null && podeEditarMapas() && request.resource.data.alvo == 'mapas' && request.resource.data.porEmail == request.auth.token.email)
+        );
+      allow update, delete: if false;
+    }
+
+    // Cadernos (páginas abertas pelos blocos de Guias). Leitura: qualquer pessoa.
+    // Árvore leve em "nos", texto em "conteudos" (limite de 1 MB por documento).
+    match /cadernos/{caderno} {
+      allow read: if true;
+      allow create, update: if ehAdmin() && caderno.matches('^[a-z0-9-]{1,40}$')
+        && request.resource.data.keys().hasOnly(['aparencia', 'atualizadoEm', 'atualizadoPor'])
+        && aparenciaValida(request.resource.data.aparencia)
+        && autoriaAtual();
+      allow delete: if false;
+
+      match /nos/{noId} {
+        allow read: if true;
+        allow create: if podeEscreverCaderno() && slugCaderno(caderno) && noValido()
+          && request.resource.data.criadoEm == request.time
+          && autorValido(request.resource.data.criadoPor);
+        // Quem edita só manda para a lixeira (excluidoEm); excluir de vez é das administradoras.
+        // A importação (só administradoras) pode substituir um item inteiro.
+        allow update: if podeEscreverCaderno() && slugCaderno(caderno) && noValido()
+          && ((request.resource.data.tipo == resource.data.tipo && request.resource.data.criadoEm == resource.data.criadoEm) || ehAdmin());
+        allow delete: if ehAdmin();
+      }
+
+      match /conteudos/{noId} {
+        allow read: if true;
+        allow create, update: if podeEscreverCaderno() && slugCaderno(caderno) && conteudoValido();
+        allow delete: if ehAdmin();
+      }
+
+      match /versoes/{versaoId} {
+        allow read: if true;
+        allow create: if podeEscreverCaderno() && slugCaderno(caderno)
+          && request.resource.data.keys().hasOnly(['noId', 'markdown', 'em', 'por'])
+          && textoAte(request.resource.data.noId, 60)
+          && request.resource.data.markdown is string && request.resource.data.markdown.size() < 800000
+          && request.resource.data.em == request.time
+          && autorValido(request.resource.data.por);
+        allow update: if false;
+        // Só contas logadas apagam (para manter as últimas 30 versões); sem login o histórico não pode ser apagado.
+        allow delete: if podeEditarCaderno();
+      }
+
+      match /imagens/{imgId} {
+        allow read: if true;
+        allow create: if podeEscreverCaderno() && slugCaderno(caderno)
+          && request.resource.data.keys().hasOnly(['miniatura', 'nome', 'largura', 'altura', 'criadoEm', 'criadoPor'])
+          && dataUrlImagem(request.resource.data.miniatura, 150000)
+          && request.resource.data.nome is string && request.resource.data.nome.size() <= 120
+          && request.resource.data.largura is number && request.resource.data.altura is number
+          && request.resource.data.criadoEm == request.time
+          && autorValido(request.resource.data.criadoPor)
+          && existsAfter(/databases/$(database)/documents/cadernos/$(caderno)/imagens-grandes/$(imgId));
+        allow update: if false;
+        allow delete: if ehAdmin();
+      }
+
+      match /imagens-grandes/{imgId} {
+        allow read: if true;
+        allow create: if podeEscreverCaderno() && slugCaderno(caderno)
+          && request.resource.data.keys().hasOnly(['imagem'])
+          && dataUrlImagem(request.resource.data.imagem, 900000)
+          && existsAfter(/databases/$(database)/documents/cadernos/$(caderno)/imagens/$(imgId));
+        allow update: if false;
+        allow delete: if ehAdmin();
+      }
+
+      match /modelos/{modeloId} {
+        allow read: if true;
+        allow create, update: if ehAdmin()
+          && request.resource.data.keys().hasOnly(['nome', 'markdown', 'atualizadoEm', 'atualizadoPor'])
+          && request.resource.data.nome is string && request.resource.data.nome.size() > 0 && request.resource.data.nome.size() <= 120
+          && request.resource.data.markdown is string && request.resource.data.markdown.size() < 800000
+          && autoriaAtual();
+        allow delete: if ehAdmin();
+      }
+    }
+
+    // Planilhas da Central (planilha.html?p=<id>): abertas como os cadernos.
+    // Leitura: qualquer pessoa. Escrita: quem assina (sem login, com o nome; administradora logada, com o e-mail).
+    // Colunas "Só administradoras" (lista colunasAdmin do documento da planilha): só ehAdmin() altera os valores
+    // e a lista. Excluir linha de vez, esvaziar a lixeira, excluir coluna de vez (tirar o id de colunasIds),
+    // gravar o arquivo compactado e apagar backups: só ehAdmin().
+    // Os limites por célula (5.000 caracteres) e de opções por coluna (400) ficam no app: as regras não
+    // percorrem listas e mapas (o teto aqui é o tamanho do documento, 1 MiB).
+    function idPlanilhaValido(p) {
+      return p.matches('^[a-z0-9-]{1,40}$');
+    }
+    function planilhaDepois(p) {
+      return getAfter(/databases/$(database)/documents/planilhas/$(p)).data;
+    }
+    // Criação: a aparência (se vier) é conferida. Atualização: só quando o campo "aparencia" muda.
+    function estruturaPlanilhaValida(d) {
+      return estruturaPlanilhaBase(d) && (!('aparencia' in d) || aparenciaPlanilhaValidaCentral(d.aparencia));
+    }
+    function estruturaPlanilhaValidaAtualizacao(d, antes) {
+      return estruturaPlanilhaBase(d)
+        && (d.get('aparencia', null) == antes.get('aparencia', null) || !('aparencia' in d) || aparenciaPlanilhaValidaCentral(d.aparencia));
+    }
+    function estruturaPlanilhaBase(d) {
+      return d.keys().hasOnly(['titulo', 'estrutura', 'colunasIds', 'colunasAdmin', 'versao', 'criadoEm', 'criadoPor', 'atualizadoEm', 'atualizadoPor', 'aparencia'])
+        && textoAte(d.titulo, 120)
+        && d.estrutura is map
+        && d.estrutura.keys().hasOnly(['colunas', 'gruposColunas', 'abas', 'resumo', 'regras'])
+        && d.estrutura.colunas is list && d.estrutura.colunas.size() >= 1 && d.estrutura.colunas.size() <= 80
+        && d.estrutura.gruposColunas is list && d.estrutura.gruposColunas.size() <= 20
+        && d.estrutura.get('abas', {}) is map && d.estrutura.get('resumo', {}) is map && d.estrutura.get('regras', {}) is map
+        && d.colunasIds is list && d.colunasIds.size() <= 80
+        && d.colunasAdmin is list && d.colunasAdmin.size() <= 80
+        && d.colunasIds.hasAll(d.colunasAdmin)
+        && d.versao is int && d.versao >= 1
+        && textoAte(d.criadoPor, 80)
+        && autoriaAtual();
+    }
+    // Sem login: só colunas da planilha e nenhuma "Só administradoras"
+    function camposDaEquipe(p, chaves) {
+      return chaves.hasOnly(planilhaDepois(p).colunasIds) && !chaves.hasAny(planilhaDepois(p).colunasAdmin);
+    }
+    function linhaPlanilhaValida(d) {
+      return d.keys().hasOnly(['campos', 'parcial', 'removida', 'criadoPor', 'criadoPorNome', 'criadoEm', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoEm'])
+        && d.campos is map && d.campos.size() <= 80
+        && d.get('parcial', false) is bool && d.get('removida', false) is bool
+        && textoAte(d.criadoPor, 80) && textoAte(d.get('criadoPorNome', ''), 80) && textoAte(d.get('atualizadoPorNome', ''), 80)
+        && (ehAdmin() || autoriaAtual());
+    }
+    // "removida: true" = a linha está na lixeira. Mandar para a lixeira exige a cópia em lixeira/{linha};
+    // restaurar só desliga o sinal (sem mexer nos campos) e exige que a cópia saia da lixeira no mesmo lote.
+    function removidaCoerente(p, linha, mudou) {
+      let antes = resource.data.get('removida', false);
+      let depois = request.resource.data.get('removida', false);
+      return antes == depois
+        || (antes == false && depois == true && existsAfter(/databases/$(database)/documents/planilhas/$(p)/lixeira/$(linha)))
+        || (antes == true && depois == false && mudou.hasOnly(['removida', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoEm'])
+          && !existsAfter(/databases/$(database)/documents/planilhas/$(p)/lixeira/$(linha)));
+    }
+    function alteracaoLinhaPermitida(p, linha) {
+      let mudou = request.resource.data.diff(resource.data).affectedKeys();
+      let camposMudaram = request.resource.data.campos.diff(resource.data.campos).affectedKeys();
+      return request.resource.data.criadoEm == resource.data.criadoEm
+        && request.resource.data.criadoPor == resource.data.criadoPor
+        && (camposMudaram.size() == 0 || camposDaEquipe(p, camposMudaram))
+        && removidaCoerente(p, linha, mudou);
+    }
+
+    // Padrão de aparência da planilha (campo "aparencia"): só administradoras gravam ou mudam
+    function aparenciaPlanilhaValidaCentral(a) {
+      return aparenciaPlanilhaValida(a) && ehAdmin() && a.atualizadoPor == request.auth.token.email;
+    }
+    match /planilhas/{planilha} {
+      allow read: if true;
+      allow create: if podeEscreverCaderno() && idPlanilhaValido(planilha)
+        && estruturaPlanilhaValida(request.resource.data)
+        && request.resource.data.criadoEm == request.time
+        && autorValido(request.resource.data.criadoPor)
+        && (ehAdmin() || (request.resource.data.colunasAdmin.size() == 0 && !('aparencia' in request.resource.data)));
+      // Sem login: não mexe na lista "Só administradoras", não tira colunas (excluir coluna de vez é das administradoras)
+      // e não mexe na aparência padrão (o campo "aparencia" continua igual)
+      allow update: if podeEscreverCaderno() && idPlanilhaValido(planilha)
+        && estruturaPlanilhaValidaAtualizacao(request.resource.data, resource.data)
+        && request.resource.data.criadoEm == resource.data.criadoEm
+        && request.resource.data.criadoPor == resource.data.criadoPor
+        && (ehAdmin() || (request.resource.data.colunasAdmin == resource.data.colunasAdmin
+          && request.resource.data.colunasIds.hasAll(resource.data.colunasIds)
+          && request.resource.data.get('aparencia', null) == resource.data.get('aparencia', null)));
+      allow delete: if false;
+
+      // Imagem de fundo do padrão de aparência (data URL comprimida no navegador)
+      match /config/{documento} {
+        allow read: if true;
+        allow create, update: if ehAdmin() && idPlanilhaValido(planilha) && documento == 'aparencia-imagem'
+          && aparenciaImagemValida(request.resource.data)
+          && request.resource.data.atualizadoPor == request.auth.token.email;
+        allow delete: if ehAdmin() && documento == 'aparencia-imagem';
+      }
+
+      match /linhas/{linha} {
+        allow read: if true;
+        allow create: if podeEscreverCaderno() && idPlanilhaValido(planilha)
+          && linhaPlanilhaValida(request.resource.data)
+          && (ehAdmin() || (request.resource.data.criadoEm == request.time
+            && autorValido(request.resource.data.criadoPor)
+            && camposDaEquipe(planilha, request.resource.data.campos.keys())
+            && (request.resource.data.get('removida', false) == false
+              || existsAfter(/databases/$(database)/documents/planilhas/$(planilha)/lixeira/$(linha)))));
+        allow update: if podeEscreverCaderno() && idPlanilhaValido(planilha)
+          && linhaPlanilhaValida(request.resource.data)
+          && (ehAdmin() || alteracaoLinhaPermitida(planilha, linha));
+        allow delete: if ehAdmin();
+
+        // Histórico de cada linha (edições de célula ficam só aqui)
+        match /historico/{evento} {
+          allow read: if true;
+          allow create: if podeEscreverCaderno()
+            && request.resource.data.keys().hasOnly(['acao', 'coluna', 'colunaNome', 'antes', 'depois', 'por', 'porNome', 'em'])
+            && textoAte(request.resource.data.acao, 30) && textoAte(request.resource.data.coluna, 40)
+            && textoAte(request.resource.data.colunaNome, 60)
+            && textoAte(request.resource.data.antes, 500) && textoAte(request.resource.data.depois, 500)
+            && autorValido(request.resource.data.por) && textoAte(request.resource.data.porNome, 80)
+            && request.resource.data.em == request.time;
+          allow update: if false;
+          allow delete: if ehAdmin();
+        }
+      }
+
+      // Arquivo compactado: muitas linhas por documento (só administradoras gravam)
+      match /arquivo/{parte} {
+        allow read: if true;
+        allow create, update: if ehAdmin()
+          && request.resource.data.keys().hasOnly(['versao', 'indice', 'total', 'json', 'criadoPor', 'criadoEm'])
+          && request.resource.data.versao is int && request.resource.data.indice is int && request.resource.data.total is int
+          && request.resource.data.json is string && request.resource.data.json.size() < 1000000
+          && request.resource.data.criadoPor == request.auth.token.email
+          && request.resource.data.criadoEm == request.time;
+        allow delete: if ehAdmin();
+      }
+
+      // Lixeira: cópia da linha excluída. Qualquer pessoa manda para cá e restaura; excluir de vez é das administradoras.
+      match /lixeira/{linha} {
+        allow read: if true;
+        allow create: if podeEscreverCaderno()
+          && request.resource.data.keys().hasOnly(['dados', 'excluidoPor', 'excluidoPorNome', 'excluidoEm', 'motivo'])
+          && request.resource.data.dados is map
+          && autorValido(request.resource.data.excluidoPor) && textoAte(request.resource.data.excluidoPorNome, 80)
+          && request.resource.data.excluidoEm == request.time
+          && textoAte(request.resource.data.motivo, 300)
+          && (ehAdmin() || getAfter(/databases/$(database)/documents/planilhas/$(planilha)/linhas/$(linha)).data.get('removida', false) == true);
+        allow update: if false;
+        allow delete: if ehAdmin()
+          || (podeEscreverCaderno()
+            && existsAfter(/databases/$(database)/documents/planilhas/$(planilha)/linhas/$(linha))
+            && getAfter(/databases/$(database)/documents/planilhas/$(planilha)/linhas/$(linha)).data.get('removida', false) == false);
+      }
+
+      // Backups: qualquer pessoa faz e baixa; só administradoras apagam (restaurar também é delas, no app)
+      match /backups/{backup} {
+        allow read: if true;
+        allow create: if podeEscreverCaderno()
+          && request.resource.data.keys().hasOnly(['motivo', 'criadoPor', 'criadoPorNome', 'criadoEm', 'totalRegistros', 'partes', 'versaoEstrutura', 'estrutura'])
+          && textoAte(request.resource.data.motivo, 200)
+          && autorValido(request.resource.data.criadoPor) && textoAte(request.resource.data.criadoPorNome, 80)
+          && request.resource.data.criadoEm == request.time
+          && request.resource.data.totalRegistros is int
+          && request.resource.data.partes is int && request.resource.data.partes <= 200
+          && request.resource.data.versaoEstrutura is int
+          && request.resource.data.estrutura is string && request.resource.data.estrutura.size() < 900000;
+        allow update: if false;
+        allow delete: if ehAdmin();
+
+        match /partes/{parte} {
+          allow read: if true;
+          allow create: if podeEscreverCaderno()
+            && request.resource.data.keys().hasOnly(['indice', 'json'])
+            && request.resource.data.indice is int
+            && request.resource.data.json is string && request.resource.data.json.size() < 1000000
+            && existsAfter(/databases/$(database)/documents/planilhas/$(planilha)/backups/$(backup));
+          allow update: if false;
+          allow delete: if ehAdmin();
+        }
+      }
+    }
+
+    // Aprendizagem - Tire suas dúvidas: só administradoras escrevem. Aula oculta (rascunho) só administradoras leem;
+    // o site dos visitantes consulta com where('oculto', '==', false).
+    match /conhecimento/{temaId} {
+      allow read: if ehAdmin() || resource.data.oculto != true;
+      allow create, update: if ehAdmin() && temaId.matches('^[a-z0-9-]{1,60}$') && temaValido();
+      allow delete: if ehAdmin();
+      // Versões anteriores de cada aula (Histórico: ver diferenças e restaurar)
+      match /versoes/{versaoId} {
+        allow read, delete: if ehAdmin();
+        allow create: if ehAdmin() && versaoId.matches('^[a-z0-9]{1,40}$')
+          && request.resource.data.keys().hasOnly(['dados', 'resumo', 'em', 'por'])
+          && request.resource.data.dados is map && textoAte(request.resource.data.resumo, 200)
+          && request.resource.data.em == request.time && request.resource.data.por == request.auth.token.email;
+        allow update: if false;
+      }
+    }
+    // Lixeira da Aprendizagem: categorias, trilhas, módulos e aulas removidos (Restaurar ou Excluir de vez)
+    match /conhecimento-lixeira/{itemId} {
+      allow read, delete: if ehAdmin();
+      allow create: if ehAdmin() && itemId.matches('^[A-Za-z0-9_-]{1,100}$')
+        && request.resource.data.keys().hasOnly(['tipo', 'itemId', 'nome', 'grupo', 'origem', 'dados', 'removidoEm', 'removidoPor'])
+        && request.resource.data.tipo in ['categoria', 'trilha', 'modulo', 'aula']
+        && textoAte(request.resource.data.itemId, 130) && textoAte(request.resource.data.nome, 120) && textoAte(request.resource.data.grupo, 200)
+        && request.resource.data.origem is map && request.resource.data.dados is map
+        && request.resource.data.removidoEm == request.time && request.resource.data.removidoPor == request.auth.token.email;
+      allow update: if false;
+    }
+    // Capas com imagem (categoria, trilha ou aula), comprimidas no navegador
+    match /conhecimento-capas/{capaId} {
+      allow read: if true;
+      allow create, update: if ehAdmin() && capaId.matches('^(categoria|trilha|aula)-[a-z0-9-]{1,60}$')
+        && request.resource.data.keys().hasOnly(['src', 'atualizadoEm', 'atualizadoPor'])
+        && dataUrlImagem(request.resource.data.src, 400000)
+        && autoriaAtual();
+      allow delete: if ehAdmin();
+    }
+    match /conhecimento-config/{documento} {
+      allow read: if true;
+      allow write: if ehAdmin() && documento in ['trilhas', 'glossario', 'categorias']
+        && request.resource.data.keys().hasOnly(['lista', 'termos', 'versao', 'atualizadoEm', 'atualizadoPor'])
+        && (!('lista' in request.resource.data) || (request.resource.data.lista is list && request.resource.data.lista.size() <= 60))
+        && (!('termos' in request.resource.data) || (request.resource.data.termos is list && request.resource.data.termos.size() <= 400))
+        && (!('versao' in request.resource.data) || (request.resource.data.versao is number && request.resource.data.versao >= 1 && request.resource.data.versao <= 1000))
+        && autoriaAtual();
+    }
+    // O antigo "Este conteúdo ajudou?" saiu do site: a coleção fica fechada.
+    match /conhecimento-votos/{temaId} {
+      allow read, write: if false;
+    }
+
+    // Contatos: leitura livre; escrita das administradoras e de CONTATOS_EDITORES (ver podeEditarContatos()).
+    match /contatos/{contatoId} {
+      allow read: if true;
+      allow create, update: if podeEditarContatos() && contatoId.matches('^[A-Za-z0-9_-]{1,60}$') && contatoValido();
+      allow delete: if podeEditarContatos();
+    }
+    match /contatos-config/{documento} {
+      allow read: if true;
+      allow write: if podeEditarContatos() && documento == 'colunas'
+        && request.resource.data.keys().hasOnly(['assuntos', 'semExemplos', 'atualizadoEm', 'atualizadoPor'])
+        && request.resource.data.get('assuntos', []) is list && request.resource.data.get('assuntos', []).size() <= 60
+        && request.resource.data.get('semExemplos', false) is bool
+        && autoriaAtual();
+    }
+
+    // Contatos da planilha Google (contatos.html com ORIGEM_CONTATOS = "planilha").
+    // Leitura livre, como /contatos. Escrita SÓ da conta do Apps Script de
+    // integracoes/planilha-contatos/ (e-mail abaixo, criado no Firebase Authentication).
+    function ehSincronizadorPlanilha() {
+      return request.auth != null && request.auth.token.email == 'sincronizador.planilha@suporte-n2.web.app';
+    }
+    match /planilha-contatos/{documento} {
+      allow read: if true;
+      allow create, update: if ehSincronizadorPlanilha() && (
+        (documento == '_estado'
+          && request.resource.data.keys().hasOnly(['status', 'erro', 'abas', 'planilhaId', 'sincronizadoEm', 'verificadoEm', 'versao'])
+          && request.resource.data.status in ['ok', 'erro']
+          && textoAte(request.resource.data.get('erro', ''), 500)
+          && request.resource.data.abas is list && request.resource.data.abas.size() <= 30
+          && textoAte(request.resource.data.planilhaId, 100)
+          && request.resource.data.verificadoEm is timestamp
+          && (!('sincronizadoEm' in request.resource.data) || request.resource.data.sincronizadoEm is timestamp)
+          && request.resource.data.get('versao', 1) is int)
+        || (documento.matches('^[a-z0-9-]{1,60}$')
+          && request.resource.data.keys().hasOnly(['nome', 'ordem', 'gid', 'cabecalhos', 'linhas', 'partes', 'hash', 'atualizadoEm'])
+          && textoAte(request.resource.data.nome, 100)
+          && request.resource.data.ordem is int && request.resource.data.gid is int
+          && request.resource.data.cabecalhos is list && request.resource.data.cabecalhos.size() <= 60
+          && request.resource.data.linhas is int && request.resource.data.linhas >= 0 && request.resource.data.linhas <= 20000
+          && request.resource.data.partes is int && request.resource.data.partes >= 0 && request.resource.data.partes <= 60
+          && textoAte(request.resource.data.hash, 80)
+          && request.resource.data.atualizadoEm is timestamp));
+      allow delete: if ehSincronizadorPlanilha() && documento != '_estado';
+
+      match /partes/{parte} {
+        allow read: if true;
+        allow create, update: if ehSincronizadorPlanilha() && documento.matches('^[a-z0-9-]{1,60}$') && parte.matches('^[0-9]{1,3}$')
+          && request.resource.data.keys().hasOnly(['indice', 'hash', 'linhas'])
+          && request.resource.data.indice is int
+          && textoAte(request.resource.data.hash, 80)
+          && request.resource.data.linhas is list && request.resource.data.linhas.size() <= 500;
+        allow delete: if ehSincronizadorPlanilha();
+      }
+    }
+
+    // ============================================================
+    // BANCO DE TICKETS (site à parte: sites/banco-tickets/, target "tickets").
+    // Administradoras = adminTickets(): Lays e Paula, entrando com e-mail e SENHA.
+    // Equipe e Leitura entram na tela "Entrar no Banco de Tickets" com e-mail e nome
+    // (sem senha), sobre um login anônimo do Firebase:
+    //  - tickets-identidades/{email}: a "conta" da pessoa (nome, papel, ativo, aprovado).
+    //  - tickets-emails/{email}: documento vazio que só diz "este e-mail tem cadastro".
+    //  - tickets-pessoas/{uid}: o aparelho (navegador) ligado a uma identidade. Só liga
+    //    quem digitar o mesmo nome (normalizado) do cadastro: conferido em vinculoValido().
+    // Cadastros antigos (aparelho sem "vinculadoEm", de antes de "Unificar cadastros por
+    // e-mail") continuam valendo pelos campos do próprio aparelho (ativo, papel, nome).
+    // Nada daqui dá acesso a coleções da Central, e vice-versa.
+    // ============================================================
+    function adminTickets() {
+      return request.auth != null
+        && request.auth.token.get('email', '') in ['lays.almeida@valid.com', 'paula.conceicao@valid.com']
+        && request.auth.token.firebase.sign_in_provider == 'password';
+    }
+    function emailTickets() {
+      return request.auth.token.email.lower();
+    }
+    function pessoaTickets() {
+      return get(/databases/$(database)/documents/tickets-pessoas/$(request.auth.uid)).data;
+    }
+    function aparelhoVinculado(p) {
+      return 'vinculadoEm' in p;
+    }
+    function identidadeDe(email) {
+      return get(/databases/$(database)/documents/tickets-identidades/$(email)).data;
+    }
+    function identidadeTickets() {
+      return identidadeDe(pessoaTickets().email);
+    }
+    // Quem assina e qual o papel: a identidade; nos cadastros antigos, o próprio aparelho
+    function perfilTickets() {
+      let p = pessoaTickets();
+      return aparelhoVinculado(p) ? identidadeDe(p.email) : p;
+    }
+    // Liberada e com o aparelho ligado depois do último "Desconectar todos os aparelhos"
+    function identidadeLiberada(p) {
+      let i = identidadeDe(p.email);
+      return i.ativo == true && i.aprovado == true
+        && (i.get('revogadoAntesDe', null) == null || p.vinculadoEm >= i.revogadoAntesDe);
+    }
+    function naListaTickets() {
+      return request.auth != null && !adminTickets()
+        && exists(/databases/$(database)/documents/tickets-pessoas/$(request.auth.uid))
+        && (aparelhoVinculado(pessoaTickets())
+          ? (exists(/databases/$(database)/documents/tickets-identidades/$(pessoaTickets().email))
+            && identidadeLiberada(pessoaTickets()))
+          : pessoaTickets().ativo == true);
+    }
+    function noTickets() {
+      return request.auth != null && (adminTickets() || naListaTickets());
+    }
+    // "admin" | "equipe" | "leitura"
+    function papelTickets() {
+      return adminTickets() ? 'admin' : perfilTickets().papel;
+    }
+    function equipeTickets() {
+      return naListaTickets() && perfilTickets().papel == 'equipe';
+    }
+    // Quem grava: e-mail da administradora ou uid da pessoa da equipe
+    function autorTickets() {
+      return adminTickets() ? emailTickets() : request.auth.uid;
+    }
+    // A autoria (id, nome e e-mail) tem de ser a do próprio perfil: ninguém grava em nome de outra pessoa
+    function autoriaDaEquipe(por, nome, email) {
+      let p = perfilTickets();
+      return por == request.auth.uid && nome == p.nome && email == p.email;
+    }
+    // Duas planilhas com as mesmas regras, cada uma nas coleções do seu prefixo:
+    // 'tickets' (BANCO DE TICKETS: tickets, tickets-config, tickets-arquivo…) e 'sig' (SIG - INFORMAÇÕES).
+    // A identificação (tickets-pessoas) e as regras de registro (tickets-config) valem para as duas.
+    function configPlanilha(p) {
+      return get(/databases/$(database)/documents/$(p + '-config')/estrutura).data;
+    }
+    function configTickets() {
+      return configPlanilha('tickets');
+    }
+    function registroTickets() {
+      return configTickets().regras.get('registro', {'aberto': true, 'dominios': [], 'papelPadrao': 'equipe', 'aprovacao': true});
+    }
+    // Com "aprovacao" (padrão: ligada), o cadastro novo nasce com aprovado false até uma administradora liberar
+    function aprovacaoTickets() {
+      return registroTickets().get('aprovacao', true) != false;
+    }
+    function emailPessoaValido(e) {
+      return e is string && e.size() <= 120
+        && e.matches('^[a-z0-9._%+-]+@[a-z0-9.-]+[.][a-z]{2,}$')
+        && !(e in ['lays.almeida@valid.com', 'paula.conceicao@valid.com']);
+    }
+    function dominioPermitido(e) {
+      let dominios = registroTickets().dominios;
+      return dominios.size() == 0 || e.split('@')[1] in dominios;
+    }
+    function nomePessoaValido(n) {
+      return n is string && n.size() >= 2 && n.size() <= 80;
+    }
+    // Igual a normalizarNomeChave() no app.js: minúsculas, sem acentos, espaços repetidos
+    // viram um e sem pontos nas pontas ("  Davi   LOPES " e "davi lopes" dão "davi lopes").
+    // O app só aceita no nome letras do latim (com acento), espaço, hífen, ponto e apóstrofo.
+    function chaveDoNome(n) {
+      return n.lower()
+        .replace('[àáâãäåāăą]', 'a')
+        .replace('[çćĉċč]', 'c')
+        .replace('ď', 'd')
+        .replace('[èéêëēĕėęě]', 'e')
+        .replace('[ĝğġģ]', 'g')
+        .replace('ĥ', 'h')
+        .replace('[ìíîïĩīĭį]', 'i')
+        .replace('ĵ', 'j')
+        .replace('ķ', 'k')
+        .replace('[ĺļľ]', 'l')
+        .replace('[ñńņň]', 'n')
+        .replace('[òóôõöōŏő]', 'o')
+        .replace('[ŕŗř]', 'r')
+        .replace('[śŝşš]', 's')
+        .replace('[ţť]', 't')
+        .replace('[ùúûüũūŭůűų]', 'u')
+        .replace('ŵ', 'w')
+        .replace('[ýÿŷ]', 'y')
+        .replace('[źżž]', 'z')
+        .replace('[\\x{0300}-\\x{036f}]', '')
+        .replace('[ ]+', ' ')
+        .trim()
+        .replace('^[.]+|[.]+$', '')
+        .trim();
+    }
+    function nomeChaveValida(chave) {
+      return chave is string && chave.size() >= 2 && chave.size() <= 80;
+    }
+    // Cadastro novo na tela de entrada: identidade + tickets-emails + aparelho, no mesmo lote
+    function cadastroNovoValido(email) {
+      let d = request.resource.data;
+      let campos = ['email', 'nome', 'nomeChave', 'papel', 'ativo', 'aprovado', 'criadoEm', 'criadoPorUid', 'atualizadoEm'];
+      return request.auth != null && !adminTickets()
+        && registroTickets().aberto == true
+        && d.keys().hasOnly(campos) && d.keys().hasAll(campos)
+        && d.email == email && emailPessoaValido(email) && dominioPermitido(email)
+        && nomePessoaValido(d.nome) && nomeChaveValida(d.nomeChave) && d.nomeChave == chaveDoNome(d.nome)
+        && d.papel == registroTickets().papelPadrao
+        && d.ativo == true && d.aprovado == !aprovacaoTickets()
+        && d.criadoPorUid == request.auth.uid
+        && d.criadoEm == request.time && d.atualizadoEm == request.time
+        && existsAfter(/databases/$(database)/documents/tickets-emails/$(email))
+        && existsAfter(/databases/$(database)/documents/tickets-pessoas/$(request.auth.uid))
+        && getAfter(/databases/$(database)/documents/tickets-pessoas/$(request.auth.uid)).data.email == email;
+    }
+    // Administradora: "Unificar cadastros por e-mail" cria identidades a partir dos cadastros antigos
+    function identidadeAdminValida(email) {
+      let d = request.resource.data;
+      return adminTickets()
+        && d.keys().hasOnly(['email', 'nome', 'nomeChave', 'papel', 'ativo', 'aprovado', 'criadoEm', 'criadoPorUid', 'atualizadoEm', 'revogadoAntesDe'])
+        && d.keys().hasAll(['email', 'nome', 'nomeChave', 'papel', 'ativo', 'aprovado', 'criadoEm', 'atualizadoEm'])
+        && d.email == email && emailPessoaValido(email)
+        && nomePessoaValido(d.nome) && nomeChaveValida(d.nomeChave)
+        && d.papel in ['equipe', 'leitura'] && d.ativo is bool && d.aprovado is bool
+        && d.criadoEm is timestamp && d.atualizadoEm == request.time
+        && (!('criadoPorUid' in d) || textoAte(d.criadoPorUid, 128))
+        && (!('revogadoAntesDe' in d) || d.revogadoAntesDe is timestamp);
+    }
+    // Administradora: aprovar, bloquear, papel, corrigir o nome e "Desconectar todos os aparelhos"
+    function identidadeAdminAltera() {
+      let d = request.resource.data;
+      return adminTickets()
+        && d.diff(resource.data).affectedKeys().hasOnly(['nome', 'nomeChave', 'papel', 'ativo', 'aprovado', 'revogadoAntesDe', 'atualizadoEm'])
+        && nomePessoaValido(d.nome) && nomeChaveValida(d.nomeChave)
+        && d.papel in ['equipe', 'leitura'] && d.ativo is bool && d.aprovado is bool
+        && (!('revogadoAntesDe' in d) || d.revogadoAntesDe is timestamp)
+        && d.atualizadoEm == request.time;
+    }
+    // Ligar este aparelho a uma identidade. O NOME é conferido aqui, no servidor: só liga quem
+    // manda o mesmo nomeChave do cadastro daquele e-mail. Ninguém lê o nome cadastrado.
+    function vinculoValido(uid) {
+      let d = request.resource.data;
+      return request.auth != null && request.auth.uid == uid && !adminTickets()
+        && emailPessoaValido(d.email)
+        && existsAfter(/databases/$(database)/documents/tickets-identidades/$(d.email))
+        && d.nomeChave == getAfter(/databases/$(database)/documents/tickets-identidades/$(d.email)).data.nomeChave
+        && d.vinculadoEm == request.time
+        && (!('ultimoAcesso' in d) || d.ultimoAcesso == request.time);
+    }
+    function numeroTicketValido(n) {
+      return n is string && (n == '' || n.matches('^[A-Z0-9][A-Z0-9._-]{0,79}$'));
+    }
+    // A coluna-chave (TICKET CONCEDIDO) é única: o índice <p>-numeros/{numero} é criado no mesmo lote e aponta para o registro.
+    function numeroIndexado(p, ticketId) {
+      let n = request.resource.data.numero;
+      return n == '' || (existsAfter(/databases/$(database)/documents/$(p + '-numeros')/$(n))
+        && getAfter(/databases/$(database)/documents/$(p + '-numeros')/$(n)).data.ticket == ticketId);
+    }
+    // Registros antigos (só e-mail em criadoPor/atualizadoPor) continuam válidos.
+    // "parcial": edição de uma linha do arquivo compactado; traz só os campos alterados, por cima da linha.
+    function formatoTicket(d) {
+      return d.keys().hasOnly(['campos', 'numero', 'parcial', 'criadoPor', 'criadoPorNome', 'criadoPorEmail', 'criadoEm',
+          'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm', 'exclusao'])
+        && d.campos is map && d.campos.size() <= 80
+        && d.get('parcial', false) is bool
+        && numeroTicketValido(d.numero);
+    }
+    // Colunas LISTA validadas no servidor: a equipe só grava vazio ou uma opção ativa (listasEquipe, gravado
+    // pela interface junto com a estrutura). Os ids são os finais do BANCO DE TICKETS v2: RESPONSÁVEL
+    // (responsavel), MOTIVO (motivo), ÁREA (area) e AR SOLICITANTE (arSolicitante).
+    // Uma coluna LISTA criada no futuro precisa ser acrescentada em listasValidas(); até lá, ela é validada só na interface.
+    // Só o valor ALTERADO é conferido: um registro com opção removida da lista continua sendo editado nas outras colunas.
+    // Etiquetas (lista de opções): só as ACRESCENTADAS precisam estar ativas; as que o registro já tinha continuam valendo.
+    function valorDeListaOk(cfg, campos, antes, col) {
+      let lista = cfg.get('listasEquipe', {}).get(col, null);
+      let v = campos.get(col, '');
+      let a = antes.get(col, []);
+      return lista == null || v == ''
+        || (v is list ? v.toSet().difference(a is list ? a.toSet() : [].toSet()).hasOnly(lista) : v in lista);
+    }
+    function listasValidas(cfg, campos, antes, alteradas) {
+      return (!('responsavel' in alteradas) || valorDeListaOk(cfg, campos, antes, 'responsavel'))
+        && (!('motivo' in alteradas) || valorDeListaOk(cfg, campos, antes, 'motivo'))
+        && (!('area' in alteradas) || valorDeListaOk(cfg, campos, antes, 'area'))
+        && (!('arSolicitante' in alteradas) || valorDeListaOk(cfg, campos, antes, 'arSolicitante'));
+    }
+    function equipeCriaTicket(p, ticketId) {
+      let d = request.resource.data;
+      let cfg = configPlanilha(p);
+      return equipeTickets()
+        && formatoTicket(d)
+        && d.campos.keys().hasOnly(cfg.colunasEquipe)
+        && listasValidas(cfg, d.campos, {}, d.campos.keys())
+        && autoriaDaEquipe(d.criadoPor, d.criadoPorNome, d.criadoPorEmail) && d.criadoEm == request.time
+        && autoriaDaEquipe(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time
+        && d.exclusao == null
+        && numeroIndexado(p, ticketId);
+    }
+    // equipeEdita: "proprias" (só quem registrou, pelo e-mail da identidade, em qualquer aparelho,
+    // dentro da janela), "todas" ou "nenhuma". Registros sem criadoPorEmail: só as administradoras.
+    function equipeEditaTicket(p, ticketId) {
+      let cfg = configPlanilha(p);
+      let regras = cfg.regras;
+      let d = request.resource.data;
+      let alteradas = d.campos.diff(resource.data.campos).affectedKeys();
+      return equipeTickets()
+        && regras.equipeEdita != 'nenhuma'
+        && (regras.equipeEdita == 'todas'
+          || (resource.data.get('criadoPorEmail', '') != '' && resource.data.get('criadoPorEmail', '') == perfilTickets().email
+            && (regras.janelaEdicaoHoras == 0 || request.time < resource.data.criadoEm + duration.value(regras.janelaEdicaoHoras, 'h'))))
+        && d.diff(resource.data).affectedKeys().hasOnly(['campos', 'numero', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm'])
+        && d.campos is map && d.campos.size() <= 80
+        && alteradas.hasOnly(cfg.colunasEquipe)
+        && listasValidas(cfg, d.campos, resource.data.campos, alteradas)
+        && autoriaDaEquipe(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time
+        && numeroTicketValido(d.numero)
+        && (d.numero == resource.data.numero || numeroIndexado(p, ticketId));
+    }
+    // "Solicitar exclusão": só marca a linha; quem exclui é uma administradora
+    function equipePedeExclusao() {
+      let d = request.resource.data;
+      return equipeTickets()
+        && resource.data.exclusao == null
+        && d.diff(resource.data).affectedKeys().hasOnly(['exclusao', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm'])
+        && d.exclusao is map && d.exclusao.keys().hasOnly(['motivo', 'por', 'porNome', 'porEmail', 'em'])
+        && d.exclusao.motivo is string && d.exclusao.motivo.size() > 0 && d.exclusao.motivo.size() <= 300
+        && autoriaDaEquipe(d.exclusao.por, d.exclusao.porNome, d.exclusao.porEmail) && d.exclusao.em == request.time
+        && autoriaDaEquipe(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time;
+    }
+
+    // Estrutura de uma planilha (<p>-config/estrutura), gravada só pelas administradoras
+    function estruturaValida(documento) {
+      return adminTickets() && documento == 'estrutura'
+        && request.resource.data.keys().hasOnly(['titulo', 'versao', 'categorias', 'colunas', 'gruposColunas', 'regras', 'colunasEquipe', 'listasEquipe', 'modelo', 'atualizadoEm', 'atualizadoPor'])
+        && (!('listasEquipe' in request.resource.data) || request.resource.data.listasEquipe is map)
+        && (!('modelo' in request.resource.data) || request.resource.data.modelo is map)
+        && textoAte(request.resource.data.titulo, 80)
+        && request.resource.data.versao is int
+        && request.resource.data.categorias is list && request.resource.data.categorias.size() <= 40
+        && request.resource.data.colunas is list && request.resource.data.colunas.size() <= 80
+        && request.resource.data.gruposColunas is list && request.resource.data.gruposColunas.size() <= 20
+        && request.resource.data.colunasEquipe is list && request.resource.data.colunasEquipe.size() <= 80
+        && request.resource.data.regras is map
+        && request.resource.data.regras.keys().hasOnly(['equipeEdita', 'janelaEdicaoHoras', 'exportacao', 'registro'])
+        && request.resource.data.regras.equipeEdita in ['proprias', 'todas', 'nenhuma']
+        && request.resource.data.regras.janelaEdicaoHoras is int
+        && request.resource.data.regras.janelaEdicaoHoras >= 0 && request.resource.data.regras.janelaEdicaoHoras <= 8760
+        && request.resource.data.regras.exportacao is bool
+        && (!('registro' in request.resource.data.regras) || (
+          request.resource.data.regras.registro is map
+          && request.resource.data.regras.registro.keys().hasOnly(['aberto', 'dominios', 'papelPadrao', 'aprovacao'])
+          && request.resource.data.regras.registro.get('aprovacao', true) is bool
+          && request.resource.data.regras.registro.aberto is bool
+          && request.resource.data.regras.registro.dominios is list && request.resource.data.regras.registro.dominios.size() <= 20
+          && request.resource.data.regras.registro.papelPadrao in ['equipe', 'leitura']))
+        && request.resource.data.atualizadoPor == emailTickets()
+        && request.resource.data.atualizadoEm == request.time;
+    }
+    // Histórico de cada linha: só entra junto com uma mudança real do registro, feita pela mesma pessoa
+    function historicoValido(p, ticketId) {
+      return (adminTickets()
+          || (equipeTickets()
+            && autoriaDaEquipe(request.resource.data.por, request.resource.data.porNome, request.resource.data.porEmail)
+            && getAfter(/databases/$(database)/documents/$(p)/$(ticketId)).data.atualizadoPor == request.auth.uid
+            && getAfter(/databases/$(database)/documents/$(p)/$(ticketId)).data.atualizadoEm == request.time))
+        && request.resource.data.keys().hasOnly(['acao', 'coluna', 'colunaNome', 'antes', 'depois', 'por', 'porNome', 'porEmail', 'em'])
+        && textoAte(request.resource.data.acao, 30) && textoAte(request.resource.data.coluna, 40)
+        && textoAte(request.resource.data.colunaNome, 60)
+        && textoAte(request.resource.data.antes, 500) && textoAte(request.resource.data.depois, 500)
+        && request.resource.data.por == autorTickets() && request.resource.data.em == request.time;
+    }
+    // Arquivo compactado: muitas linhas por documento (o plano gratuito lê ~50 mil documentos por dia).
+    // Todos que estão no Banco de Tickets leem; só as administradoras gravam.
+    function parteArquivoValida() {
+      return adminTickets()
+        && request.resource.data.keys().hasOnly(['versao', 'indice', 'total', 'json', 'criadoPor', 'criadoEm'])
+        && request.resource.data.versao is int && request.resource.data.indice is int && request.resource.data.total is int
+        && request.resource.data.indice >= 0 && request.resource.data.indice < request.resource.data.total
+        && request.resource.data.json is string
+        && request.resource.data.criadoPor == emailTickets() && request.resource.data.criadoEm == request.time;
+    }
+    function criaIndiceNumero(p, numero) {
+      return adminTickets() || (equipeTickets()
+        && numeroTicketValido(numero) && numero != ''
+        && request.resource.data.keys().hasOnly(['ticket'])
+        && getAfter(/databases/$(database)/documents/$(p)/$(request.resource.data.ticket)).data.numero == numero);
+    }
+    // A equipe só apaga o índice antigo quando o próprio registro deixa de usar esse número
+    function apagaIndiceNumero(p, numero) {
+      return adminTickets() || (equipeTickets()
+        && existsAfter(/databases/$(database)/documents/$(p)/$(resource.data.ticket))
+        && getAfter(/databases/$(database)/documents/$(p)/$(resource.data.ticket)).data.numero != numero);
+    }
+    function auditoriaValida() {
+      return adminTickets()
+        && request.resource.data.keys().hasOnly(['acao', 'resumo', 'detalhes', 'por', 'em'])
+        && textoAte(request.resource.data.acao, 40) && textoAte(request.resource.data.resumo, 300)
+        && textoAte(request.resource.data.detalhes, 1500)
+        && request.resource.data.por == emailTickets() && request.resource.data.em == request.time;
+    }
+
+    // ---------- BANCO DE TICKETS (prefixo 'tickets') ----------
+    // Quem ainda vai se registrar (login anônimo, sem perfil) precisa ler as regras de registro
+    // Aparência padrão da planilha (aparencia / aparencia-imagem): lê quem já lê a planilha; grava só administradora
+    function aparenciaTicketsValida(documento) {
+      return adminTickets() && request.resource.data.atualizadoPor == emailTickets()
+        && ((documento == 'aparencia' && aparenciaPlanilhaValida(request.resource.data))
+          || (documento == 'aparencia-imagem' && aparenciaImagemValida(request.resource.data)));
+    }
+    match /tickets-config/{documento} {
+      allow read: if request.auth != null && (!(documento in ['aparencia', 'aparencia-imagem']) || noTickets());
+      allow write: if estruturaValida(documento) || aparenciaTicketsValida(documento);
+      allow delete: if adminTickets() && documento in ['aparencia', 'aparencia-imagem'];
+    }
+    match /tickets/{ticketId} {
+      allow read: if noTickets();
+      allow create: if adminTickets() || equipeCriaTicket('tickets', ticketId);
+      allow update: if adminTickets() || equipeEditaTicket('tickets', ticketId) || equipePedeExclusao();
+      allow delete: if adminTickets();
+      match /historico/{evento} {
+        allow read: if noTickets();
+        allow create: if historicoValido('tickets', ticketId);
+        allow update, delete: if false;
+      }
+    }
+    match /tickets-arquivo/{parte} {
+      allow read: if noTickets();
+      allow create, update: if parteArquivoValida();
+      allow delete: if adminTickets();
+    }
+    match /tickets-numeros/{numero} {
+      allow read: if noTickets();
+      allow create: if criaIndiceNumero('tickets', numero);
+      allow update: if adminTickets();
+      allow delete: if apagaIndiceNumero('tickets', numero);
+    }
+
+    // ---------- SIG - INFORMAÇÕES (prefixo 'sig'): as mesmas regras do Banco de Tickets ----------
+    match /sig-config/{documento} {
+      allow read: if request.auth != null && (!(documento in ['aparencia', 'aparencia-imagem']) || noTickets());
+      allow write: if estruturaValida(documento) || aparenciaTicketsValida(documento);
+      allow delete: if adminTickets() && documento in ['aparencia', 'aparencia-imagem'];
+    }
+    match /sig/{ticketId} {
+      allow read: if noTickets();
+      allow create: if adminTickets() || equipeCriaTicket('sig', ticketId);
+      allow update: if adminTickets() || equipeEditaTicket('sig', ticketId) || equipePedeExclusao();
+      allow delete: if adminTickets();
+      match /historico/{evento} {
+        allow read: if noTickets();
+        allow create: if historicoValido('sig', ticketId);
+        allow update, delete: if false;
+      }
+    }
+    match /sig-arquivo/{parte} {
+      allow read: if noTickets();
+      allow create, update: if parteArquivoValida();
+      allow delete: if adminTickets();
+    }
+    match /sig-numeros/{numero} {
+      allow read: if noTickets();
+      allow create: if criaIndiceNumero('sig', numero);
+      allow update: if adminTickets();
+      allow delete: if apagaIndiceNumero('sig', numero);
+    }
+    match /sig-auditoria/{id} {
+      allow read: if adminTickets();
+      allow create: if auditoriaValida();
+      allow update, delete: if false;
+    }
+    match /sig-backups/{id} {
+      allow read, write: if adminTickets();
+      match /partes/{parte} {
+        allow read, write: if adminTickets();
+      }
+    }
+    match /sig-lixeira/{id} {
+      allow read, write: if adminTickets();
+    }
+
+    // Aparelho (o id do documento é o uid do login anônimo deste navegador).
+    // Ligado: { email, nomeChave, vinculadoEm, ultimoAcesso }. Cadastro antigo: { nome, email, papel, ativo, pendente, criadoEm, ultimoAcesso }.
+    match /tickets-pessoas/{uid} {
+      allow read: if adminTickets() || (request.auth != null && request.auth.uid == uid);
+      allow create: if vinculoValido(uid)
+        && request.resource.data.keys().hasOnly(['email', 'nomeChave', 'vinculadoEm', 'ultimoAcesso']);
+      // A própria pessoa: ligar de novo (a mesma ou outra identidade) ou só o último acesso.
+      // Administradora: papel, bloqueio e liberação dos cadastros antigos, e a unificação (email, nomeChave, vinculadoEm).
+      allow update: if (vinculoValido(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email', 'nomeChave', 'vinculadoEm', 'ultimoAcesso']))
+        || (request.auth != null && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ultimoAcesso'])
+          && request.resource.data.ultimoAcesso == request.time)
+        || (adminTickets()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['papel', 'ativo', 'pendente', 'email', 'nomeChave', 'vinculadoEm'])
+          && request.resource.data.get('papel', 'equipe') in ['equipe', 'leitura']
+          && request.resource.data.get('ativo', false) is bool
+          && request.resource.data.get('pendente', false) is bool
+          && (!('email' in request.resource.data) || emailPessoaValido(request.resource.data.email))
+          && (!('nomeChave' in request.resource.data) || nomeChaveValida(request.resource.data.nomeChave))
+          && (!('vinculadoEm' in request.resource.data) || request.resource.data.vinculadoEm is timestamp));
+      allow delete: if adminTickets();
+    }
+
+    // Identidade (a "conta" da pessoa), pelo e-mail em minúsculas. Só as administradoras
+    // e os aparelhos já ligados a ela leem: ninguém descobre o nome cadastrado de um e-mail.
+    match /tickets-identidades/{email} {
+      allow get: if adminTickets()
+        || (request.auth != null
+          && exists(/databases/$(database)/documents/tickets-pessoas/$(request.auth.uid))
+          && aparelhoVinculado(pessoaTickets())
+          && pessoaTickets().email == email);
+      allow list: if adminTickets();
+      allow create: if identidadeAdminValida(email) || cadastroNovoValido(email);
+      allow update: if identidadeAdminAltera();
+      allow delete: if adminTickets();
+    }
+    // "Este e-mail tem cadastro": documento vazio. Lê um e-mail por vez; ninguém lista.
+    match /tickets-emails/{email} {
+      allow get: if request.auth != null;
+      allow list: if false;
+      allow create: if request.resource.data.keys().size() == 0
+        && (adminTickets()
+          || (request.auth != null
+            && existsAfter(/databases/$(database)/documents/tickets-identidades/$(email))
+            && getAfter(/databases/$(database)/documents/tickets-identidades/$(email)).data.criadoPorUid == request.auth.uid));
+      allow update: if adminTickets() && request.resource.data.keys().size() == 0;
+      allow delete: if adminTickets();
+    }
+
+    // Lista antiga (login por link no e-mail): não é mais usada; fica só para as administradoras decidirem o que fazer
+    match /tickets-acesso/{email} {
+      allow read, write: if adminTickets();
+    }
+
+    match /tickets-auditoria/{id} {
+      allow read: if adminTickets();
+      allow create: if auditoriaValida();
+      allow update, delete: if false;
+    }
+
+    match /tickets-backups/{id} {
+      allow read, write: if adminTickets();
+      match /partes/{parte} {
+        allow read, write: if adminTickets();
+      }
+    }
+
+    match /tickets-lixeira/{id} {
+      allow read, write: if adminTickets();
+    }
+
+    // ============================================================
+    // INVENTÁRIO DE EQUIPAMENTOS (site à parte: sites/inventario-equipamentos/, target "inventario").
+    // Mesmo modelo do Banco de Tickets, com cadastros SEPARADOS: inventario-identidades,
+    // inventario-emails e inventario-pessoas. Quem tem acesso ao Banco de Tickets não tem ao
+    // Inventário só por isso, e vice-versa (cada site confere só os próprios cadastros).
+    // Administradoras = adminInventario(): Lays e Paula, entrando com e-mail e SENHA.
+    // Colunas "travado após criar" (colunasTravadas): a equipe envia na criação; depois, só administradoras.
+    // HOSTNAME e DNA são únicos: índices inventario-hostnames/{valor} e inventario-dnas/{valor},
+    // criados no mesmo lote do equipamento. Nada daqui dá acesso a coleções da Central ou do Banco.
+    // ============================================================
+    // Precisa ficar igual a ADMINS em sites/inventario-equipamentos/assets/firebase.js
+    function adminInventario() {
+      return request.auth != null
+        && request.auth.token.get('email', '') in ['lays.almeida@valid.com', 'paula.conceicao@valid.com']
+        && request.auth.token.firebase.sign_in_provider == 'password';
+    }
+    function emailInventario() {
+      return request.auth.token.email.lower();
+    }
+    function pessoaInventario() {
+      return get(/databases/$(database)/documents/inventario-pessoas/$(request.auth.uid)).data;
+    }
+    function identidadeInventarioDe(email) {
+      return get(/databases/$(database)/documents/inventario-identidades/$(email)).data;
+    }
+    function identidadeInventario() {
+      return identidadeInventarioDe(pessoaInventario().email);
+    }
+    // Quem assina e qual o papel: a identidade ligada a este aparelho (aqui não há cadastros antigos)
+    function perfilInventario() {
+      return identidadeInventario();
+    }
+    // Liberada e com o aparelho ligado depois do último "Desconectar todos os aparelhos"
+    function naListaInventario() {
+      return request.auth != null && !adminInventario()
+        && exists(/databases/$(database)/documents/inventario-pessoas/$(request.auth.uid))
+        && aparelhoLiberadoInventario(pessoaInventario());
+    }
+    // p = aparelho, i = identidade (lidos uma vez só: as regras têm limite de expressões por pedido)
+    function aparelhoLiberadoInventario(p) {
+      return 'vinculadoEm' in p
+        && exists(/databases/$(database)/documents/inventario-identidades/$(p.email))
+        && identidadeLiberadaInventario(p, identidadeInventarioDe(p.email));
+    }
+    function identidadeLiberadaInventario(p, i) {
+      return i.ativo == true && i.aprovado == true
+        && (i.get('revogadoAntesDe', null) == null || p.vinculadoEm >= i.revogadoAntesDe);
+    }
+    function noInventario() {
+      return request.auth != null && (adminInventario() || naListaInventario());
+    }
+    // "admin" | "equipe" | "leitura"
+    function papelInventario() {
+      return adminInventario() ? 'admin' : perfilInventario().papel;
+    }
+    function equipeInventario() {
+      return naListaInventario() && papelInventario() == 'equipe';
+    }
+    // Quem grava: e-mail da administradora ou uid da pessoa da equipe
+    function autorInventario() {
+      return adminInventario() ? emailInventario() : request.auth.uid;
+    }
+    // A autoria (id, nome e e-mail) tem de ser a do próprio perfil: ninguém grava em nome de outra pessoa
+    function autoriaInventario(por, nome, email) {
+      let p = perfilInventario();
+      return por == request.auth.uid && nome == p.nome && email == p.email;
+    }
+    function configInventario() {
+      return get(/databases/$(database)/documents/inventario-config/estrutura).data;
+    }
+    function registroInventario() {
+      return configInventario().regras.get('registro', {'aberto': true, 'dominios': [], 'papelPadrao': 'equipe', 'aprovacao': true});
+    }
+    // Com "aprovacao" (padrão: ligada), o cadastro novo nasce com aprovado false até uma administradora liberar
+    function aprovacaoInventario() {
+      return registroInventario().get('aprovacao', true) != false;
+    }
+    function dominioInventario(e) {
+      let dominios = registroInventario().dominios;
+      return dominios.size() == 0 || e.split('@')[1] in dominios;
+    }
+    // chaveDoNome() falha com maiúscula acentuada (o lower() das regras dá erro em "Â", "Ç", "Ã"...):
+    // aqui as maiúsculas acentuadas viram letras sem acento antes de chamar chaveDoNome().
+    function chaveDoNomeInventario(n) {
+      return chaveDoNome(n
+        .replace('[ÀÁÂÃÄÅĀĂĄ]', 'A')
+        .replace('[ÇĆĈĊČ]', 'C')
+        .replace('Ď', 'D')
+        .replace('[ÈÉÊËĒĔĖĘĚ]', 'E')
+        .replace('[ĜĞĠĢ]', 'G')
+        .replace('Ĥ', 'H')
+        .replace('[ÌÍÎÏĨĪĬĮ]', 'I')
+        .replace('Ĵ', 'J')
+        .replace('Ķ', 'K')
+        .replace('[ĹĻĽ]', 'L')
+        .replace('[ÑŃŅŇ]', 'N')
+        .replace('[ÒÓÔÕÖŌŎŐ]', 'O')
+        .replace('[ŔŖŘ]', 'R')
+        .replace('[ŚŜŞŠ]', 'S')
+        .replace('[ŢŤ]', 'T')
+        .replace('[ÙÚÛÜŨŪŬŮŰŲ]', 'U')
+        .replace('Ŵ', 'W')
+        .replace('[ÝŸŶ]', 'Y')
+        .replace('[ŹŻŽ]', 'Z'));
+    }
+    // Cadastro novo na tela de entrada: identidade + inventario-emails + aparelho, no mesmo lote.
+    // emailPessoaValido() recusa os e-mails das administradoras.
+    function cadastroNovoInventario(email) {
+      let d = request.resource.data;
+      let campos = ['email', 'nome', 'nomeChave', 'papel', 'ativo', 'aprovado', 'criadoEm', 'criadoPorUid', 'atualizadoEm'];
+      return request.auth != null && !adminInventario()
+        && registroInventario().aberto == true
+        && d.keys().hasOnly(campos) && d.keys().hasAll(campos)
+        && d.email == email && emailPessoaValido(email) && dominioInventario(email)
+        && nomePessoaValido(d.nome) && nomeChaveValida(d.nomeChave) && d.nomeChave == chaveDoNomeInventario(d.nome)
+        && d.papel == registroInventario().papelPadrao
+        && d.ativo == true && d.aprovado == !aprovacaoInventario()
+        && d.criadoPorUid == request.auth.uid
+        && d.criadoEm == request.time && d.atualizadoEm == request.time
+        && existsAfter(/databases/$(database)/documents/inventario-emails/$(email))
+        && existsAfter(/databases/$(database)/documents/inventario-pessoas/$(request.auth.uid))
+        && getAfter(/databases/$(database)/documents/inventario-pessoas/$(request.auth.uid)).data.email == email;
+    }
+    // Administradora: liberar, bloquear, papel, corrigir o nome e "Desconectar todos os aparelhos"
+    function identidadeInventarioAltera() {
+      let d = request.resource.data;
+      return adminInventario()
+        && d.diff(resource.data).affectedKeys().hasOnly(['nome', 'nomeChave', 'papel', 'ativo', 'aprovado', 'revogadoAntesDe', 'atualizadoEm'])
+        && nomePessoaValido(d.nome) && nomeChaveValida(d.nomeChave)
+        && d.papel in ['equipe', 'leitura'] && d.ativo is bool && d.aprovado is bool
+        && (!('revogadoAntesDe' in d) || d.revogadoAntesDe is timestamp)
+        && d.atualizadoEm == request.time;
+    }
+    // Ligar este aparelho a uma identidade do Inventário: só com o mesmo nomeChave do cadastro daquele e-mail
+    function vinculoInventario(uid) {
+      let d = request.resource.data;
+      return request.auth != null && request.auth.uid == uid && !adminInventario()
+        && emailPessoaValido(d.email)
+        && existsAfter(/databases/$(database)/documents/inventario-identidades/$(d.email))
+        && d.nomeChave == getAfter(/databases/$(database)/documents/inventario-identidades/$(d.email)).data.nomeChave
+        && d.vinculadoEm == request.time
+        && (!('ultimoAcesso' in d) || d.ultimoAcesso == request.time);
+    }
+    // HOSTNAME e DNA: maiúsculas, números, ponto, hífen e sublinhado (igual ao app). '' = vazio.
+    function chaveInventarioValida(v) {
+      return v is string && (v == '' || v.matches('^[A-Z0-9][A-Z0-9._-]{0,79}$'));
+    }
+    // O índice do valor único existe depois do lote e aponta para este equipamento
+    function indiceInventario(colecao, valor, id) {
+      return valor == '' || (existsAfter(/databases/$(database)/documents/$(colecao)/$(valor))
+        && getAfter(/databases/$(database)/documents/$(colecao)/$(valor)).data.equipamento == id);
+    }
+    // "parcial": edição de uma linha do arquivo compactado; traz só os campos alterados, por cima da linha
+    function formatoEquipamento(d) {
+      return d.keys().hasOnly(['campos', 'numero', 'dna', 'parcial', 'criadoPor', 'criadoPorNome', 'criadoPorEmail', 'criadoEm',
+          'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm', 'exclusao'])
+        && d.campos is map && d.campos.size() <= 80
+        && d.get('parcial', false) is bool
+        && chaveInventarioValida(d.get('numero', '')) && chaveInventarioValida(d.get('dna', ''));
+    }
+    // ÁREA, GESTOR, STATUS, AUDITORIA e TÉCNICO validadas no servidor: a equipe só grava vazio ou uma opção
+    // ativa (listasEquipe, gravado pela interface junto com a estrutura). GESTOR sem opções = só vazio.
+    // Só o valor ALTERADO é conferido: um equipamento com opção removida da lista continua sendo editado nas outras
+    // colunas. Etiquetas (lista de opções): só as ACRESCENTADAS precisam estar ativas.
+    function listaInventarioOk(cfg, campos, antes, col) {
+      let lista = cfg.get('listasEquipe', {}).get(col, null);
+      let v = campos.get(col, '');
+      let a = antes.get(col, []);
+      return lista == null || v == ''
+        || (v is list ? v.toSet().difference(a is list ? a.toSet() : [].toSet()).hasOnly(lista) : v in lista);
+    }
+    function listasInventarioValidas(cfg, campos, antes, alteradas) {
+      return (!('area' in alteradas) || listaInventarioOk(cfg, campos, antes, 'area'))
+        && (!('gestor' in alteradas) || listaInventarioOk(cfg, campos, antes, 'gestor'))
+        && (!('status' in alteradas) || listaInventarioOk(cfg, campos, antes, 'status'))
+        && (!('auditoria' in alteradas) || listaInventarioOk(cfg, campos, antes, 'auditoria'))
+        && (!('tecnico' in alteradas) || listaInventarioOk(cfg, campos, antes, 'tecnico'));
+    }
+    // Equipe cadastra: pode enviar as colunas "travado após criar" (HOSTNAME, DNA), menos numa edição parcial.
+    // A chave de cada índice é o próprio valor da célula; valor já usado = o índice já existe = recusa.
+    function equipeCriaEquipamento(id) {
+      let d = request.resource.data;
+      let cfg = configInventario();
+      return equipeInventario()
+        && formatoEquipamento(d)
+        && d.campos.keys().hasOnly(cfg.colunasEquipe)
+        && (d.get('parcial', false) == false || !d.campos.keys().hasAny(cfg.get('colunasTravadas', [])))
+        && listasInventarioValidas(cfg, d.campos, {}, d.campos.keys())
+        && autoriaInventario(d.criadoPor, d.criadoPorNome, d.criadoPorEmail) && d.criadoEm == request.time
+        && autoriaInventario(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time
+        && d.exclusao == null
+        && d.get('numero', '') == d.campos.get('hostname', '') && d.get('dna', '') == d.campos.get('dna', '')
+        && indiceInventario('inventario-hostnames', d.get('numero', ''), id)
+        && indiceInventario('inventario-dnas', d.get('dna', ''), id);
+    }
+    // equipeEdita: "todas" (padrão do Inventário), "proprias" ou "nenhuma". Na edição, as colunas
+    // "travado após criar" não podem estar entre as alteradas, e numero/dna não mudam.
+    function equipeEditaEquipamento() {
+      let cfg = configInventario();
+      let regras = cfg.regras;
+      let d = request.resource.data;
+      let alteradas = d.campos.diff(resource.data.campos).affectedKeys();
+      return d.diff(resource.data).affectedKeys().hasOnly(['campos', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm'])
+        && equipeInventario()
+        && regras.equipeEdita != 'nenhuma'
+        && (regras.equipeEdita == 'todas'
+          || (resource.data.get('criadoPorEmail', '') != '' && resource.data.get('criadoPorEmail', '') == perfilInventario().email
+            && (regras.janelaEdicaoHoras == 0 || request.time < resource.data.criadoEm + duration.value(regras.janelaEdicaoHoras, 'h'))))
+        && d.campos is map && d.campos.size() <= 80
+        && alteradas.hasOnly(cfg.colunasEquipe)
+        && !alteradas.hasAny(cfg.get('colunasTravadas', []))
+        && listasInventarioValidas(cfg, d.campos, resource.data.campos, alteradas)
+        && autoriaInventario(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time;
+    }
+    // "Solicitar exclusão": só marca a linha; quem exclui é uma administradora
+    function equipePedeExclusaoInventario() {
+      let d = request.resource.data;
+      return resource.data.exclusao == null
+        && d.diff(resource.data).affectedKeys().hasOnly(['exclusao', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm'])
+        && equipeInventario()
+        && d.exclusao is map && d.exclusao.keys().hasOnly(['motivo', 'por', 'porNome', 'porEmail', 'em'])
+        && d.exclusao.motivo is string && d.exclusao.motivo.size() > 0 && d.exclusao.motivo.size() <= 300
+        && autoriaInventario(d.exclusao.por, d.exclusao.porNome, d.exclusao.porEmail) && d.exclusao.em == request.time
+        && autoriaInventario(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time;
+    }
+    // Estrutura (inventario-config/estrutura), gravada só pelas administradoras
+    function estruturaInventarioValida(documento) {
+      let d = request.resource.data;
+      return adminInventario() && documento == 'estrutura'
+        && d.keys().hasOnly(['titulo', 'versao', 'categorias', 'colunas', 'gruposColunas', 'regras', 'colunasEquipe', 'colunasTravadas', 'listasEquipe', 'atualizadoEm', 'atualizadoPor'])
+        && (!('listasEquipe' in d) || d.listasEquipe is map)
+        && (!('colunasTravadas' in d) || (d.colunasTravadas is list && d.colunasTravadas.size() <= 80))
+        && textoAte(d.titulo, 80)
+        && d.versao is int
+        && d.categorias is list && d.categorias.size() <= 40
+        && d.colunas is list && d.colunas.size() <= 80
+        && d.gruposColunas is list && d.gruposColunas.size() <= 20
+        && d.colunasEquipe is list && d.colunasEquipe.size() <= 80
+        && d.regras is map
+        && d.regras.keys().hasOnly(['equipeEdita', 'janelaEdicaoHoras', 'exportacao', 'registro'])
+        && d.regras.equipeEdita in ['proprias', 'todas', 'nenhuma']
+        && d.regras.janelaEdicaoHoras is int && d.regras.janelaEdicaoHoras >= 0 && d.regras.janelaEdicaoHoras <= 8760
+        && d.regras.exportacao is bool
+        && (!('registro' in d.regras) || (
+          d.regras.registro is map
+          && d.regras.registro.keys().hasOnly(['aberto', 'dominios', 'papelPadrao', 'aprovacao'])
+          && d.regras.registro.get('aprovacao', true) is bool
+          && d.regras.registro.aberto is bool
+          && d.regras.registro.dominios is list && d.regras.registro.dominios.size() <= 20
+          && d.regras.registro.papelPadrao in ['equipe', 'leitura']))
+        && d.atualizadoPor == emailInventario()
+        && d.atualizadoEm == request.time;
+    }
+    // Ciclo de auditoria (inventario-config/ciclo): só administradoras iniciam e encerram
+    function cicloInventarioValido(documento) {
+      let d = request.resource.data;
+      return adminInventario() && documento == 'ciclo'
+        && d.keys().hasOnly(['inicio', 'encerradoEm', 'resumo', 'atualizadoEm', 'atualizadoPor'])
+        && d.inicio is timestamp
+        && (d.get('encerradoEm', null) == null || d.encerradoEm is timestamp)
+        && (d.get('resumo', null) == null || d.resumo is map)
+        && d.atualizadoPor == emailInventario()
+        && d.atualizadoEm == request.time;
+    }
+    // Histórico de cada equipamento: só entra junto com uma mudança real dele, feita pela mesma pessoa
+    function historicoInventario(id) {
+      return (adminInventario()
+          || (equipeInventario()
+            && autoriaInventario(request.resource.data.por, request.resource.data.porNome, request.resource.data.porEmail)
+            && getAfter(/databases/$(database)/documents/inventario/$(id)).data.atualizadoPor == request.auth.uid
+            && getAfter(/databases/$(database)/documents/inventario/$(id)).data.atualizadoEm == request.time))
+        && request.resource.data.keys().hasOnly(['acao', 'coluna', 'colunaNome', 'antes', 'depois', 'por', 'porNome', 'porEmail', 'em'])
+        && textoAte(request.resource.data.acao, 30) && textoAte(request.resource.data.coluna, 40)
+        && textoAte(request.resource.data.colunaNome, 60)
+        && textoAte(request.resource.data.antes, 500) && textoAte(request.resource.data.depois, 500)
+        && request.resource.data.por == autorInventario() && request.resource.data.em == request.time;
+    }
+    // Arquivo compactado: todos que estão no Inventário leem; só as administradoras gravam
+    function parteArquivoInventario() {
+      return adminInventario()
+        && request.resource.data.keys().hasOnly(['versao', 'indice', 'total', 'json', 'criadoPor', 'criadoEm'])
+        && request.resource.data.versao is int && request.resource.data.indice is int && request.resource.data.total is int
+        && request.resource.data.indice >= 0 && request.resource.data.indice < request.resource.data.total
+        && request.resource.data.json is string
+        && request.resource.data.criadoPor == emailInventario() && request.resource.data.criadoEm == request.time;
+    }
+    // Índice de HOSTNAME/DNA: a equipe só cria, junto com o equipamento que usa o valor; nunca apaga nem troca
+    function criaIndiceInventario(campo, valor) {
+      return adminInventario() || (equipeInventario()
+        && chaveInventarioValida(valor) && valor != ''
+        && request.resource.data.keys().hasOnly(['equipamento'])
+        && getAfter(/databases/$(database)/documents/inventario/$(request.resource.data.equipamento)).data.get(campo, '') == valor);
+    }
+    // Trilha de auditoria (inventario-auditoria): só inclusão. Administradora assina com o e-mail; quem está
+    // no Inventário assina com o uid e só registra a própria atividade (entrar e exportar; a equipe também as
+    // próprias edições no Inventário de Equipamentos). "mudancas" = [{ coluna, antes, depois }] da edição.
+    function auditoriaInventarioValida() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['acao', 'resumo', 'detalhes', 'por', 'porNome', 'porEmail', 'planilha', 'alvo', 'mudancas', 'em'])
+        && textoAte(d.acao, 40) && d.acao.size() > 0 && textoAte(d.resumo, 300)
+        && textoAte(d.detalhes, 1500)
+        && textoAte(d.get('porNome', ''), 80) && textoAte(d.get('porEmail', ''), 120)
+        && textoAte(d.get('planilha', ''), 40) && textoAte(d.get('alvo', ''), 120)
+        && d.get('mudancas', []) is list && d.get('mudancas', []).size() <= 60
+        && d.em == request.time
+        && ((adminInventario() && d.por == emailInventario())
+          || (naListaInventario() && d.por == request.auth.uid && d.acao in ['entrar', 'exportar'])
+          || (equipeInventario() && d.por == request.auth.uid
+            && d.acao in ['criar', 'editar', 'editarMassa', 'preencherMassa', 'importar', 'pedirExclusao']));
+    }
+
+    // Quem ainda vai se cadastrar (login anônimo, sem perfil) precisa ler as regras de registro
+    // Aparência padrão do Inventário (aparencia / aparencia-imagem): lê quem já lê o Inventário; grava só administradora
+    function aparenciaInventarioValida(documento) {
+      return adminInventario() && request.resource.data.atualizadoPor == emailInventario()
+        && ((documento == 'aparencia' && aparenciaPlanilhaValida(request.resource.data))
+          || (documento == 'aparencia-imagem' && aparenciaImagemValida(request.resource.data)));
+    }
+    match /inventario-config/{documento} {
+      allow read: if request.auth != null && (!(documento in ['aparencia', 'aparencia-imagem']) || noInventario());
+      allow write: if estruturaInventarioValida(documento) || cicloInventarioValido(documento) || aparenciaInventarioValida(documento);
+      allow delete: if adminInventario() && documento in ['aparencia', 'aparencia-imagem'];
+    }
+    match /inventario/{equipamentoId} {
+      allow read: if noInventario();
+      allow create: if adminInventario() || equipeCriaEquipamento(equipamentoId);
+      allow update: if adminInventario() || equipeEditaEquipamento() || equipePedeExclusaoInventario();
+      allow delete: if adminInventario();
+      match /historico/{evento} {
+        allow read: if noInventario();
+        allow create: if historicoInventario(equipamentoId);
+        allow update, delete: if false;
+      }
+    }
+    match /inventario-arquivo/{parte} {
+      allow read: if noInventario();
+      allow create, update: if parteArquivoInventario();
+      allow delete: if adminInventario();
+    }
+    match /inventario-hostnames/{valor} {
+      allow read: if noInventario();
+      allow create: if criaIndiceInventario('numero', valor);
+      allow update, delete: if adminInventario();
+    }
+    match /inventario-dnas/{valor} {
+      allow read: if noInventario();
+      allow create: if criaIndiceInventario('dna', valor);
+      allow update, delete: if adminInventario();
+    }
+    // Aparelho (o id do documento é o uid do login anônimo deste navegador): { email, nomeChave, vinculadoEm, ultimoAcesso }
+    match /inventario-pessoas/{uid} {
+      allow read: if adminInventario() || (request.auth != null && request.auth.uid == uid);
+      allow create: if vinculoInventario(uid)
+        && request.resource.data.keys().hasOnly(['email', 'nomeChave', 'vinculadoEm', 'ultimoAcesso']);
+      allow update: if (vinculoInventario(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email', 'nomeChave', 'vinculadoEm', 'ultimoAcesso']))
+        || (request.auth != null && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ultimoAcesso'])
+          && request.resource.data.ultimoAcesso == request.time);
+      allow delete: if adminInventario();
+    }
+    // Identidade (a "conta" da pessoa no Inventário), pelo e-mail em minúsculas. Só as administradoras
+    // e os aparelhos já ligados a ela leem: ninguém descobre o nome cadastrado de um e-mail.
+    match /inventario-identidades/{email} {
+      allow get: if adminInventario()
+        || (request.auth != null
+          && exists(/databases/$(database)/documents/inventario-pessoas/$(request.auth.uid))
+          && 'vinculadoEm' in pessoaInventario()
+          && pessoaInventario().email == email);
+      allow list: if adminInventario();
+      allow create: if cadastroNovoInventario(email);
+      allow update: if identidadeInventarioAltera();
+      allow delete: if adminInventario();
+    }
+    // "Este e-mail tem cadastro no Inventário": documento vazio. Lê um e-mail por vez; ninguém lista.
+    match /inventario-emails/{email} {
+      allow get: if request.auth != null;
+      allow list: if false;
+      allow create: if request.resource.data.keys().size() == 0
+        && (adminInventario()
+          || (request.auth != null
+            && existsAfter(/databases/$(database)/documents/inventario-identidades/$(email))
+            && getAfter(/databases/$(database)/documents/inventario-identidades/$(email)).data.criadoPorUid == request.auth.uid));
+      allow update: if adminInventario() && request.resource.data.keys().size() == 0;
+      allow delete: if adminInventario();
+    }
+    // Administradoras leem tudo; a equipe (gestor) só a própria atividade (consulta com where por == uid)
+    match /inventario-auditoria/{id} {
+      allow read: if adminInventario() || (equipeInventario() && resource.data.por == request.auth.uid);
+      allow create: if auditoriaInventarioValida();
+      allow update, delete: if false;
+    }
+    match /inventario-backups/{id} {
+      allow read, write: if adminInventario();
+      match /partes/{parte} {
+        allow read, write: if adminInventario();
+      }
+    }
+    match /inventario-lixeira/{id} {
+      allow read, write: if adminInventario();
+    }
+
+    // ---------- INVENTÁRIO VCORP e VCERT (Hardware e Software) ----------
+    // Quem está no Inventário (administradora, equipe ou leitura) vê; só as administradoras gravam.
+    // Registro: { campos: { idColuna: valor }, criadoPor, criadoPorNome, criadoPorEmail, criadoEm, atualizadoPor... }.
+    // Software: NOME DA APLICAÇÃO (nomeAplicacao), VERSÃO (versao), HOSTNAME (hostname) e MÊS/ANO (mesAno) obrigatórios.
+    // As colunas extras ficam no mesmo mapa "campos" (até 80 chaves; o tamanho de cada uma é conferido no app).
+    function colecaoPerfil(c) {
+      return c in ['inventario-vcorp-hw', 'inventario-vcorp-sw', 'inventario-vcert-hw', 'inventario-vcert-sw'];
+    }
+    function hostnameValido(v) {
+      return v is string && v.matches('^[A-Z0-9][A-Z0-9._-]{0,79}$');
+    }
+    function mesAnoValido(v) {
+      return v is string && v.matches('^(0[1-9]|1[0-2])/20[0-9]{2}$');
+    }
+    function softwareValido(c) {
+      return c.get('nomeAplicacao', '') is string && c.get('nomeAplicacao', '').size() > 0 && c.get('nomeAplicacao', '').size() <= 300
+        && c.get('versao', '') is string && c.get('versao', '').size() > 0 && c.get('versao', '').size() <= 300
+        && hostnameValido(c.get('hostname', ''))
+        && mesAnoValido(c.get('mesAno', ''));
+    }
+    function hardwareValido(c) {
+      return (c.get('hostname', '') == '' || hostnameValido(c.get('hostname', '')))
+        && (c.get('mesAno', '') == '' || mesAnoValido(c.get('mesAno', '')))
+        && textoAte(c.get('numeroSerie', ''), 300) && textoAte(c.get('patrimonio', ''), 300);
+    }
+    function registroPerfilValido(colecao) {
+      let d = request.resource.data;
+      return adminInventario()
+        && d.keys().hasOnly(['campos', 'numero', 'dna', 'criadoPor', 'criadoPorNome', 'criadoPorEmail', 'criadoEm',
+          'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm', 'exclusao', 'importacao'])
+        && d.campos is map && d.campos.size() <= 80
+        && textoAte(d.get('criadoPor', ''), 120) && textoAte(d.get('atualizadoPor', ''), 120)
+        && textoAte(d.get('importacao', ''), 60)
+        && (colecao.matches('.*-sw$') ? softwareValido(d.campos) : hardwareValido(d.campos));
+    }
+    // Aparência padrão de cada planilha VCORP/VCERT: <coleção>-config/aparencia e aparencia-imagem (mesmo formato do Inventário)
+    function configPerfil(c, documento) {
+      return c in ['inventario-vcorp-hw-config', 'inventario-vcorp-sw-config', 'inventario-vcert-hw-config', 'inventario-vcert-sw-config']
+        && documento in ['aparencia', 'aparencia-imagem'];
+    }
+    match /{colecao}/{registro} {
+      allow read: if (colecaoPerfil(colecao) || configPerfil(colecao, registro)) && noInventario();
+      allow create, update: if (colecaoPerfil(colecao) && registroPerfilValido(colecao))
+        || (configPerfil(colecao, registro) && aparenciaInventarioValida(registro));
+      allow delete: if (colecaoPerfil(colecao) || configPerfil(colecao, registro)) && adminInventario();
+      // Histórico de cada linha (antes e depois de cada célula)
+      match /historico/{evento} {
+        allow read: if colecaoPerfil(colecao) && noInventario();
+        allow create: if colecaoPerfil(colecao) && adminInventario()
+          && request.resource.data.keys().hasOnly(['acao', 'coluna', 'colunaNome', 'antes', 'depois', 'por', 'porNome', 'porEmail', 'em'])
+          && textoAte(request.resource.data.acao, 30) && textoAte(request.resource.data.coluna, 40)
+          && textoAte(request.resource.data.colunaNome, 60)
+          && textoAte(request.resource.data.antes, 500) && textoAte(request.resource.data.depois, 500)
+          && request.resource.data.por == emailInventario() && request.resource.data.em == request.time;
+        allow update: if false;
+        allow delete: if colecaoPerfil(colecao) && adminInventario();
+      }
+    }
+    // Colunas (estrutura) de cada planilha VCORP/VCERT: o mesmo formato de inventario-config/estrutura
+    match /inventario-colunas/{planilha} {
+      allow read: if noInventario() && planilha in ['vcorp-hw', 'vcorp-sw', 'vcert-hw', 'vcert-sw'];
+      allow create, update: if adminInventario() && planilha in ['vcorp-hw', 'vcorp-sw', 'vcert-hw', 'vcert-sw']
+        && request.resource.data.keys().hasOnly(['titulo', 'versao', 'categorias', 'colunas', 'gruposColunas', 'regras', 'colunasEquipe', 'colunasTravadas', 'listasEquipe', 'atualizadoEm', 'atualizadoPor'])
+        && textoAte(request.resource.data.titulo, 80)
+        && request.resource.data.versao is int
+        && request.resource.data.colunas is list && request.resource.data.colunas.size() >= 1 && request.resource.data.colunas.size() <= 80
+        && request.resource.data.gruposColunas is list && request.resource.data.gruposColunas.size() <= 20
+        && request.resource.data.regras is map
+        && request.resource.data.atualizadoPor == emailInventario()
+        && request.resource.data.atualizadoEm == request.time;
+      allow delete: if false;
+    }
+    // Importações (tabela provisória antes de entrar na planilha) e mapeamentos de colunas por origem: só administradoras
+    match /inventario-importacoes/{importacao} {
+      allow read, write: if adminInventario();
+      match /linhas/{linha} {
+        allow read, write: if adminInventario();
+      }
+    }
+    match /inventario-mapeamentos/{origem} {
+      allow read, write: if adminInventario();
+    }
+
+    // ============================================================
+    // CADEIAS V6 / V12 (site à parte: sites/cadeias/, target "cadeias").
+    // Mesmo modelo de entrada do Banco de Tickets e do Inventário, com cadastros SEPARADOS:
+    // cadeias-identidades, cadeias-emails e cadeias-pessoas. Quem tem acesso a outro site não lê nada daqui.
+    // Administradoras = adminCadeias(): Lays e Paula, entrando com e-mail e SENHA.
+    // Perfis (campo "perfil" da identidade): "equipe-n2" (vê e edita os registros: colunas LIVRE/LISTA, e as
+    // "travado após criar" só na criação; vê as últimas mudanças) e "equipe" (só lê). Ninguém além das
+    // administradoras mexe em estrutura, localidades, grupos, lixeira, backups ou exclui de vez.
+    // cadeias-historico (Últimas 15 mudanças): só entra junto de uma mudança real do registro, no mesmo lote.
+    // Os contadores da localidade (contagem, resumo, hoje) só mudam junto de uma gravação real de um registro.
+    // ============================================================
+    // Precisa ficar igual a ADMINS em sites/cadeias/assets/firebase.js
+    function adminCadeias() {
+      return request.auth != null
+        && request.auth.token.get('email', '') in ['lays.almeida@valid.com', 'paula.conceicao@valid.com']
+        && request.auth.token.firebase.sign_in_provider == 'password';
+    }
+    function emailCadeias() {
+      return request.auth.token.email.lower();
+    }
+    function pessoaCadeias() {
+      return get(/databases/$(database)/documents/cadeias-pessoas/$(request.auth.uid)).data;
+    }
+    function identidadeCadeiasDe(email) {
+      return get(/databases/$(database)/documents/cadeias-identidades/$(email)).data;
+    }
+    function identidadeCadeias() {
+      return identidadeCadeiasDe(pessoaCadeias().email);
+    }
+    // Liberada e com o aparelho ligado depois do último "Desconectar todos os aparelhos"
+    function naListaCadeias() {
+      return request.auth != null && !adminCadeias()
+        && exists(/databases/$(database)/documents/cadeias-pessoas/$(request.auth.uid))
+        && aparelhoLiberadoCadeias(pessoaCadeias());
+    }
+    function aparelhoLiberadoCadeias(p) {
+      return 'vinculadoEm' in p
+        && exists(/databases/$(database)/documents/cadeias-identidades/$(p.email))
+        && identidadeLiberadaCadeias(p, identidadeCadeiasDe(p.email));
+    }
+    function identidadeLiberadaCadeias(p, i) {
+      return i.ativo == true && i.aprovado == true
+        && (i.get('revogadoAntesDe', null) == null || p.vinculadoEm >= i.revogadoAntesDe);
+    }
+    function noCadeias() {
+      return request.auth != null && (adminCadeias() || naListaCadeias());
+    }
+    // "equipe-n2" | "equipe" (sem o campo = "equipe", só leitura)
+    function perfilCadeias() {
+      return identidadeCadeias().get('perfil', 'equipe');
+    }
+    function equipeN2Cadeias() {
+      return naListaCadeias() && perfilCadeias() == 'equipe-n2';
+    }
+    function equipeLeituraCadeias() {
+      return naListaCadeias() && perfilCadeias() != 'equipe-n2';
+    }
+    // Quem vê as últimas mudanças e o histórico das linhas
+    function veMudancasCadeias() {
+      return adminCadeias() || equipeN2Cadeias();
+    }
+    // Quem grava: e-mail da administradora ou uid da pessoa
+    function autorCadeias() {
+      return adminCadeias() ? emailCadeias() : request.auth.uid;
+    }
+    // A autoria (id, nome e e-mail) tem de ser a do próprio perfil: ninguém grava em nome de outra pessoa
+    function autoriaCadeias(por, nome, email) {
+      let i = identidadeCadeias();
+      return por == request.auth.uid && nome == i.nome && email == i.email;
+    }
+    function configAmbiente(amb) {
+      return get(/databases/$(database)/documents/cadeias-ambientes/$(amb)).data;
+    }
+    function localidadeCadeias(loc) {
+      return get(/databases/$(database)/documents/cadeias-localidades/$(loc)).data;
+    }
+    // Regras de cadastro (cadeias-config/entrada); sem o documento: aberto, qualquer domínio
+    function entradaCadeias() {
+      return exists(/databases/$(database)/documents/cadeias-config/entrada)
+        ? get(/databases/$(database)/documents/cadeias-config/entrada).data
+        : { 'aberto': true, 'dominios': [], 'aprovacao': true };
+    }
+    function dominioCadeias(e) {
+      let dominios = entradaCadeias().get('dominios', []);
+      return dominios.size() == 0 || e.split('@')[1] in dominios;
+    }
+    // Como chaveDoNomeInventario(): maiúsculas acentuadas viram letras sem acento antes de chaveDoNome()
+    function chaveDoNomeCadeias(n) {
+      return chaveDoNome(n
+        .replace('[ÀÁÂÃÄÅĀĂĄ]', 'A')
+        .replace('[ÇĆĈĊČ]', 'C')
+        .replace('Ď', 'D')
+        .replace('[ÈÉÊËĒĔĖĘĚ]', 'E')
+        .replace('[ĜĞĠĢ]', 'G')
+        .replace('Ĥ', 'H')
+        .replace('[ÌÍÎÏĨĪĬĮ]', 'I')
+        .replace('Ĵ', 'J')
+        .replace('Ķ', 'K')
+        .replace('[ĹĻĽ]', 'L')
+        .replace('[ÑŃŅŇ]', 'N')
+        .replace('[ÒÓÔÕÖŌŎŐ]', 'O')
+        .replace('[ŔŖŘ]', 'R')
+        .replace('[ŚŜŞŠ]', 'S')
+        .replace('[ŢŤ]', 'T')
+        .replace('[ÙÚÛÜŨŪŬŮŰŲ]', 'U')
+        .replace('Ŵ', 'W')
+        .replace('[ÝŸŶ]', 'Y')
+        .replace('[ŹŻŽ]', 'Z'));
+    }
+    // Cadastro novo na tela de entrada: identidade + cadeias-emails + aparelho, no mesmo lote.
+    // Sempre nasce "aguardando liberação" (aprovado false) e com o perfil "equipe" (só leitura).
+    function cadastroNovoCadeias(email) {
+      let d = request.resource.data;
+      let campos = ['email', 'nome', 'nomeChave', 'perfil', 'ativo', 'aprovado', 'criadoEm', 'criadoPorUid', 'atualizadoEm'];
+      return request.auth != null && !adminCadeias()
+        && entradaCadeias().get('aberto', true) == true
+        && d.keys().hasOnly(campos) && d.keys().hasAll(campos)
+        && d.email == email && emailPessoaValido(email) && dominioCadeias(email)
+        && nomePessoaValido(d.nome) && nomeChaveValida(d.nomeChave) && d.nomeChave == chaveDoNomeCadeias(d.nome)
+        && d.perfil == 'equipe' && d.ativo == true && d.aprovado == false
+        && d.criadoPorUid == request.auth.uid
+        && d.criadoEm == request.time && d.atualizadoEm == request.time
+        && existsAfter(/databases/$(database)/documents/cadeias-emails/$(email))
+        && existsAfter(/databases/$(database)/documents/cadeias-pessoas/$(request.auth.uid))
+        && getAfter(/databases/$(database)/documents/cadeias-pessoas/$(request.auth.uid)).data.email == email;
+    }
+    // Administradora: liberar (escolhendo o perfil), mudar o perfil, bloquear, corrigir o nome e desconectar aparelhos
+    function identidadeCadeiasAltera() {
+      let d = request.resource.data;
+      return adminCadeias()
+        && d.diff(resource.data).affectedKeys().hasOnly(['nome', 'nomeChave', 'perfil', 'ativo', 'aprovado', 'revogadoAntesDe', 'atualizadoEm'])
+        && nomePessoaValido(d.nome) && nomeChaveValida(d.nomeChave)
+        && d.perfil in ['equipe-n2', 'equipe'] && d.ativo is bool && d.aprovado is bool
+        && (!('revogadoAntesDe' in d) || d.revogadoAntesDe is timestamp)
+        && d.atualizadoEm == request.time;
+    }
+    // Ligar este aparelho a uma identidade do Cadeias: só com o mesmo nomeChave do cadastro daquele e-mail
+    function vinculoCadeias(uid) {
+      let d = request.resource.data;
+      return request.auth != null && request.auth.uid == uid && !adminCadeias()
+        && emailPessoaValido(d.email)
+        && existsAfter(/databases/$(database)/documents/cadeias-identidades/$(d.email))
+        && d.nomeChave == getAfter(/databases/$(database)/documents/cadeias-identidades/$(d.email)).data.nomeChave
+        && d.vinculadoEm == request.time
+        && (!('ultimoAcesso' in d) || d.ultimoAcesso == request.time);
+    }
+    // Estrutura do ambiente (cadeias-ambientes/{v6|v12}), gravada só pelas administradoras
+    function ambienteCadeiasValido(amb) {
+      let d = request.resource.data;
+      return adminCadeias() && amb in ['v6', 'v12']
+        && d.keys().hasOnly(['nome', 'descricao', 'cor', 'titulo', 'versao', 'categorias', 'colunas', 'gruposColunas', 'regras',
+          'colunasEquipe', 'colunasTravadas', 'listasEquipe', 'listasOrdem', 'colunaChave', 'colunaAbas', 'colunaResumo', 'chaveComposta', 'configurado', 'atualizadoEm', 'atualizadoPor'])
+        && d.get('chaveComposta', false) is bool
+        && textoAte(d.get('nome', ''), 10) && textoAte(d.get('descricao', ''), 200)
+        && (!('cor' in d) || (d.cor is string && d.cor.matches('^#[0-9a-fA-F]{6}$')))
+        && (!('colunas' in d) || (d.colunas is list && d.colunas.size() <= 120))
+        && (!('gruposColunas' in d) || (d.gruposColunas is list && d.gruposColunas.size() <= 20))
+        && (!('colunasEquipe' in d) || (d.colunasEquipe is list && d.colunasEquipe.size() <= 120))
+        && (!('colunasTravadas' in d) || (d.colunasTravadas is list && d.colunasTravadas.size() <= 120))
+        && (!('listasEquipe' in d) || d.listasEquipe is map)
+        && (!('listasOrdem' in d) || (d.listasOrdem is list && d.listasOrdem.size() <= 12))
+        && (!('regras' in d) || (d.regras is map
+          && d.regras.keys().hasOnly(['equipeEdita', 'janelaEdicaoHoras', 'exportacao'])
+          && d.regras.equipeEdita in ['proprias', 'todas', 'nenhuma']
+          && d.regras.janelaEdicaoHoras is int && d.regras.janelaEdicaoHoras >= 0 && d.regras.janelaEdicaoHoras <= 8760
+          && d.regras.exportacao is bool))
+        && textoAte(d.get('colunaChave', ''), 40) && textoAte(d.get('colunaAbas', ''), 40) && textoAte(d.get('colunaResumo', ''), 40)
+        && d.atualizadoPor == emailCadeias() && d.atualizadoEm == request.time;
+    }
+    // Planilha (documento em cadeias-localidades; só administradoras criam, editam e excluem; os contadores também mudam
+    // pela Equipe N2, ver abaixo). modo "sistema" | "estado"; secoes [{ id, nome, sigla }] e secaoIds (os ids, que as regras
+    // conferem na criação dos registros); sistemasPadrao [nomes]; sigla e nomeCompleto.
+    function localidadeCadeiasValida() {
+      let d = request.resource.data;
+      return adminCadeias()
+        && d.keys().hasOnly(['ambiente', 'grupo', 'nome', 'uf', 'codigo', 'responsavel', 'cor', 'icone', 'ordem', 'observacao', 'ativa',
+          'colunasExtras', 'colunasEquipeExtras', 'contagem', 'resumo', 'hoje', 'criadoEm', 'criadoPor', 'atualizadoEm', 'atualizadoPor', 'atualizadoPorNome', 'ultimoRegistro',
+          'modo', 'secoes', 'secaoIds', 'sistemasPadrao', 'sigla', 'nomeCompleto'])
+        && d.ambiente in ['v6', 'v12'] && d.nome is string && d.nome.size() > 0 && d.nome.size() <= 80
+        && d.get('modo', 'sistema') in ['sistema', 'estado']
+        && d.get('secoes', []) is list && d.get('secoes', []).size() <= 60
+        && d.get('secaoIds', []) is list && d.get('secaoIds', []).size() <= 60
+        && d.get('sistemasPadrao', []) is list && d.get('sistemasPadrao', []).size() <= 30
+        && textoAte(d.get('sigla', ''), 12) && textoAte(d.get('nomeCompleto', ''), 120)
+        && textoAte(d.get('grupo', ''), 40) && textoAte(d.get('uf', ''), 2) && textoAte(d.get('codigo', ''), 40)
+        && textoAte(d.get('responsavel', ''), 80) && textoAte(d.get('observacao', ''), 200)
+        && (!('colunasExtras' in d) || (d.colunasExtras is list && d.colunasExtras.size() <= 40))
+        && (!('colunasEquipeExtras' in d) || (d.colunasEquipeExtras is list && d.colunasEquipeExtras.size() <= 40))
+        && (!('contagem' in d) || (d.contagem is int && d.contagem >= 0))
+        && (!('resumo' in d) || (d.resumo is map && d.resumo.size() <= 1000))
+        && (resource == null || d.ambiente == resource.data.ambiente);
+    }
+    // Contadores da localidade pela Equipe N2: só junto de uma gravação real de um registro (ultimoRegistro),
+    // feita pela mesma pessoa no mesmo pedido; a contagem só sobe (a Equipe N2 não exclui), no máximo 400 por lote.
+    function equipeAtualizaContadoresCadeias(loc) {
+      let d = request.resource.data;
+      let antes = resource.data;
+      let reg = d.get('ultimoRegistro', '');
+      return equipeN2Cadeias()
+        && d.diff(antes).affectedKeys().hasOnly(['contagem', 'resumo', 'hoje', 'atualizadoEm', 'atualizadoPor', 'atualizadoPorNome', 'ultimoRegistro'])
+        && d.atualizadoEm == request.time && d.atualizadoPor == request.auth.uid && d.atualizadoPorNome == identidadeCadeias().nome
+        && d.get('contagem', 0) is int && d.get('contagem', 0) >= antes.get('contagem', 0) && d.get('contagem', 0) <= antes.get('contagem', 0) + 400
+        && (!('resumo' in d) || (d.resumo is map && d.resumo.size() <= 1000))
+        && (!('hoje' in d) || d.hoje == null || (d.hoje is map && d.hoje.keys().hasOnly(['dia', 'n'])))
+        && reg is string && reg.size() > 0 && reg.size() <= 100
+        && getAfter(/databases/$(database)/documents/cadeias-localidades/$(loc)/registros/$(reg)).data.atualizadoEm == request.time
+        && getAfter(/databases/$(database)/documents/cadeias-localidades/$(loc)/registros/$(reg)).data.atualizadoPor == request.auth.uid;
+    }
+    // Colunas que a Equipe N2 preenche: as do ambiente + as extras da localidade (LIVRE/LISTA)
+    function colunasEquipeCadeias(cfg, loc) {
+      return cfg.get('colunasEquipe', []).concat(localidadeCadeias(loc).get('colunasEquipeExtras', []));
+    }
+    // Colunas LISTA: a Equipe N2 só grava vazio ou uma opção ativa (listasEquipe). As 12 primeiras listas
+    // (listasOrdem, gravada pela interface) são conferidas aqui; acima disso e nas extras, só na interface.
+    // Só o valor ALTERADO é conferido; nas etiquetas, só as ACRESCENTADAS.
+    function listaCadeiasOk(cfg, campos, antes, col) {
+      let lista = cfg.get('listasEquipe', {}).get(col, null);
+      let v = campos.get(col, '');
+      let a = antes.get(col, []);
+      return lista == null || v == ''
+        || (v is list ? v.toSet().difference(a is list ? a.toSet() : [].toSet()).hasOnly(lista) : v in lista);
+    }
+    function listaPosCadeiasOk(cfg, campos, antes, alteradas, i) {
+      let ordem = cfg.get('listasOrdem', []);
+      return ordem.size() <= i || !(ordem[i] in alteradas) || listaCadeiasOk(cfg, campos, antes, ordem[i]);
+    }
+    function listasCadeiasValidas(cfg, campos, antes, alteradas) {
+      return listaPosCadeiasOk(cfg, campos, antes, alteradas, 0) && listaPosCadeiasOk(cfg, campos, antes, alteradas, 1)
+        && listaPosCadeiasOk(cfg, campos, antes, alteradas, 2) && listaPosCadeiasOk(cfg, campos, antes, alteradas, 3)
+        && listaPosCadeiasOk(cfg, campos, antes, alteradas, 4) && listaPosCadeiasOk(cfg, campos, antes, alteradas, 5)
+        && listaPosCadeiasOk(cfg, campos, antes, alteradas, 6) && listaPosCadeiasOk(cfg, campos, antes, alteradas, 7)
+        && listaPosCadeiasOk(cfg, campos, antes, alteradas, 8) && listaPosCadeiasOk(cfg, campos, antes, alteradas, 9)
+        && listaPosCadeiasOk(cfg, campos, antes, alteradas, 10) && listaPosCadeiasOk(cfg, campos, antes, alteradas, 11);
+    }
+    // Valor da coluna chave que vai no registro ("numero") e no nome do índice: sem espaços nas pontas e com "/" → "|".
+    // Chave composta (chaveComposta, estrutura de Tribunais e Órgãos): "<seção>|<sistema em minúsculas>" (ex.: "ac|e-saj");
+    // sem seção (planilha por sistema), só o sistema em minúsculas. O mesmo sistema pode existir em várias seções.
+    function chaveRegistroCadeias(cfg, campos, secao) {
+      let c = cfg.get('colunaChave', '');
+      let v = c == '' ? '' : campos.get(c, '');
+      let base = v == '' ? '' : (v is string ? v.trim().replace('/', '|') : string(v));
+      return cfg.get('chaveComposta', false) != true || base == '' ? base
+        : (secao == '' ? base.lower() : secao + '|' + base.lower());
+    }
+    // O índice do valor único existe depois do lote e aponta para este registro
+    function indiceCadeias(loc, valor, id) {
+      return valor == '' || (existsAfter(/databases/$(database)/documents/cadeias-localidades/$(loc)/chaves/$(valor))
+        && getAfter(/databases/$(database)/documents/cadeias-localidades/$(loc)/chaves/$(valor)).data.registro == id);
+    }
+    // "parcial": edição de uma linha do arquivo compactado; traz só os campos alterados, por cima da linha
+    // "secao": id da seção da planilha por estado (vazio no modo por sistema)
+    function formatoRegistroCadeias(d) {
+      return d.keys().hasOnly(['campos', 'numero', 'secao', 'parcial', 'criadoPor', 'criadoPorNome', 'criadoPorEmail', 'criadoEm',
+          'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm', 'exclusao', 'importacao'])
+        && d.campos is map && d.campos.size() <= 160
+        && d.get('parcial', false) is bool
+        && d.get('numero', '') is string && d.get('numero', '').size() <= 1500
+        && d.get('secao', '') is string && d.get('secao', '').size() <= 40;
+    }
+    // Equipe N2 cadastra: colunas LIVRE/LISTA e "travado após criar" (menos numa edição parcial do arquivo).
+    // A seção vai só na criação e tem de ser uma das seções da planilha; numa edição parcial do arquivo, não vai.
+    function equipeCriaRegistroCadeias(loc, id) {
+      let d = request.resource.data;
+      let l = localidadeCadeias(loc);
+      let cfg = configAmbiente(l.ambiente);
+      let secao = d.get('secao', '');
+      return equipeN2Cadeias()
+        && formatoRegistroCadeias(d)
+        && (secao == '' || (d.get('parcial', false) == false && secao in l.get('secaoIds', [])))
+        && d.campos.keys().hasOnly(colunasEquipeCadeias(cfg, loc))
+        && (d.get('parcial', false) == false || !d.campos.keys().hasAny(cfg.get('colunasTravadas', [])))
+        && listasCadeiasValidas(cfg, d.campos, {}, d.campos.keys())
+        && autoriaCadeias(d.criadoPor, d.criadoPorNome, d.criadoPorEmail) && d.criadoEm == request.time
+        && autoriaCadeias(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time
+        && d.exclusao == null && !('importacao' in d)
+        && (d.get('parcial', false) == true ? d.get('numero', '') == '' : d.get('numero', '') == chaveRegistroCadeias(cfg, d.campos, secao))
+        && indiceCadeias(loc, d.get('numero', ''), id);
+    }
+    // equipeEdita: "todas" (padrão), "proprias" (pelo e-mail da identidade, dentro da janela) ou "nenhuma".
+    // As colunas "travado após criar" (e a coluna chave) não podem estar entre as alteradas; "numero" não muda.
+    function equipeEditaRegistroCadeias(loc) {
+      let cfg = configAmbiente(localidadeCadeias(loc).ambiente);
+      let regras = cfg.get('regras', { 'equipeEdita': 'todas', 'janelaEdicaoHoras': 0 });
+      let d = request.resource.data;
+      let alteradas = d.campos.diff(resource.data.campos).affectedKeys();
+      return d.diff(resource.data).affectedKeys().hasOnly(['campos', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm'])
+        && equipeN2Cadeias()
+        && regras.equipeEdita != 'nenhuma'
+        && (regras.equipeEdita == 'todas'
+          || (resource.data.get('criadoPorEmail', '') != '' && resource.data.get('criadoPorEmail', '') == identidadeCadeias().email
+            && (regras.janelaEdicaoHoras == 0 || request.time < resource.data.criadoEm + duration.value(regras.janelaEdicaoHoras, 'h'))))
+        && d.campos is map && d.campos.size() <= 160
+        && alteradas.hasOnly(colunasEquipeCadeias(cfg, loc))
+        && !alteradas.hasAny(cfg.get('colunasTravadas', []))
+        && listasCadeiasValidas(cfg, d.campos, resource.data.campos, alteradas)
+        && autoriaCadeias(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time;
+    }
+    // "Solicitar exclusão": só marca a linha; quem exclui é uma administradora
+    function equipePedeExclusaoCadeias() {
+      let d = request.resource.data;
+      return resource.data.exclusao == null
+        && d.diff(resource.data).affectedKeys().hasOnly(['exclusao', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm'])
+        && equipeN2Cadeias()
+        && d.exclusao is map && d.exclusao.keys().hasOnly(['motivo', 'por', 'porNome', 'porEmail', 'em'])
+        && d.exclusao.motivo is string && d.exclusao.motivo.size() > 0 && d.exclusao.motivo.size() <= 300
+        && autoriaCadeias(d.exclusao.por, d.exclusao.porNome, d.exclusao.porEmail) && d.exclusao.em == request.time
+        && autoriaCadeias(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time;
+    }
+    // Administradora grava o registro (importação, restauração, edição) no mesmo formato
+    function registroAdminCadeias() {
+      return adminCadeias() && formatoRegistroCadeias(request.resource.data);
+    }
+    // Histórico de cada registro (ficha): só entra junto com uma mudança real dele, feita pela mesma pessoa
+    function historicoRegistroCadeias(loc, id) {
+      let d = request.resource.data;
+      return (adminCadeias()
+          || (equipeN2Cadeias()
+            && autoriaCadeias(d.por, d.porNome, d.porEmail)
+            && getAfter(/databases/$(database)/documents/cadeias-localidades/$(loc)/registros/$(id)).data.atualizadoPor == request.auth.uid
+            && getAfter(/databases/$(database)/documents/cadeias-localidades/$(loc)/registros/$(id)).data.atualizadoEm == request.time))
+        && d.keys().hasOnly(['acao', 'coluna', 'colunaNome', 'antes', 'depois', 'por', 'porNome', 'porEmail', 'em'])
+        && textoAte(d.acao, 30) && textoAte(d.coluna, 40) && textoAte(d.colunaNome, 60)
+        && textoAte(d.antes, 500) && textoAte(d.depois, 500)
+        && d.por == autorCadeias() && d.em == request.time;
+    }
+    // Últimas mudanças do ambiente (cadeias-historico): só inclusão, no mesmo lote da mudança do registro.
+    // "ordem" = "<ambiente>|<milissegundos>|<sequência>" (perto da hora do servidor): ordena as 15 últimas sem índice composto.
+    function historicoCadeiasValido() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['ambiente', 'localidade', 'localidadeNome', 'registro', 'registroNome', 'acao', 'coluna', 'colunaNome', 'antes', 'depois', 'por', 'porNome', 'ordem', 'em'])
+        && d.ambiente in ['v6', 'v12'] && d.localidade is string && d.localidade.size() > 0 && d.localidade.size() <= 100
+        && d.registro is string && d.registro.size() <= 100
+        && textoAte(d.get('localidadeNome', ''), 80) && textoAte(d.get('registroNome', ''), 120)
+        && textoAte(d.acao, 30) && d.acao.size() > 0 && textoAte(d.get('coluna', ''), 40) && textoAte(d.get('colunaNome', ''), 60)
+        && textoAte(d.get('antes', ''), 500) && textoAte(d.get('depois', ''), 500) && textoAte(d.get('porNome', ''), 80)
+        && d.ordem is string && d.ordem.matches('^(v6|v12)[|][0-9]{13}[|][0-9]{4}$')
+        && d.ordem.split('[|]')[0] == d.ambiente
+        && math.abs(int(d.ordem.split('[|]')[1]) - request.time.toMillis()) < 600000
+        && d.em == request.time
+        && ((adminCadeias() && d.por == emailCadeias())
+          || (equipeN2Cadeias() && d.por == request.auth.uid && d.porNome == identidadeCadeias().nome
+            && d.acao in ['criar', 'editar', 'editarMassa', 'preencherMassa', 'importar', 'pedirExclusao', 'desfazer']
+            && localidadeCadeias(d.localidade).ambiente == d.ambiente
+            && getAfter(/databases/$(database)/documents/cadeias-localidades/$(d.localidade)/registros/$(d.registro)).data.atualizadoPor == request.auth.uid
+            && getAfter(/databases/$(database)/documents/cadeias-localidades/$(d.localidade)/registros/$(d.registro)).data.atualizadoEm == request.time));
+    }
+    // Arquivo compactado: todos que estão no Cadeias leem; só as administradoras gravam
+    function parteArquivoCadeias() {
+      let d = request.resource.data;
+      return adminCadeias()
+        && d.keys().hasOnly(['versao', 'indice', 'total', 'json', 'criadoPor', 'criadoEm'])
+        && d.versao is int && d.indice is int && d.total is int && d.indice >= 0 && d.indice < d.total
+        && d.json is string && d.criadoPor == emailCadeias() && d.criadoEm == request.time;
+    }
+    // Índice da coluna chave: a Equipe N2 só cria, junto com o registro que usa o valor; nunca apaga nem troca
+    function criaChaveCadeias(loc, valor) {
+      return adminCadeias() || (equipeN2Cadeias()
+        && valor != '' && request.resource.data.keys().hasOnly(['registro'])
+        && getAfter(/databases/$(database)/documents/cadeias-localidades/$(loc)/registros/$(request.resource.data.registro)).data.get('numero', '') == valor);
+    }
+    // Trilha de auditoria (cadeias-auditoria): só inclusão. Administradora assina com o e-mail; quem está no Cadeias
+    // assina com o uid (entrar e exportar; a Equipe N2 também as próprias edições). Só as administradoras leem.
+    function auditoriaCadeiasValida() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['acao', 'resumo', 'detalhes', 'por', 'porNome', 'porEmail', 'planilha', 'ambiente', 'alvo', 'mudancas', 'em'])
+        && textoAte(d.acao, 40) && d.acao.size() > 0 && textoAte(d.resumo, 300) && textoAte(d.detalhes, 1500)
+        && textoAte(d.get('porNome', ''), 80) && textoAte(d.get('porEmail', ''), 120)
+        && textoAte(d.get('planilha', ''), 40) && textoAte(d.get('ambiente', ''), 8) && textoAte(d.get('alvo', ''), 120)
+        && d.get('mudancas', []) is list && d.get('mudancas', []).size() <= 60
+        && d.em == request.time
+        && ((adminCadeias() && d.por == emailCadeias())
+          || (naListaCadeias() && d.por == request.auth.uid && d.acao in ['entrar', 'exportar'])
+          || (equipeN2Cadeias() && d.por == request.auth.uid
+            && d.acao in ['criar', 'editar', 'editarMassa', 'preencherMassa', 'importar', 'pedirExclusao']));
+    }
+    // Aparência padrão de cada cadeia (aparencia-v6 / aparencia-v12 e a imagem): lê quem está no Cadeias; grava administradora
+    function aparenciaCadeiasValida(documento) {
+      return adminCadeias() && request.resource.data.atualizadoPor == emailCadeias()
+        && ((documento in ['aparencia-v6', 'aparencia-v12'] && aparenciaPlanilhaValida(request.resource.data))
+          || (documento in ['aparencia-imagem-v6', 'aparencia-imagem-v12'] && aparenciaImagemValida(request.resource.data)));
+    }
+    function entradaCadeiasValida(documento) {
+      let d = request.resource.data;
+      return adminCadeias() && documento == 'entrada'
+        && d.keys().hasOnly(['aberto', 'dominios', 'aprovacao', 'atualizadoEm', 'atualizadoPor'])
+        && d.aberto is bool && d.aprovacao == true && d.dominios is list && d.dominios.size() <= 20
+        && d.atualizadoPor == emailCadeias() && d.atualizadoEm == request.time;
+    }
+    match /cadeias-config/{documento} {
+      // "entrada" é lida antes do cadastro (login anônimo, sem perfil); a aparência, só por quem está no Cadeias
+      allow read: if request.auth != null && (documento == 'entrada' || noCadeias());
+      allow write: if entradaCadeiasValida(documento) || aparenciaCadeiasValida(documento);
+      allow delete: if adminCadeias() && documento in ['aparencia-v6', 'aparencia-v12', 'aparencia-imagem-v6', 'aparencia-imagem-v12'];
+    }
+    match /cadeias-ambientes/{amb} {
+      allow read: if noCadeias();
+      allow create, update: if ambienteCadeiasValido(amb);
+      allow delete: if false;
+    }
+    match /cadeias-grupos/{grupo} {
+      allow read: if noCadeias();
+      allow create, update: if adminCadeias()
+        && request.resource.data.keys().hasOnly(['ambiente', 'nome', 'ordem', 'criadoEm', 'atualizadoEm', 'atualizadoPor'])
+        && request.resource.data.ambiente in ['v6', 'v12'] && request.resource.data.nome is string
+        && request.resource.data.nome.size() > 0 && request.resource.data.nome.size() <= 60;
+      allow delete: if adminCadeias();
+    }
+    match /cadeias-localidades/{loc} {
+      allow read: if noCadeias();
+      allow create: if localidadeCadeiasValida();
+      allow update: if localidadeCadeiasValida() || equipeAtualizaContadoresCadeias(loc);
+      allow delete: if adminCadeias();
+      match /registros/{reg} {
+        allow read: if noCadeias();
+        allow create: if registroAdminCadeias() || equipeCriaRegistroCadeias(loc, reg);
+        allow update: if registroAdminCadeias() || equipeEditaRegistroCadeias(loc) || equipePedeExclusaoCadeias();
+        allow delete: if adminCadeias();
+        match /historico/{evento} {
+          allow read: if veMudancasCadeias();
+          allow create: if historicoRegistroCadeias(loc, reg);
+          allow update, delete: if false;
+        }
+      }
+      match /arquivo/{parte} {
+        allow read: if noCadeias();
+        allow create, update: if parteArquivoCadeias();
+        allow delete: if adminCadeias();
+      }
+      match /chaves/{valor} {
+        allow read: if noCadeias();
+        allow create: if criaChaveCadeias(loc, valor);
+        allow update, delete: if adminCadeias();
+      }
+    }
+    match /cadeias-historico/{id} {
+      allow read: if veMudancasCadeias();
+      allow create: if historicoCadeiasValido();
+      allow update, delete: if false;
+    }
+    // Aparelho (o id do documento é o uid do login anônimo deste navegador): { email, nomeChave, vinculadoEm, ultimoAcesso }
+    match /cadeias-pessoas/{uid} {
+      allow read: if adminCadeias() || (request.auth != null && request.auth.uid == uid);
+      allow create: if vinculoCadeias(uid)
+        && request.resource.data.keys().hasOnly(['email', 'nomeChave', 'vinculadoEm', 'ultimoAcesso']);
+      allow update: if (vinculoCadeias(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email', 'nomeChave', 'vinculadoEm', 'ultimoAcesso']))
+        || (request.auth != null && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ultimoAcesso'])
+          && request.resource.data.ultimoAcesso == request.time);
+      allow delete: if adminCadeias();
+    }
+    // Identidade (a "conta" da pessoa no Cadeias), pelo e-mail em minúsculas. Só as administradoras
+    // e os aparelhos já ligados a ela leem: ninguém descobre o nome cadastrado de um e-mail.
+    match /cadeias-identidades/{email} {
+      allow get: if adminCadeias()
+        || (request.auth != null
+          && exists(/databases/$(database)/documents/cadeias-pessoas/$(request.auth.uid))
+          && 'vinculadoEm' in pessoaCadeias()
+          && pessoaCadeias().email == email);
+      allow list: if adminCadeias();
+      allow create: if cadastroNovoCadeias(email);
+      allow update: if identidadeCadeiasAltera();
+      allow delete: if adminCadeias();
+    }
+    // "Este e-mail tem cadastro no Cadeias": documento vazio. Lê um e-mail por vez; ninguém lista.
+    match /cadeias-emails/{email} {
+      allow get: if request.auth != null;
+      allow list: if false;
+      allow create: if request.resource.data.keys().size() == 0
+        && (adminCadeias()
+          || (request.auth != null
+            && existsAfter(/databases/$(database)/documents/cadeias-identidades/$(email))
+            && getAfter(/databases/$(database)/documents/cadeias-identidades/$(email)).data.criadoPorUid == request.auth.uid));
+      allow update: if adminCadeias() && request.resource.data.keys().size() == 0;
+      allow delete: if adminCadeias();
+    }
+    match /cadeias-auditoria/{id} {
+      allow read: if adminCadeias();
+      allow create: if auditoriaCadeiasValida();
+      allow update, delete: if false;
+    }
+    match /cadeias-backups/{id} {
+      allow read, write: if adminCadeias();
+      match /partes/{parte} {
+        allow read, write: if adminCadeias();
+      }
+    }
+    match /cadeias-lixeira/{id} {
+      allow read, write: if adminCadeias();
+    }
+
+    // Mapas de Ajuda (mapas.html). Leitura livre, como o resto da Central; escrita: podeEditarMapas().
+    // Um documento por nó (mapas/{id}/nos/{noId}); ligações extras ficam no campo "ligacoes" do nó de origem.
+    match /mapas/{mapaId} {
+      allow read: if true;
+      allow create, update: if podeEditarMapas() && idMapa(mapaId) && mapaValido();
+      allow delete: if podeEditarMapas();
+      match /nos/{noId} {
+        allow read: if true;
+        allow create, update: if podeEditarMapas() && idMapa(noId) && noMapaValido();
+        allow delete: if podeEditarMapas();
+      }
+      match /usos/{usoId} {
+        allow read: if true;
+        allow create: if usoId.matches('^[a-z0-9]{1,40}$') && usoMapaValido();
+        allow update: if false;
+        allow delete: if podeEditarMapas();
+      }
+    }
+    // Lixeira dos mapas: mapas e ramos removidos (Restaurar ou Excluir de vez)
+    match /mapas-lixeira/{itemId} {
+      allow read, delete: if podeEditarMapas();
+      allow create: if podeEditarMapas() && itemId.matches('^[A-Za-z0-9_-]{1,100}$')
+        && request.resource.data.keys().hasOnly(['tipo', 'mapaId', 'nome', 'dados', 'removidoEm', 'removidoPor'])
+        && request.resource.data.tipo in ['mapa', 'no']
+        && request.resource.data.mapaId is string && request.resource.data.mapaId.matches('^[a-z0-9-]{1,60}$')
+        && textoAte(request.resource.data.nome, 120)
+        && request.resource.data.dados is map
+        && request.resource.data.removidoEm == request.time && request.resource.data.removidoPor == request.auth.token.email;
+      allow update: if false;
+    }
+
+    // Esta regra fica sempre por último: o que não foi liberado acima é negado.
+    match /{caminho=**} {
+      allow read, write: if false;
+    }
+  }
+}

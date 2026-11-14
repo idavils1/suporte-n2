@@ -6,7 +6,10 @@
  *  Endereços:  #  (lista)  ·  #m/<mapa>  ·  #m/<mapa>/n/<nó>  ·  #m/<mapa>/roteiro/<sintoma>
  *  Dados (ver mapas-dados.js): mapas/{id}, mapas/{id}/nos/{id}, mapas/{id}/usos/{id}, mapas-lixeira/{id}.
  *
- *  QUEM EDITA: administradoras (ADMINS em base.js) + EDITORES_MAPAS abaixo.
+ *  ESTRUTURA (tipos, campos, listas de opções, modelos): vem de mapas-dados.js (padrões) mesclada com
+ *  mapas-config/estrutura e /modelos, editados no Painel de edição (#painel, comum/mapas-painel.js).
+ *  QUEM EDITA OS NÓS: administradoras (ADMINS em base.js) + EDITORES_MAPAS abaixo.
+ *  QUEM USA O PAINEL: só administradoras (podeUsarPainel(); ehAdmin() em mapas-config no firestore.rules).
  *  Mantenha EDITORES_MAPAS igual à função podeEditarMapas() do firestore.rules.
  *  "Registrar atendimento" (usos) é aberto a qualquer pessoa, assinando com o nome.
  *
@@ -21,9 +24,11 @@ import {
   ID_VALIDO, LIMITES, CORES, ICONES, TIPOS, ORDEM_TIPOS, FILHO_PADRAO, CAMPOS, MODELOS, TAG_EXEMPLO,
   normalizarNo, normalizarMapa, dadosNo, dadosMapa, indexar, descendentes, caminhoAteRaiz, contarPorTipo, contatoMaisProximo,
   revisaoVencida, textoDoNo, corresponde, idCurto, nosDoModelo, mapaExemploSCDA, resumoRoteiro, textoContato,
-  mapaParaMarkdown, mapaParaJSON, lerJSONMapa, clonarNos, urlSegura, porOrdem
+  mapaParaMarkdown, mapaParaJSON, lerJSONMapa, clonarNos, urlSegura, porOrdem,
+  camposComValor, acharOpcao, rotuloOpcao, campoDoTipo, aplicarEstrutura, aplicarModelos
 } from "./mapas-dados.js";
 import { criarCanvas } from "./mapas-canvas.js";
+import { iniciarPainel } from "./mapas-painel.js";
 
 /* Quem pode editar além das administradoras (e-mails em minúsculas). Igual a podeEditarMapas() no firestore.rules. */
 const EDITORES_MAPAS = [
@@ -50,9 +55,15 @@ const estado = {
   edicao: lerJSON(CHAVE_EDICAO, false, sessionStorage),
   vista: lerJSON(CHAVE_VISTA, null), quadros: lerJSON(CHAVE_QUADRO, {}),
   recolhidos: lerJSON(CHAVE_RECOLHIDOS, {}),
-  selecionado: null, buscaMapa: "", roteiro: null, canvas: null
+  selecionado: null, buscaMapa: "", roteiro: null, canvas: null,
+  /* Configuração do Painel de edição (mapas-config/estrutura e /modelos), como veio da nuvem */
+  config: { estrutura: null, modelos: null },
+  /* "Pré-visualizar como visitante" (Painel): esconde tudo o que é de edição, só nesta aba */
+  comoVisitante: lerJSON("suporte-n2-mapas-como-visitante", false, sessionStorage)
 };
-const podeEditar = () => !!estado.api && !!sessao.email && (ehAdmin() || EDITORES_MAPAS.includes(sessao.email));
+const podeEditar = () => !estado.comoVisitante && !!estado.api && !!sessao.email && (ehAdmin() || EDITORES_MAPAS.includes(sessao.email));
+/* Painel de edição (estrutura dos mapas): SÓ administradoras. Igual a ehAdmin() em mapas-config no firestore.rules. */
+const podeUsarPainel = () => !estado.comoVisitante && !!estado.api && ehAdmin();
 const editando = () => estado.edicao && podeEditar();
 const autor = () => sessao.email || "";
 const nomeDe = (email) => { const a = ADMINS.find((x) => x.email === email); return a ? a.nome : (email || "").split("@")[0]; };
@@ -147,13 +158,24 @@ function lerRota() {
     if (p[2] === "roteiro" && ID_VALIDO.test(p[3] || "")) return { tela: "roteiro", mapaId: p[1], sintomaId: p[3] };
     return { tela: "mapa", mapaId: p[1], noId: p[2] === "n" && ID_VALIDO.test(p[3] || "") ? p[3] : null };
   }
+  if (p[0] === "painel") return { tela: "painel", aba: /^[a-z]{1,20}$/.test(p[1] || "") ? p[1] : "tipos", mapaId: null };
   return { tela: "lista" };
 }
 function ir(hash) { if (location.hash !== hash) location.hash = hash; else aoMudarRota(); }
 let telaMontada = null;
+let hashAnterior = location.hash;
 function aoMudarRota() {
   const anterior = estado.rota;
-  estado.rota = lerRota();
+  const proxima = lerRota();
+  /* Saindo do Painel com alterações não salvas: confirma antes */
+  if (anterior.tela === "painel" && proxima.tela !== "painel" && painel.temPendencias()
+    && !window.confirm("Há alterações não salvas no Painel de edição. Sair mesmo assim? (elas serão descartadas)")) {
+    history.replaceState(null, "", hashAnterior);
+    return;
+  }
+  if (anterior.tela === "painel" && proxima.tela !== "painel") painel.descartar(true);
+  hashAnterior = location.hash;
+  estado.rota = proxima;
   if (estado.rota.tela !== "mapa" || anterior.mapaId !== estado.rota.mapaId) { estado.selecionado = null; estado.buscaMapa = ""; }
   if (estado.rota.tela === "mapa") estado.selecionado = estado.rota.noId || null;
   if (estado.rota.tela === "roteiro" && (!estado.roteiro || estado.roteiro.sintomaId !== estado.rota.sintomaId || estado.roteiro.mapaId !== estado.rota.mapaId)) estado.roteiro = null;
@@ -175,9 +197,23 @@ function atualizarTopo() {
   const barra = $("#barra-edicao");
   barra.hidden = !editando();
   document.body.classList.toggle("modo-edicao", editando());
+  const bp = $("#btn-painel");
+  bp.hidden = !podeUsarPainel();
+  bp.setAttribute("aria-pressed", String(estado.rota.tela === "painel"));
+  /* Faixa "vendo como visitante": só aparece para quem ativou a pré-visualização */
+  const fv = $("#faixa-visitante");
+  fv.hidden = !estado.comoVisitante;
   const m = estado.rota.mapaId && mapaPorId(estado.rota.mapaId);
-  $("#titulo-pagina span").textContent = m ? `Mapas de Ajuda · ${m.nome}` : "Mapas de Ajuda";
-  document.title = `${m ? m.nome + " · " : ""}Mapas de Ajuda · Central do Suporte V/CERT`;
+  const titulo = estado.rota.tela === "painel" ? "Mapas de Ajuda · Painel de edição" : (m ? `Mapas de Ajuda · ${m.nome}` : "Mapas de Ajuda");
+  $("#titulo-pagina span").textContent = titulo;
+  document.title = `${estado.rota.tela === "painel" ? "Painel de edição · " : (m ? m.nome + " · " : "")}Mapas de Ajuda · Central do Suporte V/CERT`;
+}
+function alternarComoVisitante(ligar) {
+  estado.comoVisitante = ligar;
+  gravarJSON("suporte-n2-mapas-como-visitante", ligar, sessionStorage);
+  telaMontada = null;
+  mostrarAviso(ligar ? "Pré-visualizando como visitante: os controles de edição ficaram escondidos." : "Pré-visualização encerrada.");
+  if (ligar && estado.rota.tela === "painel") ir("#"); else desenharTela();
 }
 function montarBarraEdicao() {
   $("#barra-edicao").innerHTML = `<span>${svg("i-lapis")}<strong>Modo edição</strong> · <kbd>Tab</kbd> filho · <kbd>Enter</kbd> irmão · <kbd>F2</kbd> editar · <kbd>Delete</kbd> excluir · <kbd>Alt</kbd>+<kbd>↑/↓</kbd> reordenar · arraste um nó sobre outro para trocar o pai.</span>
@@ -201,6 +237,16 @@ function desenharTela() {
   const r = estado.rota;
   if (r.tela !== "roteiro") $("#conteudo").onclick = null;
   if (r.tela === "lista") return desenharLista();
+  if (r.tela === "painel") {
+    if (estado.canvas) { estado.canvas.destruir(); estado.canvas = null; }
+    if (!podeUsarPainel()) {
+      telaMontada = null;
+      $("#conteudo").innerHTML = `<div class="vazio"><p><strong>Painel de edição</strong></p><p class="apoio">${sessao.pronta && !sessao.email ? "Entre com a conta de administradora para usar o painel." : "Só as administradoras podem mudar a estrutura dos mapas."}</p><a class="btn" href="#">Ver os mapas</a></div>`;
+      return;
+    }
+    if (telaMontada !== "painel") { telaMontada = "painel"; painel.montar($("#conteudo")); }
+    return painel.desenhar(r.aba);
+  }
   const m = mapaPorId(r.mapaId);
   if (!m) {
     $("#conteudo").innerHTML = `<div class="vazio"><p>Mapa não encontrado. Ele pode ter sido excluído.</p><a class="btn" href="#">Ver todos os mapas</a></div>`;
@@ -221,8 +267,8 @@ function htmlCard(m) {
       <span class="card-texto"><strong>${escapar(m.nome)}</strong>${exemplo ? ' <span class="selo selo-amarelo">Exemplo: revisar</span>' : ""}
         ${m.descricao ? `<span class="apoio">${escapar(m.descricao)}</span>` : ""}</span>
     </a>
-    <div class="card-numeros"><span>${svg("i-alerta")}${c.sintoma || 0} ${(c.sintoma || 0) === 1 ? "sintoma" : "sintomas"}</span>
-      <span>${svg("i-telefone")}${c.contato || 0} ${(c.contato || 0) === 1 ? "contato" : "contatos"}</span><span>${svg("i-lista")}${nos.length} nós</span></div>
+    <div class="card-numeros"><span>${svg(TIPOS.sintoma.icone)}${escapar(TIPOS.sintoma.nome)}: ${c.sintoma || 0}</span>
+      <span>${svg(TIPOS.contato.icone)}${escapar(TIPOS.contato.nome)}: ${c.contato || 0}</span><span>${svg("i-lista")}${nos.length} nós</span></div>
     <div class="card-rodape"><span class="apoio">${m.atualizadoEm ? `Atualizado em ${formatarData(m.atualizadoEm)}${m.atualizadoPor ? " por " + escapar(nomeDe(m.atualizadoPor)) : ""}` : "&nbsp;"}</span>
       <button type="button" class="btn-icone" data-menu-mapa="${escapar(m.id)}" aria-label="Ações do mapa ${escapar(m.nome)}" aria-haspopup="menu">${svg("i-ajustes")}</button></div>
   </article>`;
@@ -384,7 +430,7 @@ function editarMapa(m) {
       ${htmlEscolhaCor(m ? m.cor : "roxo")}
       <label class="campo"><span class="rotulo">Etiquetas</span><input name="tags" value="${escapar(m ? m.tags.join(", ") : "")}" placeholder="separe por vírgula"></label>
       ${novo ? `<label class="campo"><span class="rotulo">Modelo inicial</span><select name="modelo">
-        ${Object.entries(MODELOS).map(([id, x]) => `<option value="${id}"${id === "diagnostico" ? " selected" : ""}>${escapar(x.nome)}: ${escapar(x.descricao)}</option>`).join("")}
+        ${MODELOS.map((x, i) => `<option value="${escapar(x.id)}"${x.id === "diagnostico" || (i === 0 && !MODELOS.some((y) => y.id === "diagnostico")) ? " selected" : ""}>${escapar(x.nome)}${x.descricao ? ": " + escapar(x.descricao) : ""}</option>`).join("")}
         ${outros.map((x) => `<option value="copiar:${escapar(x.id)}">Copiar a estrutura de: ${escapar(x.nome)}</option>`).join("")}
       </select></label>` : ""}
       <p class="form-erro" role="alert"></p>
@@ -659,6 +705,7 @@ function menuExportar(m, ancora) {
     { rotulo: "Exportar JSON", icone: "i-download", acao: () => baixarArquivo(`mapa-${m.id}.json`, mapaParaJSON(m, nosDe(m.id)), "application/json") },
     ed && { rotulo: "Editar nome, ícone e cor", icone: "i-lapis", acao: () => editarMapa(m) },
     ed && { rotulo: "Duplicar mapa", icone: "i-duplicar", acao: () => duplicarMapa(m) },
+    podeUsarPainel() && { rotulo: "Salvar como modelo de mapa", icone: "i-grade", acao: () => painel.salvarMapaComoModelo(m, nosDe(m.id)) },
     ed && { rotulo: "Excluir mapa", icone: "i-lixeira", perigo: true, acao: () => excluirMapa(m) }
   ]);
 }
@@ -734,13 +781,12 @@ function focarOutline(id) {
 
 /* ---------- Painel lateral de detalhes ---------- */
 function htmlCampos(no) {
-  const linhas = (CAMPOS[no.tipo] || []).map((def) => {
-    const v = no.campos[def.id];
-    if (!v) return "";
+  const linhas = camposComValor(no).map(({ def, valor: v, texto, opcao }) => {
     let valor;
     if (def.tipo === "lista") valor = `<ol class="passos">${v.map((p, i) => `<li><label class="check"><input type="checkbox" data-passo="${i}"><span>${escapar(p)}</span></label></li>`).join("")}</ol>`;
     else if (def.tipo === "url") valor = `<a href="${escapar(v)}"${/^https?:/.test(v) ? ' target="_blank" rel="noopener"' : ""}>${escapar(v)}</a>`;
     else if (def.id === "email" && /^[^\s@]+@[^\s@]+$/.test(v)) valor = `<a href="mailto:${escapar(v)}">${escapar(v)}</a>`;
+    else if (def.tipo === "escolha") valor = opcao && opcao.cor ? `<span class="selo tom-${opcao.cor}">${escapar(texto)}</span>` : escapar(texto) + (opcao ? "" : ' <span class="apoio" title="Este valor não está mais na lista de opções">(fora da lista)</span>');
     else if (def.tipo === "area") valor = md(v);
     else valor = escapar(v);
     return `<div class="campo-detalhe${def.tipo === "lista" || def.tipo === "area" ? " largo" : ""}"><dt>${escapar(def.rotulo)}</dt><dd>${valor}</dd></div>`;
@@ -857,12 +903,22 @@ async function adicionarNo(m, refId, como) {
   trocarHash(m, novo.id);
   editarNo(m, novo.id, { novo: true, rascunho: novo });
 }
+/* Nome do controle no formulário: nativos em no.campos, personalizados em no.extras */
+const chaveCampo = (def) => (def.personalizado ? `extra-${def.id}` : `campo-${def.id}`);
 function htmlCampoTipo(def, valor) {
-  const nome = `campo-${def.id}`;
-  if (def.tipo === "escolha") return `<label class="campo"><span class="rotulo">${escapar(def.rotulo)}</span><select name="${nome}"><option value="">—</option>${def.opcoes.map((o) => `<option${o === valor ? " selected" : ""}>${escapar(o)}</option>`).join("")}</select></label>`;
-  if (def.tipo === "lista") return `<label class="campo"><span class="rotulo">${escapar(def.rotulo)}</span><textarea name="${nome}" rows="4" placeholder="${escapar(def.dica)}">${escapar((valor || []).join("\n"))}</textarea><span class="ajuda">${escapar(def.dica)}</span></label>`;
-  if (def.tipo === "area") return `<label class="campo"><span class="rotulo">${escapar(def.rotulo)}</span><textarea name="${nome}" rows="3" maxlength="${LIMITES.campo}" placeholder="${escapar(def.dica || "")}">${escapar(valor || "")}</textarea></label>`;
-  return `<label class="campo"><span class="rotulo">${escapar(def.rotulo)}</span><input name="${nome}" maxlength="${def.tipo === "url" ? 500 : LIMITES.campo}" value="${escapar(valor || "")}" placeholder="${escapar(def.dica || "")}"></label>`;
+  const nome = chaveCampo(def);
+  const rotulo = `<span class="rotulo">${escapar(def.rotulo)}${def.obrigatorio ? ' <span class="obrigatorio" aria-hidden="true">*</span>' : ""}</span>`;
+  const req = def.obrigatorio ? " required" : "";
+  if (def.tipo === "escolha") {
+    /* Opções arquivadas somem das novas escolhas, mas continuam aparecendo no nó que já as usa; valor fora da lista também */
+    const atual = acharOpcao(def, valor);
+    const opcoes = def.opcoes.filter((o) => !o.arquivada || (atual && atual.id === o.id));
+    const fora = valor && !atual ? `<option value="${escapar(valor)}" selected>${escapar(valor)} (fora da lista)</option>` : "";
+    return `<label class="campo">${rotulo}<select name="${nome}"${req}><option value="">—</option>${opcoes.map((o) => `<option value="${escapar(o.id)}"${atual && atual.id === o.id ? " selected" : ""}>${escapar(o.rotulo)}${o.arquivada ? " (arquivada)" : ""}</option>`).join("")}${fora}</select></label>`;
+  }
+  if (def.tipo === "lista") return `<label class="campo">${rotulo}<textarea name="${nome}" rows="4" placeholder="${escapar(def.dica)}"${req}>${escapar((valor || []).join("\n"))}</textarea><span class="ajuda">${escapar(def.dica || "Um item por linha")}</span></label>`;
+  if (def.tipo === "area") return `<label class="campo">${rotulo}<textarea name="${nome}" rows="3" maxlength="${LIMITES.campo}" placeholder="${escapar(def.dica || "")}"${req}>${escapar(valor || "")}</textarea></label>`;
+  return `<label class="campo">${rotulo}<input name="${nome}" maxlength="${def.tipo === "url" ? 500 : LIMITES.campo}" value="${escapar(valor || "")}" placeholder="${escapar(def.dica || "")}"${req}></label>`;
 }
 function editarNo(m, id, { novo = false, rascunho = null } = {}) {
   const idx = indexar(nosDe(m.id));
@@ -893,16 +949,20 @@ function editarNo(m, id, { novo = false, rascunho = null } = {}) {
   });
   const form = d.querySelector("form");
   const camposTipo = form.querySelector(".campos-tipo");
-  let valores = { ...no.campos };
+  /* Valores por chave do controle (campo-x / extra-x): trocar o tipo não perde o que foi digitado */
+  const valores = {};
+  Object.entries(no.campos || {}).forEach(([k, v]) => { valores[`campo-${k}`] = v; });
+  Object.entries(no.extras || {}).forEach(([k, v]) => { valores[`extra-${k}`] = v; });
+  const visiveis = (t) => (CAMPOS[t] || []).filter((def) => !def.oculto);
   const lerCamposTela = () => {
-    (CAMPOS[form.tipo.value] || []).forEach((def) => {
-      const el = form.elements[`campo-${def.id}`];
-      if (el) valores[def.id] = def.tipo === "lista" ? el.value.split("\n") : el.value;
+    visiveis(form.tipo.value).forEach((def) => {
+      const el = form.elements[chaveCampo(def)];
+      if (el) valores[chaveCampo(def)] = def.tipo === "lista" ? el.value.split("\n") : el.value;
     });
   };
   const montarCampos = () => {
     const t = form.tipo.value;
-    camposTipo.innerHTML = (CAMPOS[t] || []).length ? `<div class="grade-campos">${CAMPOS[t].map((def) => htmlCampoTipo(def, valores[def.id])).join("")}</div>` : "";
+    camposTipo.innerHTML = visiveis(t).length ? `<div class="grade-campos">${visiveis(t).map((def) => htmlCampoTipo(def, valores[chaveCampo(def)])).join("")}</div>` : "";
     form.querySelector(".ajuda-tipo").textContent = TIPOS[t].ajuda;
     form.querySelector(".revisado-check").hidden = !(t === "teste" || t === "contato");
   };
@@ -924,13 +984,18 @@ function editarNo(m, id, { novo = false, rascunho = null } = {}) {
     if (!titulo) { form.querySelector(".form-erro").textContent = "Informe o título."; return; }
     lerCamposTela();
     const tipo = ehRaiz ? no.tipo : form.tipo.value;
-    const urls = (CAMPOS[tipo] || []).filter((c) => c.tipo === "url" && String(valores[c.id] || "").trim());
-    const ruim = urls.find((c) => !urlSegura(valores[c.id]));
+    const vazio = (v) => !String(Array.isArray(v) ? v.join("") : v || "").trim();
+    const faltando = visiveis(tipo).find((c) => c.obrigatorio && vazio(valores[chaveCampo(c)]));
+    if (faltando) { form.querySelector(".form-erro").textContent = `Preencha "${faltando.rotulo}" (obrigatório).`; form.elements[chaveCampo(faltando)]?.focus(); return; }
+    const urls = visiveis(tipo).filter((c) => c.tipo === "url" && !vazio(valores[chaveCampo(c)]));
+    const ruim = urls.find((c) => !urlSegura(valores[chaveCampo(c)]));
     if (ruim) { form.querySelector(".form-erro").textContent = `"${ruim.rotulo}": use https://…, caderno.html?c=slug ou aprender.html#aula.`; return; }
+    const campos = {}, extras = {};
+    Object.entries(valores).forEach(([k, v]) => { if (k.startsWith("campo-")) campos[k.slice(6)] = v; else if (k.startsWith("extra-")) extras[k.slice(6)] = v; });
     const ligacoes = [...form.querySelectorAll(".linha-ligacao")].map((l) => ({ rotulo: l.querySelector('[name="lig-rotulo"]').value.trim(), para: l.querySelector('[name="lig-para"]').value }))
       .filter((l) => l.para);
     const atualizado = normalizarNo({
-      ...no, tipo, titulo, descricao: form.descricao.value, campos: valores, ligacoes,
+      ...no, tipo, titulo, descricao: form.descricao.value, campos, extras, ligacoes,
       tags: form.tags.value.split(",").map((t) => t.trim()).filter(Boolean),
       revisadoEm: form.revisado.checked ? new Date().toISOString() : no.revisadoEm
     });
@@ -1042,7 +1107,7 @@ function desenharRoteiro(m) {
       html.push(`<article class="cartao-teste desfecho ${r.desfecho}" aria-live="polite">
         ${r.desfecho === "resolvido"
           ? `<h3>${svg("i-sucesso")}Resolvido${resolvidoNo ? ` no teste “${escapar(resolvidoNo.titulo)}”` : ""}</h3>
-             ${solucoes.map((s) => `<div class="solucao"><p class="rotulo">Solução ${s.campos.natureza ? "· " + escapar(s.campos.natureza) : ""}</p><strong>${escapar(s.titulo)}</strong>${s.descricao ? md(s.descricao) : ""}${s.campos.passos ? `<ol>${s.campos.passos.map((p) => `<li>${escapar(p)}</li>`).join("")}</ol>` : ""}</div>`).join("")}`
+             ${solucoes.map((s) => `<div class="solucao"><p class="rotulo">${escapar(TIPOS.solucao.nome)}${s.campos.natureza ? " · " + escapar(rotuloOpcao(campoDoTipo("solucao", "natureza"), s.campos.natureza)) : ""}</p><strong>${escapar(s.titulo)}</strong>${s.descricao ? md(s.descricao) : ""}${s.campos.passos ? `<ol>${s.campos.passos.map((p) => `<li>${escapar(p)}</li>`).join("")}</ol>` : ""}</div>`).join("")}`
           : `<h3>${svg("i-telefone")}Escalar para quem resolve</h3>
              ${contato ? `<div class="contato-roteiro"><strong>${escapar(contato.titulo)}</strong>${htmlCampos(contato)}${contato.descricao ? md(contato.descricao) : ""}</div>`
                : `<p class="apoio">Nenhum nó “Quem resolve” encontrado perto deste sintoma. ${podeEditar() ? "Inclua um no mapa." : "Avise quem cuida dos mapas."}</p>`}`}
@@ -1140,10 +1205,32 @@ function registrarAtendimento(m, idx) {
 }
 
 /* ============================================================
+ *  Painel de edição (comum/mapas-painel.js): só administradoras
+ * ============================================================ */
+const painel = iniciarPainel({
+  estado, podeUsarPainel, autor, nomeDe, nosDe, mapaPorId, redesenhar, ir, alternarComoVisitante, gravarNos: salvarNos, editarNo,
+  api: () => estado.api,
+  aplicarConfig: (doc, dados) => aoMudarConfig(doc, dados, true)
+});
+/* Configuração nova (da nuvem ou recém-salva): aplica e redesenha tudo (mapa, lista, painel lateral, roteiro) */
+function aoMudarConfig(doc, dados, local = false) {
+  estado.config[doc] = dados || null;
+  if (doc === "estrutura") aplicarEstrutura(dados);
+  else aplicarModelos(dados);
+  /* Nós normalizados de novo: opções renomeadas/novas valem já para os dados em memória */
+  estado.nos.forEach((lista, id) => estado.nos.set(id, lista.map(normalizarNo).filter(Boolean)));
+  if (estado.rota.tela !== "painel") telaMontada = null;
+  painel.aoMudarConfig(doc, local);
+  redesenhar();
+}
+
+/* ============================================================
  *  Início
  * ============================================================ */
 ligarTema();
 montarBarraEdicao();
+$("#sair-visitante").addEventListener("click", () => alternarComoVisitante(false));
+window.addEventListener("beforeunload", (e) => { if (painel.temPendencias()) { e.preventDefault(); e.returnValue = ""; } });
 $("#conteudo").addEventListener("click", (e) => { if (telaMontada === "lista") aoClicarLista(e); });
 document.addEventListener("tema-mudou", () => redesenhar());
 window.addEventListener("hashchange", aoMudarRota);
@@ -1168,6 +1255,8 @@ ligarLogin().then((api) => {
   estado.api = api;
   $("#faixa-offline").hidden = !!api;
   if (!api) return usarExemploSemNuvem();
+  /* Estrutura e modelos do Painel: em tempo real; sem documento (ou erro), valem os padrões do código */
+  ["estrutura", "modelos"].forEach((doc) => api.ouvirDoc(`mapas-config/${doc}`, (d) => aoMudarConfig(doc, d), (e) => console.warn(`mapas-config/${doc}:`, e)));
   api.ouvirColecao("mapas", (lista) => {
     estado.mapas = lista.map(normalizarMapa).filter(Boolean);
     ouvirNosDosMapas();

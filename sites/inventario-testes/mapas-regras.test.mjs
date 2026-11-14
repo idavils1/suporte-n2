@@ -90,3 +90,43 @@ test("auditoria: administradora registra ação dos mapas; conta sem permissão 
   await assertSucceeds(addDoc(collection(admin(), "auditoria"), reg(LAYS)));
   await assertFails(addDoc(collection(outraConta(), "auditoria"), reg("fulano@valid.com")));
 });
+
+/* ---------- Painel de edição: mapas-config (só administradoras) ---------- */
+const PAULA = "paula.conceicao@valid.com";
+const paula = () => env.authenticatedContext("paula", { email: PAULA, email_verified: true }).firestore();
+const estrutura = (por, extra = {}) => ({
+  versao: 1,
+  tipos: { contato: { nome: "Escalonamento", icone: "i-telefone", cor: "laranja", ajuda: "", filhoPadrao: "nota" } },
+  ordemTipos: ["sistema", "sintoma", "teste", "contato", "solucao", "link", "nota"],
+  campos: { sintoma: [{ id: "impacto", tipo: "escolha", rotulo: "Impacto", dica: "", obrigatorio: false, oculto: false, personalizado: false,
+    opcoes: [{ id: "Parada total", rotulo: "Parada total", cor: "vermelho" }, { id: "Baixo", rotulo: "Baixo", arquivada: true }] }] },
+  atualizadoEm: serverTimestamp(), atualizadoPor: por, ...extra
+});
+test("mapas-config: administradora grava estrutura, modelos e versões; todos leem a configuração", async () => {
+  await assertSucceeds(setDoc(doc(admin(), "mapas-config", "estrutura"), estrutura(LAYS)));
+  await assertSucceeds(setDoc(doc(paula(), "mapas-config", "modelos"), { versao: 1, lista: [{ id: "branco", nome: "Em branco", descricao: "", nos: [] }], atualizadoEm: serverTimestamp(), atualizadoPor: PAULA }));
+  await assertSucceeds(setDoc(doc(admin(), "mapas-config", "estrutura", "versoes", "v1abc"), { dados: { tipos: {} }, resumo: "1 mudança", em: serverTimestamp(), por: LAYS }));
+  await assertSucceeds(getDoc(doc(visitante(), "mapas-config", "estrutura")));
+});
+test("mapas-config: editor comum, conta sem permissão e visitante não gravam", async () => {
+  await assertFails(setDoc(doc(outraConta(), "mapas-config", "estrutura"), estrutura("fulano@valid.com")));
+  await assertFails(setDoc(doc(visitante(), "mapas-config", "estrutura"), estrutura("Fulano")));
+  await assertFails(setDoc(doc(outraConta(), "mapas-config", "estrutura", "versoes", "v2"), { dados: {}, resumo: "", em: serverTimestamp(), por: "fulano@valid.com" }));
+  await assertFails(getDoc(doc(outraConta(), "mapas-config", "estrutura", "versoes", "v1abc")));
+});
+test("mapas-config: formato inválido é recusado e versões não mudam", async () => {
+  await assertFails(setDoc(doc(admin(), "mapas-config", "outro"), estrutura(LAYS)));
+  await assertFails(setDoc(doc(admin(), "mapas-config", "estrutura"), estrutura(LAYS, { tipos: { pasta: { nome: "Pasta" } } })));
+  await assertFails(setDoc(doc(admin(), "mapas-config", "estrutura"), estrutura(LAYS, { senha: "x" })));
+  await assertFails(setDoc(doc(admin(), "mapas-config", "estrutura"), estrutura(PAULA)));
+  await assertFails(setDoc(doc(admin(), "mapas-config", "modelos"), { versao: 1, lista: [], tipos: {}, atualizadoEm: serverTimestamp(), atualizadoPor: LAYS }));
+  await env.withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), "mapas-config", "estrutura", "versoes", "v9"), { dados: {}, resumo: "x", em: new Date(), por: LAYS }));
+  await assertFails(setDoc(doc(admin(), "mapas-config", "estrutura", "versoes", "v9"), { dados: {}, resumo: "y", em: serverTimestamp(), por: LAYS }));
+  await assertFails(deleteDoc(doc(admin(), "mapas-config", "estrutura")));
+});
+test("nós aceitam campos personalizados em extras (até 20 chaves) e continuam recusando chaves fora da lista em campos", async () => {
+  await assertSucceeds(setDoc(doc(admin(), "mapas", "scda", "nos", "n4"), no({ extras: { ambiente: "Produção", "passos-extra": ["a", "b"] } })));
+  const muitos = Object.fromEntries(Array.from({ length: 21 }, (_, i) => [`c${i}`, "x"]));
+  await assertFails(setDoc(doc(admin(), "mapas", "scda", "nos", "n5"), no({ extras: muitos })));
+  await assertFails(setDoc(doc(admin(), "mapas", "scda", "nos", "n6"), no({ campos: { ambiente: "x" } })));
+});

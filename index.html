@@ -1075,6 +1075,30 @@
     .caixa-categoria .card-destaque { grid-template-columns: minmax(0, 1fr); padding: 20px; }
   }
 
+  /* Largura fluida em telas largas: até ~1280px de tela fica como antes (1100px);
+     1360px+: 1320px; 1760px+: 1560px (teto, não estica em 2560px). Celular e tablet não mudam. */
+  @media (min-width: 1360px) { :root { --largura-max: 1320px; } }
+  @media (min-width: 1760px) { :root { --largura-max: 1560px; } }
+  @media (min-width: 1025px) {
+    .container { padding: 0 clamp(32px, 3vw, 48px); }
+    /* Texto longo com linha confortável (a largura vale para o texto, não para o container) */
+    .hero .apoio { max-width: 70ch; margin-left: auto; margin-right: auto; }
+    .recado p, .item .descricao { max-width: 70ch; }
+  }
+  @media (min-width: 1081px) {
+    /* Grades ganham colunas conforme a largura (o modo edição continua com as 2 colunas dele) */
+    body:not(.editando) .grade-itens:not(.compacto):not(.duas) { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    body:not(.editando) .grade-itens.duas { grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); }
+    body:not(.editando) .caixa-categoria .grade-itens:not(.duas) { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+    body:not(.editando) .caixa-categoria .grade-itens.duas { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (min-width: 1360px) {
+    body:not(.editando) .grade-itens.compacto { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+    .grade-time { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+    .recados { grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); }
+    .busca { max-width: 520px; }
+  }
+
   /* Cinco ícones no topo (Comunicados, Inventário/Auditoria, tema, login, menu) */
   @media (max-width: 400px) {
     .acoes-header { gap: 4px; }
