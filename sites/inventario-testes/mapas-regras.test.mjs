@@ -51,10 +51,11 @@ test("administradora cria mapa e nó no formato da página", async () => {
 test("atualização parcial do mapa (atualizadoEm/Por) passa", async () => {
   await assertSucceeds(setDoc(doc(admin(), "mapas", "scda"), { atualizadoEm: serverTimestamp(), atualizadoPor: LAYS }, { merge: true }));
 });
-test("visitante e conta sem permissão não escrevem mapas nem nós", async () => {
-  await assertFails(setDoc(doc(visitante(), "mapas", "x"), mapa({ atualizadoPor: "Fulano" })));
-  await assertFails(setDoc(doc(outraConta(), "mapas", "x"), mapa({ atualizadoPor: "fulano@valid.com", criadoPor: "fulano@valid.com" })));
-  await assertFails(setDoc(doc(outraConta(), "mapas", "scda", "nos", "n2"), no({ atualizadoPor: "fulano@valid.com" })));
+test("qualquer pessoa cria/atualiza mapa e nó assinando com o nome; só editores excluem", async () => {
+  await assertSucceeds(setDoc(doc(visitante(), "mapas", "x"), mapa({ atualizadoPor: "Fulano", criadoPor: "Fulano" })));
+  await assertSucceeds(setDoc(doc(outraConta(), "mapas", "y"), mapa({ atualizadoPor: "fulano@valid.com", criadoPor: "fulano@valid.com" })));
+  await assertSucceeds(setDoc(doc(outraConta(), "mapas", "scda", "nos", "n2"), no({ atualizadoPor: "fulano@valid.com" })));
+  await assertFails(setDoc(doc(visitante(), "mapas", "z"), mapa({ atualizadoPor: "alguem@valid.com", criadoPor: "alguem@valid.com" })));
   await assertFails(deleteDoc(doc(outraConta(), "mapas", "scda", "nos", "scda-teste")));
   await assertFails(deleteDoc(doc(visitante(), "mapas", "scda")));
 });

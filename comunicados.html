@@ -281,17 +281,17 @@
     fonte: "Bricolage Grotesque", peso: 400, cor: "#111212", alinhar: "esquerda", alinharVertical: "topo",
     maxLinhas: 1, maxCaracteres: 80, maiusculas: false, entrelinha: 1.2, tipo: "texto", prefixo: "", padrao: "", prontos: [], ...c
   });
-  /* Templates oficiais (Instabilidade e Restabelecimento): imagem pronta de 561×545 com a saudação
-     "Olá Parceiro(a)," e a assinatura "Atenciosamente, Suporte Técnico V/Cert" já desenhadas.
-     A pessoa escreve só o RECADO, no branco entre as duas. versao 2: configurações salvas de
-     versão menor (as provisórias de 1080×1080) são ignoradas para estes dois modelos. */
+  /* Templates oficiais: a pessoa escreve só o RECADO no branco. Em alguns a saudação e a
+     assinatura já vêm na imagem (desenharFixos: false); nos outros a página desenha
+     "Olá Parceiro(a)," e "Atenciosamente, Suporte Técnico V/Cert" (desenharFixos: true).
+     versao: configurações salvas de versão menor são ignoradas. */
   const VERSAO_OFICIAL = 2;
   const campoRecado = (caixa) => campo({
     id: "recado", rotulo: "Recado", tipo: "texto",
     fonte: "Calibri", peso: 400, cor: "#000000", tamanhoMax: 13, tamanhoMin: 9, entrelinha: 1.3,
     alinhar: "esquerda", alinharVertical: "topo", maxLinhas: 24, maxCaracteres: 1200, padrao: "", ...caixa
   });
-  /* Textos fixos, só desenhados se um template futuro vier SEM eles (desenharFixos: true). Nunca aparecem no formulário. */
+  /* Textos fixos, só desenhados se o template vier SEM eles (desenharFixos: true). Nunca aparecem no formulário. */
   const fixosDoTemplate = (x, ySaudacao, yAtenciosamente, tamanho = 13, passo = 16) => [
     { texto: "Olá Parceiro(a),", x, y: ySaudacao, tamanho, peso: 700 },
     { texto: "Atenciosamente,", x, y: yAtenciosamente, tamanho, peso: 400 },
@@ -313,11 +313,30 @@
       id: "restabelecimento", nome: "Restabelecimento", imagem: "fotos/comunicados/restabelecimento.png", largura: 771, altura: 743, corProvisoria: "#111212",
       versao: 3, oficial: true, desenharFixos: true, fixos: fixosDoTemplate(22, 134, 572, 18, 22),
       campos: [campoRecado({ x: 22, y: 169, largura: 727, altura: 387, tamanhoMax: 18, tamanhoMin: 12.5 })]
+    },
+    /* Templates 561×545 com área branca vazia: saudação e assinatura desenhadas pela página. */
+    importante: {
+      id: "importante", nome: "Comunicado Importante", imagem: "fotos/comunicados/importante.png", largura: 561, altura: 545, corProvisoria: "#c62828",
+      versao: 1, oficial: true, desenharFixos: true,
+      fixos: fixosDoTemplate(16, 145, 400, 13, 16),
+      campos: [campoRecado({ x: 16, y: 170, largura: 529, altura: 218, tamanhoMax: 13, tamanhoMin: 9 })]
+    },
+    novidades: {
+      id: "novidades", nome: "Novidades", imagem: "fotos/comunicados/novidades.png", largura: 561, altura: 545, corProvisoria: "#c62828",
+      versao: 1, oficial: true, desenharFixos: true,
+      fixos: fixosDoTemplate(16, 145, 400, 13, 16),
+      campos: [campoRecado({ x: 16, y: 170, largura: 529, altura: 218, tamanhoMax: 13, tamanhoMin: 9 })]
+    },
+    manutencao: {
+      id: "manutencao", nome: "Manutenção Programada", imagem: "fotos/comunicados/manutencao.png", largura: 561, altura: 545, corProvisoria: "#111212",
+      versao: 1, oficial: true, desenharFixos: true,
+      fixos: fixosDoTemplate(16, 145, 400, 13, 16),
+      campos: [campoRecado({ x: 16, y: 170, largura: 529, altura: 218, tamanhoMax: 13, tamanhoMin: 9 })]
     }
   };
-  const ORDEM_ABAS = ["instabilidade", "restabelecimento"];
+  const ORDEM_ABAS = ["instabilidade", "restabelecimento", "importante", "novidades", "manutencao"];
   /* Abas que saíram do site: o endereço antigo abre Instabilidade e o rascunho local é apagado */
-  const ABAS_REMOVIDAS = ["novidades"];
+  const ABAS_REMOVIDAS = [];
   const FONTES = ["Bricolage Grotesque", "Calibri", "Arial", "Georgia", "Verdana"];
   /* Pilha de fontes do canvas: Calibri (dos templates) cai para Carlito, que tem as mesmas medidas */
   const PILHA_FONTES = {

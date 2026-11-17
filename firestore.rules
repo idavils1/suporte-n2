@@ -152,13 +152,18 @@ service cloud.firestore {
         ])
         || contatosAbertos();
     }
-    // Mapas de Ajuda (mapas.html): administradoras + EDITORES_MAPAS. Mantenha esta lista igual a
-    // EDITORES_MAPAS no comum/mapas.js (e-mails em minúsculas). Para trocar a política, mude só aqui e lá.
+    // Mapas de Ajuda (mapas.html): qualquer pessoa cria e edita nós (como Galeria/Anotações),
+    // assinando com o e-mail logado ou com um nome sem "@". EDITORES_MAPAS / administradoras
+    // continuam podendo excluir e usar a lixeira. Mantenha EDITORES_MAPAS igual a comum/mapas.js.
     function podeEditarMapas() {
       return ehAdmin()
         || (request.auth != null && request.auth.token.email in [
           // 'nome.sobrenome@valid.com',
         ]);
+    }
+    // Escrita aberta (criar/atualizar mapa e nós). Exclusão e lixeira: podeEditarMapas().
+    function podeEscreverMapas() {
+      return true;
     }
     function idMapa(id) {
       return id.matches('^[a-z0-9-]{1,60}$');
@@ -174,7 +179,7 @@ service cloud.firestore {
         && d.get('tags', []) is list && d.get('tags', []).size() <= 20
         && d.criadoEm is timestamp && textoAte(d.criadoPor, 80)
         && (d.get('excluidoEm', null) == null || d.excluidoEm is timestamp)
-        && request.auth != null && d.atualizadoPor == request.auth.token.email && d.atualizadoEm == request.time;
+        && autoriaAtual();
     }
     function noMapaValido() {
       let d = request.resource.data;
@@ -194,7 +199,7 @@ service cloud.firestore {
         // Campos personalizados do Painel de edição (no máximo 20; o navegador limita cada valor a 2000 caracteres)
         && d.get('extras', {}) is map && d.get('extras', {}).size() <= 20
         && textoAte(d.get('revisadoEm', ''), 30)
-        && request.auth != null && d.atualizadoPor == request.auth.token.email && d.atualizadoEm == request.time;
+        && autoriaAtual();
     }
     // Painel de edição dos mapas (mapas-config/estrutura e /modelos): SÓ administradoras.
     // Os ids dos 7 tipos não mudam (só nome, cor, ícone etc.), por isso as chaves são fixas.
@@ -2249,15 +2254,15 @@ service cloud.firestore {
       allow read, write: if adminCadeias();
     }
 
-    // Mapas de Ajuda (mapas.html). Leitura livre, como o resto da Central; escrita: podeEditarMapas().
-    // Um documento por nó (mapas/{id}/nos/{noId}); ligações extras ficam no campo "ligacoes" do nó de origem.
+    // Mapas de Ajuda (mapas.html). Leitura livre; criar/atualizar: qualquer pessoa (podeEscreverMapas + autoriaAtual).
+    // Excluir e lixeira: podeEditarMapas(). Um documento por nó; ligações extras no campo "ligacoes" do nó.
     match /mapas/{mapaId} {
       allow read: if true;
-      allow create, update: if podeEditarMapas() && idMapa(mapaId) && mapaValido();
+      allow create, update: if podeEscreverMapas() && idMapa(mapaId) && mapaValido();
       allow delete: if podeEditarMapas();
       match /nos/{noId} {
         allow read: if true;
-        allow create, update: if podeEditarMapas() && idMapa(noId) && noMapaValido();
+        allow create, update: if podeEscreverMapas() && idMapa(noId) && noMapaValido();
         allow delete: if podeEditarMapas();
       }
       match /usos/{usoId} {
