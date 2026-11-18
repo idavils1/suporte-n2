@@ -952,7 +952,8 @@ function desenharPainel(m, idx) {
       <button type="button" class="btn btn-secundario btn-mini" data-painel="filho">${svg("i-mais")}Filho</button>
       ${no.paiId ? `<button type="button" class="btn btn-secundario btn-mini" data-painel="irmao">${svg("i-mais")}Irmão</button>
       <button type="button" class="btn-icone" data-painel="subir" aria-label="Subir entre os irmãos">${svg("i-seta-cima")}</button>
-      <button type="button" class="btn-icone" data-painel="descer" aria-label="Descer entre os irmãos">${svg("i-seta-baixo")}</button>` : ""}
+      <button type="button" class="btn-icone" data-painel="descer" aria-label="Descer entre os irmãos">${svg("i-seta-baixo")}</button>
+      <button type="button" class="btn btn-secundario btn-mini" data-painel="mover">${svg("i-mover")}Mover para…</button>` : ""}
       ${(no.tipo === "teste" || no.tipo === "contato") ? `<button type="button" class="btn btn-secundario btn-mini" data-painel="revisado">${svg("i-check")}Revisado hoje</button>` : ""}
       ${no.paiId && podeExcluir() ? `<button type="button" class="btn btn-perigo btn-mini" data-painel="excluir">${svg("i-lixeira")}Excluir</button>` : ""}
     </div>` : ""}`;
@@ -984,6 +985,7 @@ function desenharPainel(m, idx) {
       if (a === "irmao") return adicionarNo(m2, id, "irmao");
       if (a === "subir") return reordenar(m2, id, -1);
       if (a === "descer") return reordenar(m2, id, 1);
+      if (a === "mover") return escolherNovoPai(m2, id);
       if (a === "excluir") return excluirNo(m2, id);
       if (a === "revisado") { const no2 = indexar(nosDe(m2.id)).porId.get(id); return salvarNos(m2.id, [{ ...no2, revisadoEm: new Date().toISOString() }], { aviso: "Marcado como revisado hoje." }); }
     });
@@ -1163,6 +1165,52 @@ async function reparentar(m, id, novoPai) {
   const ok = await salvarNos(m.id, [{ ...no, paiId: novoPai, ordem: irmaos.length ? irmaos[irmaos.length - 1].ordem + 1 : 0, pos: null }],
     { aviso: `"${no.titulo}" agora fica abaixo de "${idx.porId.get(novoPai).titulo}".` });
   if (!ok) redesenhar();
+}
+
+/* "Mover para…": o bloco e tudo o que está abaixo dele passam para debaixo de outro bloco do mesmo mapa */
+function escolherNovoPai(m, id) {
+  const idx = indexar(nosDe(m.id));
+  const no = idx.porId.get(id);
+  if (!no || !no.paiId) return;
+  const proibidos = new Set([id, ...descendentes(idx, id).map((n) => (typeof n === "string" ? n : n.id))]);
+  const opcoes = [];
+  const percorrer = (n, nivel) => {
+    if (proibidos.has(n.id)) return;
+    opcoes.push({ n, nivel });
+    (idx.filhos.get(n.id) || []).forEach((f) => percorrer(f, nivel + 1));
+  };
+  if (idx.raiz) percorrer(idx.raiz, 0);
+  const d = criarDialogo({
+    titulo: `Mover “${no.titulo}”`, largo: true,
+    corpo: `<p class="apoio">Escolha o bloco que vai ficar acima dele. ${(idx.filhos.get(id) || []).length ? "Tudo o que está abaixo vai junto." : ""}</p>
+      <label class="campo"><span class="sr-only">Buscar destino</span><input type="search" data-mover-busca placeholder="Buscar destino…" autocomplete="off"></label>
+      <ul class="lista-mover" role="listbox" aria-label="Destinos">${opcoes.map(({ n, nivel }) => {
+        const t = TIPOS[n.tipo];
+        const atual = n.id === no.paiId;
+        return `<li><button type="button" role="option" data-destino="${escapar(n.id)}" data-texto="${escapar(normalizar(n.titulo + " " + t.nome))}" style="--nivel:${nivel}"${atual ? ' disabled aria-current="true"' : ""}>
+          <span class="selo tom-${t.cor}">${svg(t.icone)}${escapar(t.nome)}</span><span class="lista-mover-titulo">${escapar(n.titulo)}</span>${atual ? '<span class="apoio">(onde está agora)</span>' : ""}</button></li>`;
+      }).join("")}</ul>
+      <div class="form-botoes"><button type="button" class="btn btn-secundario" data-fechar>Cancelar</button></div>`
+  });
+  const busca = d.querySelector("[data-mover-busca]");
+  busca.addEventListener("input", () => {
+    const termo = normalizar(busca.value.trim());
+    d.querySelectorAll("[data-destino]").forEach((b) => { b.parentElement.hidden = !!termo && !b.dataset.texto.includes(termo); });
+  });
+  busca.addEventListener("keydown", (e) => { if (e.key === "Enter") e.preventDefault(); });
+  d.querySelector(".lista-mover").addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-destino]");
+    if (!b || b.disabled) return;
+    d.close();
+    expandirAte(m, idx, b.dataset.destino);
+    estado.recolhidos[m.id][b.dataset.destino] = false;
+    gravarJSON(CHAVE_RECOLHIDOS, estado.recolhidos);
+    await reparentar(m, id, b.dataset.destino);
+    estado.selecionado = id;
+    requestAnimationFrame(() => estado.canvas ? estado.canvas.focar(id) : focarOutline(id));
+  });
+  d.showModal();
+  busca.focus();
 }
 
 /* ---------- Escolher sintoma para o roteiro ---------- */
