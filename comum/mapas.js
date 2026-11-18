@@ -8,10 +8,11 @@
  *
  *  ESTRUTURA (tipos, campos, listas de opções, modelos): vem de mapas-dados.js (padrões) mesclada com
  *  mapas-config/estrutura e /modelos, editados no Painel de edição (#painel, comum/mapas-painel.js).
- *  QUEM EDITA OS NÓS: administradoras (ADMINS em base.js) + EDITORES_MAPAS abaixo.
+ *  QUEM CRIA/EDITA MAPAS E NÓS: qualquer pessoa (sem login assina com o nome, como a Galeria).
+ *  QUEM EXCLUI / LIXEIRA: administradoras (ADMINS em base.js) + EDITORES_MAPAS abaixo.
  *  QUEM USA O PAINEL: só administradoras (podeUsarPainel(); ehAdmin() em mapas-config no firestore.rules).
  *  Mantenha EDITORES_MAPAS igual à função podeEditarMapas() do firestore.rules.
- *  "Registrar atendimento" (usos) é aberto a qualquer pessoa, assinando com o nome.
+ *  "Registrar atendimento" (usos) também é aberto a qualquer pessoa, assinando com o nome.
  *
  *  Teste local sem tocar na produção: abra mapas.html?nuvem-teste em localhost
  *  (carrega dev/mapas/nuvem-teste.js, uma nuvem simulada no navegador).
@@ -30,7 +31,7 @@ import {
 import { criarCanvas } from "./mapas-canvas.js";
 import { iniciarPainel } from "./mapas-painel.js";
 
-/* Quem pode editar além das administradoras (e-mails em minúsculas). Igual a podeEditarMapas() no firestore.rules. */
+/* Quem pode excluir / usar a lixeira além das administradoras (e-mails em minúsculas). Igual a podeEditarMapas() no firestore.rules. */
 const EDITORES_MAPAS = [
   // "nome.sobrenome@valid.com",
 ];
@@ -47,6 +48,8 @@ if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && new URLSearchParams(
 
 const lerJSON = (chave, padrao, area = localStorage) => { try { const v = area.getItem(chave); return v ? JSON.parse(v) : padrao; } catch (e) { return padrao; } };
 const gravarJSON = (chave, valor, area = localStorage) => { try { area.setItem(chave, JSON.stringify(valor)); } catch (e) {} };
+const lerAutorLocal = () => { try { return (localStorage.getItem(CHAVE_AUTOR) || "").trim().replace(/@/g, "").slice(0, 60); } catch (e) { return ""; } };
+const gravarAutorLocal = (nome) => { try { localStorage.setItem(CHAVE_AUTOR, nome); } catch (e) {} };
 
 const estado = {
   api: null, carregou: false,
@@ -61,11 +64,13 @@ const estado = {
   /* "Pré-visualizar como visitante" (Painel): esconde tudo o que é de edição, só nesta aba */
   comoVisitante: lerJSON("suporte-n2-mapas-como-visitante", false, sessionStorage)
 };
-const podeEditar = () => !estado.comoVisitante && !!estado.api && !!sessao.email && (ehAdmin() || EDITORES_MAPAS.includes(sessao.email));
+/* Criar/editar/mover: qualquer pessoa com nuvem (sem login assina com o nome). Excluir: admins + EDITORES_MAPAS. */
+const podeEditar = () => !estado.comoVisitante && !!estado.api;
+const podeExcluir = () => podeEditar() && !!sessao.email && (ehAdmin() || EDITORES_MAPAS.includes(sessao.email));
 /* Painel de edição (estrutura dos mapas): SÓ administradoras. Igual a ehAdmin() em mapas-config no firestore.rules. */
 const podeUsarPainel = () => !estado.comoVisitante && !!estado.api && ehAdmin();
 const editando = () => estado.edicao && podeEditar();
-const autor = () => sessao.email || "";
+const autor = () => sessao.email || lerAutorLocal();
 const nomeDe = (email) => { const a = ADMINS.find((x) => x.email === email); return a ? a.nome : (email || "").split("@")[0]; };
 const md = (t) => renderizarMarkdown(t || "").html;
 const mapaPorId = (id) => estado.mapas.find((m) => m.id === id) || null;
@@ -77,8 +82,43 @@ const nosDe = (id) => estado.nos.get(id) || [];
 function opsTocarMapa(mapaId) {
   return { caminho: `mapas/${mapaId}`, dados: { atualizadoEm: "__AGORA__", atualizadoPor: autor() }, mesclar: true };
 }
+/* Sem login: pede o nome (igual Galeria/Anotações). Com login, usa o e-mail. */
+function pedirAutor() {
+  if (sessao.email) return Promise.resolve(sessao.email);
+  const salvo = lerAutorLocal();
+  if (salvo) return Promise.resolve(salvo);
+  return new Promise((resolver) => {
+    const d = criarDialogo({
+      titulo: "Como você se chama?",
+      corpo: `<p class="apoio">Seu nome assina o mapa (nada além disso é gravado). Sem “@”.</p>
+        <label class="campo"><span class="rotulo">Seu nome</span><input name="autor" maxlength="60" required autocomplete="name"></label>
+        <p class="form-erro" role="alert"></p>
+        <div class="form-botoes"><button type="button" class="btn btn-secundario" data-fechar>Cancelar</button><button type="submit" class="btn">Continuar</button></div>`
+    });
+    const form = d.querySelector("form");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nome = form.autor.value.trim().replace(/@/g, "").slice(0, 60);
+      if (!nome) { form.querySelector(".form-erro").textContent = "Informe seu nome."; return; }
+      gravarAutorLocal(nome);
+      d.close();
+      resolver(nome);
+    });
+    d.addEventListener("close", () => resolver(lerAutorLocal() || null), { once: true });
+    d.showModal();
+    form.autor.focus();
+  });
+}
 async function gravar(ops, { aviso = null, auditoria = null } = {}) {
   if (!podeEditar()) { mostrarAviso("Sem permissão para editar."); return false; }
+  const por = await pedirAutor();
+  if (!por) return false;
+  /* Garante que opsNos / dadosMapa usem o nome acabado de informar */
+  ops.forEach((op) => {
+    if (op.dados && "atualizadoPor" in op.dados) op.dados.atualizadoPor = por;
+    if (op.dados && "criadoPor" in op.dados) op.dados.criadoPor = por;
+    if (op.dados && "removidoPor" in op.dados) op.dados.removidoPor = por;
+  });
   try {
     await estado.api.lote(ops);
     if (aviso) mostrarAviso(aviso);
@@ -110,6 +150,7 @@ async function criarMapa(mapa, nos, { auditoria = "criar" } = {}) {
 }
 function tamanhoJSON(v) { try { return new Blob([JSON.stringify(v)]).size; } catch (e) { return Infinity; } }
 async function moverParaLixeira(tipo, mapa, nos, nome) {
+  if (!podeExcluir()) { mostrarAviso("Só administradoras (e editores) podem excluir."); return false; }
   const dados = tipo === "mapa" ? { mapa, nos } : { nos };
   if (tamanhoJSON(dados) > 900000) { mostrarAviso("Grande demais para a lixeira: exporte o JSON antes de excluir."); return false; }
   const id = `${tipo}-${mapa.id}-${Date.now().toString(36)}`.slice(0, 100);
@@ -216,8 +257,8 @@ function alternarComoVisitante(ligar) {
   if (ligar && estado.rota.tela === "painel") ir("#"); else desenharTela();
 }
 function montarBarraEdicao() {
-  $("#barra-edicao").innerHTML = `<span>${svg("i-lapis")}<strong>Modo edição</strong> · <kbd>Tab</kbd> filho · <kbd>Enter</kbd> irmão · <kbd>F2</kbd> editar · <kbd>Delete</kbd> excluir · <kbd>Alt</kbd>+<kbd>↑/↓</kbd> reordenar · arraste um nó sobre outro para trocar o pai.</span>
-    <span class="barra-edicao-acoes"><button type="button" class="btn btn-secundario btn-mini" data-acao="lixeira">${svg("i-lixeira")}Lixeira</button></span>`;
+  $("#barra-edicao").innerHTML = `<span>${svg("i-lapis")}<strong>Modo edição</strong> · <kbd>Tab</kbd> filho · <kbd>Enter</kbd> irmão · <kbd>F2</kbd> editar${podeExcluir() ? " · <kbd>Delete</kbd> excluir" : ""} · <kbd>Alt</kbd>+<kbd>↑/↓</kbd> reordenar · arraste um nó sobre outro para trocar o pai. Arrastar o nó (árvore ou grafo) guarda a posição.</span>
+    <span class="barra-edicao-acoes">${podeExcluir() ? `<button type="button" class="btn btn-secundario btn-mini" data-acao="lixeira">${svg("i-lixeira")}Lixeira</button>` : ""}</span>`;
   $("#barra-edicao").addEventListener("click", (e) => { if (e.target.closest('[data-acao="lixeira"]')) abrirLixeira(); });
   $("#btn-edicao").addEventListener("click", () => {
     estado.edicao = !estado.edicao;
@@ -303,8 +344,8 @@ function desenharLista() {
       if (m && s) ir(`#m/${m}/roteiro/${s}`); else if (m) ir(`#m/${m}`);
     });
   }
-  $("#lista-acoes").innerHTML = editando() ? `<button type="button" class="btn btn-mini" data-acao="novo">${svg("i-mais")}Novo mapa</button>
-    <button type="button" class="btn btn-secundario btn-mini" data-acao="importar">${svg("i-upload")}Importar JSON</button>` : "";
+  $("#lista-acoes").innerHTML = podeEditar() ? `<button type="button" class="btn btn-mini" data-acao="novo">${svg("i-mais")}Novo mapa</button>
+    ${editando() ? `<button type="button" class="btn btn-secundario btn-mini" data-acao="importar">${svg("i-upload")}Importar JSON</button>` : ""}` : "";
   const sel = $("#atalho-mapa"), atual = sel.value;
   const ordenados = [...estado.mapas].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
   sel.innerHTML = `<option value="">Escolha o sistema</option>` + ordenados.map((m) => `<option value="${escapar(m.id)}">${escapar(m.nome)}</option>`).join("");
@@ -330,10 +371,10 @@ function desenharCards() {
   if (!estado.mapas.length) {
     grade.innerHTML = `<div class="vazio">
       <p><strong>Nenhum mapa ainda.</strong></p>
-      ${podeEditar() ? `<p class="apoio">Comece pelo exemplo do SCDA (com marcadores [Preencher] nos contatos) ou crie um mapa do zero.</p>
+      ${podeEditar() ? `<p class="apoio">Qualquer pessoa pode criar. Comece pelo exemplo do SCDA ou monte um mapa do zero.</p>
         <div class="vazio-acoes"><button type="button" class="btn" data-acao="exemplo">${svg("i-mapa")}Criar mapa de exemplo</button>
         <button type="button" class="btn btn-secundario" data-acao="novo">${svg("i-mais")}Novo mapa</button></div>`
-        : `<p class="apoio">Quem tem permissão de edição pode criar o primeiro mapa (entre pelo botão Entrar).</p>`}
+        : `<p class="apoio">Sem conexão com a nuvem agora: não dá para criar mapas.</p>`}
     </div>`;
     return;
   }
@@ -406,7 +447,7 @@ function abrirMenuMapa(ancora, m) {
     ed && { rotulo: "Duplicar", icone: "i-duplicar", acao: () => duplicarMapa(m) },
     { rotulo: "Exportar JSON", icone: "i-download", acao: () => baixarArquivo(`mapa-${m.id}.json`, mapaParaJSON(m, nosDe(m.id)), "application/json") },
     { rotulo: "Exportar roteiro (Markdown)", icone: "i-documento", acao: () => baixarArquivo(`mapa-${m.id}.md`, mapaParaMarkdown(m, nosDe(m.id)), "text/markdown;charset=utf-8") },
-    ed && { rotulo: "Excluir (vai para a lixeira)", icone: "i-lixeira", perigo: true, acao: () => excluirMapa(m) }
+    podeExcluir() && { rotulo: "Excluir (vai para a lixeira)", icone: "i-lixeira", perigo: true, acao: () => excluirMapa(m) }
   ]);
 }
 
@@ -599,7 +640,7 @@ function desenharMapa(m) {
         <div class="busca-mapa" role="search">${svg("i-busca")}<label class="sr-only" for="busca-mapa">Buscar neste mapa</label>
           <input type="search" id="busca-mapa" placeholder="Buscar neste mapa" autocomplete="off" value="${escapar(estado.buscaMapa)}"><span class="apoio" id="busca-mapa-total"></span></div>
         <div class="barra-mapa-fim">
-          ${editando() && vistaAtual() === "mapa" ? `<button type="button" class="btn btn-secundario btn-mini" data-acao="reorganizar" title="Volta todas as posições ao layout automático">${svg("i-desfazer")}<span>Reorganizar</span></button>` : ""}
+          ${podeEditar() && vistaAtual() === "mapa" ? `<button type="button" class="btn btn-secundario btn-mini" data-acao="reorganizar" title="Volta todas as posições ao layout automático (árvore ou grafo)">${svg("i-desfazer")}<span>Reorganizar</span></button>` : ""}
           <button type="button" class="btn-icone" data-acao="mais" aria-label="Exportar e mais ações" aria-haspopup="menu">${svg("i-download")}</button>
         </div>
       </div>
@@ -623,8 +664,10 @@ function desenharMapa(m) {
         aoSelecionar: (id) => selecionar(m, id),
         aoAbrir: (id) => { if (editando()) editarNo(m, id); else selecionar(m, id); },
         aoAlternar: (id) => alternar(m, id),
+        /* Arrastar nó: funciona em árvore e grafo (posição livre salva na nuvem). */
         aoMover: (id, pos) => { const no = indexar(nosDe(m.id)).porId.get(id); if (no) salvarNos(m.id, [{ ...no, pos }]); },
-        aoReparentar: (id, alvo) => reparentar(m, id, alvo),
+        /* Soltar sobre outro nó (trocar pai): só no modo edição, para não mudar a árvore sem querer. */
+        aoReparentar: editando() ? (id, alvo) => reparentar(m, id, alvo) : null,
         aoTecla: (e, id) => teclaEdicao(m, e, id),
         aoClicarFundo: () => { if (estado.selecionado) { estado.selecionado = null; trocarHash(m, null); redesenhar(); } }
       });
@@ -637,7 +680,8 @@ function desenharMapa(m) {
   $("#busca-mapa-total").textContent = termo.length >= 2 ? `${marcados.size}` : "";
   const rec = recolhidosDe(m, idx);
   if (estado.canvas) {
-    estado.canvas.atualizar({ idx, recolhidos: rec, quadro: quadroAtual(m), editavel: editando(), selecionado: estado.selecionado, marcados });
+    /* editavel: qualquer pessoa com nuvem pode arrastar nós (árvore ou grafo). */
+    estado.canvas.atualizar({ idx, recolhidos: rec, quadro: quadroAtual(m), editavel: podeEditar(), selecionado: estado.selecionado, marcados });
     if (estado.rota.noId && estado.pendenteFoco !== `${m.id}/${estado.rota.noId}` && idx.porId.has(estado.rota.noId)) {
       estado.pendenteFoco = `${m.id}/${estado.rota.noId}`;
       if (rec.size && caminhoAteRaiz(idx, estado.rota.noId).slice(1).some((a) => rec.has(a))) { expandirAte(m, idx, estado.rota.noId); return redesenhar(); }
@@ -706,14 +750,15 @@ function menuExportar(m, ancora) {
     ed && { rotulo: "Editar nome, ícone e cor", icone: "i-lapis", acao: () => editarMapa(m) },
     ed && { rotulo: "Duplicar mapa", icone: "i-duplicar", acao: () => duplicarMapa(m) },
     podeUsarPainel() && { rotulo: "Salvar como modelo de mapa", icone: "i-grade", acao: () => painel.salvarMapaComoModelo(m, nosDe(m.id)) },
-    ed && { rotulo: "Excluir mapa", icone: "i-lixeira", perigo: true, acao: () => excluirMapa(m) }
+    podeExcluir() && { rotulo: "Excluir mapa", icone: "i-lixeira", perigo: true, acao: () => excluirMapa(m) }
   ]);
 }
 async function reorganizar(m) {
-  const q = quadroAtual(m);
-  const comPos = nosDe(m.id).filter((n) => n.pos && n.pos.v === q);
+  const comPos = nosDe(m.id).filter((n) => n.pos);
   if (!comPos.length) { mostrarAviso("O mapa já está no layout automático."); estado.canvas && estado.canvas.ajustar(); return; }
-  if (await salvarNos(m.id, comPos.map((n) => ({ ...n, pos: null })), { aviso: "Mapa reorganizado." })) requestAnimationFrame(() => requestAnimationFrame(() => estado.canvas && estado.canvas.ajustar()));
+  if (await salvarNos(m.id, comPos.map((n) => ({ ...n, pos: null })), { aviso: "Mapa reorganizado (árvore e grafo voltam ao automático)." })) {
+    requestAnimationFrame(() => requestAnimationFrame(() => estado.canvas && estado.canvas.ajustar()));
+  }
 }
 
 /* ---------- Lista em árvore (outline): padrão no celular e para leitores de tela ---------- */
@@ -837,7 +882,7 @@ function desenharPainel(m, idx) {
       <button type="button" class="btn-icone" data-painel="subir" aria-label="Subir entre os irmãos">${svg("i-seta-cima")}</button>
       <button type="button" class="btn-icone" data-painel="descer" aria-label="Descer entre os irmãos">${svg("i-seta-baixo")}</button>` : ""}
       ${(no.tipo === "teste" || no.tipo === "contato") ? `<button type="button" class="btn btn-secundario btn-mini" data-painel="revisado">${svg("i-check")}Revisado hoje</button>` : ""}
-      ${no.paiId ? `<button type="button" class="btn btn-perigo btn-mini" data-painel="excluir">${svg("i-lixeira")}Excluir</button>` : ""}
+      ${no.paiId && podeExcluir() ? `<button type="button" class="btn btn-perigo btn-mini" data-painel="excluir">${svg("i-lixeira")}Excluir</button>` : ""}
     </div>` : ""}`;
   if (!painel.dataset.ligado) {
     painel.dataset.ligado = "1";
@@ -877,7 +922,7 @@ function teclaEdicao(m, e, id) {
   if (e.key === "Tab" && !e.shiftKey) { adicionarNo(m, id, "filho"); return true; }
   if (e.key === "Enter") { const no = indexar(nosDe(m.id)).porId.get(id); if (no && no.paiId) adicionarNo(m, id, "irmao"); else selecionar(m, id); return true; }
   if (e.key === "F2") { editarNo(m, id); return true; }
-  if (e.key === "Delete") { excluirNo(m, id); return true; }
+  if (e.key === "Delete" && podeExcluir()) { excluirNo(m, id); return true; }
   if (e.altKey && e.key === "ArrowUp") { reordenar(m, id, -1); return true; }
   if (e.altKey && e.key === "ArrowDown") { reordenar(m, id, 1); return true; }
   return false;

@@ -2,7 +2,8 @@
  * ============================================================
  *  MAPAS DE AJUDA: quadro em SVG (sem bibliotecas)
  *  - Árvore horizontal (raiz à esquerda) ou "Visão grafo" (forças, estilo Obsidian)
- *  - Pan (arrastar o fundo), zoom (roda / pinça / botões), nós arrastáveis
+ *  - Pan (arrastar o fundo), zoom (roda / pinça / botões), nós arrastáveis nos dois modos
+ *  - Posição livre (no.pos) vale em árvore e grafo; sem pos, usa o layout automático
  *  - Passar o mouse (ou focar) destaca o caminho até a raiz e os filhos diretos
  *  - Teclado: setas navegam entre pai, filhos e irmãos; Espaço recolhe/expande
  *  Tudo o que muda dados é avisado por callbacks; quem grava é mapas.js.
@@ -180,8 +181,9 @@ export function criarCanvas(container, cb = {}) {
     est.visiveis.forEach(({ no }) => (no.ligacoes || []).forEach((l) => { if (visivel.has(l.para)) extras.push([no.id, l.para, l.rotulo]); }));
     const auto = ehGrafo() ? layoutGrafo(d.idx, d.recolhidos, extras) : layoutArvore(d.idx, d.recolhidos);
     est.pos = new Map();
+    /* Posição livre vale nos dois modos (árvore e grafo): se o nó tem pos, usa; senão, layout automático. */
     est.visiveis.forEach(({ no }) => {
-      const manual = no.pos && no.pos.v === est.quadro ? no.pos : null;
+      const manual = no.pos && Number.isFinite(no.pos.x) && Number.isFinite(no.pos.y) ? no.pos : null;
       est.pos.set(no.id, manual ? { x: manual.x, y: manual.y } : (auto.get(no.id) || { x: 0, y: 0 }));
     });
     const foco = document.activeElement && document.activeElement.closest && document.activeElement.closest(".no");
