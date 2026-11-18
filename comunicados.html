@@ -306,13 +306,13 @@
       versao: 3, oficial: true, desenharFixos: false, fixos: fixosDoTemplate(23, 194, 803, 22, 29),
       campos: [campoRecado({ x: 23, y: 233, largura: 978, altura: 548, tamanhoMax: 22, tamanhoMin: 15 })]
     },
-    /* Template oficial recebido em 771×743, com a área branca VAZIA (y 102 a 651): a saudação e a
-       assinatura são desenhadas pela página (desenharFixos: true). Medidas na proporção do layout de
-       561×545 (fator 771/561): margem 22, saudação em 134, assinatura em 572/594, fonte 18 a 12,5 px; caixa = área entre as duas. */
+    /* Template oficial 561×545 com área branca vazia (cabeçalho ~y 97, rodapé ~y 481):
+       saudação e assinatura desenhadas pela página (desenharFixos: true). versao 4: ignora a caixa salva do layout antigo 771×743. */
     restabelecimento: {
-      id: "restabelecimento", nome: "Restabelecimento", imagem: "fotos/comunicados/restabelecimento.png", largura: 771, altura: 743, corProvisoria: "#111212",
-      versao: 3, oficial: true, desenharFixos: true, fixos: fixosDoTemplate(22, 134, 572, 18, 22),
-      campos: [campoRecado({ x: 22, y: 169, largura: 727, altura: 387, tamanhoMax: 18, tamanhoMin: 12.5 })]
+      id: "restabelecimento", nome: "Restabelecimento", imagem: "fotos/comunicados/restabelecimento.png", largura: 561, altura: 545, corProvisoria: "#111212",
+      versao: 4, oficial: true, desenharFixos: true,
+      fixos: fixosDoTemplate(16, 145, 400, 13, 16),
+      campos: [campoRecado({ x: 16, y: 170, largura: 529, altura: 218, tamanhoMax: 13, tamanhoMin: 9 })]
     },
     /* Templates 561×545 com área branca vazia: saudação e assinatura desenhadas pela página. */
     importante: {

@@ -39,6 +39,7 @@ const CHAVE_EDICAO = "suporte-n2-mapas-edicao";
 const CHAVE_RECOLHIDOS = "suporte-n2-mapas-recolhidos";
 const CHAVE_VISTA = "suporte-n2-mapas-vista";
 const CHAVE_QUADRO = "suporte-n2-mapas-quadro";
+const CHAVE_POSICOES = "suporte-n2-mapas-posicoes";
 const CHAVE_AUTOR = "suporte-n2-autor-anotacao";
 const CELULAR = window.matchMedia("(max-width: 640px)");
 
@@ -58,7 +59,9 @@ const estado = {
   edicao: lerJSON(CHAVE_EDICAO, false, sessionStorage),
   vista: lerJSON(CHAVE_VISTA, null), quadros: lerJSON(CHAVE_QUADRO, {}),
   recolhidos: lerJSON(CHAVE_RECOLHIDOS, {}),
-  selecionado: null, buscaMapa: "", roteiro: null, canvas: null,
+  /* Posições livres (árvore/grafo): só neste navegador — não vão para a nuvem. */
+  posicoesLocais: lerJSON(CHAVE_POSICOES, {}),
+  selecionado: null, apontado: null, buscaMapa: "", roteiro: null, canvas: null,
   /* Configuração do Painel de edição (mapas-config/estrutura e /modelos), como veio da nuvem */
   config: { estrutura: null, modelos: null },
   /* "Pré-visualizar como visitante" (Painel): esconde tudo o que é de edição, só nesta aba */
@@ -75,6 +78,32 @@ const nomeDe = (email) => { const a = ADMINS.find((x) => x.email === email); ret
 const md = (t) => renderizarMarkdown(t || "").html;
 const mapaPorId = (id) => estado.mapas.find((m) => m.id === id) || null;
 const nosDe = (id) => estado.nos.get(id) || [];
+/* Vista do mapa: ignora pos da nuvem e aplica só o layout local deste computador. */
+function nosParaVista(mapaId) {
+  const locais = estado.posicoesLocais[mapaId] || {};
+  return nosDe(mapaId).map((n) => {
+    const p = locais[n.id];
+    const pos = p && Number.isFinite(p.x) && Number.isFinite(p.y)
+      ? { x: Math.round(p.x), y: Math.round(p.y), v: p.v === "grafo" ? "grafo" : "arvore" }
+      : null;
+    return { ...n, pos };
+  });
+}
+function gravarPosicaoLocal(mapaId, noId, pos) {
+  const porMapa = { ...(estado.posicoesLocais[mapaId] || {}) };
+  if (pos && Number.isFinite(pos.x) && Number.isFinite(pos.y)) {
+    porMapa[noId] = { x: Math.round(pos.x), y: Math.round(pos.y), v: pos.v === "grafo" ? "grafo" : "arvore" };
+  } else delete porMapa[noId];
+  if (Object.keys(porMapa).length) estado.posicoesLocais[mapaId] = porMapa;
+  else delete estado.posicoesLocais[mapaId];
+  gravarJSON(CHAVE_POSICOES, estado.posicoesLocais);
+}
+function limparPosicoesLocais(mapaId) {
+  if (!estado.posicoesLocais[mapaId]) return false;
+  delete estado.posicoesLocais[mapaId];
+  gravarJSON(CHAVE_POSICOES, estado.posicoesLocais);
+  return true;
+}
 
 /* ============================================================
  *  Persistência
@@ -217,7 +246,7 @@ function aoMudarRota() {
   if (anterior.tela === "painel" && proxima.tela !== "painel") painel.descartar(true);
   hashAnterior = location.hash;
   estado.rota = proxima;
-  if (estado.rota.tela !== "mapa" || anterior.mapaId !== estado.rota.mapaId) { estado.selecionado = null; estado.buscaMapa = ""; }
+  if (estado.rota.tela !== "mapa" || anterior.mapaId !== estado.rota.mapaId) { estado.selecionado = null; estado.apontado = null; estado.buscaMapa = ""; }
   if (estado.rota.tela === "mapa") estado.selecionado = estado.rota.noId || null;
   if (estado.rota.tela === "roteiro" && (!estado.roteiro || estado.roteiro.sintomaId !== estado.rota.sintomaId || estado.roteiro.mapaId !== estado.rota.mapaId)) estado.roteiro = null;
   telaMontada = null;
@@ -257,7 +286,7 @@ function alternarComoVisitante(ligar) {
   if (ligar && estado.rota.tela === "painel") ir("#"); else desenharTela();
 }
 function montarBarraEdicao() {
-  $("#barra-edicao").innerHTML = `<span>${svg("i-lapis")}<strong>Modo edição</strong> · <kbd>Tab</kbd> filho · <kbd>Enter</kbd> irmão · <kbd>F2</kbd> editar${podeExcluir() ? " · <kbd>Delete</kbd> excluir" : ""} · <kbd>Alt</kbd>+<kbd>↑/↓</kbd> reordenar · arraste um nó sobre outro para trocar o pai. Arrastar o nó (árvore ou grafo) guarda a posição.</span>
+  $("#barra-edicao").innerHTML = `<span>${svg("i-lapis")}<strong>Modo edição</strong> · <kbd>Tab</kbd> filho · <kbd>Enter</kbd> irmão · <kbd>F2</kbd> editar${podeExcluir() ? " · <kbd>Delete</kbd> excluir" : ""} · <kbd>Alt</kbd>+<kbd>↑/↓</kbd> reordenar · arraste um nó sobre outro para trocar o pai. Arrastar o nó (árvore ou grafo) move só neste computador.</span>
     <span class="barra-edicao-acoes">${podeExcluir() ? `<button type="button" class="btn btn-secundario btn-mini" data-acao="lixeira">${svg("i-lixeira")}Lixeira</button>` : ""}</span>`;
   $("#barra-edicao").addEventListener("click", (e) => { if (e.target.closest('[data-acao="lixeira"]')) abrirLixeira(); });
   $("#btn-edicao").addEventListener("click", () => {
@@ -617,7 +646,7 @@ async function alternar(m, id) {
 
 function desenharMapa(m) {
   const raiz = $("#conteudo");
-  const nos = nosDe(m.id);
+  const nos = nosParaVista(m.id);
   const idx = indexar(nos);
   if (estado.selecionado && !idx.porId.has(estado.selecionado)) estado.selecionado = null;
   const chave = `mapa:${m.id}:${vistaAtual()}:${editando()}`;
@@ -640,7 +669,7 @@ function desenharMapa(m) {
         <div class="busca-mapa" role="search">${svg("i-busca")}<label class="sr-only" for="busca-mapa">Buscar neste mapa</label>
           <input type="search" id="busca-mapa" placeholder="Buscar neste mapa" autocomplete="off" value="${escapar(estado.buscaMapa)}"><span class="apoio" id="busca-mapa-total"></span></div>
         <div class="barra-mapa-fim">
-          ${podeEditar() && vistaAtual() === "mapa" ? `<button type="button" class="btn btn-secundario btn-mini" data-acao="reorganizar" title="Volta todas as posições ao layout automático (árvore ou grafo)">${svg("i-desfazer")}<span>Reorganizar</span></button>` : ""}
+          ${vistaAtual() === "mapa" ? `<button type="button" class="btn btn-secundario btn-mini" data-acao="reorganizar" title="Volta as posições deste computador ao layout automático (árvore ou grafo)">${svg("i-desfazer")}<span>Reorganizar</span></button>` : ""}
           <button type="button" class="btn-icone" data-acao="mais" aria-label="Exportar e mais ações" aria-haspopup="menu">${svg("i-download")}</button>
         </div>
       </div>
@@ -662,14 +691,15 @@ function desenharMapa(m) {
     if (vistaAtual() === "mapa") {
       estado.canvas = criarCanvas($("#palco"), {
         aoSelecionar: (id) => selecionar(m, id),
+        aoApontar: (id) => apontar(m, id),
         aoAbrir: (id) => { if (editando()) editarNo(m, id); else selecionar(m, id); },
         aoAlternar: (id) => alternar(m, id),
-        /* Arrastar nó: funciona em árvore e grafo (posição livre salva na nuvem). */
-        aoMover: (id, pos) => { const no = indexar(nosDe(m.id)).porId.get(id); if (no) salvarNos(m.id, [{ ...no, pos }]); },
+        /* Arrastar nó: posição livre só neste navegador (não replica para outros). */
+        aoMover: (_id, pos) => { gravarPosicaoLocal(m.id, _id, pos); },
         /* Soltar sobre outro nó (trocar pai): só no modo edição, para não mudar a árvore sem querer. */
         aoReparentar: editando() ? (id, alvo) => reparentar(m, id, alvo) : null,
         aoTecla: (e, id) => teclaEdicao(m, e, id),
-        aoClicarFundo: () => { if (estado.selecionado) { estado.selecionado = null; trocarHash(m, null); redesenhar(); } }
+        aoClicarFundo: () => { if (estado.selecionado || estado.apontado) { estado.selecionado = null; estado.apontado = null; trocarHash(m, null); redesenhar(); } }
       });
     }
   }
@@ -680,8 +710,8 @@ function desenharMapa(m) {
   $("#busca-mapa-total").textContent = termo.length >= 2 ? `${marcados.size}` : "";
   const rec = recolhidosDe(m, idx);
   if (estado.canvas) {
-    /* editavel: qualquer pessoa com nuvem pode arrastar nós (árvore ou grafo). */
-    estado.canvas.atualizar({ idx, recolhidos: rec, quadro: quadroAtual(m), editavel: podeEditar(), selecionado: estado.selecionado, marcados });
+    /* editavel: qualquer pessoa pode arrastar nós só neste computador (árvore ou grafo). */
+    estado.canvas.atualizar({ idx, recolhidos: rec, quadro: quadroAtual(m), editavel: true, selecionado: estado.selecionado, marcados });
     if (estado.rota.noId && estado.pendenteFoco !== `${m.id}/${estado.rota.noId}` && idx.porId.has(estado.rota.noId)) {
       estado.pendenteFoco = `${m.id}/${estado.rota.noId}`;
       if (rec.size && caminhoAteRaiz(idx, estado.rota.noId).slice(1).some((a) => rec.has(a))) { expandirAte(m, idx, estado.rota.noId); return redesenhar(); }
@@ -697,9 +727,27 @@ function trocarHash(m, id) {
 }
 function selecionar(m, id) {
   estado.selecionado = id;
+  estado.apontado = null;
   trocarHash(m, id);
   redesenhar();
   if (CELULAR.matches || vistaAtual() === "lista") requestAnimationFrame(() => { const p = $("#painel"); if (p && !p.hidden) p.focus({ preventScroll: false }); });
+}
+/* Passar o mouse sobre um bloco (Árvore, Grafo ou Lista) mostra as informações no painel sem empurrar o quadro. */
+let timerLimparApontado = null;
+function apontar(m, id) {
+  if (CELULAR.matches) return;
+  clearTimeout(timerLimparApontado);
+  if (!id) {
+    timerLimparApontado = setTimeout(() => {
+      const p = $("#painel");
+      if (p && p.matches(":hover")) return;
+      if (estado.apontado) { estado.apontado = null; desenharPainel(m, indexar(nosDe(m.id))); }
+    }, 120);
+    return;
+  }
+  if (estado.apontado === id) return;
+  estado.apontado = id;
+  desenharPainel(m, indexar(nosDe(m.id)));
 }
 function ligarBarraMapa(m) {
   const barra = $(".barra-mapa");
@@ -754,11 +802,21 @@ function menuExportar(m, ancora) {
   ]);
 }
 async function reorganizar(m) {
-  const comPos = nosDe(m.id).filter((n) => n.pos);
-  if (!comPos.length) { mostrarAviso("O mapa já está no layout automático."); estado.canvas && estado.canvas.ajustar(); return; }
-  if (await salvarNos(m.id, comPos.map((n) => ({ ...n, pos: null })), { aviso: "Mapa reorganizado (árvore e grafo voltam ao automático)." })) {
-    requestAnimationFrame(() => requestAnimationFrame(() => estado.canvas && estado.canvas.ajustar()));
+  const tinhaLocal = limparPosicoesLocais(m.id);
+  /* Limpa posições antigas que ainda estejam na nuvem (legado), sem afetar o conteúdo. */
+  const comPosNuvem = nosDe(m.id).filter((n) => n.pos);
+  if (!tinhaLocal && !comPosNuvem.length) {
+    mostrarAviso("O mapa já está no layout automático.");
+    estado.canvas && estado.canvas.ajustar();
+    return;
   }
+  if (comPosNuvem.length && podeEditar()) {
+    await salvarNos(m.id, comPosNuvem.map((n) => ({ ...n, pos: null })), { aviso: "Mapa reorganizado neste computador." });
+  } else {
+    mostrarAviso("Mapa reorganizado neste computador.");
+  }
+  redesenhar();
+  requestAnimationFrame(() => requestAnimationFrame(() => estado.canvas && estado.canvas.ajustar()));
 }
 
 /* ---------- Lista em árvore (outline): padrão no celular e para leitores de tela ---------- */
@@ -795,6 +853,12 @@ function desenharOutline(m, idx, rec, marcados) {
       if (e.target.closest("[data-alternar]")) { alternar(m2, li.dataset.id); return; }
       selecionar(m2, li.dataset.id);
     });
+    caixa.addEventListener("pointerover", (e) => {
+      const linha = e.target.closest(".linha");
+      const li = linha && linha.closest("[role=treeitem]");
+      if (li) apontar(mapaPorId(estado.rota.mapaId), li.dataset.id);
+    });
+    caixa.addEventListener("pointerleave", () => apontar(mapaPorId(estado.rota.mapaId), null));
     caixa.addEventListener("keydown", (e) => {
       const li = e.target.closest("[role=treeitem]");
       if (!li) return;
@@ -840,8 +904,13 @@ function htmlCampos(no) {
 }
 function desenharPainel(m, idx) {
   const painel = $("#painel");
-  const no = estado.selecionado && idx.porId.get(estado.selecionado);
-  document.querySelector(".area-mapa").classList.toggle("com-painel", !!no);
+  const idAtivo = (estado.apontado && idx.porId.has(estado.apontado) ? estado.apontado : null)
+    || (estado.selecionado && idx.porId.has(estado.selecionado) ? estado.selecionado : null);
+  const no = idAtivo && idx.porId.get(idAtivo);
+  const previa = !!no && idAtivo !== estado.selecionado;
+  const area = document.querySelector(".area-mapa");
+  area.classList.toggle("com-painel", !!no);
+  painel.classList.toggle("flutuante", previa);
   if (!no) { painel.hidden = true; painel.innerHTML = ""; return; }
   painel.hidden = false;
   painel.tabIndex = -1;
@@ -857,7 +926,10 @@ function desenharPainel(m, idx) {
   const chegam = [...idx.porId.values()].filter((n) => (n.ligacoes || []).some((l) => l.para === no.id));
   painel.innerHTML = `<div class="painel-topo tom-${t.cor}">
       <span class="selo tom-${t.cor}">${svg(t.icone)}${escapar(t.nome)}</span>
-      <button type="button" class="btn-icone" data-painel="fechar" aria-label="Fechar detalhes">${svg("i-fechar")}</button>
+      <span class="painel-topo-fim">
+        ${previa ? `<span class="apoio painel-dica">Clique no bloco para fixar</span>` : ""}
+        <button type="button" class="btn-icone" data-painel="fechar" aria-label="Fechar detalhes">${svg("i-fechar")}</button>
+      </span>
     </div>
     ${caminho.length ? `<nav class="trilha-no" aria-label="Caminho">${caminho.map((n) => `<a href="#m/${escapar(m.id)}/n/${escapar(n.id)}" data-ir="${escapar(n.id)}">${escapar(n.titulo)}</a>`).join(" › ")}</nav>` : ""}
     <h3 class="painel-titulo">${escapar(no.titulo)}</h3>
@@ -886,9 +958,12 @@ function desenharPainel(m, idx) {
     </div>` : ""}`;
   if (!painel.dataset.ligado) {
     painel.dataset.ligado = "1";
+    painel.addEventListener("pointerleave", () => {
+      if (estado.apontado) { estado.apontado = null; const m2 = mapaPorId(estado.rota.mapaId); if (m2) desenharPainel(m2, indexar(nosDe(m2.id))); }
+    });
     painel.addEventListener("click", (e) => {
       const m2 = mapaPorId(estado.rota.mapaId);
-      const id = estado.selecionado;
+      const id = estado.apontado || estado.selecionado;
       const irPara = e.target.closest("[data-ir]");
       if (irPara) {
         e.preventDefault();
@@ -901,7 +976,7 @@ function desenharPainel(m, idx) {
       const b = e.target.closest("[data-painel]");
       if (!b || !m2 || !id) return;
       const a = b.dataset.painel;
-      if (a === "fechar") { estado.selecionado = null; trocarHash(m2, null); return redesenhar(); }
+      if (a === "fechar") { estado.selecionado = null; estado.apontado = null; trocarHash(m2, null); return redesenhar(); }
       if (a === "roteiro") return ir(`#m/${m2.id}/roteiro/${id}`);
       if (a === "copiar-contato") { const no2 = indexar(nosDe(m2.id)).porId.get(id); copiarTexto(textoContato(no2)).then((ok) => mostrarAviso(ok ? "Contato copiado." : "Não foi possível copiar.")); return; }
       if (a === "editar") return editarNo(m2, id);
@@ -1084,6 +1159,7 @@ async function reparentar(m, id, novoPai) {
   if (!no || !no.paiId || id === novoPai || caminhoAteRaiz(idx, novoPai).includes(id)) { redesenhar(); return; }
   if (idx.paiDe.get(id) === novoPai) { redesenhar(); return; }
   const irmaos = idx.filhos.get(novoPai) || [];
+  gravarPosicaoLocal(m.id, id, null);
   const ok = await salvarNos(m.id, [{ ...no, paiId: novoPai, ordem: irmaos.length ? irmaos[irmaos.length - 1].ordem + 1 : 0, pos: null }],
     { aviso: `"${no.titulo}" agora fica abaixo de "${idx.porId.get(novoPai).titulo}".` });
   if (!ok) redesenhar();

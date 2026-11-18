@@ -273,6 +273,7 @@ function textoTrava(col) {
 
 /* Colunas do inventário (os ids são usados nas regras do Firestore: não mude) */
 const ID_HOSTNAME = "hostname", ID_DNA = "dna", ID_AREA = "area", ID_GESTOR = "gestor", ID_STATUS = "status", ID_AUDITORIA = "auditoria", ID_TECNICO = "tecnico";
+const ID_SERIE = "numeroSerie", ID_SO = "sistemaOperacional";
 const AUD_PENDENTE = "pendente", AUD_OK = "auditado-ok", AUD_DIVERGENCIA = "divergencia-encontrada", AUD_NAO_LOCALIZADO = "nao-localizado";
 const STATUS_BAIXADO = "baixado-descartado";
 function estruturaInicial() {
@@ -281,6 +282,8 @@ function estruturaInicial() {
   const colunas = [
     col(ID_HOSTNAME, "HOSTNAME", "texto", { obrigatoria: true, unica: true, acesso: "travado", largura: 170, ajuda: "Nome da máquina na rede. Fica em maiúsculas, sem espaços." }),
     col(ID_DNA, "DNA", "texto", { unica: true, acesso: "travado", largura: 150, ajuda: "Identificador da máquina no cadastro DNA." }),
+    col(ID_SERIE, "Nº DE SÉRIE", "texto", { acesso: "livre", largura: 150, ajuda: "Número de série do equipamento." }),
+    col(ID_SO, "SISTEMA OP", "texto", { acesso: "livre", largura: 180, ajuda: "Sistema operacional." }),
     col("usuario", "NOME DO USUÁRIO", "texto", { acesso: "livre", largura: 220 }),
     col(ID_AREA, "ÁREA", "lista", { acesso: "lista", largura: 190, opcoes: ["SAC", "SUPORTE OPERACIONAL", "SUPORTE N2"].map((n) => op(n)) }),
     col(ID_GESTOR, "GESTOR", "lista", { acesso: "lista", largura: 200, opcoes: [] }),
@@ -303,7 +306,7 @@ function estruturaInicial() {
 }
 /* VCORP/VCERT · Software: quatro colunas FIXAS, nesta ordem, obrigatórias, que não se removem nem se renomeiam
    (os ids são conferidos no firestore.rules). As extras entram depois delas. */
-const ID_APLICACAO = "nomeAplicacao", ID_VERSAO = "versao", ID_MES_ANO = "mesAno", ID_SERIE = "numeroSerie";
+const ID_APLICACAO = "nomeAplicacao", ID_VERSAO = "versao", ID_MES_ANO = "mesAno";
 const COLUNAS_FIXAS_SW = [
   { id: ID_APLICACAO, nome: "NOME DA APLICAÇÃO", tipo: "texto", largura: 240, ajuda: "Nome do programa instalado." },
   { id: ID_VERSAO, nome: "VERSÃO", tipo: "texto", largura: 130, ajuda: "Ex.: 10.2.3" },
@@ -311,6 +314,11 @@ const COLUNAS_FIXAS_SW = [
   { id: ID_MES_ANO, nome: "MÊS/ANO", tipo: "mesAno", largura: 120, ajuda: "Mês da coleta (MM/AAAA)." }
 ];
 const FIXAS_SW = COLUNAS_FIXAS_SW.map((c) => c.id);
+/* Em todas as planilhas do Inventário: Nº de série e Sistema OP (ids fixos; o nome pode já existir com texto longo). */
+const COLUNAS_SERIE_SO = [
+  { id: ID_SERIE, nome: "Nº DE SÉRIE", tipo: "texto", largura: 150, ajuda: "Número de série do equipamento." },
+  { id: ID_SO, nome: "SISTEMA OP", tipo: "texto", largura: 180, ajuda: "Sistema operacional." }
+];
 const ehColunaFixa = (pl, id) => !!pl && pl.tipo === "sw" && FIXAS_SW.includes(id);
 function colunaBase(id, nome, tipo, extra = {}) {
   return { id, nome, tipo, grupo: "geral", largura: 160, obrigatoria: false, unica: false, padrao: "", opcoes: [], ajuda: "", somenteAdmin: false, acesso: "livre", ativa: true, ...extra };
@@ -319,6 +327,8 @@ function estruturaInicialPerfil(pl) {
   const op = (nome, cor = "", extra = {}) => ({ id: slug(nome, 40), nome, cor, ...extra });
   const colunas = pl.tipo === "sw"
     ? [...COLUNAS_FIXAS_SW.map((c) => colunaBase(c.id, c.nome, c.tipo, { ...c, obrigatoria: true })),
+      colunaBase(ID_SERIE, "Nº DE SÉRIE", "texto", { largura: 150, ajuda: "Número de série do equipamento." }),
+      colunaBase(ID_SO, "SISTEMA OP", "texto", { largura: 180, ajuda: "Sistema operacional." }),
       colunaBase("fabricante", "FABRICANTE", "texto"), colunaBase("licenca", "LICENÇA", "texto"), colunaBase("observacao", "OBSERVAÇÃO", "textoLongo", { largura: 260 })]
     : [colunaBase(ID_HOSTNAME, "HOSTNAME", "texto", { largura: 170, formato: "hostname", ajuda: "Nome da máquina na rede. Fica em maiúsculas, sem espaços." }),
       colunaBase("tipo", "TIPO", "lista", { acesso: "lista", opcoes: ["Desktop", "Notebook", "Servidor", "Monitor", "Outro"].map((n) => op(n)) }),
@@ -326,7 +336,7 @@ function estruturaInicialPerfil(pl) {
       colunaBase(ID_SERIE, "Nº DE SÉRIE", "texto", { largura: 150, ajuda: "Identifica o equipamento (sem série, vale o HOSTNAME)." }),
       colunaBase("patrimonio", "PATRIMÔNIO", "texto", { largura: 130 }), colunaBase("processador", "PROCESSADOR", "texto"),
       colunaBase("memoria", "MEMÓRIA", "texto", { largura: 120 }), colunaBase("armazenamento", "ARMAZENAMENTO", "texto", { largura: 140 }),
-      colunaBase("sistemaOperacional", "SISTEMA OPERACIONAL", "texto", { largura: 180 }), colunaBase("localizacao", "LOCALIZAÇÃO", "texto"),
+      colunaBase(ID_SO, "SISTEMA OP", "texto", { largura: 180, ajuda: "Sistema operacional." }), colunaBase("localizacao", "LOCALIZAÇÃO", "texto"),
       colunaBase("responsavel", "RESPONSÁVEL", "texto"),
       colunaBase(ID_STATUS, "STATUS", "status", { acesso: "lista", opcoes: [op("Ativo", "verde"), op("Estoque", "azul"), op("Manutenção", "laranja"), op("Baixado", "cinza", { final: true })] }),
       colunaBase(ID_MES_ANO, "MÊS/ANO", "mesAno", { largura: 120, ajuda: "Mês da coleta (MM/AAAA)." })];
@@ -351,6 +361,18 @@ function garantirFixasSoftware(e) {
   /* As fixas ficam no primeiro grupo, sempre na frente */
   fixas.forEach((c) => { c.grupo = grupo; });
   return { ...e, colunas: [...fixas, ...extras] };
+}
+/* Garante Nº DE SÉRIE e SISTEMA OP em qualquer planilha (Inventário, VCORP e VCERT). Não renomeia se já existir. */
+function garantirColunasSerieESo(e) {
+  const grupo = ([...e.gruposColunas].sort((a, b) => a.ordem - b.ordem)[0] || { id: "geral" }).id;
+  let maxOrdem = e.colunas.reduce((m, c) => Math.max(m, Number(c.ordem) || 0), 0);
+  const novas = [];
+  COLUNAS_SERIE_SO.forEach((f) => {
+    if (e.colunas.some((c) => c.id === f.id)) return;
+    maxOrdem += 1;
+    novas.push({ ...colunaBase(f.id, f.nome, f.tipo, f), grupo, ordem: maxOrdem, acesso: "livre" });
+  });
+  return novas.length ? { ...e, colunas: [...e.colunas, ...novas] } : e;
 }
 /* Quem pode criar cadastro na tela de entrada (igual ao padrão do firestore.rules) */
 /* aprovacao: o cadastro novo fica "aguardando liberação" até uma administradora liberar */
@@ -381,8 +403,13 @@ function normalizarOpcao(o) {
 }
 function normalizarEstrutura(d, pl = planilhaAtual()) {
   if (!d || typeof d !== "object") return null;
-  const e = normalizarEstruturaBase(d);
-  return pl && pl.tipo === "sw" ? garantirFixasSoftware(e) : e;
+  let e = normalizarEstruturaBase(d);
+  if (pl && pl.tipo === "sw") e = garantirFixasSoftware(e);
+  return garantirColunasSerieESo(e);
+}
+function estruturaPrecisaSerieESo(d) {
+  const ids = new Set((Array.isArray(d && d.colunas) ? d.colunas : []).map((c) => c && c.id));
+  return !ids.has(ID_SERIE) || !ids.has(ID_SO);
 }
 function normalizarEstruturaBase(d) {
   const grupos = (Array.isArray(d.gruposColunas) ? d.gruposColunas : []).filter((g) => g && RE_OPCAO.test(g.id || ""))
@@ -5705,7 +5732,7 @@ function renderizarSemEstrutura() {
   ["#resumo", "#abas", ".barra", "#area-dados"].forEach((s) => { $(s).hidden = sem; });
   if (!sem) return;
   const pl = planilhaAtual();
-  const colunasIniciais = pl.tipo ? estruturaInicialPerfil(pl).colunas.map((c) => c.nome).join(", ") : "HOSTNAME, DNA, NOME DO USUÁRIO, ÁREA, GESTOR, STATUS, AUDITORIA, TÉCNICO e OBSERVAÇÃO";
+  const colunasIniciais = pl.tipo ? estruturaInicialPerfil(pl).colunas.map((c) => c.nome).join(", ") : "HOSTNAME, DNA, Nº DE SÉRIE, SISTEMA OP, NOME DO USUÁRIO, ÁREA, GESTOR, STATUS, AUDITORIA, TÉCNICO e OBSERVAÇÃO";
   caixa.innerHTML = ehAdmin()
     ? `<div class="cartao-login" style="margin:24px auto;text-align:center"><h2>${escapar(nomeCompletoPlanilha(pl))} ainda não tem estrutura</h2>
         <p class="apoio">Crie a estrutura inicial: ${escapar(colunasIniciais)}.${pl.tipo === "sw" ? " As quatro primeiras são fixas em toda planilha de Software." : ""} A planilha nasce vazia; depois dá para ajustar em Administração › Estrutura.</p>
@@ -6270,12 +6297,19 @@ function abrirPlanilha() {
   };
   const ouvir = (f) => estado.ouvintesPlanilha.push(f);
   ouvir(api.ouvirDoc(caminhoEstrutura(), (d) => {
-    aplicarEstrutura(normalizarEstrutura(d));
+    const e = normalizarEstrutura(d);
+    aplicarEstrutura(e);
     estado.carregouEstrutura = true;
     renderizarSemEstrutura();
     atualizarBotoes();
     salvarCopia();
     agendarRender();
+    /* Planilhas antigas: grava Nº DE SÉRIE e SISTEMA OP na estrutura (só administradora). */
+    if (ehAdmin() && conectado() && d && e && estruturaPrecisaSerieESo(d)) {
+      estado.api.salvarDoc(caminhoEstrutura(), dadosEstrutura({ ...e, versao: (e.versao || 0) + 1 }))
+        .then(() => registrarAuditoria("estrutura", "Incluiu Nº DE SÉRIE e SISTEMA OP na estrutura", "", { planilha: pl.id }))
+        .catch((err) => console.warn("serie-so", err));
+    }
   }, aoErro("estrutura")));
   if (pl.ciclo) ouvir(api.ouvirDoc(CAMINHO_CICLO(), (d) => { estado.ciclo = d; renderizarCiclo(); }, (e) => console.warn("ciclo", e)));
   /* A planilha só aparece depois que os registros vivos e o arquivo compactado chegaram */
@@ -6881,7 +6915,7 @@ const SINONIMOS_PERFIL = {
   patrimonio: ["patrimonio", "asset", "tag", "etiqueta", "numero do patrimonio"],
   tipo: ["tipo", "categoria", "tipo de equipamento"], modelo: ["modelo", "model"],
   processador: ["processador", "cpu", "processor"], memoria: ["memoria", "ram", "memoria ram", "memory"],
-  armazenamento: ["armazenamento", "disco", "hd", "ssd", "storage"], sistemaOperacional: ["sistema operacional", "so", "os", "operating system"],
+  armazenamento: ["armazenamento", "disco", "hd", "ssd", "storage"], sistemaOperacional: ["sistema operacional", "sistema op", "so", "os", "operating system"],
   localizacao: ["localizacao", "local", "site", "unidade", "filial", "setor"], responsavel: ["responsavel", "usuario", "owner", "colaborador"],
   [ID_STATUS]: ["status", "situacao", "estado"], observacao: ["observacao", "observacoes", "obs", "comentario"]
 };

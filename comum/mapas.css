@@ -146,10 +146,11 @@ body.modo-edicao .tela-mapa { height: calc(100dvh - var(--altura-topo) - 40px); 
 .no-alternar:hover circle { stroke: var(--cor); fill: var(--cor-fundo); }
 .no-bola { fill: var(--cor); stroke: var(--fundo); stroke-width: 2; }
 .no.selecionado .no-bola { stroke: var(--cor-acao); stroke-width: 3; }
+.no-tipo-grafo { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; fill: var(--cor); paint-order: stroke; stroke: var(--fundo); stroke-width: 3px; stroke-linejoin: round; }
 .no-rotulo { font-size: 12px; font-weight: 600; fill: var(--cor-acao); paint-order: stroke; stroke: var(--fundo); stroke-width: 4px; stroke-linejoin: round; }
 .no-mais { font-size: 10px; font-weight: 700; fill: var(--fundo); }
 .quadro.grafo .aresta { stroke-width: 1.2; }
-.quadro.longe .no-titulo, .quadro.longe .no-tipo, .quadro.longe .ligacao text { display: none; }
+.quadro.longe .no-titulo, .quadro.longe .no-tipo, .quadro.longe .no-tipo-grafo, .quadro.longe .ligacao text { display: none; }
 .quadro.longe .no-caixa { fill: var(--cor-fundo); }
 /* Destaque estilo Obsidian: tudo esmaece, menos caminho até a raiz e filhos diretos */
 .quadro.com-destaque .no:not(.ativo), .quadro.com-destaque .aresta:not(.ativo), .quadro.com-destaque .ligacao:not(.ativo) { opacity: 0.18; }
@@ -181,7 +182,10 @@ body.modo-edicao .tela-mapa { height: calc(100dvh - var(--altura-topo) - 40px); 
 
 /* Painel de detalhes */
 .painel { width: min(420px, 42vw); flex-shrink: 0; overflow-y: auto; padding: 16px 18px 28px; border-left: 1px solid var(--borda); background: var(--superficie); display: grid; align-content: start; gap: 12px; outline: none; }
-.painel-topo { display: flex; justify-content: space-between; align-items: center; }
+.painel.flutuante { position: absolute; top: 0; right: 0; bottom: 0; z-index: 20; box-shadow: -8px 0 24px var(--sombra); }
+.painel-topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.painel-topo-fim { display: inline-flex; align-items: center; gap: 8px; }
+.painel-dica { font-size: 11px; white-space: nowrap; }
 .painel-titulo { font-size: 20px; overflow-wrap: anywhere; }
 .trilha-no { font-size: 12px; color: var(--texto-secundario); overflow-wrap: anywhere; }
 .trilha-no a { color: var(--texto-secundario); }

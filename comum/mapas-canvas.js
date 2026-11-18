@@ -4,6 +4,7 @@
  *  - Árvore horizontal (raiz à esquerda) ou "Visão grafo" (forças, estilo Obsidian)
  *  - Pan (arrastar o fundo), zoom (roda / pinça / botões), nós arrastáveis nos dois modos
  *  - Posição livre (no.pos) vale em árvore e grafo; sem pos, usa o layout automático
+ *    (mapas.js grava no.pos só no navegador local — não sincroniza entre computadores)
  *  - Passar o mouse (ou focar) destaca o caminho até a raiz e os filhos diretos
  *  - Teclado: setas navegam entre pai, filhos e irmãos; Espaço recolhe/expande
  *  Tudo o que muda dados é avisado por callbacks; quem grava é mapas.js.
@@ -224,7 +225,7 @@ export function criarCanvas(container, cb = {}) {
     html = "";
     est.visiveis.forEach(({ no }) => { html += ehGrafo() ? htmlNoGrafo(no) : htmlNoArvore(no); });
     gNos.innerHTML = html;
-    if (est.destaque) destacar(est.destaque);
+    if (est.destaque) destacar(est.destaque, false);
     aplicar();
     if (idFoco) { const el = gNos.querySelector(`.no[data-id="${CSS.escape(idFoco)}"]`); if (el) el.focus({ preventScroll: true }); }
     if (est.primeiro && est.visiveis.length) { est.primeiro = false; ajustar(true); }
@@ -269,19 +270,23 @@ export function criarCanvas(container, cb = {}) {
     const r = raioGrafo(no.id);
     const sel = d.selecionado === no.id ? " selecionado" : "";
     const marcado = d.marcados && d.marcados.has(no.id) ? " marcado" : "";
+    const vencido = revisaoVencida(no);
     const titulo = no.titulo.length > 34 ? no.titulo.slice(0, 33) + "…" : no.titulo;
-    return `<g class="no tipo-${no.tipo} tom-${tipo.cor}${sel}${marcado}" data-id="${esc(no.id)}" transform="translate(${p.x} ${p.y})" tabindex="0" role="button" aria-label="${esc(rotuloAria(no))}">
+    return `<g class="no tipo-${no.tipo} tom-${tipo.cor}${sel}${marcado}" data-id="${esc(no.id)}" transform="translate(${p.x} ${p.y})" tabindex="0" role="button" aria-label="${esc(rotuloAria(no))}"${d.selecionado === no.id ? ' aria-current="true"' : ""}>
       <circle class="no-bola" r="${r}"/>
+      ${vencido ? `<circle class="no-vencido" cx="${r - 2}" cy="${-r + 2}" r="4"><title>Sem revisão há mais de 90 dias</title></circle>` : ""}
       ${rec && f ? `<text class="no-mais" y="4" text-anchor="middle">+${f}</text>` : ""}
-      <text class="no-rotulo" y="${r + 15}" text-anchor="middle">${esc(titulo)}</text>
+      <text class="no-tipo-grafo" y="${r + 12}" text-anchor="middle">${esc(tipo.nome.toUpperCase())}</text>
+      <text class="no-rotulo" y="${r + 25}" text-anchor="middle">${esc(titulo)}</text>
     </g>`;
   }
 
   /* ---------- Destaque (hover/foco): caminho até a raiz + filhos diretos ---------- */
-  function destacar(id) {
+  function destacar(id, notificar = true) {
+    const mudou = est.destaque !== id;
     est.destaque = id;
     const d = est.dados;
-    if (!d || !id || !est.pos.has(id)) { limparDestaque(); return; }
+    if (!d || !id || !est.pos.has(id)) { limparDestaque(notificar); return; }
     const ativos = new Set(caminhoAteRaiz(d.idx, id));
     (d.recolhidos.has(id) ? [] : (d.idx.filhos.get(id) || [])).forEach((f) => ativos.add(f.id));
     const no = d.idx.porId.get(id);
@@ -290,10 +295,13 @@ export function criarCanvas(container, cb = {}) {
     gNos.querySelectorAll(".no").forEach((el) => el.classList.toggle("ativo", ativos.has(el.dataset.id)));
     gArestas.querySelectorAll(".aresta").forEach((el) => el.classList.toggle("ativo", ativos.has(el.dataset.de) && ativos.has(el.dataset.para)));
     gLig.querySelectorAll(".ligacao").forEach((el) => el.classList.toggle("ativo", el.dataset.de === id || el.dataset.para === id));
+    if (notificar && mudou && cb.aoApontar) cb.aoApontar(id);
   }
-  function limparDestaque() {
+  function limparDestaque(notificar = true) {
+    const tinha = est.destaque != null;
     est.destaque = null;
     svg.classList.remove("com-destaque");
+    if (notificar && tinha && cb.aoApontar) cb.aoApontar(null);
   }
 
   /* ---------- Enquadramento ---------- */
