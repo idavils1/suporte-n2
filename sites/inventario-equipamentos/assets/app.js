@@ -5682,6 +5682,8 @@ function atualizarBotoes() {
   $("#menu-admin").hidden = !ehAdmin();
   $("#faixa-offline").hidden = !(estado.offline || (estado.usandoCopia && !estado.carregouEquipamentos));
   $("#btn-busca-rapida").hidden = !estado.usuario;
+  $("#btn-script").hidden = !estado.usuario;
+  $("#btn-script").setAttribute("aria-current", estado.tela === "script" ? "page" : "false");
 }
 function atualizarTopo() {
   const u = estado.usuario;
@@ -6385,7 +6387,7 @@ function rotaDaUrl() {
   const p = new URLSearchParams(location.search);
   const tela = (p.get("tela") || "").toLowerCase();
   if (tela === "importacoes") return { tela, id: p.get("id") || "" };
-  if (tela === "auditoria") return { tela };
+  if (tela === "auditoria" || tela === "script") return { tela };
   const inv = (p.get("inv") || "").toLowerCase();
   if (inv === "equipamentos") return { tela: "planilha", planilha: "inventario" };
   if (GRUPOS_INVENTARIO[inv]) return { tela: "planilha", planilha: `${inv}-${(p.get("aba") || "").toLowerCase() === "sw" ? "sw" : "hw"}` };
@@ -6396,6 +6398,7 @@ function urlDaRota(r) {
   if (r.tela === "planilha") { const pl = planilhaPorId(r.planilha) || PLANILHAS[0]; return pl.grupo ? `${base}?inv=${pl.grupo}&aba=${pl.aba}` : `${base}?inv=equipamentos`; }
   if (r.tela === "importacoes") return `${base}?tela=importacoes${r.id ? `&id=${encodeURIComponent(r.id)}` : ""}`;
   if (r.tela === "auditoria") return `${base}?tela=auditoria`;
+  if (r.tela === "script") return `${base}?tela=script`;
   return base;
 }
 function navegar(r) {
@@ -6420,7 +6423,7 @@ function mostrarRota(r, { substituir = false } = {}) {
   if (estado.pararTela) { try { estado.pararTela(); } catch (e) { /* já parado */ } estado.pararTela = null; }
   const anterior = estado.tela;
   estado.tela = r.tela;
-  ["tela-menu", "tela-importacoes", "tela-auditoria", "conteudo-planilha"].forEach((id) => { $("#" + id).hidden = true; });
+  ["tela-menu", "tela-importacoes", "tela-auditoria", "tela-script", "conteudo-planilha"].forEach((id) => { $("#" + id).hidden = true; });
   if (r.tela !== "planilha" && (anterior === "planilha" || estado.carregouEstrutura)) { if (!ficha.hidden) fecharFicha(); pararOuvintesPlanilha(); }
   if (r.tela === "planilha") {
     $("#conteudo-planilha").hidden = false;
@@ -6433,13 +6436,14 @@ function mostrarRota(r, { substituir = false } = {}) {
   } else if (r.tela === "menu") { $("#tela-menu").hidden = false; renderizarMenu(); }
   else if (r.tela === "importacoes") { $("#tela-importacoes").hidden = false; renderizarImportacoes(r.id); }
   else if (r.tela === "auditoria") { $("#tela-auditoria").hidden = false; renderizarTelaAuditoria(); }
+  else if (r.tela === "script") { $("#tela-script").hidden = false; renderizarTelaScript(); }
   renderizarMigalhas(r);
   atualizarBotoes();
   if (anterior !== r.tela || r.tela !== "planilha") window.scrollTo({ top: 0 });
 }
 function tituloDaRota(r) {
   if (r.tela === "planilha") return nomeCompletoPlanilha(planilhaPorId(r.planilha));
-  return { importacoes: "Importações", auditoria: "Auditoria" }[r.tela] || "Menu";
+  return { importacoes: "Importações", auditoria: "Auditoria", script: "Script" }[r.tela] || "Menu";
 }
 function renderizarMigalhas(r) {
   const itens = [{ rotulo: "Menu", rota: r.tela === "menu" ? null : { tela: "menu" } }];
@@ -6450,6 +6454,7 @@ function renderizarMigalhas(r) {
   }
   if (r.tela === "importacoes") { itens.push({ rotulo: "Importações", rota: r.id ? { tela: "importacoes" } : null }); if (r.id) itens.push({ rotulo: "Revisão" }); }
   if (r.tela === "auditoria") itens.push({ rotulo: "Auditoria" });
+  if (r.tela === "script") itens.push({ rotulo: "Script" });
   $("#migalhas").innerHTML = `<ol>${itens.map((it, i) => `<li>${it.rota && i < itens.length - 1 ? `<a href="${escapar(urlDaRota(it.rota))}" data-rota="${escapar(JSON.stringify(it.rota))}"${it.titulo ? ` title="${escapar(it.titulo)}"` : ""}>${escapar(it.rotulo)}</a>` : `<span${i === itens.length - 1 ? ' aria-current="page"' : ""}>${escapar(it.rotulo)}</span>`}</li>`).join("")}</ol>`;
   $("#btn-voltar").hidden = r.tela === "menu";
   if (r.tela !== "planilha") $("#titulo-planilha").textContent = "Inventário e Auditoria";
@@ -7341,7 +7346,7 @@ const NOMES_ACOES = {
   excluir: "Excluiu (Lixeira)", excluirDeVez: "Excluiu de vez", restaurar: "Restaurou", importar: "Importou", aceitar: "Aceitou importação",
   rejeitar: "Rejeitou importação", desfazerImportacao: "Desfez importação", pedirExclusao: "Pediu exclusão", recusarExclusao: "Recusou exclusão",
   estrutura: "Estrutura", pessoa: "Pessoas", backup: "Backup", restaurarBackup: "Restaurou backup", apagarBackup: "Apagou backup", compactar: "Compactou",
-  auditoria: "Ciclo de auditoria", substituirValor: "Substituiu valor", corrigirLista: "Corrigiu lista", aparencia: "Aparência"
+  auditoria: "Ciclo de auditoria", substituirValor: "Substituiu valor", corrigirLista: "Corrigiu lista", aparencia: "Aparência", script: "Script"
 };
 const nomeAcao = (a) => NOMES_ACOES[a] || a;
 async function renderizarTelaAuditoria() {
@@ -7422,6 +7427,223 @@ async function renderizarTelaAuditoria() {
   };
   carregar();
 }
+
+/* ------------------------------------------------------------
+ *  Script (?tela=script): arquivos do script à esquerda e a explicação à direita.
+ *  Todos que estão no Inventário veem e baixam; só as administradoras enviam, removem e editam o texto.
+ *  inventario-script/texto                         { texto, atualizadoEm, atualizadoPor }
+ *  inventario-script-arquivos/{id}                 { nome, tipo, tamanho, partes, criadoEm, criadoPor }
+ *  inventario-script-arquivos/{id}/partes/{n}      { dados } (base64; o Firestore aceita até 1 MiB por documento)
+ * ------------------------------------------------------------ */
+const COL_SCRIPT_ARQUIVOS = "inventario-script-arquivos";
+const DOC_SCRIPT_TEXTO = "inventario-script/texto";
+const SCRIPT_MAX_BYTES = 15 * 1024 * 1024;
+const SCRIPT_BYTES_POR_PARTE = 600 * 1024;
+const SCRIPT_MAX_TEXTO = 20000;
+const SCRIPT_EXT_TEXTO = /\.(ps1|psm1|psd1|bat|cmd|sh|bash|py|vbs|js|ts|txt|json|xml|ini|cfg|conf|reg|csv|md|sql|ya?ml|log|html?|css)$/i;
+const tamanhoLegivel = (n) => (n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1).replace(".", ",")} KB` : `${(n / 1048576).toFixed(1).replace(".", ",")} MB`);
+/* Texto da explicação: quebras de linha mantidas, **negrito**, `código` e links http(s) */
+function formatarTextoScript(texto) {
+  return escapar(texto || "")
+    .replace(/`([^`\n]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+}
+const lerComoBase64 = (blob) => new Promise((resolver, rejeitar) => {
+  const r = new FileReader();
+  r.onload = () => resolver(String(r.result).split(",")[1] || "");
+  r.onerror = () => rejeitar(r.error);
+  r.readAsDataURL(blob);
+});
+function base64ParaBytes(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+async function baixarBytesScript(arq) {
+  const partes = await Promise.all(Array.from({ length: arq.partes }, (_, i) => estado.api.lerDoc(`${COL_SCRIPT_ARQUIVOS}/${arq.id}/partes/${i}`)));
+  if (partes.some((p) => !p || typeof p.dados !== "string")) throw new Error("Arquivo incompleto.");
+  return new Blob(partes.map((p) => base64ParaBytes(p.dados)), { type: arq.tipo || "application/octet-stream" });
+}
+function textoDosBytes(buf) {
+  const b = new Uint8Array(buf);
+  if (b[0] === 0xff && b[1] === 0xfe) return new TextDecoder("utf-16le").decode(b.subarray(2));
+  if (b[0] === 0xfe && b[1] === 0xff) return new TextDecoder("utf-16be").decode(b.subarray(2));
+  const t = new TextDecoder("utf-8").decode(b[0] === 0xef && b[1] === 0xbb && b[2] === 0xbf ? b.subarray(3) : b);
+  return t.includes("\ufffd") ? new TextDecoder("windows-1252").decode(b) : t;
+}
+async function enviarArquivosScript(arquivos) {
+  if (!ehAdmin() || !conectado()) { mostrarAviso("Sem conexão: tente de novo quando a conexão voltar."); return; }
+  const lista = [...arquivos];
+  const grandes = lista.filter((f) => f.size > SCRIPT_MAX_BYTES);
+  if (grandes.length) mostrarAviso(`Arquivo grande demais (máximo de ${tamanhoLegivel(SCRIPT_MAX_BYTES)}): ${grandes.map((f) => f.name).join(", ")}`, 7000);
+  let enviados = 0;
+  for (const f of lista.filter((x) => x.size <= SCRIPT_MAX_BYTES)) {
+    mostrarAviso(`Enviando ${f.name}…`, 60000);
+    try {
+      const id = estado.api.novoId(COL_SCRIPT_ARQUIVOS);
+      const ops = [];
+      for (let i = 0, n = 0; i < f.size; i += SCRIPT_BYTES_POR_PARTE, n++) {
+        ops.push({ op: "set", caminho: `${COL_SCRIPT_ARQUIVOS}/${id}/partes/${n}`, dados: { dados: await lerComoBase64(f.slice(i, i + SCRIPT_BYTES_POR_PARTE)) } });
+      }
+      /* As partes antes da ficha: a lista só mostra o arquivo depois que ele chegou inteiro */
+      ops.push({ op: "set", caminho: `${COL_SCRIPT_ARQUIVOS}/${id}`, dados: {
+        nome: f.name.slice(0, 200), tipo: (f.type || "").slice(0, 120), tamanho: f.size, partes: ops.length,
+        criadoEm: "__AGORA__", criadoPor: estado.usuario.email } });
+      await estado.api.lote(ops);
+      enviados++;
+      registrarAuditoria("script", `Enviou o arquivo ${f.name} (${tamanhoLegivel(f.size)}) na tela Script`, "", { planilha: "" });
+    } catch (e) {
+      console.error(e);
+      mostrarAviso(`Não foi possível enviar ${f.name}.`, 6000);
+      return;
+    }
+  }
+  if (enviados) mostrarAviso(enviados === 1 ? "Arquivo enviado." : `${enviados} arquivos enviados.`);
+}
+function renderizarTelaScript() {
+  const tela = $("#tela-script");
+  const admin = ehAdmin();
+  let arquivos = null, texto = null, editando = false, previa = null;
+  tela.innerHTML = `<div class="menu-cabeca"><div><h1 id="script-titulo">Script</h1>
+      <p class="apoio">O script de coleta e a explicação de como ele funciona.${admin ? " Só as administradoras enviam arquivos e editam o texto." : ""}</p></div></div>
+    <div class="script-grade">
+      <section class="script-area" aria-labelledby="script-arquivos-titulo">
+        <div class="script-area-cabeca"><h2 id="script-arquivos-titulo">${svg("i-script")}Script</h2>
+          ${admin ? `<label class="btn btn-mini">${svg("i-upload")}Adicionar arquivo<input type="file" multiple hidden data-script="arquivo"></label>` : ""}</div>
+        ${admin ? `<div class="script-soltar" data-script="soltar">${svg("i-upload")}<span>Arraste arquivos para cá (qualquer tipo, até ${tamanhoLegivel(SCRIPT_MAX_BYTES)} cada)</span></div>` : ""}
+        <ul class="script-arquivos" id="script-arquivos"><li class="apoio">Carregando…</li></ul>
+        <div class="script-previa" id="script-previa" hidden></div>
+      </section>
+      <section class="script-area" aria-labelledby="script-texto-titulo">
+        <div class="script-area-cabeca"><h2 id="script-texto-titulo">${svg("i-documento")}Como funciona</h2>
+          ${admin ? `<button type="button" class="btn btn-secundario btn-mini" data-script="editar">${svg("i-lapis")}Editar</button>` : ""}</div>
+        <div id="script-texto"><p class="apoio">Carregando…</p></div>
+      </section>
+    </div>`;
+  const desenharArquivos = () => {
+    const caixa = $("#script-arquivos", tela);
+    if (!arquivos) return;
+    caixa.innerHTML = arquivos.length ? arquivos.map((a) => `<li data-id="${escapar(a.id)}"${previa === a.id ? ' aria-current="true"' : ""}>
+        <span class="script-arquivo-icone">${svg("i-documento")}</span>
+        <span class="script-arquivo-texto"><strong>${escapar(a.nome)}</strong><span class="apoio">${escapar(tamanhoLegivel(Number(a.tamanho) || 0))}${a.criadoEm ? ` · ${escapar(formatarData(a.criadoEm, true))}` : ""}</span></span>
+        <span class="script-arquivo-acoes">
+          ${SCRIPT_EXT_TEXTO.test(a.nome) && a.tamanho <= 1048576 ? `<button type="button" class="btn-icone" data-script="ver" title="Ver o conteúdo" aria-label="Ver o conteúdo de ${escapar(a.nome)}">${svg("i-olho")}</button>` : ""}
+          <button type="button" class="btn-icone" data-script="baixar" title="Baixar" aria-label="Baixar ${escapar(a.nome)}">${svg("i-download")}</button>
+          ${admin ? `<button type="button" class="btn-icone" data-script="remover" title="Remover" aria-label="Remover ${escapar(a.nome)}">${svg("i-lixeira")}</button>` : ""}
+        </span></li>`).join("")
+      : `<li class="vazio-mini">${svg("i-script")}${admin ? "Nenhum arquivo ainda. Use “Adicionar arquivo” ou arraste para cá." : "Nenhum arquivo do script ainda."}</li>`;
+  };
+  const desenharTexto = () => {
+    const caixa = $("#script-texto", tela);
+    const btn = $('[data-script="editar"]', tela);
+    if (btn) btn.hidden = editando;
+    if (editando) {
+      caixa.innerHTML = `<label class="campo"><span class="sr-only">Explicação do script</span>
+          <textarea class="script-editor" maxlength="${SCRIPT_MAX_TEXTO}" data-script="campo">${escapar((texto && texto.texto) || "")}</textarea></label>
+        <p class="apoio script-dica">Dicas: <code>**negrito**</code>, <code>\`código\`</code> e links começando com https:// viram links.</p>
+        <div class="form-botoes"><button type="button" class="btn btn-secundario" data-script="cancelar">Cancelar</button>
+          <button type="button" class="btn" data-script="salvar">${svg("i-salvar")}Salvar</button></div>`;
+      $("textarea", caixa).focus();
+      return;
+    }
+    if (texto === null) return;
+    caixa.innerHTML = texto && texto.texto
+      ? `<div class="script-explicacao">${formatarTextoScript(texto.texto)}</div>
+        ${texto.atualizadoEm ? `<p class="apoio script-assinatura">Atualizado em ${escapar(formatarData(texto.atualizadoEm, true))}${texto.atualizadoPor ? ` por ${escapar(nomePessoa(texto.atualizadoPor))}` : ""}</p>` : ""}`
+      : `<p class="vazio-mini">${svg("i-documento")}${admin ? "Ainda sem explicação. Clique em “Editar” para escrever." : "Ainda sem explicação."}</p>`;
+  };
+  const mostrarPrevia = async (a) => {
+    const caixa = $("#script-previa", tela);
+    if (previa === a.id) { previa = null; caixa.hidden = true; desenharArquivos(); return; }
+    previa = a.id;
+    desenharArquivos();
+    caixa.hidden = false;
+    caixa.innerHTML = '<p class="apoio">Carregando…</p>';
+    try {
+      const conteudo = textoDosBytes(await (await baixarBytesScript(a)).arrayBuffer());
+      if (previa !== a.id) return;
+      caixa.innerHTML = `<div class="script-previa-cabeca"><strong>${escapar(a.nome)}</strong>
+          <button type="button" class="btn btn-secundario btn-mini" data-script="copiar">${svg("i-copiar")}Copiar</button></div>
+        <pre><code>${escapar(conteudo)}</code></pre>`;
+      caixa.dataset.conteudo = conteudo;
+    } catch (e) { console.warn(e); caixa.innerHTML = '<p class="erro-carregar">Não foi possível abrir o arquivo.</p>'; }
+  };
+  const pararArquivos = estado.api.ouvirColecao(COL_SCRIPT_ARQUIVOS, (lista) => { arquivos = lista; desenharArquivos(); },
+    (e) => { console.warn("script", e); $("#script-arquivos", tela).innerHTML = '<li class="erro-carregar">Não foi possível carregar os arquivos.</li>'; },
+    { ordenar: "criadoEm" });
+  const pararTexto = estado.api.ouvirDoc(DOC_SCRIPT_TEXTO, (d) => { texto = d || {}; if (!editando) desenharTexto(); },
+    (e) => { console.warn("script", e); $("#script-texto", tela).innerHTML = '<p class="erro-carregar">Não foi possível carregar a explicação.</p>'; });
+  estado.pararTela = () => { pararArquivos(); pararTexto(); };
+
+  tela.onchange = (e) => {
+    if (e.target.dataset.script !== "arquivo") return;
+    const arqs = e.target.files;
+    if (arqs && arqs.length) enviarArquivosScript(arqs);
+    e.target.value = "";
+  };
+  const zona = $('[data-script="soltar"]', tela);
+  if (zona) {
+    zona.addEventListener("dragover", (e) => { e.preventDefault(); zona.classList.add("ativo"); });
+    zona.addEventListener("dragleave", () => zona.classList.remove("ativo"));
+    zona.addEventListener("drop", (e) => {
+      e.preventDefault();
+      zona.classList.remove("ativo");
+      if (e.dataTransfer && e.dataTransfer.files.length) enviarArquivosScript(e.dataTransfer.files);
+    });
+  }
+  tela.onclick = async (e) => {
+    const b = e.target.closest("[data-script]");
+    if (!b) return;
+    const acao = b.dataset.script;
+    const item = b.closest("[data-id]");
+    const a = item && arquivos ? arquivos.find((x) => x.id === item.dataset.id) : null;
+    if (acao === "ver" && a) { mostrarPrevia(a); return; }
+    if (acao === "copiar") {
+      try { await navigator.clipboard.writeText($("#script-previa", tela).dataset.conteudo || ""); mostrarAviso("Conteúdo copiado."); }
+      catch (err) { mostrarAviso("Não foi possível copiar."); }
+      return;
+    }
+    if (acao === "baixar" && a) {
+      mostrarAviso(`Baixando ${a.nome}…`, 30000);
+      try { baixarBlob(a.nome, await baixarBytesScript(a)); mostrarAviso("Download iniciado."); }
+      catch (err) { console.warn(err); mostrarAviso("Não foi possível baixar o arquivo."); }
+      return;
+    }
+    if (!admin) return;
+    if (acao === "remover" && a) {
+      if (!(await confirmar(`Remover o arquivo "${a.nome}"? Quem abrir a tela Script não vai mais vê-lo.`, { titulo: "Remover arquivo", botao: "Remover", perigo: true }))) return;
+      try {
+        await estado.api.lote([
+          { op: "delete", caminho: `${COL_SCRIPT_ARQUIVOS}/${a.id}` },
+          ...Array.from({ length: a.partes }, (_, i) => ({ op: "delete", caminho: `${COL_SCRIPT_ARQUIVOS}/${a.id}/partes/${i}` }))
+        ]);
+        if (previa === a.id) { previa = null; $("#script-previa", tela).hidden = true; }
+        registrarAuditoria("script", `Removeu o arquivo ${a.nome} da tela Script`, "", { planilha: "" });
+        mostrarAviso("Arquivo removido.");
+      } catch (err) { console.error(err); mostrarAviso(mensagemErro(err)); }
+      return;
+    }
+    if (acao === "editar") { editando = true; desenharTexto(); return; }
+    if (acao === "cancelar") { editando = false; desenharTexto(); return; }
+    if (acao === "salvar") {
+      if (!conectado()) { mostrarAviso("Sem conexão: tente de novo quando a conexão voltar."); return; }
+      const valor = $('[data-script="campo"]', tela).value.slice(0, SCRIPT_MAX_TEXTO);
+      b.disabled = true;
+      try {
+        await estado.api.salvarDoc(DOC_SCRIPT_TEXTO, { texto: valor, atualizadoEm: "__AGORA__", atualizadoPor: estado.usuario.email });
+        registrarAuditoria("script", "Editou a explicação da tela Script", "", { planilha: "" });
+        editando = false;
+        texto = { ...(texto || {}), texto: valor, atualizadoPor: estado.usuario.email };
+        desenharTexto();
+        mostrarAviso("Explicação salva.");
+      } catch (err) { console.error(err); mostrarAviso(mensagemErro(err)); b.disabled = false; }
+    }
+  };
+}
+$("#btn-script").innerHTML = svg("i-script") + "<span>Script</span>";
+$("#btn-script").addEventListener("click", () => { if (estado.tela !== "script") navegar({ tela: "script" }); });
 
 window.addEventListener("offline", () => { estado.offline = true; if (estado.usuario) { atualizarBotoes(); agendarRender(); } });
 window.addEventListener("online", () => { estado.offline = false; if (estado.usuario) { atualizarBotoes(); agendarRender(); } });

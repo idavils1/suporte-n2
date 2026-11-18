@@ -821,6 +821,39 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .busca-global button[data-resultado] { display: grid; gap: 2px; width: 100%; text-align: left; padding: 6px 10px; border: 1px solid var(--borda); border-radius: var(--raio-md); background: var(--superficie); color: inherit; font: inherit; cursor: pointer; }
 .busca-global button[data-resultado]:hover, .busca-global button[data-resultado]:focus-visible { border-color: var(--borda-forte); background: var(--superficie-quente); }
 .busca-global .apoio { font-size: 12px; }
+/* Tela Script: arquivos (esquerda) e explicação (direita) */
+#btn-script[aria-current="page"] { border-color: var(--lilas); background: var(--lilas-destaque); }
+.script-grade { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 16px; }
+.script-area { display: grid; gap: 12px; align-content: start; min-width: 0; padding: 16px; border: 1px solid var(--borda); border-radius: 16px; background: var(--superficie); }
+.script-area-cabeca { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.script-area-cabeca h2 { display: flex; align-items: center; gap: 8px; font-size: 18px; }
+.script-area-cabeca h2 .icone { width: 20px; height: 20px; stroke: var(--cor-icone); }
+.script-area-cabeca label.btn { cursor: pointer; }
+.script-soltar { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border: 1px dashed var(--borda-forte); border-radius: 12px; color: var(--texto-secundario); font-size: 13px; text-align: center; transition: background-color var(--transicao), border-color var(--transicao); }
+.script-soltar .icone { width: 18px; height: 18px; flex-shrink: 0; }
+.script-soltar.ativo { border-color: var(--lilas); background: var(--lilas-destaque); color: var(--cor-acao); }
+.script-arquivos { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.script-arquivos > li[data-id] { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--borda); border-radius: var(--raio-md); background: var(--superficie); }
+.script-arquivos > li[aria-current="true"] { border-color: var(--lilas); background: var(--superficie-quente); }
+.script-arquivo-icone { display: inline-grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 9px; background: var(--lilas-destaque); }
+.script-arquivo-icone .icone { width: 18px; height: 18px; stroke: var(--cor-icone); }
+.script-arquivo-texto { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.script-arquivo-texto strong { overflow-wrap: anywhere; font-size: 14px; }
+.script-arquivo-texto .apoio { font-size: 12px; }
+.script-arquivo-acoes { display: inline-flex; gap: 2px; flex-shrink: 0; }
+.script-previa { display: grid; gap: 8px; }
+.script-previa-cabeca { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.script-previa-cabeca strong { overflow-wrap: anywhere; }
+.script-previa pre { margin: 0; max-height: 60vh; overflow: auto; padding: 12px; border-radius: var(--raio-md); background: var(--superficie-suave); border: 1px solid var(--borda); font-size: 12.5px; line-height: 1.5; }
+.script-previa code, .script-explicacao code, .script-dica code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+.script-explicacao { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; font-size: 15px; }
+.script-explicacao code { padding: 1px 5px; border-radius: var(--raio-sm); background: var(--superficie-suave); font-size: 13px; }
+.script-assinatura { font-size: 12px; padding-top: 8px; border-top: 1px solid var(--borda); }
+.script-editor { width: 100%; min-height: 360px; padding: 10px 12px; border: 1px solid var(--borda-forte); border-radius: var(--raio-md); background: var(--superficie); color: inherit; font: inherit; font-size: 14px; line-height: 1.55; resize: vertical; }
+.script-dica { font-size: 12px; }
+@media (max-width: 900px) {
+  .script-grade { grid-template-columns: minmax(0, 1fr); }
+}
 @media (max-width: 900px) {
   .migalhas { display: none; }
 }

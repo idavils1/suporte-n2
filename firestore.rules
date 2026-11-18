@@ -1794,6 +1794,36 @@ service cloud.firestore {
     match /inventario-mapeamentos/{origem} {
       allow read, write: if adminInventario();
     }
+    // Tela "Script": quem está no Inventário lê e baixa; só as administradoras gravam.
+    // Arquivos em partes base64 (até 40 partes de ~600 KB cada; o app limita a 15 MB por arquivo).
+    match /inventario-script/{documento} {
+      allow read: if noInventario();
+      allow create, update: if adminInventario() && documento == 'texto'
+        && request.resource.data.keys().hasOnly(['texto', 'atualizadoEm', 'atualizadoPor'])
+        && textoAte(request.resource.data.texto, 20000)
+        && request.resource.data.atualizadoPor == emailInventario()
+        && request.resource.data.atualizadoEm == request.time;
+      allow delete: if adminInventario();
+    }
+    match /inventario-script-arquivos/{arquivo} {
+      allow read: if noInventario();
+      allow create, update: if adminInventario()
+        && request.resource.data.keys().hasOnly(['nome', 'tipo', 'tamanho', 'partes', 'criadoEm', 'criadoPor'])
+        && textoAte(request.resource.data.nome, 200) && request.resource.data.nome.size() > 0
+        && textoAte(request.resource.data.tipo, 120)
+        && request.resource.data.tamanho is int && request.resource.data.tamanho >= 0 && request.resource.data.tamanho <= 15728640
+        && request.resource.data.partes is int && request.resource.data.partes >= 0 && request.resource.data.partes <= 40
+        && request.resource.data.criadoPor == emailInventario()
+        && request.resource.data.criadoEm == request.time;
+      allow delete: if adminInventario();
+      match /partes/{parte} {
+        allow read: if noInventario();
+        allow create, update: if adminInventario()
+          && request.resource.data.keys().hasOnly(['dados'])
+          && textoAte(request.resource.data.dados, 900000);
+        allow delete: if adminInventario();
+      }
+    }
 
     // ============================================================
     // CADEIAS V6 / V12 (site à parte: sites/cadeias/, target "cadeias").

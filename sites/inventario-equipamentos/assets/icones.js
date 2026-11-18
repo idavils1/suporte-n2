@@ -48,7 +48,8 @@ const SIMBOLOS = {
   "i-equipamento": '<path d="M2 9a3 3 0 0 0 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 0 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 17v2M13 11v2"/>',
   "i-selecionar": '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/>',
   "i-microsoft": '<path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/>',
-  "i-ordenar": '<path d="m3 16 4 4 4-4M7 20V4M21 8l-4-4-4 4M17 4v16"/>'
+  "i-ordenar": '<path d="m3 16 4 4 4-4M7 20V4M21 8l-4-4-4 4M17 4v16"/>',
+  "i-script": '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m6 9 3 3-3 3M12 15h6"/>'
 };
 
 export function injetarIcones() {
