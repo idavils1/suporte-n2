@@ -5,8 +5,9 @@
  *  nenhum caminho para outros sites e não lê dados deles. Os cadastros
  *  são só daqui (quem entra em outro site não entra aqui, e vice-versa).
  *
- *  Papéis: administradora (tudo, inclusive estrutura), equipe
- *  (vê, pesquisa e alimenta), leitura (só vê e pesquisa).
+ *  Papéis: administradora (tudo, inclusive estrutura), gestor (alimenta e edita qualquer
+ *  linha, também nas planilhas VCORP/VCERT; sem estrutura, backups nem excluir de vez),
+ *  equipe "Equipe N2" (vê, pesquisa e alimenta), leitura (só vê e pesquisa).
  *  As mesmas permissões estão no firestore.rules (vale o que está lá).
  *
  *  Firestore (prefixo "inventario"):
@@ -84,7 +85,7 @@ const planilhaDe = (grupo, aba) => PLANILHAS.find((p) => p.grupo === grupo && p.
 const planilhaAtual = () => PLANILHAS.find((p) => p.id === estado.planilha) || PLANILHAS[0];
 const caminhoEstrutura = (pl = planilhaAtual()) => pl.estrutura;
 const termo = () => planilhaAtual().termo;
-const somenteAdminEdita = () => !!planilhaAtual().soAdmin;
+const somenteAdminEdita = () => !!planilhaAtual().soAdmin && !(estado.usuario && estado.usuario.papel === "gestor");
 const nomeCompletoPlanilha = (pl) => (pl.grupo ? `Inventário ${GRUPOS_INVENTARIO[pl.grupo]} · ${pl.curto}` : pl.curto);
 /* Lixeira, backups e auditoria são das quatro… cinco planilhas juntas (o campo "planilha" diz de qual é) */
 const COL_LIXEIRA = "inventario-lixeira", COL_BACKUPS = "inventario-backups", COL_AUDITORIA = "inventario-auditoria";
@@ -468,12 +469,23 @@ const estado = {
 /* Aparência livre (aparencia.js): criada no fim do arquivo, depois de tudo definido */
 let aparencia = null;
 const SEM_APARENCIA = { l: "", c: {} };
+/* Papéis de quem entra sem senha (o "papel" da identidade); as administradoras são fixas (ADMINS) */
+const PAPEIS_PESSOA = [
+  { id: "gestor", nome: "Gestor", ajuda: "Adiciona e edita em todas as planilhas (inclusive VCORP/VCERT). Não mexe na estrutura nem nos backups e não exclui de vez." },
+  { id: "equipe", nome: "Equipe N2", ajuda: "Vê, pesquisa e alimenta o Inventário de Equipamentos. VCORP/VCERT: só visualiza." },
+  { id: "leitura", nome: "Leitura", ajuda: "Só vê e pesquisa." }
+];
+const papelPessoa = (v) => (PAPEIS_PESSOA.some((p) => p.id === v) ? v : "equipe");
+const NOME_PAPEL = { admin: "Administradora", gestor: "Gestor", equipe: "Equipe N2", leitura: "Leitura" };
 const papel = () => (estado.usuario ? estado.usuario.papel : "");
 const ehAdmin = () => papel() === "admin";
+const ehGestor = () => papel() === "gestor";
+/* Quem alimenta (Equipe N2 e Gestor); o Gestor também edita qualquer linha e grava nas planilhas VCORP/VCERT */
+const ehEquipe = () => papel() === "equipe" || ehGestor();
 const conectado = () => !!estado.api && !estado.offline;
-const podeAlimentar = () => conectado() && !!estado.estrutura && (ehAdmin() || (papel() === "equipe" && !somenteAdminEdita()));
+const podeAlimentar = () => conectado() && !!estado.estrutura && (ehAdmin() || (ehEquipe() && !somenteAdminEdita()));
 /* Exportar: administradoras sempre; VCORP/VCERT, todo mundo; Inventário de Equipamentos, conforme a regra da estrutura */
-const podeExportar = () => !!estado.estrutura && (ehAdmin() || somenteAdminEdita() || estado.estrutura.regras.exportacao !== false);
+const podeExportar = () => !!estado.estrutura && (ehAdmin() || !!planilhaAtual().soAdmin || estado.estrutura.regras.exportacao !== false);
 /* Selo "Somente visualização": quem não pode alterar nada nesta planilha */
 const soVisualizacao = () => !!estado.usuario && !ehAdmin() && (somenteAdminEdita() || papel() === "leitura");
 const porId = (id) => estado.equipamentos.find((t) => t.id === id);
@@ -916,7 +928,8 @@ const registradoPorMim = (t) => !!t && !!t.criadoPorEmail && !!estado.usuario &&
 function podeEditarLinha(t) {
   if (!conectado() || !estado.estrutura || !t) return false;
   if (ehAdmin()) return true;
-  if (papel() !== "equipe" || somenteAdminEdita()) return false;
+  if (!ehEquipe() || somenteAdminEdita()) return false;
+  if (ehGestor()) return true;
   const regra = estado.estrutura.regras.equipeEdita;
   if (regra === "todas") return true;
   if (regra === "proprias") return registradoPorMim(t) && dentroDaJanela(t);
@@ -925,10 +938,10 @@ function podeEditarLinha(t) {
 /* Coluna "travado após criar": a equipe preenche no cadastro; depois, só as administradoras alteram */
 const podeEditarColuna = (col) => !!col && !TIPOS_SEM_EDICAO.includes(col.tipo) && (ehAdmin() || (!col.somenteAdmin && col.acesso !== "travado"));
 const podeEditarCelula = (t, col) => podeEditarLinha(t) && podeEditarColuna(col);
-const podePedirExclusao = (t) => conectado() && papel() === "equipe" && !somenteAdminEdita() && !!t && !t.exclusao && !t.arquivo;
+const podePedirExclusao = (t) => conectado() && ehEquipe() && !planilhaAtual().soAdmin && !!t && !t.exclusao && !t.arquivo;
 function motivoSemEdicao(t, col) {
   if (!conectado()) return "Sem conexão: a edição está bloqueada.";
-  if (somenteAdminEdita() && !ehAdmin()) return `Somente visualização: só a Lays e a Paula editam o ${nomeCompletoPlanilha(planilhaAtual())}.`;
+  if (somenteAdminEdita() && !ehAdmin()) return `Somente visualização: só a Lays, a Paula e os gestores editam o ${nomeCompletoPlanilha(planilhaAtual())}.`;
   if (col && TIPOS_SEM_EDICAO.includes(col.tipo)) return `“${col.nome}” é preenchido automaticamente.`;
   if (col && col.somenteAdmin && !ehAdmin()) return `${TEXTO_BLOQUEADO}: “${col.nome}”.`;
   if (col && col.acesso === "travado" && !ehAdmin()) return `“${col.nome}” não muda depois do cadastro. ${TEXTO_TRAVADO}.`;
@@ -3197,14 +3210,15 @@ function ligarCamposFormulario(raiz) {
   });
 }
 function prepararCamposFormulario(raiz) { $$("textarea[data-crescer]", raiz).forEach(crescerTexto); }
-/* atuais: campos que o registro já tem (edição na ficha); opções removidas da lista só passam se já estavam lá */
+/* atuais: campos que o registro já tem (edição na ficha); opções removidas da lista só passam se já estavam lá.
+   No cadastro novo o "original" vem do rascunho deste navegador e pode ser uma opção removida depois: valida de novo. */
 function lerFormulario(form, cols, atuais = {}) {
   const valores = {}, erros = {};
   cols.forEach((c) => {
     let bruto, el = null;
     if (c.tipo === "etiquetas") bruto = $$(`[name="${CSS.escape(c.id)}"]:checked`, form).map((i) => i.value);
     else { el = form.elements[c.id]; if (!el) return; bruto = c.tipo === "booleano" ? el.value === "sim" : el.value; }
-    const r = valorOriginalMantido(el, c) ? { ok: true, valor: el.dataset.original } : validarValor(c, bruto, atuais[c.id]);
+    const r = valorOriginalMantido(el, c) && atuais[c.id] === el.dataset.original ? { ok: true, valor: el.dataset.original } : validarValor(c, bruto, atuais[c.id]);
     if (r.ok) valores[c.id] = r.valor; else erros[c.id] = r.erro;
   });
   return { valores, erros };
@@ -3775,7 +3789,7 @@ const ACOES_DA_EQUIPE = ["criar", "editar", "editarMassa", "preencherMassa", "im
 function registrarAuditoria(acao, resumo, detalhes = "", { planilha = planilhaAtual().id, alvo = "", mudancas = null } = {}) {
   if (!estado.api || !estado.usuario) return Promise.resolve();
   const admin = ehAdmin();
-  if (!admin && !ACOES_PROPRIAS.includes(acao) && !(papel() === "equipe" && ACOES_DA_EQUIPE.includes(acao))) return Promise.resolve();
+  if (!admin && !ACOES_PROPRIAS.includes(acao) && !(ehEquipe() && ACOES_DA_EQUIPE.includes(acao))) return Promise.resolve();
   const id = estado.api.novoId(COL_AUDITORIA);
   return estado.api.salvarDoc(`${COL_AUDITORIA}/${id}`, {
     acao: String(acao).slice(0, 40), resumo: String(resumo).slice(0, 300), detalhes: String(detalhes || "").slice(0, 1500),
@@ -4294,7 +4308,7 @@ const SELO_SITUACAO = {
   aguardando: '<span class="selo-exclusao">Aguardando liberação</span>',
   bloqueada: '<span class="selo-exclusao">Bloqueada</span>'
 };
-const opcoesPapel = (atual) => `<option value="equipe"${atual === "equipe" ? " selected" : ""}>Equipe</option><option value="leitura"${atual === "leitura" ? " selected" : ""}>Leitura</option>`;
+const opcoesPapel = (atual) => PAPEIS_PESSOA.map((p) => `<option value="${p.id}"${atual === p.id ? " selected" : ""} title="${escapar(p.ajuda)}">${p.nome}</option>`).join("");
 async function salvarIdentidade(i, dados, texto, caixaErro) {
   if (caixaErro) caixaErro.textContent = "";
   try {
@@ -4317,7 +4331,7 @@ function abrirPessoas() {
       <div class="barra">
         <label class="busca"><span class="sr-only">Buscar pessoa</span>${svg("i-busca")}<input type="search" name="buscaPessoa" placeholder="Buscar por nome ou e-mail…" autocomplete="off"></label>
         <label class="sr-only" for="filtro-pessoas">Filtrar</label>
-        <select id="filtro-pessoas" name="filtroPessoa"><option value="">Todas</option><option value="aguardando">Aguardando liberação</option><option value="ativa">Ativas</option><option value="bloqueada">Bloqueadas</option><option value="equipe">Equipe</option><option value="leitura">Leitura</option></select>
+        <select id="filtro-pessoas" name="filtroPessoa"><option value="">Todas</option><option value="aguardando">Aguardando liberação</option><option value="ativa">Ativas</option><option value="bloqueada">Bloqueadas</option>${PAPEIS_PESSOA.map((p) => `<option value="${p.id}">${p.nome}</option>`).join("")}</select>
         <span class="contagem" id="contagem-pessoas" aria-live="polite"></span>
       </div>
       <div class="tabela-admin" id="lista-pessoas"></div>
@@ -4357,9 +4371,9 @@ function abrirPessoas() {
   const identidadeDaLinha = (el) => { const tr = el.closest("[data-identidade]"); return tr ? estado.identidades.find((x) => x.id === tr.dataset.identidade) : null; };
   d.addEventListener("change", (e) => {
     if (!e.target.matches("[data-papel]")) return;
-    const papelNovo = e.target.value === "leitura" ? "leitura" : "equipe";
+    const papelNovo = papelPessoa(e.target.value);
     const i = identidadeDaLinha(e.target);
-    if (i) salvarIdentidade(i, { papel: papelNovo }, papelNovo === "leitura" ? "Mudou para Leitura" : "Mudou para Equipe", erro()).then((ok) => { if (!ok) desenhar(); });
+    if (i) salvarIdentidade(i, { papel: papelNovo }, `Mudou para ${NOME_PAPEL[papelNovo]}`, erro()).then((ok) => { if (!ok) desenhar(); });
   });
   d.addEventListener("click", async (e) => {
     const b = e.target.closest("button");
@@ -4569,7 +4583,7 @@ function abrirEstrutura() {
         <div class="campos-linha" style="margin-top:8px">
           <label class="check" style="align-self:start"><input type="checkbox" data-registro="aberto"${r.regras.registro.aberto ? " checked" : ""}> Permitir novos registros</label>
           <label class="check" style="align-self:start"><input type="checkbox" data-registro="aprovacao"${r.regras.registro.aprovacao ? " checked" : ""}> Novos registros só entram depois de liberados em Pessoas</label>
-          <label class="campo"><span class="rotulo">Papel de quem se registra</span><select data-registro="papelPadrao"><option value="equipe"${r.regras.registro.papelPadrao === "equipe" ? " selected" : ""}>Equipe (vê, pesquisa e alimenta)</option><option value="leitura"${r.regras.registro.papelPadrao === "leitura" ? " selected" : ""}>Leitura (só vê e pesquisa)</option></select></label>
+          <label class="campo"><span class="rotulo">Papel de quem se registra</span><select data-registro="papelPadrao"><option value="equipe"${r.regras.registro.papelPadrao === "equipe" ? " selected" : ""}>Equipe N2 (vê, pesquisa e alimenta)</option><option value="leitura"${r.regras.registro.papelPadrao === "leitura" ? " selected" : ""}>Leitura (só vê e pesquisa)</option></select></label>
           <label class="campo"><span class="rotulo">Domínios de e-mail permitidos (um por linha)</span><textarea data-registro="dominios" rows="3" placeholder="valid.com&#10;empresa-parceira.com.br">${escapar(r.regras.registro.dominios.join("\n"))}</textarea><span class="ajuda">Vazio = qualquer domínio. Quem já se registrou não é afetado; para tirar alguém, bloqueie em Pessoas.</span></label>
         </div>`;
     }
@@ -4961,7 +4975,7 @@ function abrirEstrutura() {
     original.colunas.forEach((a) => { if (!r.colunas.some((c) => c.id === a.id)) itens.push(`Coluna “${a.nome}” excluída de vez`); });
     if (JSON.stringify(original.gruposColunas) !== JSON.stringify(r.gruposColunas)) itens.push("Grupos de colunas alterados");
     if (original.titulo !== r.titulo) itens.push(`Título: “${original.titulo}” → “${r.titulo}”`);
-    if (JSON.stringify(original.regras) !== JSON.stringify(r.regras)) itens.push(`Regras da equipe: edita ${EQUIPE_EDITA.find((x) => x.id === r.regras.equipeEdita).nome.toLowerCase()}; janela ${r.regras.janelaEdicaoHoras || "sem limite"}${r.regras.janelaEdicaoHoras ? " h" : ""}; exportação ${r.regras.exportacao ? "liberada" : "desligada"}; novos registros ${r.regras.registro.aberto ? "permitidos" : "fechados"}${r.regras.registro.dominios.length ? ` (só ${r.regras.registro.dominios.join(", ")})` : ""}${r.regras.registro.aprovacao ? ", com liberação" : ", sem liberação"}, como ${r.regras.registro.papelPadrao === "leitura" ? "Leitura" : "Equipe"}`);
+    if (JSON.stringify(original.regras) !== JSON.stringify(r.regras)) itens.push(`Regras da equipe: edita ${EQUIPE_EDITA.find((x) => x.id === r.regras.equipeEdita).nome.toLowerCase()}; janela ${r.regras.janelaEdicaoHoras || "sem limite"}${r.regras.janelaEdicaoHoras ? " h" : ""}; exportação ${r.regras.exportacao ? "liberada" : "desligada"}; novos registros ${r.regras.registro.aberto ? "permitidos" : "fechados"}${r.regras.registro.dominios.length ? ` (só ${r.regras.registro.dominios.join(", ")})` : ""}${r.regras.registro.aprovacao ? ", com liberação" : ", sem liberação"}, como ${r.regras.registro.papelPadrao === "leitura" ? "Leitura" : "Equipe N2"}`);
     return [...new Set(itens)];
   }
   /* Escritas de dados que as migrações pedem (só registros que mudam) */
@@ -5656,7 +5670,7 @@ function atualizarTopo() {
   $("#nome-usuario").title = u.email;
   $("#btn-sair").hidden = !admin;
   const selo = $("#selo-papel");
-  selo.textContent = { admin: "Administradora", equipe: "Equipe", leitura: "Leitura" }[u.papel];
+  selo.textContent = NOME_PAPEL[u.papel];
   selo.className = `selo papel-${u.papel}`;
 }
 $("#btn-sair").innerHTML = svg("i-sair") + "<span>Sair</span>";
@@ -6137,7 +6151,7 @@ function rotaIdentidade(uid, aparelho, identidade) {
 function entrarComIdentidade(uid, aparelho, identidade, { semConexao = false } = {}) {
   pararOuvintes();
   estado.mensagemBloqueio = null;
-  estado.usuario = { id: uid, uid, email: identidade.email, nome: identidade.nome, papel: identidade.papel === "leitura" ? "leitura" : "equipe", vinculadoEm: aparelho.vinculadoEm || "" };
+  estado.usuario = { id: uid, uid, email: identidade.email, nome: identidade.nome, papel: papelPessoa(identidade.papel), vinculadoEm: aparelho.vinculadoEm || "" };
   lembrarConta(identidade.email, identidade.nome);
   const ultimo = Date.parse(aparelho.ultimoAcesso || "");
   if (!semConexao && (isNaN(ultimo) || Date.now() - ultimo > 3600000)) {
@@ -6148,7 +6162,7 @@ function entrarComIdentidade(uid, aparelho, identidade, { semConexao = false } =
   estado.pararOuvintes.push(estado.api.ouvirDoc(`inventario-identidades/${identidade.email}`, (i) => {
     if (!estado.usuario || estado.usuario.uid !== uid) return;
     if (!i || i.ativo === false || !i.aprovado || desconectado(aparelho, i)) { rotaIdentidade(uid, aparelho, i); return; }
-    const papelNovo = i.papel === "leitura" ? "leitura" : "equipe";
+    const papelNovo = papelPessoa(i.papel);
     if (papelNovo === estado.usuario.papel && i.nome === estado.usuario.nome) return;
     Object.assign(estado.usuario, { papel: papelNovo, nome: i.nome });
     lembrarConta(i.email, i.nome);
@@ -6329,7 +6343,7 @@ function registrarEntrada() {
     if (sessionStorage.getItem(CHAVE_ENTRADA) === estado.usuario.uid) return;
     sessionStorage.setItem(CHAVE_ENTRADA, estado.usuario.uid);
   } catch (e) { /* sem sessionStorage: registra de novo */ }
-  registrarAuditoria("entrar", `Entrou no Inventário e Auditoria (${{ admin: "administradora", equipe: "equipe", leitura: "leitura" }[papel()]})`, "", { planilha: "" });
+  registrarAuditoria("entrar", `Entrou no Inventário e Auditoria (${(NOME_PAPEL[papel()] || "").toLowerCase()})`, "", { planilha: "" });
 }
 
 /* ---------- Rotas: ?inv=equipamentos | ?inv=vcorp&aba=hw|sw | ?inv=vcert&aba=hw|sw | ?tela=importacoes | ?tela=auditoria ---------- */
@@ -6361,7 +6375,7 @@ window.addEventListener("popstate", () => {
   estado.passos = Math.max(0, estado.passos - 1);
   mostrarRota(rotaDaUrl());
 });
-const podeVerAuditoria = () => ehAdmin() || papel() === "equipe";
+const podeVerAuditoria = () => ehAdmin() || ehEquipe();
 function mostrarRota(r, { substituir = false } = {}) {
   if (r.tela === "importacoes" && !ehAdmin()) { mostrarAviso("Importações: só as administradoras."); r = { tela: "menu" }; substituir = true; }
   if (r.tela === "auditoria" && !podeVerAuditoria()) { mostrarAviso("A auditoria não está liberada para o seu acesso."); r = { tela: "menu" }; substituir = true; }

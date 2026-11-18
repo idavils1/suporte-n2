@@ -192,6 +192,7 @@ a { color: var(--cor-icone); }
 .usuario-topo .nome-usuario { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #btn-identidade span { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
 .papel-admin { background: var(--f-roxo); color: var(--c-roxo); }
+.papel-gestor { background: var(--f-laranja); color: var(--c-laranja); }
 .papel-equipe { background: var(--f-azul); color: var(--c-azul); }
 .papel-leitura { background: var(--f-cinza); color: var(--c-cinza); }
 .menu-admin { position: relative; }

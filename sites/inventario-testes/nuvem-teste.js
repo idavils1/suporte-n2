@@ -74,7 +74,7 @@
     return !!i && i.ativo === true && i.aprovado === true && (!i.revogadoAntesDe || p.vinculadoEm >= i.revogadoAntesDe);
   }
   const noInventario = (db, u) => ehAdmin(u) || naLista(db, u);
-  const equipe = (db, u) => naLista(db, u) && (perfil(db, u) || {}).papel === "equipe";
+  const equipe = (db, u) => naLista(db, u) && ["equipe", "gestor"].includes((perfil(db, u) || {}).papel);
   const config = (db) => db["inventario-config/estrutura"] || null;
   function registro(db) {
     const c = config(db) || {};
@@ -137,6 +137,18 @@
     if (admin) return true;
     if (!equipe(antes, u)) return false;
     const cfg = config(antes) || {};
+    const gestor = (perfil(antes, u) || {}).papel === "gestor";
+    /* VCORP/VCERT: só o gestor cria e edita (colunas liberadas da planilha, assinando com o próprio perfil); ninguém exclui */
+    if (/^inventario-vc(orp|ert)-(hw|sw)$/.test(col)) {
+      if (!gestor) return false;
+      if (partes.length > 2) return true;
+      if (o.op === "delete") return false;
+      const cp = antes[`inventario-colunas/${col.replace(/^inventario-/, "")}`] || {};
+      const alteradas = velho ? mudancas(velho.campos, novo.campos) : Object.keys(novo.campos || {});
+      if (Array.isArray(cp.colunasEquipe) && alteradas.some((c) => !cp.colunasEquipe.includes(c))) return false;
+      const pf = perfil(antes, u);
+      return novo.atualizadoPor === u.uid && novo.atualizadoPorNome === pf.nome && novo.atualizadoPorEmail === pf.email;
+    }
     /* Índices de HOSTNAME e DNA: a equipe só cria (valor repetido = o índice já existe = recusa) e nunca apaga */
     if (col === "inventario-hostnames" || col === "inventario-dnas") {
       if (o.op === "delete" || velho) return false;
@@ -149,7 +161,7 @@
     const pf = perfil(antes, u);
     const pedindoExclusao = !!velho && !!novo.exclusao && !velho.exclusao;
     if (velho && !pedindoExclusao) {
-      const regra = (cfg.regras || {}).equipeEdita || "todas";
+      const regra = gestor ? "todas" : (cfg.regras || {}).equipeEdita || "todas";
       if (regra === "nenhuma") return false;
       if (regra === "proprias" && (!velho.criadoPorEmail || velho.criadoPorEmail !== pf.email)) return false;
       const alteradas = mudancas(velho.campos, novo.campos);

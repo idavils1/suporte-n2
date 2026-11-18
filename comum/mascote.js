@@ -1,9 +1,9 @@
 /* ============================================================
- *  Mascote da planilha: Byte, o gatinho, e mais 14 bichos (ou "Surpresa do dia").
+ *  Mascote da planilha: Byte, o gatinho, e mais 26 bichos (ou "Surpresa do dia", sorteada por navegador).
  *  Camada fixa por cima da página: só o bichinho recebe o ponteiro, nunca o foco (aria-hidden).
  *  Anda pela borda de baixo da planilha e, às vezes, por cima da barra de ferramentas.
  *  Conversa com a planilha só por eventos: "planilha:salvou", "planilha:erro" e "mascote:preferencias".
- *  Sem som. Animações só com transform/opacity; com "menos movimento" (ou prefers-reduced-motion) fica sentado.
+ *  Sem som. Animações só com transform/opacity; no modo "Calmo" (ou prefers-reduced-motion) fica sentado.
  * ============================================================ */
 (() => {
   const script = document.currentScript;
@@ -16,7 +16,8 @@
   const SONO_MS = 60000, SONO_NOITE_MS = 25000;
 
   /* ---------- Preferências (neste navegador) ---------- */
-  const PADRAO = { mostrar: true, animal: "gato", menosMovimento: false, escondidoEm: "" };
+  /* animado: modo "Animado" (mais brincadeiras e especiais). menosMovimento = modo "Calmo". */
+  const PADRAO = { mostrar: true, animal: "gato", menosMovimento: false, animado: false, escondidoEm: "" };
   const lerPrefs = () => { try { return { ...PADRAO, ...(JSON.parse(localStorage.getItem(CHAVE)) || {}) }; } catch { return { ...PADRAO }; } };
   const gravarPrefs = () => { try { localStorage.setItem(CHAVE, JSON.stringify(prefs)); } catch { /* sem armazenamento */ } };
   let prefs = lerPrefs();
@@ -24,6 +25,7 @@
   const horaBrasilia = () => Number(new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "numeric", hourCycle: "h23" }).format(new Date()));
   const movimentoReduzido = matchMedia("(prefers-reduced-motion: reduce)");
   const quieto = () => prefs.menosMovimento || movimentoReduzido.matches;
+  const animado = () => prefs.animado && !quieto();
   const ativo = () => prefs.mostrar && prefs.escondidoEm !== hojeBrasilia();
 
   /* ---------- Desenhos (SVG próprio, olhando para a direita) ---------- */
@@ -156,6 +158,7 @@
     /* Campos opcionais dos bichos novos (os quatro acima usam os padrões):
        escala (tamanho), andar "quadrupede" | "bipede", ginga (balanço lateral), velocidade, sono (fração do tempo
        até dormir), frases (entram no sorteio do clique), especial { classe, ms, efeito, poses, depois }, escuro (contorno no tema escuro),
+       efeito: "fumaca" | "notas" | "rugido" | "bolhas" | "zumbido" (saem da boca) | "estrelas" (em volta do corpo),
        boca [x, y] (de onde saem fumacinha, notas e rugido, no desenho 64×56). */
     urso: {
       nome: "Urso",
@@ -485,6 +488,335 @@
             <path class="m-lingua" d="M43 27 q.7 2.8 1.4 0 z" fill="#ef8fa0"/>
           </g>
         </g>`
+    },
+    coelho: {
+      nome: "Coelho",
+      ronrom: "*mexe o nariz*",
+      oi: "Oi! Cheguei pulando!",
+      frases: ["Tem cenoura no próximo chamado?"],
+      velocidade: 1.15,
+      especial: { classe: "esp-coelho", ms: 1600 },
+      svg: `<g class="m-cauda"><circle cx="12" cy="34.5" r="3.8" fill="#fbf8f4"/></g>
+        ${pata(1, 15, 42, 8.5, 11, "#cfc6bd", 3.6)}${pata(2, 23, 42, 8.5, 11, "#e3dcd3", 3.6)}${pata(3, 38, 43, 5.5, 10, "#cfc6bd", 2.6)}${pata(4, 45, 43, 5.5, 10, "#e3dcd3", 2.6)}
+        <g class="m-corpo-g">
+          <ellipse class="m-corpo" cx="30" cy="37" rx="18" ry="11" fill="#ece6df"/>
+          <ellipse cx="34" cy="41.5" rx="9" ry="4.5" fill="#fbf8f4"/>
+          <g class="m-cabeca">
+            <g class="m-orelha"><ellipse cx="43" cy="7.5" rx="3.2" ry="9" transform="rotate(-14 43 7.5)" fill="#ece6df"/><ellipse cx="43" cy="8" rx="1.5" ry="6.4" transform="rotate(-14 43 8)" fill="#f2b8c2"/></g>
+            <g class="m-orelha"><ellipse cx="51.5" cy="6.5" rx="3.2" ry="9" transform="rotate(12 51.5 6.5)" fill="#ece6df"/><ellipse cx="51.5" cy="7" rx="1.5" ry="6.4" transform="rotate(12 51.5 7)" fill="#f2b8c2"/></g>
+            <circle cx="48" cy="22" r="10.5" fill="#f3eee8"/>
+            ${bochechas(42.5, 55.5, 26, 1.6)}
+            ${olhos(44.5, 52, 20, 2.3, 1.6)}
+            ${olhosFechados(44.5, 52, 20.5)}
+            <path d="M55 23.4 h2.6 l-1.3 1.4 z" fill="#e58fa5"/>
+            ${boca(56.2, 26.4, "#8a6a6a")}
+            <rect x="55.4" y="27" width="1.6" height="1.6" rx=".3" fill="#fff" stroke="#d9d2c9" stroke-width=".3"/>
+            ${bocaAberta(56.2, 27.8, 1.6, 1.8)}
+          </g>
+        </g>`
+    },
+    raposa: {
+      nome: "Raposa",
+      ronrom: "*cauda fofinha*",
+      oi: "Oi! Vim de mansinho.",
+      frases: ["Faro aguçado pra achar erro de digitação."],
+      velocidade: 1.1,
+      especial: { classe: "esp-raposa", ms: 1600 },
+      boca: [61, 26],
+      svg: `<g class="m-cauda"><ellipse cx="10.5" cy="31" rx="9.5" ry="5.2" transform="rotate(40 10.5 31)" fill="#e8823a"/><ellipse cx="4.6" cy="26" rx="3.6" ry="3" transform="rotate(40 4.6 26)" fill="#fbf3e6"/></g>
+        ${pata(1, 18, 41, 5.5, 12, "#3b2a22")}${pata(2, 26, 41, 5.5, 12, "#523a2e")}${pata(3, 37, 41, 5.5, 12, "#3b2a22")}${pata(4, 45, 41, 5.5, 12, "#523a2e")}
+        <g class="m-corpo-g">
+          <ellipse class="m-corpo" cx="31" cy="36" rx="18" ry="10" fill="#e8823a"/>
+          <ellipse cx="42" cy="39" rx="6" ry="5.5" fill="#fbf3e6"/>
+          <g class="m-cabeca">
+            <g class="m-orelha"><path d="M40 15 L41.5 3 L48 11 Z" fill="#e8823a"/><path d="M41.8 12 L42.4 6.5 L45.6 10 Z" fill="#3b2a22"/></g>
+            <g class="m-orelha"><path d="M50 10.5 L57 2.5 L58.5 14 Z" fill="#e8823a"/><path d="M52.4 10 L56 6 L56.8 11.8 Z" fill="#3b2a22"/></g>
+            <circle cx="48.5" cy="20.5" r="10.5" fill="#e8823a"/>
+            <ellipse cx="45" cy="26" rx="6.5" ry="3.6" fill="#fbf3e6"/>
+            <path d="M50 19.5 q8 1 13.5 5.5 q-6 4 -14 3 z" fill="#fbf3e6"/>
+            ${olhos(44, 51.5, 18.5, 2.2, 1.6)}
+            ${olhosFechados(44, 51.5, 19)}
+            <circle cx="62.6" cy="24.8" r="1.4" fill="#2a1d14"/>
+            ${boca(57.6, 27.6, "#8a5a2e")}
+            ${bocaAberta(57.6, 28.6, 1.8, 1.9)}
+          </g>
+        </g>`
+    },
+    coruja: {
+      nome: "Coruja",
+      ronrom: "*uhu baixinho*",
+      oi: "Uhu! Boa noite… digo, bom dia!",
+      frases: ["De olho em tudo (literalmente)."],
+      andar: "bipede",
+      velocidade: 0.85,
+      especial: { classe: "esp-coruja", ms: 1900, efeito: "estrelas" },
+      boca: [36, 22],
+      svg: `<g class="m-cauda"><path d="M22 44 l-7 4 l8 1 z" fill="#6b4f39"/></g>
+        ${pe(1, 24, "#d9952f")}${pe(2, 24, "#f2b84a")}${pe(3, 32, "#d9952f")}${pe(4, 32, "#f2b84a")}
+        <g class="m-corpo-g">
+          <ellipse class="m-corpo" cx="31" cy="35" rx="12.5" ry="14" fill="#8a6a4e"/>
+          <ellipse cx="33" cy="39" rx="8" ry="9.5" fill="#e8d6bc"/>
+          <path d="M29 36 l1.5 1.2 l1.5 -1.2 M33 36 l1.5 1.2 l1.5 -1.2 M31 41 l1.5 1.2 l1.5 -1.2 M35 41 l1.5 1.2 l1.5 -1.2" stroke="#b39675" stroke-width=".9" fill="none" stroke-linecap="round"/>
+          <g class="m-asa"><path d="M20 30 q-4 9 2 17 q6 -3 6 -11 q-3 -6 -8 -6 z" fill="#6b4f39"/></g>
+          <g class="m-cabeca">
+            <g class="m-orelha"><path d="M26 10.5 l-2 -8 l6.5 4.5 z" fill="#6b4f39"/></g>
+            <g class="m-orelha"><path d="M44 10.5 l2 -8 l-6.5 4.5 z" fill="#6b4f39"/></g>
+            <circle cx="35" cy="17" r="11" fill="#8a6a4e"/>
+            <circle cx="30.5" cy="17" r="5.6" fill="#f3e7d3"/><circle cx="39.5" cy="17" r="5.6" fill="#f3e7d3"/>
+            ${olhos(30.5, 39.5, 17, 3.4, 2.3)}
+            ${olhosFechados(30.5, 39.5, 17.5)}
+            <path d="M33.6 19.6 h2.8 l-1.4 3.4 z" fill="#e0a33c"/>
+            <path class="m-boca" d="M34.2 24.2 q.8 .7 1.6 0" fill="none" stroke="#6b4f39" stroke-width=".8" stroke-linecap="round"/>
+            ${bocaAberta(35, 24.4, 1.3, 1.4)}
+          </g>
+        </g>`
+    },
+    axolote: {
+      nome: "Axolote",
+      ronrom: "*sorrisão*",
+      oi: "Oiê! 😊",
+      frases: ["Sorrir sempre, até com planilha cheia."],
+      velocidade: 0.8,
+      especial: { classe: "esp-axolote", ms: 1600, efeito: "bolhas" },
+      boca: [56, 33],
+      svg: `<g class="m-cauda"><path d="M14 38 q-10 -2 -12.5 -9 q8 .5 13.5 5 z" fill="#f08fb0"/></g>
+        ${pata(1, 18, 44, 4.5, 9, "#e98aa8", 2)}${pata(2, 24, 44, 4.5, 9, "#f4a6c0", 2)}${pata(3, 36, 44, 4.5, 9, "#e98aa8", 2)}${pata(4, 42, 44, 4.5, 9, "#f4a6c0", 2)}
+        <g class="m-corpo-g">
+          <ellipse class="m-corpo" cx="30" cy="40" rx="18" ry="8" fill="#f4a6c0"/>
+          <ellipse cx="32" cy="44" rx="11" ry="3.4" fill="#fbd3e0"/>
+          <path d="M14 34.5 q13 -8 25 -2.5" stroke="#f7c3d4" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <g class="m-cabeca">
+            <g class="m-orelha"><path d="M39 24 q-6 -6 -4 -10 M39.5 27 q-7 -2 -8 -6.5 M39 30 q-7 1 -9 -2" stroke="#e05f8c" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>
+            <g class="m-orelha"><path d="M45 21 q-1 -7 2 -9 M50 20.5 q1 -7 4 -8" stroke="#e05f8c" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>
+            <ellipse cx="49" cy="30" rx="12" ry="9.5" fill="#f6b2c9"/>
+            ${bochechas(44, 57, 33, 1.6)}
+            ${olhos(46, 53.5, 27.5, 1.9, 1.5, "#2a1d14")}
+            ${olhosFechados(46, 53.5, 28)}
+            <path class="m-boca" d="M46 33 q4.5 3 9 0" fill="none" stroke="#b5476f" stroke-width="1" stroke-linecap="round"/>
+            ${bocaAberta(50.5, 34, 2, 1.8)}
+          </g>
+        </g>`
+    },
+    tartaruga: {
+      nome: "Tartaruga",
+      ronrom: "*devagar e sempre*",
+      oi: "Ooooi… cheguei.",
+      frases: ["Sem pressa: o importante é salvar."],
+      velocidade: 0.55,
+      sono: 1.3,
+      especial: { classe: "esp-tartaruga", ms: 2200, depois: "sentado" },
+      boca: [62, 34],
+      svg: `<g class="m-cauda"><path d="M13 44 l-6 1.5 l6 2 z" fill="#8cc06a"/></g>
+        ${pata(1, 15, 43, 6.5, 10, "#7cb35a", 3)}${pata(2, 22, 43, 6.5, 10, "#8cc06a", 3)}${pata(3, 38, 43, 6.5, 10, "#7cb35a", 3)}${pata(4, 45, 43, 6.5, 10, "#8cc06a", 3)}
+        <g class="m-corpo-g">
+          <g class="m-cabeca">
+            <g class="m-orelha"></g>
+            <ellipse cx="51" cy="37" rx="6" ry="3.8" fill="#8cc06a"/>
+            <circle cx="57" cy="32" r="6.5" fill="#8cc06a"/>
+            ${bochechas(54.5, 62.4, 34.6, 1.2)}
+            ${olhos(55.6, 60.2, 30.5, 1.8, 1.3)}
+            ${olhosFechados(55.6, 60.2, 31)}
+            ${boca(60.5, 34.6, "#3f6b2f")}
+            ${bocaAberta(60.8, 35.4, 1.4, 1.5)}
+          </g>
+          <path class="m-corpo" d="M12 44 q2 -22 21 -22 q19 0 21 22 z" fill="#5c8f45"/>
+          <path d="M24 31 l4.5 -4 l6 0 l4.5 4 l-2 6.5 l-11 0 z M16.5 41.5 l3 -6 l5 0 l1 6 z M40.5 41.5 l-1 -6 l5 0 l3 6 z" fill="#79ab58"/>
+          <rect x="10" y="42" width="46" height="4" rx="2" fill="#4a7838"/>
+        </g>`
+    },
+    guaxinim: {
+      nome: "Guaxinim",
+      ronrom: "*lava as patinhas*",
+      oi: "Psiu! Achei um biscoito.",
+      frases: ["Revirei a lixeira… e achei seu arquivo!"],
+      escuro: true,
+      especial: { classe: "esp-guaxinim", ms: 1800, efeito: "bolhas", depois: "sentado" },
+      boca: [52, 34],
+      svg: `<g class="m-cauda"><path d="M14 36 C5 34 3 25 7 19" fill="none" stroke="#8e9099" stroke-width="6" stroke-linecap="round"/><path d="M4.4 31.5 l5.4 -2 M3.6 25.8 l5.4 -.4 M5 21 l4.6 1.4" stroke="#2f3138" stroke-width="2.2" stroke-linecap="round"/></g>
+        ${pata(1, 17, 40, 6, 13, "#2f3138")}${pata(2, 25, 40, 6, 13, "#45474f")}${pata(3, 37, 40, 6, 13, "#2f3138")}${pata(4, 45, 40, 6, 13, "#45474f")}
+        <g class="m-corpo-g">
+          <ellipse class="m-corpo" cx="31" cy="37" rx="19" ry="10.5" fill="#8e9099"/>
+          <ellipse cx="33" cy="41" rx="10" ry="4.5" fill="#c9cbd1"/>
+          <g class="m-cabeca">
+            <g class="m-orelha"><path d="M40 14 L41 4 L48 10 Z" fill="#8e9099"/><path d="M41.8 11.5 L42.3 6.8 L45.6 9.8 Z" fill="#2f3138"/></g>
+            <g class="m-orelha"><path d="M50.5 9.5 L57.5 3.5 L59 13.5 Z" fill="#8e9099"/><path d="M52.8 9.4 L56.4 6.6 L57 11 Z" fill="#2f3138"/></g>
+            <circle cx="49" cy="21" r="11.5" fill="#a3a5ad"/>
+            <ellipse cx="50" cy="24.5" rx="9.5" ry="7" fill="#eceef2"/>
+            <path d="M39.5 19.5 q5 -5 10 -.5 q5 -4.5 10 .5 q-1 5 -5 5 q-2.6 -2 -5 0 q-2.4 -2 -5 0 q-4 0 -5 -5 z" fill="#2f3138"/>
+            ${olhos(44.5, 54, 19.8, 2.1, 1.5)}
+            ${olhosFechados(44.5, 54, 20.3, "#eceef2")}
+            <ellipse cx="50" cy="26" rx="2" ry="1.4" fill="#2f3138"/>
+            ${boca(50, 28.6, "#2f3138")}
+            ${bocaAberta(50, 29.8, 1.8, 2)}
+          </g>
+        </g>`
+    },
+    lhama: {
+      nome: "Lhama",
+      ronrom: "*lã quentinha*",
+      oi: "Como lhama vai? 🦙",
+      frases: ["Sem drama, só lhama."],
+      escala: 1.05,
+      velocidade: 0.9,
+      especial: { classe: "esp-lhama", ms: 1600, efeito: "estrelas" },
+      boca: [56, 16],
+      svg: `<g class="m-cauda"><path d="M13 31 q-5 1 -4 6 q3 -1 5 -3 z" fill="#e3d2b0"/></g>
+        ${pata(1, 17, 40, 5, 13, "#d9c7a3", 2.4)}${pata(2, 24, 40, 5, 13, "#e8d9bb", 2.4)}${pata(3, 36, 40, 5, 13, "#d9c7a3", 2.4)}${pata(4, 43, 40, 5, 13, "#e8d9bb", 2.4)}
+        <g class="m-corpo-g">
+          <ellipse class="m-corpo" cx="30" cy="36" rx="18" ry="9.5" fill="#efe2c8"/>
+          <path d="M14 33 q3 -4 6 -1 q3 -4 6 -1 q3 -4 6 -1 q3 -4 6 -1" fill="none" stroke="#e3d2b0" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M22 28.5 h14 v6 h-14 z" fill="#9b7fd4"/><path d="M22 31.5 h14" stroke="#f2c94c" stroke-width="1.2"/>
+          <g class="m-cabeca">
+            <g class="m-orelha"><path d="M42.5 7 q-2 -6 1 -8 q1.6 3 1.2 7 z" fill="#e3d2b0"/></g>
+            <g class="m-orelha"><path d="M47 6 q0 -6.5 3.4 -7.5 q.6 3.6 -1 7.6 z" fill="#e3d2b0"/></g>
+            <rect x="40" y="12" width="8" height="24" rx="4" fill="#efe2c8"/>
+            <ellipse cx="48" cy="12" rx="8" ry="6.5" fill="#efe2c8"/>
+            <ellipse cx="54" cy="14.2" rx="4.6" ry="3.8" fill="#f7efdd"/>
+            ${bochechas(44.5, 52.2, 15, 1.3)}
+            ${olhos(45.5, 50.5, 11, 1.8, 1.3)}
+            ${olhosFechados(45.5, 50.5, 11.5)}
+            <path d="M56.4 12.6 q.8 .8 1.6 0" fill="none" stroke="#7a6a50" stroke-width=".9" stroke-linecap="round"/>
+            ${boca(55.4, 16.2, "#7a6a50")}
+            ${bocaAberta(55.4, 17, 1.4, 1.5)}
+          </g>
+        </g>`
+    },
+    peixe: {
+      nome: "Peixinho",
+      ronrom: "*blub blub*",
+      oi: "Blub! Água fresquinha?",
+      frases: ["Memória de peixe? Por isso eu salvo tudo!"],
+      ginga: true,
+      velocidade: 0.9,
+      especial: { classe: "esp-peixe", ms: 1800, efeito: "bolhas" },
+      boca: [52, 35],
+      svg: `<g class="m-cauda"><path d="M16 33 l-11 -8 q2.5 8 0 16 z" fill="#f28b3c"/></g>
+        ${pata(1, 24, 42, 4, 6, "#f2a65a", 2)}${pata(2, 28, 42, 4, 6, "#f7b96e", 2)}${pata(3, 36, 42, 4, 6, "#f2a65a", 2)}${pata(4, 40, 42, 4, 6, "#f7b96e", 2)}
+        <g class="m-corpo-g">
+          <g class="m-asa"><path d="M27 23 q6 -10 14 -2 z" fill="#f28b3c"/></g>
+          <ellipse class="m-corpo" cx="33" cy="33" rx="18" ry="12" fill="#f7a440"/>
+          <path d="M26 22.5 q-3 10.5 0 21 M33 21.5 q-3 11.5 0 23" stroke="#fff" stroke-width="2.4" fill="none" opacity=".85"/>
+          <g class="m-cabeca">
+            <g class="m-orelha"></g>
+            ${bochechas(41.5, 48.5, 36, 1.5)}
+            ${olhos(42.5, 47.5, 30, 2.6, 1.8)}
+            ${olhosFechados(42.5, 47.5, 30.5)}
+            <path class="m-boca" d="M48.6 35 q1.4 1.3 2.8 0" fill="none" stroke="#b5561e" stroke-width="1" stroke-linecap="round"/>
+            ${bocaAberta(50.2, 35.6, 1.4, 1.6)}
+          </g>
+        </g>`
+    },
+    abelha: {
+      nome: "Abelha",
+      ronrom: "*bzzz feliz*",
+      oi: "Bzz! Oi, flor!",
+      frases: ["Trabalhando feito… uma abelha!"],
+      andar: "bipede",
+      ginga: true,
+      escala: 0.85,
+      velocidade: 1.25,
+      especial: { classe: "esp-abelha", ms: 1800, efeito: "zumbido" },
+      boca: [50, 31],
+      svg: `<g class="m-cauda"><path d="M15.5 37 l-5.5 1.6 l5.5 1.8 z" fill="#3a3326"/></g>
+        ${pe(1, 25, "#3a3326")}${pe(2, 25, "#4a4232")}${pe(3, 32, "#3a3326")}${pe(4, 32, "#4a4232")}
+        <g class="m-corpo-g">
+          <ellipse class="m-corpo" cx="30" cy="37" rx="14.5" ry="11" fill="#f7c948"/>
+          <path d="M24 27.3 q-3 9.7 0 19.4 M31 26.4 q-3 10.6 0 21.2" stroke="#3a3326" stroke-width="3" fill="none"/>
+          <g class="m-asa"><ellipse cx="27" cy="22" rx="5" ry="8" transform="rotate(-25 27 22)" fill="#dff1fb" opacity=".85" stroke="#a9d4ea" stroke-width=".8"/><ellipse cx="33" cy="21" rx="4" ry="7" transform="rotate(15 33 21)" fill="#dff1fb" opacity=".85" stroke="#a9d4ea" stroke-width=".8"/></g>
+          <g class="m-cabeca">
+            <g class="m-orelha"><path d="M42 19.5 q-2 -7 -5 -8" stroke="#3a3326" stroke-width="1.3" fill="none" stroke-linecap="round"/><circle cx="37" cy="11.5" r="1.6" fill="#3a3326"/></g>
+            <g class="m-orelha"><path d="M47.5 18.5 q1 -7 4.5 -8.5" stroke="#3a3326" stroke-width="1.3" fill="none" stroke-linecap="round"/><circle cx="52" cy="10" r="1.6" fill="#3a3326"/></g>
+            <circle cx="45" cy="27" r="9" fill="#f9d561"/>
+            ${bochechas(40.5, 51.5, 30.5, 1.5)}
+            ${olhos(42.5, 49, 26, 2.3, 1.6)}
+            ${olhosFechados(42.5, 49, 26.5)}
+            ${boca(47.5, 31, "#7a5a20")}
+            ${bocaAberta(47.5, 32.2, 1.5, 1.7)}
+          </g>
+        </g>`
+    },
+    gamba: {
+      nome: "Gambá",
+      ronrom: "*rabinho enrolado*",
+      oi: "Oi! Não tô fedendo, juro.",
+      frases: ["Se o sistema cair, eu finjo de morto."],
+      velocidade: 0.9,
+      especial: { classe: "esp-gamba", ms: 2400, depois: "sentado" },
+      boca: [61, 26],
+      svg: `<g class="m-cauda"><path d="M14 38 C6 40 2 34 4 28 C5 25 8 25 8 28" fill="none" stroke="#e8a3b0" stroke-width="2.6" stroke-linecap="round"/></g>
+        ${pata(1, 17, 41, 5.5, 12, "#3b3d48")}${pata(2, 25, 41, 5.5, 12, "#555866")}${pata(3, 37, 41, 5.5, 12, "#3b3d48")}${pata(4, 45, 41, 5.5, 12, "#555866")}
+        <g class="m-corpo-g">
+          <ellipse class="m-corpo" cx="31" cy="37" rx="19" ry="10.5" fill="#a9acb5"/>
+          <path d="M14 34 q16 -10 34 -3 q-17 -4 -34 3 z" fill="#8a8d97"/>
+          <g class="m-cabeca">
+            <g class="m-orelha"><circle cx="42" cy="13" r="3.8" fill="#2f3138"/><circle cx="42" cy="13" r="1.8" fill="#e8a3b0"/></g>
+            <g class="m-orelha"><circle cx="51" cy="11.5" r="3.8" fill="#2f3138"/><circle cx="51" cy="11.5" r="1.8" fill="#e8a3b0"/></g>
+            <circle cx="47" cy="21" r="10" fill="#eef0f3"/>
+            <path d="M50 17 q10 3 13 8 q-5 4 -13 2 z" fill="#eef0f3"/>
+            <path d="M46.5 11.5 q1.4 5 -.6 9" stroke="#c9ccd3" stroke-width="2" fill="none" stroke-linecap="round"/>
+            ${bochechas(42.5, 53.5, 25, 1.5)}
+            ${olhos(43.5, 50.5, 19, 2.1, 1.6)}
+            ${olhosFechados(43.5, 50.5, 19.5)}
+            <circle cx="62.6" cy="24.8" r="1.4" fill="#e8869a"/>
+            ${boca(57.5, 27.2, "#8a8d97")}
+            ${bocaAberta(57.5, 28.2, 1.6, 1.8)}
+          </g>
+        </g>`
+    },
+    sapo: {
+      nome: "Sapo",
+      ronrom: "*croac baixinho*",
+      oi: "Croac! 🐸",
+      frases: ["Pegando os bugs no ar!"],
+      velocidade: 0.9,
+      especial: { classe: "esp-sapo", ms: 1500 },
+      boca: [57, 31],
+      svg: `<g class="m-cauda"></g>
+        ${pata(1, 13, 42, 9, 11, "#4f9a3e", 4)}${pata(2, 21, 44, 7, 9, "#62b14f", 3.4)}${pata(3, 38, 43, 5, 10, "#4f9a3e", 2.4)}${pata(4, 44, 43, 5, 10, "#62b14f", 2.4)}
+        <g class="m-corpo-g">
+          <ellipse class="m-corpo" cx="31" cy="39" rx="19" ry="10.5" fill="#6cbf55"/>
+          <ellipse cx="36" cy="43" rx="11" ry="5" fill="#dff0c4"/>
+          <circle cx="22" cy="35" r="2" fill="#57a644"/><circle cx="28" cy="31.5" r="1.5" fill="#57a644"/>
+          <g class="m-cabeca">
+            <g class="m-orelha"><circle cx="42" cy="20" r="5" fill="#6cbf55"/></g>
+            <g class="m-orelha"><circle cx="52.5" cy="19.5" r="5" fill="#6cbf55"/></g>
+            <ellipse cx="47" cy="28" rx="13" ry="8.5" fill="#6cbf55"/>
+            ${bochechas(40.5, 56, 30.5, 1.8)}
+            ${olhos(42, 52.5, 19.5, 3.2, 2)}
+            ${olhosFechados(42, 52.5, 20)}
+            <path class="m-linguao" d="M54 32 h11" stroke="#ef8fa0" stroke-width="2" stroke-linecap="round"/>
+            <path class="m-boca" d="M43 31 q8 4 16 -1" fill="none" stroke="#2f6b25" stroke-width="1" stroke-linecap="round"/>
+            ${bocaAberta(53, 32.4, 2.6, 2)}
+          </g>
+        </g>`
+    },
+    polvo: {
+      nome: "Polvo",
+      ronrom: "*abraço de oito braços*",
+      oi: "Oi! Tenho braço pra tudo.",
+      frases: ["Oito braços, zero chamados atrasados."],
+      ginga: true,
+      velocidade: 0.85,
+      especial: { classe: "esp-polvo", ms: 1700, efeito: "bolhas" },
+      boca: [41, 36],
+      svg: `<g class="m-cauda"><path d="M19 40 q-8 4 -6 11 q1 2 3 0" fill="none" stroke="#a65ba8" stroke-width="4" stroke-linecap="round"/></g>
+        <g class="m-pata m-pata-1"><path d="M22 42 q-2.5 6 .5 11" stroke="#b768b8" stroke-width="4.2" fill="none" stroke-linecap="round"/></g>
+        <g class="m-pata m-pata-2"><path d="M28 43 q-1.5 5.5 1 10" stroke="#c97fca" stroke-width="4.2" fill="none" stroke-linecap="round"/></g>
+        <g class="m-pata m-pata-3"><path d="M35 43 q1.5 5.5 -1 10" stroke="#b768b8" stroke-width="4.2" fill="none" stroke-linecap="round"/></g>
+        <g class="m-pata m-pata-4"><path d="M41 42 q2.5 6 -.5 11" stroke="#c97fca" stroke-width="4.2" fill="none" stroke-linecap="round"/></g>
+        <g class="m-corpo-g">
+          <ellipse class="m-corpo" cx="33" cy="30" rx="15" ry="14" fill="#c97fca"/>
+          <ellipse cx="32" cy="41" rx="13" ry="4" fill="#b768b8"/>
+          <circle cx="26" cy="21.5" r="2" fill="#dba0dc"/><circle cx="33.5" cy="19.5" r="1.4" fill="#dba0dc"/><circle cx="22.5" cy="28" r="1.2" fill="#dba0dc"/>
+          <g class="m-cabeca">
+            <g class="m-orelha"></g>
+            ${bochechas(33, 46, 34, 1.7)}
+            ${olhos(36, 43, 29.5, 2.5, 1.8)}
+            ${olhosFechados(36, 43, 30)}
+            <path class="m-boca" d="M38.6 35 q1.3 1.3 2.6 0" fill="none" stroke="#7d3a80" stroke-width="1" stroke-linecap="round"/>
+            ${bocaAberta(39.9, 35.8, 1.4, 1.5)}
+          </g>
+        </g>`
     }
   };
   const PADROES = { escala: 1, andar: "quadrupede", ginga: false, velocidade: 1, sono: 1, frases: [], especial: null, escuro: false, boca: [58, 24] };
@@ -617,6 +949,129 @@
 @keyframes m-danca-furao { 0%, 100% { transform: none; } 16% { transform: translate(-5px, -6px); } 33% { transform: none; } 50% { transform: translate(5px, -6px); } 66% { transform: none; } 83% { transform: translate(-5px, -6px); } }
 .mascote.a-lontras.esp-lontras .m-todo { transform-origin: 50% 60%; animation: m-boiar 2s ease-in-out; }
 @keyframes m-boiar { 0% { transform: none; } 22% { transform: translateY(4px) rotate(-90deg); } 75% { transform: translateY(4px) rotate(-450deg); } 100% { transform: none; } }
+/* Peixinho e abelha: flutuam parados (desligado no modo Calmo); a abelha bate as asas sem parar */
+.mascote.a-peixe .m-todo, .mascote.a-abelha .m-todo { animation: m-flutuar 2.4s ease-in-out infinite; }
+.mascote.a-abelha .m-asa { animation: m-zumbir .12s linear infinite alternate; }
+.mascote.a-sapo.andando .m-corpo-g, .mascote.a-coelho.andando .m-corpo-g { animation: m-saltito calc(.45s / var(--vel, 1)) ease-in-out infinite alternate; }
+.mascote .m-linguao { opacity: 0; transform-box: fill-box; transform-origin: 0 50%; }
+@keyframes m-flutuar { 50% { transform: translateY(-2.5px); } }
+@keyframes m-zumbir { from { transform: none; } to { transform: rotate(-18deg) scaleY(.85); } }
+/* Especiais dos bichos novos */
+.mascote.a-coelho.esp-coelho .m-todo { animation: m-coelho-pulos 1.6s ease-in-out; }
+.mascote.a-coelho.esp-coelho .m-orelha { animation: m-orelha-mola .2s ease-in-out 8 alternate; }
+@keyframes m-coelho-pulos { 0%, 100% { transform: none; } 12% { transform: translateY(-13px); } 24% { transform: none; } 28% { transform: scale(1.06, .94); } 40% { transform: translateY(-13px); } 52% { transform: none; } 56% { transform: scale(1.06, .94); } 72% { transform: translateY(-19px) rotate(-8deg); } 88% { transform: scale(1.06, .94); } }
+@keyframes m-orelha-mola { from { transform: none; } to { transform: rotate(-14deg) scaleY(.9); } }
+.mascote.a-raposa.esp-raposa .m-todo { animation: m-raposa-bote 1.6s ease-in-out; }
+.mascote.a-raposa.esp-raposa .m-cauda { animation: m-cauda .3s ease-in-out 5; }
+@keyframes m-raposa-bote { 0%, 100% { transform: none; } 25% { transform: translate(-2px, 2px) scale(1.04, .9); } 50% { transform: translate(6px, -20px) rotate(25deg); } 70% { transform: translate(10px, -2px) rotate(70deg); } 86% { transform: translate(4px, 0) rotate(8deg); } }
+.mascote.a-coruja.esp-coruja .m-cabeca { transform-origin: 50% 80%; animation: m-coruja-cabeca 1.9s ease-in-out; }
+.mascote.a-coruja.esp-coruja .m-olhos { transform-box: fill-box; transform-origin: 50% 50%; transform: scale(1.2); }
+.mascote.a-coruja.esp-coruja .m-asa { animation: m-bater-asa .18s ease-in-out 6 alternate; animation-delay: .9s; }
+.mascote.a-coruja.esp-coruja .m-todo { animation: m-coruja-pulo 1.9s ease-in-out; }
+@keyframes m-coruja-cabeca { 0%, 100% { transform: none; } 14% { transform: rotate(-38deg); } 32% { transform: rotate(38deg); } 50% { transform: rotate(-38deg); } 66% { transform: rotate(22deg); } 80% { transform: none; } }
+@keyframes m-coruja-pulo { 0%, 50%, 100% { transform: none; } 68% { transform: translateY(-14px); } 86% { transform: scale(1.06, .94); } }
+.mascote.a-axolote.esp-axolote .m-orelha { animation: m-branquias .16s ease-in-out 10 alternate; }
+.mascote.a-axolote.esp-axolote .m-todo { animation: m-pulinho 1.6s ease-in-out; }
+.mascote.a-axolote.esp-axolote .m-boca-aberta { opacity: 1; }
+.mascote.a-axolote.esp-axolote .m-boca { opacity: 0; }
+@keyframes m-branquias { from { transform: none; } to { transform: scale(1.18) rotate(-7deg); } }
+.mascote.a-tartaruga.esp-tartaruga .m-cabeca { animation: m-casco-cabeca 2.2s ease-in-out; }
+.mascote.a-tartaruga.esp-tartaruga .m-pata, .mascote.a-tartaruga.esp-tartaruga .m-cauda { animation: m-casco-pata 2.2s ease-in-out; }
+.mascote.a-tartaruga.esp-tartaruga .m-todo { animation: m-casco-balanco 2.2s ease-in-out; }
+@keyframes m-casco-cabeca { 0%, 100% { transform: none; } 18%, 72% { transform: translateX(-9px) scale(.25); } }
+@keyframes m-casco-pata { 0%, 100% { transform: none; } 18%, 72% { transform: scaleY(.12); } }
+@keyframes m-casco-balanco { 0%, 25%, 70%, 100% { transform: none; } 35% { transform: rotate(-6deg); } 47% { transform: rotate(6deg); } 58% { transform: rotate(-3deg); } }
+.mascote.a-guaxinim.esp-guaxinim .m-corpo-g { transform: translateY(3px); }
+.mascote.a-guaxinim.esp-guaxinim .m-cabeca { transform: rotate(10deg); }
+.mascote.a-guaxinim.esp-guaxinim .m-pata-3 { animation: m-lavar-a .2s ease-in-out 9 alternate; }
+.mascote.a-guaxinim.esp-guaxinim .m-pata-4 { animation: m-lavar-b .2s ease-in-out 9 alternate; }
+.mascote.a-guaxinim.esp-guaxinim .m-pata-1, .mascote.a-guaxinim.esp-guaxinim .m-pata-2 { transform: scaleY(.55); }
+@keyframes m-lavar-a { from { transform: rotate(-70deg); } to { transform: rotate(-95deg) translateY(-1px); } }
+@keyframes m-lavar-b { from { transform: rotate(-95deg) translateY(-1px); } to { transform: rotate(-70deg); } }
+.mascote.a-lhama.esp-lhama .m-corpo-g { animation: m-sacudir-la .1s ease-in-out 10 alternate; }
+.mascote.a-lhama.esp-lhama .m-cabeca { animation: m-lhama-pescoco 1.6s ease-in-out; }
+.mascote.a-lhama.esp-lhama .m-boca-aberta { opacity: 1; }
+.mascote.a-lhama.esp-lhama .m-boca { opacity: 0; }
+@keyframes m-sacudir-la { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
+@keyframes m-lhama-pescoco { 0%, 100% { transform: none; } 30% { transform: rotate(-14deg); } 62% { transform: rotate(12deg); } }
+.mascote.a-peixe.esp-peixe .m-todo { transform-origin: 50% 60%; animation: m-nado 1.8s ease-in-out; }
+.mascote.a-peixe.esp-peixe .m-cauda { animation: m-cauda .25s ease-in-out 7; }
+.mascote.a-peixe.esp-peixe .m-boca-aberta { opacity: 1; }
+.mascote.a-peixe.esp-peixe .m-boca { opacity: 0; }
+@keyframes m-nado { 0%, 100% { transform: none; } 25% { transform: translate(-8px, -14px) rotate(-20deg); } 50% { transform: translate(0, -22px); } 75% { transform: translate(8px, -14px) rotate(20deg); } }
+.mascote.a-abelha.esp-abelha .m-todo { animation: m-voo-oito 1.8s ease-in-out; }
+.mascote.a-abelha.esp-abelha .m-asa { animation: m-zumbir .06s linear infinite alternate; }
+@keyframes m-voo-oito { 0%, 100% { transform: none; } 20% { transform: translate(-10px, -12px) rotate(-8deg); } 40% { transform: translate(0, -20px); } 60% { transform: translate(10px, -12px) rotate(8deg); } 80% { transform: translate(0, -4px); } }
+.mascote.a-gamba.esp-gamba .m-todo { transform-origin: 50% 50%; animation: m-fingir-morto 2.4s ease-in-out; }
+.mascote.a-gamba.esp-gamba .m-olhos { opacity: 0; }
+.mascote.a-gamba.esp-gamba .m-fechados, .mascote.a-gamba.esp-gamba .m-lingua { opacity: 1; }
+@keyframes m-fingir-morto { 0%, 100% { transform: none; } 15%, 78% { transform: rotate(-180deg); } 84% { transform: rotate(-174deg); } 90% { transform: rotate(-186deg); } }
+.mascote.a-sapo.esp-sapo .m-linguao { animation: m-linguada .55s ease-out .25s; }
+.mascote.a-sapo.esp-sapo .m-todo { animation: m-sapo-pulo 1.5s ease-in-out; }
+.mascote.a-sapo.esp-sapo .m-boca-aberta { animation: m-mostrar 1.5s linear; }
+@keyframes m-linguada { 0% { transform: scaleX(0); opacity: 1; } 45% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(0); opacity: 1; } }
+@keyframes m-sapo-pulo { 0%, 52%, 100% { transform: none; } 70% { transform: translateY(-17px); } 86% { transform: scale(1.08, .92); } }
+.mascote.a-polvo.esp-polvo .m-pata { animation: m-tentaculo .22s ease-in-out 8 alternate; }
+.mascote.a-polvo.esp-polvo .m-pata-2, .mascote.a-polvo.esp-polvo .m-pata-3 { animation-delay: .11s; }
+.mascote.a-polvo.esp-polvo .m-cauda { animation: m-tentaculo .22s ease-in-out 8 alternate; }
+.mascote.a-polvo.esp-polvo .m-todo { animation: m-pulinho 1.7s ease-in-out; }
+@keyframes m-tentaculo { from { transform: rotate(-22deg); } to { transform: rotate(22deg); } }
+/* Comportamentos espontâneos novos (decidir) e reações a clique, hover e arraste */
+@keyframes m-mostrar { 0%, 22%, 86%, 100% { opacity: 0; } 30%, 78% { opacity: 1; } }
+@keyframes m-esconder { 0%, 22%, 86%, 100% { opacity: 1; } 30%, 78% { opacity: 0; } }
+.mascote.espreguicando .m-corpo-g { animation: m-espreguicar 1.8s ease-in-out; }
+.mascote.espreguicando .m-pata-3, .mascote.espreguicando .m-pata-4 { animation: m-esticar-pata 1.8s ease-in-out; }
+.mascote.espreguicando .m-boca-aberta, .mascote.espreguicando .m-fechados { animation: m-mostrar 1.8s linear; }
+.mascote.espreguicando .m-boca, .mascote.espreguicando .m-olhos { animation: m-esconder 1.8s linear; }
+@keyframes m-espreguicar { 0%, 100% { transform: none; } 30%, 72% { transform: translateY(2px) rotate(7deg) scaleX(1.06); } }
+@keyframes m-esticar-pata { 0%, 100% { transform: none; } 30%, 72% { transform: rotate(-38deg); } }
+.mascote.cocando .m-corpo-g { transform: translateY(3px); }
+.mascote.cocando .m-pata-1, .mascote.cocando .m-pata-2 { transform: scaleY(.55); }
+.mascote.cocando .m-pata-4 { animation: m-cocar .14s ease-in-out 10 alternate; }
+.mascote.cocando .m-cabeca { transform: rotate(9deg); }
+.mascote.cocando .m-orelha { transform: rotate(-10deg); }
+.mascote.cocando .m-olhos { opacity: 0; }
+.mascote.cocando .m-fechados { opacity: 1; }
+@keyframes m-cocar { from { transform: translate(1px, -9px) rotate(-40deg); } to { transform: translate(1px, -11px) rotate(-58deg); } }
+.mascote.abanando .m-cauda { animation: m-cauda .3s ease-in-out 5; }
+.mascote.abanando .m-corpo-g { animation: m-ginga .25s ease-in-out 6 alternate; }
+.mascote.abanando .m-cabeca { transform: rotate(-6deg); }
+.mascote.abanando .m-boca-aberta { opacity: 1; }
+.mascote.abanando .m-boca { opacity: 0; }
+.mascote.cochilando .m-corpo-g { transform: translateY(3px); }
+.mascote.cochilando .m-cabeca { animation: m-cochilo 2.4s ease-in-out; }
+.mascote.cochilando .m-olhos { animation: m-cochilo-olhos 2.4s linear; }
+.mascote.cochilando .m-fechados { animation: m-cochilo-fechados 2.4s linear; }
+@keyframes m-cochilo { 0%, 100% { transform: none; } 30% { transform: rotate(6deg); } 62% { transform: rotate(16deg) translateY(2px); } 74% { transform: rotate(18deg) translateY(2px); } 79% { transform: rotate(-9deg) translateY(-2px); } 90% { transform: rotate(-3deg); } }
+@keyframes m-cochilo-olhos { 0%, 10%, 78%, 100% { opacity: 1; } 15%, 22% { opacity: 0; } 26%, 30% { opacity: 1; } 36%, 76% { opacity: 0; } }
+@keyframes m-cochilo-fechados { 0%, 10%, 78%, 100% { opacity: 0; } 15%, 22% { opacity: 1; } 26%, 30% { opacity: 0; } 36%, 76% { opacity: 1; } }
+.mascote.cheirando .m-corpo-g { transform: translateY(1px); }
+.mascote.cheirando .m-cabeca { animation: m-cheirar 1.6s ease-in-out; }
+@keyframes m-cheirar { 0%, 100% { transform: none; } 22% { transform: rotate(18deg) translateY(4px); } 32% { transform: rotate(15deg) translateY(4px); } 42% { transform: rotate(19deg) translateY(4px); } 52% { transform: rotate(15deg) translateY(4px); } 62% { transform: rotate(19deg) translateY(4px); } 80% { transform: rotate(17deg) translateY(4px); } }
+.mascote.inclinando .m-cabeca, .mascote.inclinando .m-cabeca-2 { animation: m-inclinar 1.3s ease-in-out; }
+@keyframes m-inclinar { 0%, 100% { transform: none; } 25%, 75% { transform: rotate(-16deg); } }
+.mascote.correndo .m-todo { rotate: 5deg; }
+.mascote.dancando .m-todo { animation: m-dancar .9s ease-in-out; }
+@keyframes m-dancar { 0%, 100% { transform: none; } 20% { transform: rotate(-10deg) translateY(-3px); } 40% { transform: rotate(10deg); } 60% { transform: rotate(-10deg) translateY(-3px); } 80% { transform: rotate(8deg); } }
+.mascote.rolando .m-pulo { transform-origin: 50% 55%; animation: m-rolar .9s ease-in-out; }
+@keyframes m-rolar { 0% { transform: none; } 50% { transform: translateY(-8px) rotate(180deg); } 100% { transform: rotate(360deg); } }
+.mascote.sacudindo .m-pulo { animation: m-sacudir .08s linear 8 alternate; }
+@keyframes m-sacudir { from { transform: translateX(-2px); } to { transform: translateX(2px); } }
+.mascote.saltitando .m-pulo { animation: m-saltitos .9s ease-out; }
+@keyframes m-saltitos { 0%, 33%, 66%, 100% { transform: none; } 16% { transform: translateY(-9px); } 50% { transform: translateY(-11px); } 83% { transform: translateY(-9px); } }
+.mascote.apaixonado .m-olhos { opacity: 0; }
+.mascote.apaixonado .m-fechados { opacity: 1; }
+.mascote.apaixonado .m-corpo-g { animation: m-ronrom 1.4s ease-in-out infinite alternate; }
+@keyframes m-ronrom { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+.mascote.tonto .m-cabeca, .mascote.tonto .m-cabeca-2 { animation: m-tonto .5s ease-in-out 2; }
+.mascote.tonto .m-corpo-g { animation: m-ginga .25s ease-in-out 4 alternate; }
+@keyframes m-tonto { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+.mascote.aliviado .m-corpo-g { transform: translateY(3px); }
+.mascote.aliviado .m-olhos { opacity: 0; }
+.mascote.aliviado .m-fechados, .mascote.aliviado .m-boca-aberta { opacity: 1; }
+.mascote.aliviado .m-boca { opacity: 0; }
+/* Modo Calmo: sem flutuar, sem asas zumbindo */
+.mascote.quieto .m-todo, .mascote.quieto .m-asa, .mascote.quieto .m-corpo-g { animation: none; }
 /* Efeitos dos especiais (curtos, só transform/opacity) */
 .mascote-fumaca { width: 7px; height: 7px; border-radius: 50%; background: rgba(160, 165, 175, .85); animation: m-fumaca 1.2s ease-out both; }
 .mascote-nota { font: 700 13px/1 system-ui, sans-serif; color: #9b7fd4; animation: m-nota 1.3s ease-out both; }
@@ -624,15 +1079,21 @@
 @keyframes m-fumaca { from { transform: translate(0, 0) scale(.5); opacity: .9; } to { transform: translate(var(--dx, 0px), -26px) scale(1.6); opacity: 0; } }
 @keyframes m-nota { from { transform: translate(0, 0) rotate(0); opacity: 1; } to { transform: translate(var(--dx, 0px), -30px) rotate(var(--r, 0deg)); opacity: 0; } }
 @keyframes m-rugido { from { transform: translateX(0) scale(.6) scaleX(var(--sx, 1)); opacity: 1; } to { transform: translateX(var(--dx, 0px)) scale(1.3) scaleX(var(--sx, 1)); opacity: 0; } }
+.mascote-bolha { width: 7px; height: 7px; border-radius: 50%; border: 1.4px solid rgba(74, 163, 223, .9); background: rgba(223, 241, 251, .35); animation: m-bolha 1.4s ease-out both; }
+.mascote-estrela { font: 700 12px/1 system-ui, sans-serif; color: #f2c94c; text-shadow: 0 0 2px rgba(0, 0, 0, .25); animation: m-estrela 1.1s ease-out both; }
+.mascote-zumbido { font: italic 700 11px/1 system-ui, sans-serif; color: #b08a1e; animation: m-nota 1.1s ease-out both; }
+.mascote-coracao.pequeno { font-size: 10px; }
+@keyframes m-bolha { 0% { transform: translate(0, 0) scale(.4); opacity: 0; } 15% { opacity: 1; } 50% { transform: translate(calc(var(--dx, 0px) * .5 + 3px), -16px) scale(1); } 100% { transform: translate(var(--dx, 0px), -34px) scale(1.15); opacity: 0; } }
+@keyframes m-estrela { 0% { transform: translate(0, 0) scale(.3) rotate(0); opacity: 0; } 25% { opacity: 1; } 100% { transform: translate(var(--dx, 0px), var(--dy, -20px)) scale(1.1) rotate(var(--r, 90deg)); opacity: 0; } }
 /* Bichos com partes escuras: contorno claro sutil no tema escuro */
 ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tema="escuro"] .mascote.a-${id} svg, [data-tema="escuro"] .mascote-animal.a-${id} svg`).join(", ")} { filter: drop-shadow(0 0 .6px rgba(255, 255, 255, .55)); }
 @media (prefers-reduced-motion: reduce) { .mascote *, .mascote-efeito, .mascote-pref * { animation: none !important; transition: none !important; } }
 @media print { .mascote-camada { display: none !important; } }
 .mascote-pref .mascote-animais { margin: 0; padding: 0; border: 0; min-width: 0; }
-.mascote-pref .mascote-grade-animais { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; max-height: min(46vh, 400px); overflow: auto; padding: 4px; }
+.mascote-pref .mascote-grade-animais { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; max-height: min(52vh, 460px); overflow: auto; padding: 4px; }
 .mascote-pref .mascote-animais legend { margin-bottom: 6px; font-size: 13px; font-weight: 700; }
 .mascote-pref .mascote-animal { position: relative; display: grid; justify-items: center; gap: 4px; padding: 8px; border: 1px solid var(--borda, #ddd); border-radius: 10px; cursor: pointer; font-size: 13px; text-align: center; }
-.mascote-pref .m-fechados, .mascote-pref .m-boca-aberta, .mascote-pref .m-lingua { opacity: 0; }
+.mascote-pref .m-fechados, .mascote-pref .m-boca-aberta, .mascote-pref .m-lingua, .mascote-pref .m-linguao { opacity: 0; }
 .mascote-pref .mascote-animal:hover svg { animation: m-previa .45s ease-out; }
 .mascote-pref.sem-movimento .mascote-animal:hover svg { animation: none; }
 @keyframes m-previa { 0%, 100% { transform: none; } 45% { transform: translateY(-6px); } 75% { transform: scale(1.05, .95); } }
@@ -641,6 +1102,11 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
 .mascote-pref .mascote-animal input { position: absolute; opacity: 0; pointer-events: none; }
 .mascote-pref .mascote-animal:focus-within { outline: 2px solid var(--lilas, #9b7fd4); outline-offset: 2px; }
 .mascote-pref .mascote-opcoes { display: grid; gap: 8px; }
+.mascote-pref .mascote-movimento { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 6px; }
+.mascote-pref .mascote-movimento legend { margin-bottom: 4px; font-size: 13px; font-weight: 700; }
+.mascote-pref .mascote-surpresa-info { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 8px 0 0; font-size: 13px; }
+.mascote-pref .mascote-surpresa-info[hidden] { display: none; }
+.mascote-pref .mascote-conhecidos { margin: 0; font-size: 12px; color: var(--texto-secundario, #6b6b78); }
 `;
   document.head.appendChild(estilo);
 
@@ -655,17 +1121,52 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
   const balao = el.querySelector(".mascote-balao");
   const pulo = el.querySelector(".m-pulo");
   const svgDe = (a) => `<svg viewBox="0 0 64 56" focusable="false"><g class="m-todo">${a.svg}</g></svg>`;
-  /* "Surpresa do dia": o mesmo bicho o dia todo (fuso de Brasília), outro no dia seguinte (passo 7 em 15 percorre todos) */
-  function sorteioDoDia(dia) {
-    const n = Math.floor(Date.parse(`${dia}T12:00:00Z`) / 86400000);
-    return IDS_ORDEM[((n * 7) % IDS_ORDEM.length + IDS_ORDEM.length) % IDS_ORDEM.length];
+  /* "Surpresa do dia": sorteada POR NAVEGADOR. Cada navegador (cada localStorage/PREFIXO) ganha uma semente aleatória
+     na primeira vez (prefs.sorteioSeed, nunca muda). O bicho do dia sai de um gerador com semente (semente + dia de Brasília
+     + rodada), então fica o mesmo o dia todo neste computador e muda na virada do dia; outro computador tem outra semente.
+     prefs.sorteioHistorico guarda os últimos bichos sorteados e eles ficam fora do sorteio (sem repetir em dias seguidos). */
+  const TAM_HISTORICO = Math.max(1, Math.min(10, Math.floor(IDS_ORDEM.length / 2)));
+  const hash32 = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  function geradorSemente(n) {
+    let t = n >>> 0;
+    return () => { t = (t + 0x6d2b79f5) >>> 0; let r = Math.imul(t ^ (t >>> 15), 1 | t); r ^= r + Math.imul(r ^ (r >>> 7), 61 | r); return ((r ^ (r >>> 14)) >>> 0) / 4294967296; };
   }
+  function novaSemente() {
+    try { const v = new Uint32Array(2); crypto.getRandomValues(v); return v[0].toString(36) + v[1].toString(36); }
+    catch { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+  }
+  function semente() {
+    if (!prefs.sorteioSeed || typeof prefs.sorteioSeed !== "string") { prefs.sorteioSeed = novaSemente(); gravarPrefs(); }
+    return prefs.sorteioSeed;
+  }
+  const historico = () => (Array.isArray(prefs.sorteioHistorico) ? prefs.sorteioHistorico : []).filter((id) => ANIMAIS[id]);
+  /* Função pura: mesmo (dia, semente, evitar, rodada) => mesmo bicho. Se evitar tudo, libera os mais antigos do histórico. */
+  function sorteioDoDia(dia, sem = semente(), evitar = historico(), rodada = 0) {
+    const r = geradorSemente(hash32(`${sem}|${dia}|${rodada}`));
+    const fora = evitar.slice();
+    let candidatos = IDS_ORDEM.filter((id) => !fora.includes(id));
+    while (!candidatos.length && fora.length) { fora.shift(); candidatos = IDS_ORDEM.filter((id) => !fora.includes(id)); }
+    if (!candidatos.length) candidatos = IDS_ORDEM.slice();
+    return candidatos[Math.floor(r() * candidatos.length)];
+  }
+  /* Bicho de hoje neste navegador; outro=true é o "Sortear outro hoje" (o atual entra no histórico e não volta tão cedo) */
+  function surpresaDeHoje(outro = false) {
+    const hoje = hojeBrasilia();
+    if (!outro && prefs.sorteioDia === hoje && ANIMAIS[prefs.sorteioAnimal]) return prefs.sorteioAnimal;
+    const hist = historico();
+    if (outro && ANIMAIS[prefs.sorteioAnimal] && !hist.includes(prefs.sorteioAnimal)) hist.push(prefs.sorteioAnimal);
+    const rodada = outro && prefs.sorteioDia === hoje ? (Number(prefs.sorteioRodada) || 0) + 1 : 0;
+    const escolhido = sorteioDoDia(hoje, semente(), hist, rodada);
+    hist.push(escolhido);
+    while (hist.length > TAM_HISTORICO) hist.shift();
+    Object.assign(prefs, { sorteioDia: hoje, sorteioAnimal: escolhido, sorteioHistorico: hist, sorteioRodada: rodada });
+    gravarPrefs();
+    return escolhido;
+  }
+  /* Só para mostrar no diálogo quem seria o bicho de hoje (não grava nada além da semente) */
+  const previaSurpresa = () => (prefs.sorteioDia === hojeBrasilia() && ANIMAIS[prefs.sorteioAnimal] ? prefs.sorteioAnimal : sorteioDoDia(hojeBrasilia()));
   function idAnimal() {
-    if (prefs.animal === "surpresa") {
-      const hoje = hojeBrasilia();
-      if (prefs.sorteioDia !== hoje || !ANIMAIS[prefs.sorteioAnimal]) { prefs.sorteioDia = hoje; prefs.sorteioAnimal = sorteioDoDia(hoje); gravarPrefs(); }
-      return prefs.sorteioAnimal;
-    }
+    if (prefs.animal === "surpresa") return surpresaDeHoje();
     return ANIMAIS[prefs.animal] ? prefs.animal : "gato";
   }
   let desenhado = "";
@@ -683,20 +1184,39 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
     pulo.innerHTML = svgDe(a);
     const trocou = !!desenhado;
     desenhado = id;
+    conquista = conhecer(id);
     return trocou;
   }
+  /* Conquista leve (só neste navegador): quantos bichos diferentes já apareceram */
+  const MARCOS = [5, 10, 15, 20];
+  let conquista = "";
+  function conhecer(id) {
+    const lista = (Array.isArray(prefs.conhecidos) ? prefs.conhecidos : []).filter((x) => ANIMAIS[x]);
+    if (lista.includes(id)) return "";
+    lista.push(id);
+    prefs.conhecidos = lista;
+    gravarPrefs();
+    if (lista.length === IDS_ORDEM.length) return `🏅 Você conheceu todos os ${lista.length} bichos!`;
+    return MARCOS.includes(lista.length) ? `🏅 Você já conheceu ${lista.length} bichos!` : "";
+  }
   const animal = () => ANIMAIS[desenhado] || ANIMAIS.gato;
-  if (script && "galeria" in script.dataset) window.__mascoteGaleria = { animais: ANIMAIS, ordem: IDS_ORDEM, svg: (id) => svgDe(ANIMAIS[id]), sorteioDoDia };
+  /* Galeria de dev: sorteioDoDia(dia, semente, evitar, rodada) é puro; o resultado depende da semente deste navegador */
+  if (script && "galeria" in script.dataset) {
+    window.__mascoteGaleria = { animais: ANIMAIS, ordem: IDS_ORDEM, svg: (id) => svgDe(ANIMAIS[id]), sorteioDoDia, semente, novaSemente, tamanhoHistorico: TAM_HISTORICO };
+  }
   const montar = () => { if (!camada.isConnected) document.body.appendChild(camada); };
   if (document.body) montar(); else document.addEventListener("DOMContentLoaded", montar);
 
   /* ---------- Estado ---------- */
-  const m = { x: 40, y: -100, alvoX: 40, dir: 1, trilha: "base", estado: "parar", ate: 0, vy: 0, pose: "sentado" };
+  const m = { x: 40, y: -100, alvoX: 40, dir: 1, trilha: "base", estado: "parar", ate: 0, vy: 0, pose: "sentado", turboAte: 0 };
   let ultimaAtividade = performance.now();
   let pedido = 0, ultimoQuadro = 0, rects = { grade: null, barra: null }, ultimaMedida = 0;
   let mouse = { x: -999, y: -999 };
-  let temporizadorBalao = 0, temporizadorClique = 0, proximaPiscada = performance.now() + 3000;
-  let proximoEspecial = performance.now() + 40000 + Math.random() * 50000;
+  let temporizadorBalao = 0, temporizadorClique = 0, temporizadorHover = 0, intervaloCoracoes = 0, proximaPiscada = performance.now() + 3000;
+  let cliquesRecentes = [], empolgadoAte = 0, soltouEm = 0;
+  /* Especial espontâneo: 25–60 s (modo Animado: 15–35 s) */
+  const intervaloEspecial = () => (animado() ? 15000 + Math.random() * 20000 : 25000 + Math.random() * 35000);
+  let proximoEspecial = performance.now() + intervaloEspecial();
 
   const classe = (c, sim) => el.classList.toggle(c, !!sim);
   const POSES = ["sentado", "lambendo", "olhando", "bocejando"];
@@ -707,7 +1227,25 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
     clearTimeout(temporizadorBalao);
     temporizadorBalao = setTimeout(() => balao.classList.remove("visivel"), ms);
   }
-  function efeitoUnico(c, ms) { el.classList.remove(c); void el.offsetWidth; el.classList.add(c); setTimeout(() => el.classList.remove(c), ms); }
+  /* Classes de uma vez só: cada uma tem o seu temporizador (re-disparar não é cortado pelo temporizador antigo) */
+  const temporizadoresUnicos = {};
+  function efeitoUnico(c, ms) {
+    clearTimeout(temporizadoresUnicos[c]);
+    el.classList.remove(c); void el.offsetWidth; el.classList.add(c);
+    temporizadoresUnicos[c] = setTimeout(() => el.classList.remove(c), ms);
+  }
+  /* Ações de um tempo (espontâneas e de clique): limpas ao arrastar, dormir ou fazer especial */
+  const ACOES = ["espreguicando", "cocando", "abanando", "cochilando", "cheirando", "inclinando", "dancando", "rolando", "sacudindo", "saltitando", "tonto", "aliviado"];
+  function limparAcoes() { ACOES.forEach((c) => { clearTimeout(temporizadoresUnicos[c]); el.classList.remove(c); }); }
+  function acao(c, ms) {
+    limparAcoes();
+    pose("");
+    classe("andando", false);
+    m.estado = "parar";
+    m.ate = performance.now() + ms + 300;
+    proximoEspecial = Math.max(proximoEspecial, performance.now() + ms + 8000);
+    efeitoUnico(c, ms);
+  }
   desenhar();
 
   /* ---------- Trilhas: borda de baixo da planilha e topo da barra de ferramentas ---------- */
@@ -757,10 +1295,18 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
     const t = trilhaAtual();
     if (!t) return;
     const sorteio = Math.random();
-    if (sorteio < 0.55) {
+    /* Modo Animado: menos passeio comum e mais brincadeira */
+    const passeio = animado() ? 0.4 : 0.5;
+    if (sorteio < passeio) {
       m.alvoX = t.min + Math.random() * (t.max - t.min);
       m.estado = "passear";
-    } else if (sorteio < 0.65 && rects.barra && rects.grade) {
+      /* Corridinha: vai mais longe e mais rápido por 1–2 s */
+      if (Math.random() < (animado() ? 0.25 : 0.14) && t.max - t.min > 160) {
+        const longe = m.x - t.min > t.max - m.x ? t.min : t.max;
+        m.alvoX = longe + (longe === t.min ? 1 : -1) * Math.random() * 40;
+        m.turboAte = agora + 1000 + Math.random() * 1000;
+      }
+    } else if (sorteio < passeio + 0.08 && rects.barra && rects.grade) {
       /* Visita rápida à outra trilha (some e aparece lá) */
       el.classList.add("escondido");
       setTimeout(() => {
@@ -770,6 +1316,8 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
         el.classList.remove("escondido");
       }, 320);
       m.estado = "parar"; m.ate = agora + 900; pose("sentado");
+    } else if (Math.random() < (animado() ? 0.65 : 0.5)) {
+      comportamento(agora);
     } else {
       m.estado = "parar";
       m.ate = agora + 2500 + Math.random() * 4500;
@@ -779,7 +1327,28 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
     /* Visita à barra dura pouco: volta para baixo da planilha */
     if (m.trilha === "barra" && m.estado === "parar" && Math.random() < 0.5) m.ate = agora + 1500;
   }
+  /* Comportamentos espontâneos (sorteio com pesos): espreguiçar, coçar a orelha, abanar para a pessoa,
+     cochilo curto com susto, cheirar o chão e inclinar a cabeça */
+  const COMPORTAMENTOS = [
+    { c: "espreguicando", ms: 1800, peso: 3 },
+    { c: "cocando", ms: 1600, peso: 3 },
+    { c: "abanando", ms: 1500, peso: 3, antes() { if (mouse.x > 0) m.dir = mouse.x < m.x + L / 2 ? -1 : 1; } },
+    { c: "cochilando", ms: 2400, peso: 2, depois: [1850, () => falar("Hã?! Tô acordado! 😳", 1300)] },
+    { c: "cheirando", ms: 1600, peso: 3 },
+    { c: "inclinando", ms: 1300, peso: 2, antes() { if (Math.random() < 0.4) falar("?", 900); } }
+  ];
+  function comportamento() {
+    const total = COMPORTAMENTOS.reduce((s, x) => s + x.peso, 0);
+    let r = Math.random() * total;
+    const b = COMPORTAMENTOS.find((x) => (r -= x.peso) < 0) || COMPORTAMENTOS[0];
+    if (b.antes) b.antes();
+    acao(b.c, b.ms);
+    m.ate += 400 + Math.random() * 1200;
+    if (b.depois) setTimeout(() => { if (el.classList.contains(b.c)) b.depois[1](); }, b.depois[0]);
+    setTimeout(() => { if (m.estado === "parar" && !m.pose) pose("sentado"); }, b.ms);
+  }
   function dormir() {
+    limparAcoes();
     m.estado = "dormir"; pose(""); classe("andando", false); classe("dormindo", true);
   }
   function acordar() {
@@ -788,13 +1357,18 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
     pose("bocejando");
     m.estado = "parar"; m.ate = performance.now() + 1800;
     ultimaAtividade = performance.now();
+    proximoEspecial = Math.max(proximoEspecial, performance.now() + 10000);
     setTimeout(() => { if (m.pose === "bocejando") pose("sentado"); }, 1400);
   }
   const limiteSono = () => (horaBrasilia() >= 18 || horaBrasilia() < 6 ? SONO_NOITE_MS : SONO_MS) * animal().sono;
-  /* Especial do bicho (clique duplo ou, de vez em quando, parado). Com "menos movimento", nada animado. */
+  /* Especial do bicho (clique duplo ou, de vez em quando, parado). No modo Calmo, nada animado. */
+  let especialAte = 0;
   function fazerEspecial() {
     const e = animal().especial;
-    if (!e || quieto() || ["dormir", "arrastar", "cair"].includes(m.estado)) return false;
+    if (!e || quieto() || ["dormir", "arrastar", "cair"].includes(m.estado) || performance.now() < especialAte) return false;
+    especialAte = performance.now() + e.ms + 200;
+    proximoEspecial = performance.now() + intervaloEspecial();
+    limparAcoes();
     pose("");
     classe("andando", false);
     m.estado = "parar";
@@ -817,6 +1391,12 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
     if (!t && m.estado !== "arrastar") { el.classList.add("escondido"); agendar(); return; }
     if (m.estado !== "arrastar") el.classList.remove("escondido");
     if (t && m.y < -50) { m.x = t.max; m.y = t.y; m.alvoX = m.x; }
+    classe("quieto", quieto());
+    const correndo = m.estado === "passear" && agora < m.turboAte && !quieto();
+    if (correndo !== el.classList.contains("correndo")) {
+      classe("correndo", correndo);
+      el.style.setProperty("--vel", String(animal().velocidade * (correndo ? 2.2 : 1)));
+    }
 
     if (quieto()) {
       /* Menos movimento: sentado, parado no canto direito da trilha */
@@ -826,20 +1406,20 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
     } else if (m.estado === "passear" && t) {
       m.alvoX = Math.min(Math.max(m.alvoX, t.min), t.max);
       const dx = m.alvoX - m.x;
-      const passo = VELOCIDADE * animal().velocidade * dt;
-      if (Math.abs(dx) <= passo) { m.x = m.alvoX; m.estado = "parar"; m.ate = agora + 1200 + Math.random() * 2500; pose("sentado"); classe("andando", false); }
+      const passo = VELOCIDADE * animal().velocidade * (correndo ? 2.2 : 1) * dt;
+      if (Math.abs(dx) <= passo) { m.x = m.alvoX; m.estado = "parar"; m.turboAte = 0; m.ate = agora + 1200 + Math.random() * 2500; pose("sentado"); classe("andando", false); }
       else { m.x += Math.sign(dx) * passo; m.dir = Math.sign(dx); classe("andando", true); pose(""); }
       m.y = t.y;
     } else if (m.estado === "parar" && t) {
       classe("andando", false);
       m.x = Math.min(Math.max(m.x, t.min), t.max);
       m.y = t.y;
-      if (agora > proximoEspecial) { proximoEspecial = agora + 40000 + Math.random() * 50000; if (fazerEspecial()) { agendar(); return; } }
+      if (agora > proximoEspecial) { proximoEspecial = agora + intervaloEspecial(); if (fazerEspecial()) { agendar(); return; } }
       if (agora > m.ate) decidir(agora);
     } else if (m.estado === "cair" && t) {
       m.vy += 1500 * dt;
       m.y += m.vy * dt;
-      if (m.y >= t.y) { m.y = t.y; m.vy = 0; m.estado = "parar"; m.ate = agora + 1500; pose("sentado"); efeitoUnico("pousando", 350); }
+      if (m.y >= t.y) { m.y = t.y; m.vy = 0; m.estado = "parar"; m.ate = agora + 1500; pose("sentado"); efeitoUnico("pousando", 350); depoisDoPouso(); }
     } else if (m.estado === "dormir" && t) {
       m.x = Math.min(Math.max(m.x, t.min), t.max); m.y = t.y;
     }
@@ -879,13 +1459,30 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
   addEventListener("scroll", () => { medir(); }, { passive: true, capture: true });
 
   /* ---------- Interações com o bichinho ---------- */
+  /* Hover prolongado (~1,5 s): ronrona sem parar, fecha os olhos feliz e solta coraçõezinhos (no modo Calmo, só o ronrom) */
+  function pararCarinhoLongo() {
+    clearTimeout(temporizadorHover); clearInterval(intervaloCoracoes);
+    temporizadorHover = 0; intervaloCoracoes = 0;
+    classe("apaixonado", false);
+  }
   el.addEventListener("pointerenter", () => {
     if (m.estado === "dormir") acordar();
     classe("carinho", true);
     if (m.estado !== "arrastar") falar(animal().ronrom, 1400);
+    pararCarinhoLongo();
+    temporizadorHover = setTimeout(() => {
+      if (!el.classList.contains("carinho") || m.estado === "arrastar" || arraste) return;
+      falar(`${animal().ronrom} 💕`, 60000);
+      if (quieto()) return;
+      classe("apaixonado", true);
+      coracao(true);
+      intervaloCoracoes = setInterval(() => { if (el.classList.contains("apaixonado")) coracao(true); }, 900);
+    }, 1500);
   });
   el.addEventListener("pointerleave", () => {
     classe("carinho", false);
+    if (el.classList.contains("apaixonado") || intervaloCoracoes) balao.classList.remove("visivel");
+    pararCarinhoLongo();
     el.querySelectorAll(".m-pupilas").forEach((p) => { p.style.transform = ""; });
   });
   let arraste = null;
@@ -899,6 +1496,7 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
     if (!arraste) return;
     if (!arraste.movendo && Math.hypot(e.clientX - arraste.x0, e.clientY - arraste.y0) > 5) {
       arraste.movendo = true;
+      pararCarinhoLongo(); limparAcoes(); classe("correndo", false); m.turboAte = 0;
       m.estado = "arrastar"; pose(""); classe("andando", false); classe("dormindo", false);
       classe("pendurado", true); classe("arrastando", true);
       falar("Iiih!", 900);
@@ -913,6 +1511,7 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
     const movia = arraste.movendo;
     arraste = null;
     if (!movia) return;
+    soltouEm = performance.now();
     classe("pendurado", false); classe("arrastando", false);
     /* Cai na trilha de baixo mais próxima (a da planilha, ou a da barra se estiver abaixo) */
     medir();
@@ -922,47 +1521,97 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
     if (!t) { m.estado = "parar"; return; }
     m.trilha = nome;
     m.x = Math.min(Math.max(m.x, t.min), t.max);
-    if (m.y > t.y) { m.y = t.y; m.estado = "parar"; m.ate = performance.now() + 1200; pose("sentado"); efeitoUnico("pousando", 350); }
+    if (m.y > t.y) { m.y = t.y; m.estado = "parar"; m.ate = performance.now() + 1200; pose("sentado"); efeitoUnico("pousando", 350); depoisDoPouso(); }
     else { m.vy = 0; m.estado = quieto() ? "parar" : "cair"; if (quieto()) m.y = t.y; }
   };
+  /* Depois de arrastar e pousar: fica tonto (com estrelinhas) ou aliviado por ~1 s */
+  function depoisDoPouso() {
+    if (quieto()) return;
+    setTimeout(() => {
+      if (m.estado !== "parar") return;
+      if (Math.random() < 0.5) { acao("tonto", 1000); falar("Tô tonto… 💫", 1200); EFEITOS.estrelas(); }
+      else { acao("aliviado", 1100); falar("Ufa!", 1100); }
+      m.ate = performance.now() + 1600;
+      setTimeout(() => { if (m.estado === "parar" && !m.pose) pose("sentado"); }, 1100);
+    }, 360);
+  }
   el.addEventListener("pointerup", soltar);
   el.addEventListener("pointercancel", soltar);
-  el.addEventListener("click", (e) => {
-    if (e.detail > 1) return;
-    clearTimeout(temporizadorClique);
-    temporizadorClique = setTimeout(() => {
-      if (m.estado === "dormir") acordar();
-      if (!quieto()) efeitoUnico("pulando", 600);
-      efeitoUnico("miando", 700);
-      if (Math.random() < 0.4 && !quieto()) coracao();
-      else { const f = [animal().oi, ...FRASES, ...animal().frases]; falar(f[Math.floor(Math.random() * f.length)], 2200); }
-    }, 240);
-  });
-  el.addEventListener("dblclick", (e) => {
-    e.preventDefault();
-    clearTimeout(temporizadorClique);
+  const fraseQualquer = () => { const f = [animal().oi, ...FRASES, ...animal().frases]; return f[Math.floor(Math.random() * f.length)]; };
+  const sortearPeso = (lista) => { let r = Math.random() * lista.reduce((s, x) => s + x[0], 0); return (lista.find((x) => (r -= x[0]) < 0) || lista[0])[1]; };
+  /* Clique simples: varia entre pulo, gingada, rolar de lado, coração e estrelinhas */
+  function cliqueSimples() {
     if (m.estado === "dormir") acordar();
-    if (animal().especial) { fazerEspecial(); falar(animal().oi, 1400); return; }
-    if (!quieto()) efeitoUnico("girando", 700);
+    efeitoUnico("miando", 700);
+    if (quieto()) { falar(fraseQualquer(), 2200); return; }
+    const reacao = sortearPeso([
+      [30, () => { efeitoUnico("pulando", 600); falar(fraseQualquer(), 2200); }],
+      [15, () => { acao("dancando", 900); falar("♪ Dancinha! ♪", 1200); }],
+      [15, () => { acao("rolando", 900); falar("Weee!", 1000); }],
+      [20, () => { efeitoUnico("pulando", 600); coracao(); }],
+      [20, () => { efeitoUnico("pulando", 600); EFEITOS.estrelas(); falar(fraseQualquer(), 2000); }]
+    ]);
+    reacao();
+  }
+  /* Clique duplo: especial do bicho (às vezes com partículas); sem especial, gira, sacode ou dá saltitos */
+  function cliqueDuplo() {
+    if (m.estado === "dormir") acordar();
+    if (animal().especial && fazerEspecial()) {
+      falar(animal().oi, 1400);
+      if (Math.random() < 0.4) setTimeout(() => (Math.random() < 0.5 ? EFEITOS.estrelas() : confete(8)), animal().especial.ms - 200);
+      return;
+    }
+    if (!quieto()) {
+      const c = sortearPeso([[2, "girando"], [1, "sacudindo"], [1, "saltitando"]]);
+      if (c === "girando") efeitoUnico("girando", 700); else acao(c, c === "sacudindo" ? 700 : 900);
+    }
     falar("Uiii!", 1000);
+  }
+  /* Clique triplo (ou 3 cliques em 1 s): sequência "empolgado" */
+  const FRASES_EMPOLGADO = ["Uhuuu! 🎉", "Tô empolgado demais!", "De novo! De novo!", "Isso é que é carinho!"];
+  function empolgado() {
+    const agora = performance.now();
+    if (agora < empolgadoAte) return;
+    empolgadoAte = agora + 1500;
+    cliquesRecentes = [];
+    if (m.estado === "dormir") acordar();
+    efeitoUnico("miando", 900);
+    falar(FRASES_EMPOLGADO[Math.floor(Math.random() * FRASES_EMPOLGADO.length)], 1800);
+    if (quieto()) return;
+    acao("saltitando", 900);
+    efeitoUnico("pulando", 600);
+    confete(8);
+    setTimeout(() => coracao(), 300);
+  }
+  el.addEventListener("click", (e) => {
+    if (performance.now() - soltouEm < 300) return;
+    const agora = performance.now();
+    cliquesRecentes = cliquesRecentes.filter((t) => agora - t < 1000).concat(agora);
+    const n = cliquesRecentes.length >= 3 ? 3 : Math.min(e.detail || 1, 3);
+    clearTimeout(temporizadorClique);
+    /* Espera um pouco para saber se vem outro clique (simples x duplo x triplo) */
+    if (n >= 3) { empolgado(); return; }
+    temporizadorClique = setTimeout(n === 2 ? cliqueDuplo : cliqueSimples, n === 2 ? 260 : 240);
   });
+  el.addEventListener("dblclick", (e) => { e.preventDefault(); });
   el.addEventListener("contextmenu", (e) => { e.preventDefault(); abrirPreferencias(); });
 
   /* ---------- Efeitos ---------- */
-  function coracao() {
+  function coracao(pequeno = false) {
     const c = document.createElement("span");
-    c.className = "mascote-efeito mascote-coracao";
+    c.className = `mascote-efeito mascote-coracao${pequeno ? " pequeno" : ""}`;
     c.textContent = "❤";
-    c.style.left = `${m.x + L / 2 - 8}px`;
+    c.style.left = `${m.x + L / 2 - (pequeno ? 4 : 8) + (pequeno ? Math.round((Math.random() - 0.5) * 24) : 0)}px`;
     c.style.top = `${m.y - 6}px`;
     c.style.color = "#e5486b";
+    if (pequeno) c.style.setProperty("--dx", `${Math.round((Math.random() - 0.5) * 16)}px`);
     camada.appendChild(c);
     setTimeout(() => c.remove(), 1200);
   }
-  function confete() {
+  function confete(n = 16) {
     if (quieto()) return;
     const cores = ["#9b7fd4", "#f2c94c", "#5bbf7a", "#e5486b", "#4aa3df", "#f2994a"];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < n; i++) {
       const c = document.createElement("span");
       c.className = "mascote-efeito mascote-confete";
       c.style.left = `${m.x + L / 2}px`;
@@ -996,7 +1645,27 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
   const EFEITOS = {
     fumaca() { [0, 1, 2].forEach((i) => efeito("mascote-fumaca", "", { "--dx": `${lado() * (4 + i * 4)}px` }, i * 170, 1200)); },
     notas() { ["♪", "♫", "♪"].forEach((s, i) => efeito("mascote-nota", s, { "--dx": `${lado() * (6 + i * 5)}px`, "--r": `${(i - 1) * 18}deg` }, i * 230, 1300)); },
-    rugido() { [0, 1].forEach((i) => efeito("mascote-rugido", "", { "--dx": `${lado() * (10 + i * 6)}px`, "--sx": String(lado()) }, i * 180, 900)); }
+    rugido() { [0, 1].forEach((i) => efeito("mascote-rugido", "", { "--dx": `${lado() * (10 + i * 6)}px`, "--sx": String(lado()) }, i * 180, 900)); },
+    bolhas() { [0, 1, 2, 3].forEach((i) => efeito("mascote-bolha", "", { "--dx": `${lado() * (2 + i * 3) + (i % 2 ? -4 : 4)}px` }, i * 200, 1400)); },
+    zumbido() { ["bzz", "bzzz", "bz"].forEach((s, i) => efeito("mascote-zumbido", s, { "--dx": `${lado() * (8 + i * 6)}px`, "--r": `${(i - 1) * 12}deg` }, i * 260, 1100)); },
+    /* Estrelinhas em volta do corpo (não saem da boca) */
+    estrelas() {
+      if (quieto() || document.querySelector(`${SEL_GRADE} .editor-celula`)) return;
+      for (let i = 0; i < 6; i++) {
+        const c = document.createElement("span");
+        const ang = (i / 6) * Math.PI * 2 + Math.random() * 0.5;
+        c.className = "mascote-efeito mascote-estrela";
+        c.textContent = i % 2 ? "✦" : "★";
+        c.style.left = `${m.x + L / 2 - 5}px`;
+        c.style.top = `${m.y + A * 0.3}px`;
+        c.style.setProperty("--dx", `${Math.round(Math.cos(ang) * 30)}px`);
+        c.style.setProperty("--dy", `${Math.round(Math.sin(ang) * 22 - 14)}px`);
+        c.style.setProperty("--r", `${Math.round((Math.random() - 0.5) * 240)}deg`);
+        c.style.animationDelay = `${i * 60}ms`;
+        camada.appendChild(c);
+        setTimeout(() => c.remove(), 1500);
+      }
+    }
   };
 
   /* ---------- Reações à planilha ---------- */
@@ -1030,6 +1699,11 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
       if (!quieto()) efeitoUnico("pulando", 600);
       falar(animal().oi, 2000);
     }
+    if (conquista && ativo()) {
+      const texto = conquista;
+      conquista = "";
+      setTimeout(() => { falar(texto, 2600); confete(10); }, trocou ? 2100 : 600);
+    }
   }
   function abrirPreferencias() {
     const antigo = document.querySelector("dialog.mascote-pref");
@@ -1038,31 +1712,58 @@ ${Object.keys(ANIMAIS).filter((id) => ANIMAIS[id].escuro).map((id) => `[data-tem
     d.className = `perfil mascote-pref${quieto() ? " sem-movimento" : ""}`;
     d.setAttribute("aria-label", "Mascote");
     const escondidoHoje = prefs.escondidoEm === hojeBrasilia();
-    const hoje = ANIMAIS[sorteioDoDia(hojeBrasilia())];
-    const surpresa = `<label class="mascote-animal" title="Hoje: ${hoje.nome}"><input type="radio" name="animal" value="surpresa"${prefs.animal === "surpresa" ? " checked" : ""}><svg viewBox="0 0 64 56" aria-hidden="true" focusable="false"><circle cx="32" cy="28" r="19" fill="#9b7fd4"/><text x="32" y="37" text-anchor="middle" font-size="26" font-weight="700" fill="#fff" font-family="system-ui, sans-serif">?</text></svg><span>Surpresa do dia</span></label>`;
+    const surpresa = `<label class="mascote-animal" data-surpresa title="Hoje neste computador: ${ANIMAIS[previaSurpresa()].nome}"><input type="radio" name="animal" value="surpresa"${prefs.animal === "surpresa" ? " checked" : ""}><svg viewBox="0 0 64 56" aria-hidden="true" focusable="false"><circle cx="32" cy="28" r="19" fill="#9b7fd4"/><text x="32" y="37" text-anchor="middle" font-size="26" font-weight="700" fill="#fff" font-family="system-ui, sans-serif">?</text></svg><span>Surpresa do dia</span></label>`;
     const atual = prefs.animal === "surpresa" ? "surpresa" : idAnimal();
+    const nivel = prefs.menosMovimento ? "calmo" : prefs.animado ? "animado" : "normal";
+    const opcaoNivel = (v, texto) => `<label class="check"><input type="radio" name="nivel" value="${v}"${nivel === v ? " checked" : ""}> ${texto}</label>`;
     d.innerHTML = `<form class="form-dialog" method="dialog">
       <div class="form-topo"><h2>Mascote</h2><button type="button" class="perfil-fechar" data-fechar aria-label="Fechar"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
       <label class="check"><input type="checkbox" name="mostrar"${prefs.mostrar ? " checked" : ""}> Mostrar mascote</label>
-      <fieldset class="mascote-animais"><legend>Animal</legend>
+      <fieldset class="mascote-animais"><legend>Animal (${IDS_ORDEM.length} bichos)</legend>
         <div class="mascote-grade-animais">${surpresa}${IDS_ORDEM.map((id) => `<label class="mascote-animal a-${id}"><input type="radio" name="animal" value="${id}"${atual === id ? " checked" : ""}><svg viewBox="0 0 64 56" aria-hidden="true" focusable="false">${ANIMAIS[id].svg}</svg><span>${ANIMAIS[id].nome}</span></label>`).join("")}</div>
+        <p class="mascote-surpresa-info" data-info-surpresa hidden><span>Hoje neste computador: <strong data-nome-surpresa></strong>. Amanhã é outra surpresa.</span><button type="button" class="btn btn-secundario btn-mini" data-sortear-outro>Sortear outro hoje</button></p>
       </fieldset>
       <div class="mascote-opcoes">
-        <label class="check"><input type="checkbox" name="menos"${prefs.menosMovimento ? " checked" : ""}> Menos movimento (fica sentado, sem andar)</label>
+        <fieldset class="mascote-movimento"><legend>Movimento</legend>
+          ${opcaoNivel("calmo", "Calmo (fica sentado, sem andar)")}
+          ${opcaoNivel("normal", "Normal")}
+          ${opcaoNivel("animado", "Animado (mais brincadeiras e especiais)")}
+        </fieldset>
         <label class="check"><input type="checkbox" name="hoje"${escondidoHoje ? " checked" : ""}> Esconder por hoje</label>
       </div>
-      <p class="apoio">Sem som. Clique no bichinho para brincar, arraste para mudar de lugar; o botão direito abre estas opções. Fica salvo neste navegador.</p>
+      <p class="mascote-conhecidos"></p>
+      <p class="apoio">Sem som. Clique, clique duplo ou triplo no bichinho para brincar; deixe o ponteiro em cima para um carinho; arraste para mudar de lugar; o botão direito abre estas opções. Fica salvo neste navegador.</p>
       <div class="form-botoes"><button type="submit" class="btn">Pronto</button></div>
     </form>`;
     document.body.appendChild(d);
     const form = d.querySelector("form");
+    const info = d.querySelector("[data-info-surpresa]");
+    const atualizarInfo = () => {
+      const ehSurpresa = prefs.animal === "surpresa";
+      info.hidden = !ehSurpresa;
+      const nome = ANIMAIS[ehSurpresa ? surpresaDeHoje() : previaSurpresa()].nome;
+      d.querySelector("[data-nome-surpresa]").textContent = nome;
+      d.querySelector("[data-surpresa]").title = `Hoje neste computador: ${nome}`;
+      const n = (Array.isArray(prefs.conhecidos) ? prefs.conhecidos : []).filter((x) => ANIMAIS[x]).length;
+      d.querySelector(".mascote-conhecidos").textContent = `Bichos que já apareceram neste navegador: ${n} de ${IDS_ORDEM.length}.`;
+    };
     form.addEventListener("change", () => {
       prefs.mostrar = form.elements.mostrar.checked;
       prefs.animal = (form.querySelector('input[name="animal"]:checked') || {}).value || "gato";
-      prefs.menosMovimento = form.elements.menos.checked;
+      const nivelEscolhido = (form.querySelector('input[name="nivel"]:checked') || {}).value || "normal";
+      prefs.menosMovimento = nivelEscolhido === "calmo";
+      prefs.animado = nivelEscolhido === "animado";
+      d.classList.toggle("sem-movimento", quieto());
       prefs.escondidoEm = form.elements.hoje.checked ? hojeBrasilia() : "";
       aplicarPrefs();
+      atualizarInfo();
     });
+    d.querySelector("[data-sortear-outro]").addEventListener("click", () => {
+      surpresaDeHoje(true);
+      aplicarPrefs();
+      atualizarInfo();
+    });
+    atualizarInfo();
     d.addEventListener("click", (e) => { if (e.target === d || e.target.closest("[data-fechar]")) d.close(); });
     d.addEventListener("close", () => setTimeout(() => d.remove(), 300));
     d.showModal();

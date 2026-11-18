@@ -378,6 +378,78 @@ test("estrutura com opção removida (ativa, removidaEm, removidaPor, nomesAnter
   }));
 });
 
+/* ---------- Gestor: alimenta e edita qualquer linha; também cria e edita no VCORP/VCERT ---------- */
+const GESTORA = "gestora@valid.com";
+async function gestora(uid = "pc-gestora") {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    const f = ctx.firestore();
+    await setDoc(doc(f, "inventario-identidades", GESTORA), identidade(GESTORA, "Gestora Teste", { papel: "gestor" }));
+    await setDoc(doc(f, "inventario-emails", GESTORA), {});
+    await setDoc(doc(f, "inventario-colunas", "vcorp-hw"), { titulo: "INVENTÁRIO VCORP · HARDWARE", versao: 1, colunas: [{ id: "hostname" }], gruposColunas: [], regras: {}, colunasEquipe: ["hostname", "numeroSerie", "patrimonio", "modelo"], atualizadoEm: antes(5), atualizadoPor: LAYS_EMAIL });
+    await setDoc(doc(f, "inventario-colunas", "vcorp-sw"), { titulo: "INVENTÁRIO VCORP · SOFTWARE", versao: 1, colunas: [{ id: "hostname" }], gruposColunas: [], regras: {}, colunasEquipe: ["hostname", "nomeAplicacao", "versao", "mesAno"], atualizadoEm: antes(5), atualizadoPor: LAYS_EMAIL });
+  });
+  const db = anonimo(uid);
+  await vincular(db, uid, GESTORA, "Gestora Teste");
+  return db;
+}
+const LAYS_EMAIL = "lays.almeida@valid.com";
+function criarPerfil(db, colecao, id, campos, { uid = "pc-gestora", nome = "Gestora Teste", email = GESTORA, historico = true, extra = {} } = {}) {
+  const b = writeBatch(db);
+  b.set(doc(db, colecao, id), { campos, ...autoria("criado", uid, nome, email), ...autoria("atualizado", uid, nome, email), exclusao: null, ...extra });
+  if (historico) b.set(doc(db, colecao, id, "historico", `h-${id}`), { acao: "criar", coluna: "", colunaNome: "", antes: "", depois: "x", por: uid, porNome: nome, porEmail: email, em: serverTimestamp() });
+  return b.commit();
+}
+const editarPerfil = (db, colecao, id, mudancas, { uid = "pc-gestora", nome = "Gestora Teste", email = GESTORA } = {}) => updateDoc(doc(db, colecao, id), {
+  ...Object.fromEntries(Object.entries(mudancas).map(([k, v]) => [`campos.${k}`, v])),
+  atualizadoPor: uid, atualizadoPorNome: nome, atualizadoPorEmail: email, atualizadoEm: serverTimestamp()
+});
+test("gestor: a administradora define o papel; papel desconhecido recusa", async () => {
+  await assertSucceeds(updateDoc(doc(admin(), "inventario-identidades", DAVI), { papel: "gestor", atualizadoEm: serverTimestamp() }));
+  await assertFails(updateDoc(doc(admin(), "inventario-identidades", DAVI), { papel: "chefe", atualizadoEm: serverTimestamp() }));
+  await assertFails(updateDoc(doc(await equipeDavi(), "inventario-identidades", DAVI), { papel: "gestor", atualizadoEm: serverTimestamp() }));
+});
+test("gestor: cadastra no Inventário de Equipamentos e edita linha de outra pessoa mesmo com 'só as próprias'", async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => { await setDoc(doc(ctx.firestore(), "inventario-config", "estrutura"), { ...ESTRUTURA, regras: { ...ESTRUTURA.regras, equipeEdita: "proprias" }, atualizadoEm: antes(1), atualizadoPor: LAYS_EMAIL }); });
+  const db = await gestora();
+  await assertSucceeds(criarEquipamento(db, "pc-gestora", "g1", { hostname: "NB-GEST1", status: "em-uso" }, { nome: "Gestora Teste", email: GESTORA }));
+  await assertSucceeds(editar(db, "pc-gestora", "e1", { status: "disponivel" }, { nome: "Gestora Teste", email: GESTORA }));
+  await assertFails(editar(db, "pc-gestora", "e1", { hostname: "NB-TROCA" }, { nome: "Gestora Teste", email: GESTORA }));
+  const jose = anonimo("pc-jose");
+  await vincular(jose, "pc-jose", "jose@valid.com", "José Antônio Çaçapava");
+  await assertFails(editar(jose, "pc-jose", "e1", { status: "em-uso" }, { nome: "José Antônio Çaçapava", email: "jose@valid.com" }));
+});
+test("gestor: NÃO exclui, não mexe na estrutura nem lê backups e lixeira", async () => {
+  const db = await gestora();
+  await assertFails(deleteDoc(doc(db, "inventario", "e1")));
+  await assertFails(setDoc(doc(db, "inventario-config", "estrutura"), { ...ESTRUTURA, atualizadoEm: serverTimestamp(), atualizadoPor: GESTORA }));
+  await assertFails(getDocs(collection(db, "inventario-backups")));
+  await assertFails(getDocs(collection(db, "inventario-lixeira")));
+});
+test("VCORP/VCERT: gestor cria (com histórico) e edita; equipe N2 e leitura não gravam", async () => {
+  const db = await gestora();
+  await assertSucceeds(criarPerfil(db, "inventario-vcorp-hw", "h1", { hostname: "NB-VC1", numeroSerie: "S1" }));
+  await assertSucceeds(editarPerfil(db, "inventario-vcorp-hw", "h1", { modelo: "Latitude 5440" }));
+  await assertSucceeds(criarPerfil(db, "inventario-vcorp-sw", "s1", { hostname: "NB-VC1", nomeAplicacao: "Office", versao: "2021", mesAno: "11/2026" }));
+  const equipe = await equipeDavi();
+  await assertFails(criarPerfil(equipe, "inventario-vcorp-hw", "h2", { hostname: "NB-VC2" }, { uid: "pc-davi", nome: "Davi Santos", email: DAVI }));
+  await assertFails(editarPerfil(equipe, "inventario-vcorp-hw", "h1", { modelo: "X" }, { uid: "pc-davi", nome: "Davi Santos", email: DAVI }));
+});
+test("VCORP/VCERT: gestor não exclui, não usa coluna fora das liberadas, não assina por outra pessoa e respeita o formato", async () => {
+  const db = await gestora();
+  await assertSucceeds(criarPerfil(db, "inventario-vcorp-hw", "h1", { hostname: "NB-VC1" }));
+  await assertFails(deleteDoc(doc(db, "inventario-vcorp-hw", "h1")));
+  await assertFails(editarPerfil(db, "inventario-vcorp-hw", "h1", { custo: "100" }));
+  await assertFails(criarPerfil(db, "inventario-vcorp-hw", "h3", { hostname: "NB-VC3" }, { nome: "Outra Pessoa" }));
+  await assertFails(criarPerfil(db, "inventario-vcorp-hw", "h4", { hostname: "nb vc4" }));
+  await assertFails(criarPerfil(db, "inventario-vcorp-sw", "s2", { hostname: "NB-VC1", nomeAplicacao: "Office", mesAno: "11/2026" }));
+  await assertFails(criarPerfil(db, "inventario-vcorp-hw", "h5", { hostname: "NB-VC5" }, { extra: { importacao: "imp-1" } }));
+});
+test("VCORP/VCERT: histórico do gestor só entra junto com a própria mudança", async () => {
+  const db = await gestora();
+  await assertSucceeds(criarPerfil(db, "inventario-vcorp-hw", "h1", { hostname: "NB-VC1" }));
+  await assertFails(setDoc(doc(db, "inventario-vcorp-hw", "h1", "historico", "solto"), { acao: "editar", coluna: "", colunaNome: "", antes: "", depois: "x", por: "pc-gestora", porNome: "Gestora Teste", porEmail: GESTORA, em: serverTimestamp() }));
+});
+
 /* ---------- Aparência livre: padrão do Inventário (inventario-config/aparencia e aparencia-imagem) ---------- */
 const LAYS = "lays.almeida@valid.com";
 const TEMA = {

@@ -1324,12 +1324,17 @@ service cloud.firestore {
     function noInventario() {
       return request.auth != null && (adminInventario() || naListaInventario());
     }
-    // "admin" | "equipe" | "leitura"
+    // "admin" | "gestor" | "equipe" (Equipe N2) | "leitura"
+    // Gestor: tudo o que a equipe faz, em qualquer linha (sem "só as próprias"), e também cria e edita nas
+    // planilhas VCORP/VCERT. Não mexe em estrutura, backups, lixeira, índices nem exclui de vez.
     function papelInventario() {
       return adminInventario() ? 'admin' : perfilInventario().papel;
     }
     function equipeInventario() {
-      return naListaInventario() && papelInventario() == 'equipe';
+      return naListaInventario() && papelInventario() in ['equipe', 'gestor'];
+    }
+    function gestorInventario() {
+      return naListaInventario() && papelInventario() == 'gestor';
     }
     // Quem grava: e-mail da administradora ou uid da pessoa da equipe
     function autorInventario() {
@@ -1402,7 +1407,7 @@ service cloud.firestore {
       return adminInventario()
         && d.diff(resource.data).affectedKeys().hasOnly(['nome', 'nomeChave', 'papel', 'ativo', 'aprovado', 'revogadoAntesDe', 'atualizadoEm'])
         && nomePessoaValido(d.nome) && nomeChaveValida(d.nomeChave)
-        && d.papel in ['equipe', 'leitura'] && d.ativo is bool && d.aprovado is bool
+        && d.papel in ['gestor', 'equipe', 'leitura'] && d.ativo is bool && d.aprovado is bool
         && (!('revogadoAntesDe' in d) || d.revogadoAntesDe is timestamp)
         && d.atualizadoEm == request.time;
     }
@@ -1477,10 +1482,10 @@ service cloud.firestore {
       let alteradas = d.campos.diff(resource.data.campos).affectedKeys();
       return d.diff(resource.data).affectedKeys().hasOnly(['campos', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm'])
         && equipeInventario()
-        && regras.equipeEdita != 'nenhuma'
-        && (regras.equipeEdita == 'todas'
-          || (resource.data.get('criadoPorEmail', '') != '' && resource.data.get('criadoPorEmail', '') == perfilInventario().email
-            && (regras.janelaEdicaoHoras == 0 || request.time < resource.data.criadoEm + duration.value(regras.janelaEdicaoHoras, 'h'))))
+        && (papelInventario() == 'gestor' || (regras.equipeEdita != 'nenhuma'
+          && (regras.equipeEdita == 'todas'
+            || (resource.data.get('criadoPorEmail', '') != '' && resource.data.get('criadoPorEmail', '') == perfilInventario().email
+              && (regras.janelaEdicaoHoras == 0 || request.time < resource.data.criadoEm + duration.value(regras.janelaEdicaoHoras, 'h'))))))
         && d.campos is map && d.campos.size() <= 80
         && alteradas.hasOnly(cfg.colunasEquipe)
         && !alteradas.hasAny(cfg.get('colunasTravadas', []))
@@ -1676,7 +1681,8 @@ service cloud.firestore {
     }
 
     // ---------- INVENTÁRIO VCORP e VCERT (Hardware e Software) ----------
-    // Quem está no Inventário (administradora, equipe ou leitura) vê; só as administradoras gravam.
+    // Quem está no Inventário (administradora, gestor, equipe ou leitura) vê; administradoras e gestores gravam
+    // (gestor: só cria e edita, nas colunas liberadas da planilha, assinando com o próprio perfil; não exclui).
     // Registro: { campos: { idColuna: valor }, criadoPor, criadoPorNome, criadoPorEmail, criadoEm, atualizadoPor... }.
     // Software: NOME DA APLICAÇÃO (nomeAplicacao), VERSÃO (versao), HOSTNAME (hostname) e MÊS/ANO (mesAno) obrigatórios.
     // As colunas extras ficam no mesmo mapa "campos" (até 80 chaves; o tamanho de cada uma é conferido no app).
@@ -1710,6 +1716,35 @@ service cloud.firestore {
         && textoAte(d.get('importacao', ''), 60)
         && (colecao.matches('.*-sw$') ? softwareValido(d.campos) : hardwareValido(d.campos));
     }
+    // Gestor: as colunas alteradas têm de estar entre as liberadas (colunasEquipe de inventario-colunas/{planilha});
+    // na criação assina criadoPor e atualizadoPor; na edição só mudam campos e atualizadoPor.
+    function gestorGravaPerfil(colecao, criando) {
+      let d = request.resource.data;
+      let cfg = get(/databases/$(database)/documents/inventario-colunas/$(colecao.replace('^inventario-', ''))).data;
+      let alteradas = criando ? d.campos.keys().toSet() : d.campos.diff(resource.data.campos).affectedKeys();
+      return gestorInventario()
+        && d.keys().hasOnly(['campos', 'criadoPor', 'criadoPorNome', 'criadoPorEmail', 'criadoEm',
+          'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm', 'exclusao'])
+        && d.campos is map && d.campos.size() <= 80
+        && (!('colunasEquipe' in cfg) || alteradas.hasOnly(cfg.colunasEquipe))
+        && ((criando && d.get('exclusao', null) == null
+            && autoriaInventario(d.criadoPor, d.criadoPorNome, d.criadoPorEmail) && d.criadoEm == request.time)
+          || (!criando && d.diff(resource.data).affectedKeys().hasOnly(['campos', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm'])))
+        && autoriaInventario(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time
+        && (colecao.matches('.*-sw$') ? softwareValido(d.campos) : hardwareValido(d.campos));
+    }
+    // Histórico de uma linha VCORP/VCERT: administradora assina com o e-mail; gestor com o uid, junto da própria mudança
+    function historicoPerfilValido(colecao, registro) {
+      let h = request.resource.data;
+      return h.keys().hasOnly(['acao', 'coluna', 'colunaNome', 'antes', 'depois', 'por', 'porNome', 'porEmail', 'em'])
+        && textoAte(h.acao, 30) && textoAte(h.coluna, 40) && textoAte(h.colunaNome, 60)
+        && textoAte(h.antes, 500) && textoAte(h.depois, 500) && h.em == request.time
+        && ((adminInventario() && h.por == emailInventario())
+          || (gestorInventario() && h.por == request.auth.uid
+            && autoriaInventario(h.por, h.porNome, h.porEmail)
+            && getAfter(/databases/$(database)/documents/$(colecao)/$(registro)).data.atualizadoPor == request.auth.uid
+            && getAfter(/databases/$(database)/documents/$(colecao)/$(registro)).data.atualizadoEm == request.time));
+    }
     // Aparência padrão de cada planilha VCORP/VCERT: <coleção>-config/aparencia e aparencia-imagem (mesmo formato do Inventário)
     function configPerfil(c, documento) {
       return c in ['inventario-vcorp-hw-config', 'inventario-vcorp-sw-config', 'inventario-vcert-hw-config', 'inventario-vcert-sw-config']
@@ -1717,18 +1752,15 @@ service cloud.firestore {
     }
     match /{colecao}/{registro} {
       allow read: if (colecaoPerfil(colecao) || configPerfil(colecao, registro)) && noInventario();
-      allow create, update: if (colecaoPerfil(colecao) && registroPerfilValido(colecao))
+      allow create: if (colecaoPerfil(colecao) && (registroPerfilValido(colecao) || gestorGravaPerfil(colecao, true)))
+        || (configPerfil(colecao, registro) && aparenciaInventarioValida(registro));
+      allow update: if (colecaoPerfil(colecao) && (registroPerfilValido(colecao) || gestorGravaPerfil(colecao, false)))
         || (configPerfil(colecao, registro) && aparenciaInventarioValida(registro));
       allow delete: if (colecaoPerfil(colecao) || configPerfil(colecao, registro)) && adminInventario();
       // Histórico de cada linha (antes e depois de cada célula)
       match /historico/{evento} {
         allow read: if colecaoPerfil(colecao) && noInventario();
-        allow create: if colecaoPerfil(colecao) && adminInventario()
-          && request.resource.data.keys().hasOnly(['acao', 'coluna', 'colunaNome', 'antes', 'depois', 'por', 'porNome', 'porEmail', 'em'])
-          && textoAte(request.resource.data.acao, 30) && textoAte(request.resource.data.coluna, 40)
-          && textoAte(request.resource.data.colunaNome, 60)
-          && textoAte(request.resource.data.antes, 500) && textoAte(request.resource.data.depois, 500)
-          && request.resource.data.por == emailInventario() && request.resource.data.em == request.time;
+        allow create: if colecaoPerfil(colecao) && historicoPerfilValido(colecao, registro);
         allow update: if false;
         allow delete: if colecaoPerfil(colecao) && adminInventario();
       }

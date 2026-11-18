@@ -22,6 +22,12 @@
   /* Na galeria o bicho fica parado no quadro e as animações de uma vez repetem sem parar */
   .galeria .mascote { position: absolute; left: 0; top: 0; transform: none !important; opacity: 1 !important; pointer-events: none; }
   .galeria .mascote.pulando .m-pulo, .galeria .mascote.especial *, .galeria .mascote.especial .m-pulo { animation-iteration-count: infinite !important; }
+  .galeria .mascote.repetir *, .galeria .mascote.repetir .m-pulo { animation-iteration-count: infinite !important; }
+  button.testar { font-size: 11px; padding: 1px 6px; margin-top: 2px; cursor: pointer; }
+  .sorteio { padding: 12px; border-radius: 12px; margin-bottom: 18px; background: #fff; border: 1px solid #e3e3ea; overflow-x: auto; }
+  .sorteio h2 { font-size: 15px; margin: 0 0 4px; }
+  .sorteio td, .sorteio th { padding: 3px 8px; font-size: 12px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; }
+  .sorteio .repetido { background: #fde7ea; }
 </style>
 <script src="../comum/mascote.js" data-prefixo="galeria-dev" data-grade="#nao-existe" data-galeria></script>
 </head>
@@ -32,13 +38,17 @@
   <label><input type="checkbox" id="esquerda"> Olhando para a esquerda (espelhado)</label>
   <label><input type="checkbox" id="carinho-pupilas" checked> Pupilas deslocadas no "carinho"</label>
 </div>
+<section class="sorteio" id="sorteio"></section>
 <div id="galeria" class="galeria"></div>
 <script>
   const g = window.__mascoteGaleria;
   const POSES = [
     ["andando", "andando"], ["sentado", "sentado"], ["olhando", "olhando"], ["lambendo", "lambendo"], ["bocejando", "bocejando"],
-    ["dormindo", "dormindo"], ["carinho", "carinho"], ["preocupado", "preocupado"], ["pulando", "pulando"], ["miando", "miando"], ["especial", "especial"]
+    ["dormindo", "dormindo"], ["carinho", "carinho"], ["preocupado", "preocupado"], ["pulando", "pulando"], ["miando", "miando"], ["especial", "especial"],
+    ["espreguicando", "espreguiça"], ["cocando", "coça"], ["abanando", "abana"], ["cochilando", "cochilo"], ["cheirando", "cheira"], ["inclinando", "inclina"],
+    ["dancando", "dança"], ["rolando", "rola"], ["saltitando", "saltitos"], ["tonto", "tonto"], ["aliviado", "aliviado"], ["apaixonado", "carinho longo"]
   ];
+  const REPETIR = new Set(["espreguicando", "cocando", "abanando", "cochilando", "cheirando", "inclinando", "dancando", "rolando", "saltitando", "tonto"]);
   function quadro(id, pose) {
     const a = g.animais[id];
     const classes = ["mascote", `a-${id}`];
@@ -46,16 +56,50 @@
     if (a.ginga) classes.push("ginga");
     if (pose === "especial") { if (!a.especial) return `<div class="quadro"></div>`; classes.push("especial", a.especial.classe, ...(a.especial.poses || [])); }
     else classes.push(pose);
+    if (REPETIR.has(pose)) classes.push("repetir");
     const zzz = pose === "dormindo" ? '<span class="mascote-zzz">z</span><span class="mascote-zzz">z</span><span class="mascote-zzz">z</span>' : "";
     return `<div class="quadro"><div class="${classes.join(" ")}" style="--vel:${a.velocidade};--m-escala:${a.escala}" aria-hidden="true">${zzz}<div class="m-pulo">${g.svg(id)}</div></div></div>`;
   }
   function tabela(tema) {
     return `<section class="tema" data-tema="${tema}"><h2>Tema ${tema}</h2><table><thead><tr><th class="nome">Bicho</th>${POSES.map(([, r]) => `<th>${r}</th>`).join("")}</tr></thead><tbody>`
-      + g.ordem.map((id) => `<tr><th class="nome">${g.animais[id].nome}${g.animais[id].especial ? `<br><span style="font-weight:400;opacity:.7">${g.animais[id].especial.classe}</span>` : ""}</th>${POSES.map(([p]) => `<td>${quadro(id, p)}</td>`).join("")}</tr>`).join("")
+      + g.ordem.map((id) => `<tr><th class="nome">${g.animais[id].nome}${g.animais[id].especial ? `<br><span style="font-weight:400;opacity:.7">${g.animais[id].especial.classe}${g.animais[id].especial.efeito ? ` + ${g.animais[id].especial.efeito}` : ""}</span><br><button type="button" class="testar" data-testar="${id}">testar especial</button>` : ""}</th>${POSES.map(([p]) => `<td>${quadro(id, p)}</td>`).join("")}</tr>`).join("")
       + `</tbody></table></section>`;
   }
   const raiz = document.getElementById("galeria");
   raiz.innerHTML = tabela("claro") + tabela("escuro");
+  /* "testar especial": toca o especial da linha uma vez (sem repetição) */
+  raiz.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-testar]");
+    if (!b) return;
+    const a = g.animais[b.dataset.testar];
+    const m = b.closest("tr").querySelector(`.mascote.${a.especial.classe}`);
+    m.classList.remove("especial", a.especial.classe);
+    void m.offsetWidth;
+    m.classList.add(a.especial.classe);
+    setTimeout(() => m.classList.add("especial"), a.especial.ms + 300);
+  });
+  /* Simulação da Surpresa do dia: cada "computador" tem uma semente aleatória; mostra 14 dias seguidos com o histórico anti-repetição */
+  function simular() {
+    const dias = Array.from({ length: 14 }, (_, i) => new Date(Date.now() + i * 86400000).toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" }));
+    const pcs = Array.from({ length: 5 }, (_, i) => ({ nome: i === 0 ? "este navegador" : `computador ${i + 1}`, semente: i === 0 ? g.semente() : g.novaSemente() }));
+    const linhas = pcs.map((pc) => {
+      const hist = [];
+      return dias.map((dia) => {
+        const id = g.sorteioDoDia(dia, pc.semente, hist, 0);
+        hist.push(id);
+        while (hist.length > g.tamanhoHistorico) hist.shift();
+        return id;
+      });
+    });
+    const html = `<h2>Surpresa do dia: simulação (${pcs.length} computadores × ${dias.length} dias)</h2>
+      <p class="apoio">Mesmo dia, computadores diferentes: bichos diferentes. Na mesma linha não há repetição dentro de ${g.tamanhoHistorico} dias. Em vermelho: dois computadores com o mesmo bicho no mesmo dia (acontece por acaso, com ${g.ordem.length} opções).</p>
+      <table><thead><tr><th>Computador</th>${dias.map((d) => `<th>${d.slice(5)}</th>`).join("")}</tr></thead><tbody>`
+      + linhas.map((l, i) => `<tr><th>${pcs[i].nome}</th>${l.map((id, j) => `<td class="${linhas.some((o, k) => k !== i && o[j] === id) ? "repetido" : ""}">${g.animais[id].nome}</td>`).join("")}</tr>`).join("")
+      + `</tbody></table><button type="button" id="resimular">Sortear outros computadores</button>`;
+    document.getElementById("sorteio").innerHTML = html;
+    document.getElementById("resimular").addEventListener("click", simular);
+  }
+  simular();
   const espelhar = () => raiz.querySelectorAll(".mascote").forEach((m) => m.classList.toggle("esquerda", document.getElementById("esquerda").checked));
   const pupilas = () => raiz.querySelectorAll(".mascote.carinho .m-pupilas").forEach((p) => { p.style.transform = document.getElementById("carinho-pupilas").checked ? "translate(1px, -.8px)" : ""; });
   document.getElementById("esquerda").addEventListener("change", espelhar);
