@@ -91,7 +91,7 @@
       return !lista && !!p && !!p.vinculadoEm && p.email === id;
     }
     if (col === "inventario-pessoas") return ehAdmin(u) || (!lista && id === u.uid);
-    if (/-(lixeira|backups|auditoria)$/.test(col)) return ehAdmin(u);
+    if (/-(lixeira|backups|auditoria|hostnames|dnas)$/.test(col)) return ehAdmin(u);
     return noInventario(db, u);
   }
   const mudancas = (velho, novo) => [...new Set([...Object.keys(velho || {}), ...Object.keys(novo || {})])]
@@ -133,7 +133,7 @@
         && (velho ? alteradas : Object.keys(novo)).every((k) => CAMPOS_APARELHO.includes(k));
       return vinculo || (!!velho && alteradas.every((k) => k === "ultimoAcesso"));
     }
-    if (col === "inventario-config" || /-(lixeira|backups|auditoria|arquivo)$/.test(col)) return admin;
+    if (col === "inventario-config" || /-(lixeira|backups|auditoria|arquivo|hostnames|dnas)$/.test(col)) return admin;
     if (admin) return true;
     if (!equipe(antes, u)) return false;
     const cfg = config(antes) || {};
@@ -149,19 +149,6 @@
       const pf = perfil(antes, u);
       return novo.atualizadoPor === u.uid && novo.atualizadoPorNome === pf.nome && novo.atualizadoPorEmail === pf.email;
     }
-    /* Índices de HOSTNAME e DNA: a equipe só cria (valor repetido = o índice já existe = recusa). O Time N2 apaga
-       o índice antigo no mesmo lote em que o próprio equipamento deixa de usar o valor. */
-    if (col === "inventario-hostnames" || col === "inventario-dnas") {
-      const campo = col === "inventario-hostnames" ? "numero" : "dna";
-      if (o.op === "delete") {
-        const eq = velho && depois[`inventario/${velho.equipamento}`];
-        return timeN2 && !!eq && eq.atualizadoPor === u.uid && eq[campo] !== id
-          && (eq.campos || {})[campo === "numero" ? "hostname" : "dna"] !== id;
-      }
-      if (velho) return false;
-      const eq = depois[`inventario/${novo.equipamento}`];
-      return !!eq && eq[campo] === id;
-    }
     if (partes.length > 2) return true;
     if (o.op === "delete") return false;
     const pf = perfil(antes, u);
@@ -176,10 +163,8 @@
       const permitidas = ["campos", "atualizadoPor", "atualizadoPorNome", "atualizadoPorEmail", "atualizadoEm", "exclusao", ...(timeN2 ? ["numero", "dna"] : [])];
       if (chavesDoc.some((k) => !permitidas.includes(k))) return false;
       const c = novo.campos || {};
-      if ((chavesDoc.includes("numero") || alteradas.includes("hostname"))
-        && ((novo.numero || "") !== (c.hostname || "") || (novo.numero && (depois[`inventario-hostnames/${novo.numero}`] || {}).equipamento !== id))) return false;
-      if ((chavesDoc.includes("dna") || alteradas.includes("dna"))
-        && ((novo.dna || "") !== (c.dna || "") || (novo.dna && (depois[`inventario-dnas/${novo.dna}`] || {}).equipamento !== id))) return false;
+      if ((chavesDoc.includes("numero") || alteradas.includes("hostname")) && (novo.numero || "") !== (c.hostname || "")) return false;
+      if ((chavesDoc.includes("dna") || alteradas.includes("dna")) && (novo.dna || "") !== (c.dna || "")) return false;
       if (!listasOk(cfg, novo.campos || {}, alteradas, velho.campos || {})) return false;
     }
     if (!velho) {
@@ -188,8 +173,6 @@
       if (!timeN2 && novo.parcial && chaves.some((c) => (cfg.colunasTravadas || []).includes(c))) return false;
       if (!listasOk(cfg, novo.campos || {}, chaves)) return false;
       if ((novo.numero || "") !== ((novo.campos || {}).hostname || "") || (novo.dna || "") !== ((novo.campos || {}).dna || "")) return false;
-      if (novo.numero && (depois[`inventario-hostnames/${novo.numero}`] || {}).equipamento !== id) return false;
-      if (novo.dna && (depois[`inventario-dnas/${novo.dna}`] || {}).equipamento !== id) return false;
     }
     return novo.atualizadoPor === u.uid && novo.atualizadoPorNome === pf.nome && novo.atualizadoPorEmail === pf.email;
   }

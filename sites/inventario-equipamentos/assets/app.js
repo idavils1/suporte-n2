@@ -21,8 +21,8 @@
  *   inventario-arquivo/{parte}   equipamentos compactados (muitos por documento): { versao, indice, total, json }.
  *                                Um registro em inventario/{id} com o mesmo id substitui a linha do arquivo; com
  *                                "parcial: true" ele só traz os campos alterados, por cima da linha.
- *   inventario-hostnames/{valor} índice do HOSTNAME (único): { equipamento }
- *   inventario-dnas/{valor}      índice do DNA (único): { equipamento }
+ *   inventario-hostnames/{valor} antigo índice do HOSTNAME único (HOSTNAME e DNA agora se repetem); só é limpo
+ *   inventario-dnas/{valor}      antigo índice do DNA único; só é limpo
  *   inventario-identidades/{email} a "conta" da equipe: { email, nome, nomeChave, papel, ativo, aprovado,
  *                                criadoEm, criadoPorUid, atualizadoEm, revogadoAntesDe }. Só administradoras
  *                                e os aparelhos ligados a ela leem.
@@ -273,6 +273,8 @@ function textoTrava(col) {
 
 /* Colunas do inventário (os ids são usados nas regras do Firestore: não mude) */
 const ID_HOSTNAME = "hostname", ID_DNA = "dna", ID_AREA = "area", ID_GESTOR = "gestor", ID_STATUS = "status", ID_AUDITORIA = "auditoria", ID_TECNICO = "tecnico";
+/* HOSTNAME e DNA podem se repetir: nunca são "valor único" */
+const COLUNAS_REPETEM = [ID_HOSTNAME, ID_DNA];
 const ID_SERIE = "numeroSerie", ID_SO = "sistemaOperacional";
 const AUD_PENDENTE = "pendente", AUD_OK = "auditado-ok", AUD_DIVERGENCIA = "divergencia-encontrada", AUD_NAO_LOCALIZADO = "nao-localizado";
 const STATUS_BAIXADO = "baixado-descartado";
@@ -280,8 +282,8 @@ function estruturaInicial() {
   const op = (nome, cor = "", extra = {}) => ({ id: slug(nome, 40), nome, cor, ...extra });
   const col = (id, nome, tipo, extra = {}) => ({ id, nome, tipo, grupo: "equipamento", largura: 160, obrigatoria: false, unica: false, padrao: "", opcoes: [], ajuda: "", somenteAdmin: false, ativa: true, ...extra });
   const colunas = [
-    col(ID_HOSTNAME, "HOSTNAME", "texto", { obrigatoria: true, unica: true, acesso: "travado", largura: 170, ajuda: "Nome da máquina na rede. Fica em maiúsculas, sem espaços." }),
-    col(ID_DNA, "DNA", "texto", { unica: true, acesso: "travado", largura: 150, ajuda: "Identificador da máquina no cadastro DNA." }),
+    col(ID_HOSTNAME, "HOSTNAME", "texto", { obrigatoria: true, acesso: "travado", largura: 170, ajuda: "Nome da máquina na rede. Fica em maiúsculas, sem espaços." }),
+    col(ID_DNA, "DNA", "texto", { acesso: "travado", largura: 150, ajuda: "Identificador da máquina no cadastro DNA." }),
     col(ID_SERIE, "Nº DE SÉRIE", "texto", { acesso: "livre", largura: 150, ajuda: "Número de série do equipamento." }),
     col(ID_SO, "SISTEMA OP", "texto", { acesso: "livre", largura: 180, ajuda: "Sistema operacional." }),
     col("usuario", "NOME DO USUÁRIO", "texto", { acesso: "livre", largura: 220 }),
@@ -420,7 +422,7 @@ function normalizarEstruturaBase(d) {
     grupo: grupos.some((g) => g.id === c.grupo) ? c.grupo : grupos[0].id,
     ordem: Number(c.ordem) || i + 1, largura: Math.max(60, Math.min(600, Number(c.largura) || 150)),
     ...(Number(c.ordemFormulario) > 0 ? { ordemFormulario: Math.min(999, Math.round(Number(c.ordemFormulario))) } : {}),
-    obrigatoria: !!c.obrigatoria, unica: !!c.unica, padrao: txt(c.padrao, 60),
+    obrigatoria: !!c.obrigatoria, unica: !!c.unica && !COLUNAS_REPETEM.includes(c.id), padrao: txt(c.padrao, 60),
     opcoes: (Array.isArray(c.opcoes) ? c.opcoes : []).map(normalizarOpcao).filter(Boolean).slice(0, MAX_OPCOES_TOTAL),
     ajuda: txt(c.ajuda, 200), acesso: acessoDe(c), somenteAdmin: acessoDe(c) === "bloqueado", ativa: c.ativa !== false,
     ...(c.formato === "hostname" ? { formato: "hostname" } : {}),
@@ -554,35 +556,29 @@ function recalcularColunas() { COL = Object.fromEntries((estado.estrutura ? esta
 const colPorTipo = (tipo) => colunasAtivas().find((c) => c.tipo === tipo);
 const colAtiva = (id) => (COL[id] && COL[id].ativa ? COL[id] : null);
 const colCategoria = () => null;
-/* Coluna-chave (valor único, indexado em inventario-hostnames): HOSTNAME. Só no Inventário de Equipamentos;
-   nas planilhas VCORP/VCERT o HOSTNAME se repete (um por software) e a duplicidade tem regra própria. */
+/* Coluna-chave: HOSTNAME (pode se repetir). Só no Inventário de Equipamentos; nas planilhas VCORP/VCERT
+   a duplicidade tem regra própria. */
 const colNumero = () => colAtiva(ID_HOSTNAME);
 const idChave = () => (planilhaAtual().indices ? ID_HOSTNAME : "");
-/* Valores únicos indexados no servidor, no mesmo lote do registro. O registro guarda a chave em "numero" (HOSTNAME)
-   e "dna" (DNA): as regras conferem que é o mesmo valor da célula e que o índice aponta para o registro.
-   Trocado em marcarPlanilha(): vazio nas planilhas sem índice. */
+/* O registro guarda o HOSTNAME em "numero" e o DNA em "dna" (as regras conferem que é o mesmo valor da célula).
+   HOSTNAME e DNA podem se repetir: não há mais índice de valor único no servidor ("colecao" = índice antigo, só limpo).
+   Trocado em marcarPlanilha(): vazio nas planilhas sem "numero"/"dna". */
 const INDICES_EQUIPAMENTOS = [
   { campo: "numero", col: ID_HOSTNAME, colecao: "hostnames" },
   { campo: "dna", col: ID_DNA, colecao: "dnas" }
 ];
 let INDICES = INDICES_EQUIPAMENTOS;
 const chaveIndice = (ix, campos) => (colAtiva(ix.col) && !estaVazio((campos || {})[ix.col]) ? chaveNumero(campos[ix.col]) : "");
-/* Escritas dos índices quando os valores mudam (antes = campos atuais; depois = campos completos novos).
-   Devolve { dados (numero/dna para o registro), ops (criar o índice novo e apagar o antigo) } */
-function indicesMudanca(id, antes, depois) {
-  const dados = {}, ops = [];
+/* numero/dna do registro quando HOSTNAME/DNA mudam (antes = campos atuais; depois = campos completos novos) */
+function indicesMudanca(antes, depois) {
+  const dados = {};
   INDICES.forEach((ix) => {
     if (!colAtiva(ix.col)) return;
     const a = chaveIndice(ix, antes), b = chaveIndice(ix, depois);
-    if (a === b) return;
-    dados[ix.campo] = b;
-    if (b) ops.push({ op: "set", caminho: `${P()}-${ix.colecao}/${b}`, dados: { equipamento: id } });
-    if (a) ops.push({ op: "delete", caminho: `${P()}-${ix.colecao}/${a}` });
+    if (a !== b) dados[ix.campo] = b;
   });
-  return { dados, ops };
+  return { dados };
 }
-/* Apagar os índices de equipamentos que saem de vez (ou vão para a lixeira) */
-const opsApagarIndices = (t) => INDICES.flatMap((ix) => { const k = chaveIndice(ix, t.campos) || t[ix.campo] || ""; return k ? [{ op: "delete", caminho: `${P()}-${ix.colecao}/${k}` }] : []; });
 function opcoesDe(col) {
   if (!col) return [];
   return col.opcoes;
@@ -2870,7 +2866,7 @@ const autoria = (prefixo) => ({ [prefixo]: estado.usuario.id, [prefixo + "Nome"]
 const assinatura = () => ({ ...autoria("atualizadoPor"), atualizadoEm: "__AGORA__" });
 function mensagemErro(e, contexto = "") {
   const codigo = (e && e.code) || "";
-  if (/permission-denied/.test(codigo)) return contexto === "numero" ? "Não foi possível salvar: esse HOSTNAME ou DNA já está em outro equipamento, ou você não tem permissão." : "Você não tem permissão para esta mudança.";
+  if (/permission-denied/.test(codigo)) return "Você não tem permissão para esta mudança.";
   if (/resource-exhausted|quota/i.test(codigo)) return "O limite diário de gravações do plano gratuito acabou. Tente de novo amanhã.";
   if (/unavailable|network|deadline/.test(codigo)) return "Sem conexão. Tente de novo quando a internet voltar.";
   return "Não foi possível salvar agora. Tente de novo.";
@@ -2893,12 +2889,12 @@ async function gravar(ops, { desfazer: fn = null, rotulo = "", contexto = "" } =
     return false;
   }
 }
-/* Monta as escritas de uma mudança de campos (com os índices de HOSTNAME e DNA e o histórico) */
+/* Monta as escritas de uma mudança de campos (com numero/dna e o histórico) */
 function opsAlteracao(t, mudancas, acao = "editar") {
   if (t.arquivo) return opsTirarDoArquivo(t, mudancas, acao);
-  const indices = indicesMudanca(t.id, t.campos, { ...(t.campos || {}), ...mudancas });
+  const indices = indicesMudanca(t.campos, { ...(t.campos || {}), ...mudancas });
   const dados = { campos: { ...mudancas }, ...indices.dados, ...assinatura() };
-  const ops = [{ op: "set", caminho: `${P()}/${t.id}`, mesclar: true, dados }, ...indices.ops];
+  const ops = [{ op: "set", caminho: `${P()}/${t.id}`, mesclar: true, dados }];
   Object.entries(mudancas).forEach(([c, v]) => {
     const col = COL[c];
     if (!col) return;
@@ -2910,10 +2906,9 @@ function opsAlteracao(t, mudancas, acao = "editar") {
    da linha do arquivo (vazio é gravado como ""). Assim ninguém regrava as colunas que não pode alterar. */
 function opsTirarDoArquivo(t, mudancas, acao) {
   const campos = Object.fromEntries(Object.entries(mudancas).map(([c, v]) => [c, v == null ? "" : v]));
-  /* Só a administradora muda HOSTNAME/DNA de uma linha do arquivo: aí o índice muda junto */
-  const indices = indicesMudanca(t.id, t.campos, { ...(t.campos || {}), ...campos });
+  const indices = indicesMudanca(t.campos, { ...(t.campos || {}), ...campos });
   const chaves = Object.fromEntries(INDICES.map((ix) => [ix.campo, ix.campo in indices.dados ? indices.dados[ix.campo] : ""]));
-  const ops = [{ op: "set", caminho: `${P()}/${t.id}`, dados: { campos, ...chaves, parcial: true, ...autoria("criadoPor"), criadoEm: "__AGORA__", ...assinatura(), exclusao: null } }, ...indices.ops];
+  const ops = [{ op: "set", caminho: `${P()}/${t.id}`, dados: { campos, ...chaves, parcial: true, ...autoria("criadoPor"), criadoEm: "__AGORA__", ...assinatura(), exclusao: null } }];
   Object.entries(mudancas).forEach(([c, v]) => {
     const col = COL[c];
     if (!col) return;
@@ -2947,13 +2942,12 @@ function filtrarCamposPermitidos(campos) {
 function resumoRegistro(campos) {
   return [campos[idChave()], campos[ID_DNA] ? `DNA ${campos[ID_DNA]}` : "", campos.usuario].filter(Boolean).join(" · ");
 }
-/* Escritas de um equipamento novo: registro (com as chaves dos índices), índices de HOSTNAME e DNA e histórico */
+/* Escritas de um equipamento novo: registro (com numero/dna) e histórico */
 function opsNovoRegistro(id, campos, acao = "criar") {
-  const indices = indicesMudanca(id, {}, campos);
+  const indices = indicesMudanca({}, campos);
   const chaves = Object.fromEntries(INDICES.map((ix) => [ix.campo, indices.dados[ix.campo] || ""]));
   return [
     { op: "set", caminho: `${P()}/${id}`, dados: { campos, ...chaves, ...autoria("criadoPor"), criadoEm: "__AGORA__", ...assinatura(), exclusao: null } },
-    ...indices.ops,
     opHistorico(id, acao, { depois: resumoRegistro(campos) })
   ];
 }
@@ -3495,14 +3489,16 @@ function abrirColar(textoInicial = "") {
         else if (escolha !== "vazio") { erros.push(r.erro); celulasFora.add(i); }
       });
       const campos = completarCampos(informados);
-      const chave = campos[idChave()] ? chaveNumero(campos[idChave()]) : "";
-      const existente = chave ? equipamentosComHostname(chave)[0] || null : null;
+      const m = modo();
+      /* HOSTNAME pode se repetir: só "Atualizar" procura o equipamento pelo HOSTNAME (e ele tem de ser um só) */
+      const chave = m === "atualizar" && campos[idChave()] ? chaveNumero(campos[idChave()]) : "";
+      const iguais = chave ? equipamentosComHostname(chave) : [];
+      const existente = iguais.length === 1 ? iguais[0] : null;
       const repetidoNoColado = chave && vistos.has(chave);
       if (chave) vistos.add(chave);
-      const m = modo();
-      const conf = conferirRegistro(campos, existente && m !== "adicionar" ? existente.id : undefined);
-      /* HOSTNAME já cadastrado vira "Já existe"/"Atualizar"; DNA de outro equipamento é erro */
-      Object.entries(conf).forEach(([c, x]) => { if (typeof x === "string") erros.push(x); else if (c !== idChave()) erros.push(x.texto); });
+      if (iguais.length > 1) erros.push(`${colNumero() ? colNumero().nome : "HOSTNAME"} “${campos[idChave()]}” está em ${iguais.length} equipamentos: não dá para saber qual atualizar.`);
+      const conf = conferirRegistro(campos, existente ? existente.id : undefined);
+      Object.entries(conf).forEach(([, x]) => erros.push(typeof x === "string" ? x : x.texto));
       vistosUnicos.forEach((set, c) => {
         if (estaVazio(campos[c])) return;
         const k = ehColunaIndice(COL[c]) ? chaveNumero(campos[c]) : normalizar(campos[c]);
@@ -3510,8 +3506,8 @@ function abrirColar(textoInicial = "") {
         set.add(k);
       });
       let situacao = erros.length ? "erro" : "nova";
-      if (!erros.length && repetidoNoColado) { situacao = "erro"; erros.push(`${colNumero() ? colNumero().nome : "HOSTNAME"} “${campos[idChave()]}” repetido na própria colagem.`); }
-      else if (!erros.length && existente) situacao = m === "adicionar" ? "repetido" : m === "atualizar" ? "atualizar" : "nova";
+      if (!erros.length && repetidoNoColado) { situacao = "erro"; erros.push(`${colNumero() ? colNumero().nome : "HOSTNAME"} “${campos[idChave()]}” repetido na própria colagem: não dá para saber qual linha atualiza o equipamento.`); }
+      else if (!erros.length && existente) situacao = "atualizar";
       return { campos, informados, erros, situacao, existente, original: l, celulasFora };
     });
     analise = { titulos, mapa, linhas, fora: [...fora.values()] };
@@ -3933,8 +3929,7 @@ const dadosParte = (versao, indice, total, json) => {
   if (bytes(json) > LIMITE_PARTE_MAX) throw new Error("Parte do arquivo grande demais.");
   return { versao, indice, total, json, criadoPor: estado.usuario.email, criadoEm: "__AGORA__" };
 };
-/* Grava a lista inteira como versão nova; depois apaga as versões antigas e os registros vivos indicados.
-   Os índices de HOSTNAME e DNA continuam valendo (os equipamentos compactados seguem únicos no servidor). */
+/* Grava a lista inteira como versão nova; depois apaga as versões antigas e os registros vivos indicados. */
 async function gravarArquivo(lista, { apagarVivos = [] } = {}) {
   const versao = Date.now();
   const grupos = dividirArquivo(lista);
@@ -3945,25 +3940,12 @@ async function gravarArquivo(lista, { apagarVivos = [] } = {}) {
   if (limpeza.length) await estado.api.lote(limpeza);
   return grupos.length;
 }
-/* Substituir tudo ou restaurar um backup: os índices são refeitos do zero (só administradoras) */
+/* Substituir tudo ou restaurar um backup: limpa os antigos índices de valor único (só administradoras) */
 async function apagarTodosIndices() {
   for (const ix of INDICES) {
     const docs = await estado.api.lerColecao(`${P()}-${ix.colecao}`);
     if (docs.length) await estado.api.lote(docs.map((d) => ({ op: "delete", caminho: `${P()}-${ix.colecao}/${d.id}` })));
   }
-}
-async function recriarIndices(lista) {
-  const ops = [];
-  INDICES.forEach((ix) => {
-    const usados = new Set();
-    lista.forEach((t) => {
-      const k = chaveIndice(ix, t.campos);
-      if (!k || usados.has(k)) return;
-      usados.add(k);
-      ops.push({ op: "set", caminho: `${P()}-${ix.colecao}/${k}`, dados: { equipamento: t.id } });
-    });
-  });
-  if (ops.length) await estado.api.lote(ops);
 }
 /* Troca linhas do arquivo (Map id → registro novo, ou null para tirar) regravando só as partes em que estão */
 async function alterarArquivo(alterados) {
@@ -4027,8 +4009,6 @@ async function excluirParaLixeira(lista, motivo = "") {
   const ops = [];
   lista.forEach((t) => {
     ops.push({ op: "set", caminho: `${COL_LIXEIRA}/${t.id}`, dados: { dados: serializar(t), excluidoPor: estado.usuario.email, excluidoEm: "__AGORA__", motivo: String(motivo).slice(0, 300), planilha: planilhaAtual().id } });
-    /* HOSTNAME e DNA ficam livres para outro equipamento (voltam se o equipamento for restaurado) */
-    ops.push(...opsApagarIndices(t));
     if (t.arquivo) return;
     ops.push({ op: "delete", caminho: `${P()}/${t.id}` });
   });
@@ -4049,12 +4029,11 @@ async function excluirDeVez(lista, motivo = "", { semAuditoria = false } = {}) {
   const ops = [];
   const soNoArquivo = new Set(estado.equipamentos.filter((t) => t.arquivo).map((t) => t.id));
   lista.forEach((t) => {
-    ops.push(...opsApagarIndices(t));
     if (soNoArquivo.has(t.id)) return;
     ops.push({ op: "delete", caminho: `${P()}/${t.id}` });
   });
   try {
-    await estado.api.lote(ops);
+    if (ops.length) await estado.api.lote(ops);
     await alterarArquivo(new Map(lista.filter((t) => noArquivo(t.id)).map((t) => [t.id, null])));
     if (!semAuditoria) registrarAuditoria("excluirDeVez", `Excluiu de vez ${lista.length} equipamento(s)`, motivo);
     return true;
@@ -4066,18 +4045,10 @@ async function restaurarDaLixeira(ids, { silencioso = false } = {}) {
     for (const id of ids) { const doc = await estado.api.lerDoc(`${COL_LIXEIRA}/${id}`); if (doc) itens.push({ id, ...doc }); }
   }
   if (!itens.length) return false;
-  /* HOSTNAME e DNA voltam para o índice, a não ser que outro equipamento já use o valor */
-  const usados = Object.fromEntries(INDICES.map((ix) => [ix.campo, new Set(estado.equipamentos.map((t) => chaveIndice(ix, t.campos)).filter(Boolean))]));
   const ops = [];
-  let conflitos = 0;
   itens.forEach((x) => {
     const dados = serializar({ ...x.dados });
-    INDICES.forEach((ix) => {
-      const k = chaveIndice(ix, dados.campos);
-      if (k && usados[ix.campo].has(k)) { dados[ix.campo] = ""; conflitos++; return; }
-      dados[ix.campo] = k;
-      if (k) { usados[ix.campo].add(k); ops.push({ op: "set", caminho: `${P()}-${ix.colecao}/${k}`, dados: { equipamento: x.id } }); }
-    });
+    INDICES.forEach((ix) => { dados[ix.campo] = chaveIndice(ix, dados.campos); });
     dados.exclusao = null;
     ops.push({ op: "set", caminho: `${P()}/${x.id}`, dados });
     ops.push({ op: "delete", caminho: `${COL_LIXEIRA}/${x.id}` });
@@ -4086,7 +4057,7 @@ async function restaurarDaLixeira(ids, { silencioso = false } = {}) {
   try {
     await estado.api.lote(ops);
     registrarAuditoria("restaurar", `Restaurou ${itens.length} equipamento(s) da Lixeira`, itens.map((x) => (x.dados && x.dados.numero) || x.id).join(", "));
-    if (!silencioso || conflitos) mostrarAviso(`${itens.length} equipamento(s) restaurado(s).${conflitos ? ` ${conflitos} valor(es) de HOSTNAME/DNA já estão em outro equipamento: confira as linhas restauradas.` : ""}`, 6000);
+    if (!silencioso) mostrarAviso(`${itens.length} equipamento(s) restaurado(s).`, 6000);
     return true;
   } catch (e) { console.error(e); mostrarAviso(mensagemErro(e)); return false; }
 }
@@ -4141,9 +4112,7 @@ async function aplicarBackup({ estrutura, registros }, descricao) {
   await estado.api.salvarDoc(caminhoEstrutura(), dadosEstrutura(est));
   const partes = await gravarArquivo(validos.filter((r) => !r.dados.exclusao).map(equipamentoDeRegistro), { apagarVivos: estado.vivos.filter((t) => !manter.has(t.id)) });
   if (vivos.length) await estado.api.lote(vivos.map((r) => ({ op: "set", caminho: `${P()}/${r.id}`, dados: r.dados })));
-  /* Índices de HOSTNAME e DNA refeitos para os equipamentos do backup */
   await apagarTodosIndices();
-  await recriarIndices(validos.map((r) => ({ id: r.id, campos: (r.dados && r.dados.campos) || {} })));
   registrarAuditoria("restaurarBackup", `Restaurou ${descricao}`, `${validos.length} registro(s) em ${partes} documento(s) do arquivo${validos.length < (registros || []).length ? ` · ${(registros || []).length - validos.length} ignorado(s) por id inválido` : ""}`);
   mostrarAviso(`Pronto: ${validos.length.toLocaleString("pt-BR")} registro(s) carregados.`, 6000);
   return true;
@@ -4702,7 +4671,7 @@ function abrirEstrutura() {
       if (ehColunaFixa(planilhaAtual(), col.id) || (ord[j] && ehColunaFixa(planilhaAtual(), ord[j].id))) { mostrarAviso("As quatro colunas fixas ficam sempre na frente, nesta ordem."); return; }
     }
     if (a === "arquivar-coluna" && col) {
-      if (col.id === idChave() && col.ativa && !(await confirmar(`Arquivar “${col.nome}” desliga a conferência de valor repetido. Continuar?`, { titulo: "Arquivar coluna" }))) return;
+      if (col.unica && col.ativa && !(await confirmar(`Arquivar “${col.nome}” desliga a conferência de valor repetido. Continuar?`, { titulo: "Arquivar coluna" }))) return;
       col.ativa = !col.ativa; desenhar();
     }
     if (a === "excluir-coluna" && col) {
@@ -4755,7 +4724,7 @@ function abrirEstrutura() {
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:8px 20px">
           <label class="check"><input type="checkbox" name="obrigatoria"${base.obrigatoria ? " checked" : ""}> Obrigatória</label>
-          <label class="check"><input type="checkbox" name="unica"${base.unica ? " checked" : ""}> Valor único (não pode repetir)</label>
+          <label class="check"${COLUNAS_REPETEM.includes(base.id) ? ` title="${escapar(base.nome)} pode se repetir"` : ""}><input type="checkbox" name="unica"${base.unica ? " checked" : ""}${COLUNAS_REPETEM.includes(base.id) ? " disabled" : ""}> Valor único (não pode repetir)</label>
         </div>
         <label class="campo"><span class="rotulo">Acesso</span><select name="acesso"></select>
           <span class="ajuda">BLOQUEADO: só a Lays, a Paula e o Time N2 alteram (os gestores veem com cadeado). LIVRE: toda a equipe edita, em qualquer linha. LISTA: a equipe só escolhe uma opção (não cria nem renomeia). TRAVADO APÓS CRIAR: a equipe preenche ao cadastrar; depois, só a Lays, a Paula e o Time N2 alteram.</span></label>

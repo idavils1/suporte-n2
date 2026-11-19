@@ -53,14 +53,10 @@ function cadastroNovo(db, uid, email, nome, extra = {}) {
 const autoria = (prefixo, uid, nome, email) => ({
   [`${prefixo}Por`]: uid, [`${prefixo}PorNome`]: nome, [`${prefixo}PorEmail`]: email, [`${prefixo}Em`]: serverTimestamp()
 });
-/* Cadastro pela equipe: equipamento + índices de HOSTNAME e DNA no mesmo lote (como o app faz) */
-function criarEquipamento(db, uid, id, campos, { nome = "Davi Santos", email = DAVI, indices = {} } = {}) {
-  const b = writeBatch(db);
+/* Cadastro pela equipe: numero/dna repetem o HOSTNAME/DNA da célula (como o app faz) */
+function criarEquipamento(db, uid, id, campos, { nome = "Davi Santos", email = DAVI, chaves = {} } = {}) {
   const numero = campos.hostname ?? "", dna = campos.dna ?? "";
-  b.set(doc(db, "inventario", id), { campos, numero, dna, ...autoria("criado", uid, nome, email), ...autoria("atualizado", uid, nome, email), exclusao: null });
-  if (numero) b.set(doc(db, "inventario-hostnames", indices.hostname ?? numero), { equipamento: id });
-  if (dna) b.set(doc(db, "inventario-dnas", indices.dna ?? dna), { equipamento: id });
-  return b.commit();
+  return setDoc(doc(db, "inventario", id), { campos, numero, dna, ...chaves, ...autoria("criado", uid, nome, email), ...autoria("atualizado", uid, nome, email), exclusao: null });
 }
 const editar = (db, uid, id, mudancas, { nome = "Davi Santos", email = DAVI, extra = {} } = {}) => updateDoc(doc(db, "inventario", id), {
   ...Object.fromEntries(Object.entries(mudancas).map(([k, v]) => [`campos.${k}`, v])),
@@ -197,23 +193,29 @@ test("administradora do Inventário não precisa de cadastro; aparelho anônimo 
   await assertFails(getDocs(collection(anonimo("ninguem"), "inventario-hostnames")));
 });
 
-/* ---------- Equipamentos: travado após criar, únicos e listas ---------- */
-test("equipe cadastra com HOSTNAME + DNA (índices no mesmo lote)", async () => {
+/* ---------- Equipamentos: travado após criar, HOSTNAME/DNA (podem repetir) e listas ---------- */
+test("equipe cadastra com HOSTNAME + DNA", async () => {
   const db = await equipeDavi();
   await assertSucceeds(criarEquipamento(db, "pc-davi", "n1", { hostname: "NB-0100", dna: "DNA0100", status: "em-uso", tecnico: "davi-santos", area: "sac" }));
-  await assertSucceeds(getDoc(doc(db, "inventario-hostnames", "NB-0100")));
 });
-test("equipe cadastra sem os índices ou com índice apontando para outro equipamento: recusa", async () => {
+test("numero/dna diferentes do HOSTNAME/DNA da célula: recusa", async () => {
   const db = await equipeDavi();
-  const b = writeBatch(db);
-  b.set(doc(db, "inventario", "n2"), { campos: { hostname: "NB-0200" }, numero: "NB-0200", dna: "", ...autoria("criado", "pc-davi", "Davi Santos", DAVI), ...autoria("atualizado", "pc-davi", "Davi Santos", DAVI), exclusao: null });
-  await assertFails(b.commit());
-  await assertFails(criarEquipamento(db, "pc-davi", "n3", { hostname: "NB-0300", dna: "DNA0300" }, { indices: { hostname: "NB-9999" } }));
+  await assertFails(criarEquipamento(db, "pc-davi", "n2", { hostname: "NB-0200" }, { chaves: { numero: "NB-9999" } }));
+  await assertFails(criarEquipamento(db, "pc-davi", "n3", { hostname: "NB-0300", dna: "DNA0300" }, { chaves: { dna: "" } }));
 });
-test("HOSTNAME repetido: recusa (e DNA repetido também)", async () => {
+test("HOSTNAME e DNA repetidos: passa (equipe e gestor)", async () => {
   const db = await equipeDavi();
-  await assertFails(criarEquipamento(db, "pc-davi", "n4", { hostname: "NB-0001", dna: "DNA0400" }));
-  await assertFails(criarEquipamento(db, "pc-davi", "n5", { hostname: "NB-0500", dna: "DNA1001" }));
+  await assertSucceeds(criarEquipamento(db, "pc-davi", "n4", { hostname: "NB-0001", dna: "DNA0400" }));
+  await assertSucceeds(criarEquipamento(db, "pc-davi", "n5", { hostname: "NB-0500", dna: "DNA1001" }));
+  await assertSucceeds(criarEquipamento(db, "pc-davi", "n6", { hostname: "NB-0001", dna: "DNA1001" }));
+  await assertSucceeds(criarEquipamento(await gestora(), "pc-gestora", "g7", { hostname: "NB-0001", dna: "DNA1001" }, { nome: "Gestora Teste", email: GESTORA }));
+});
+test("equipe não lê nem grava os antigos índices de HOSTNAME/DNA; a administradora limpa", async () => {
+  const db = await equipeDavi();
+  await assertFails(getDoc(doc(db, "inventario-hostnames", "NB-0001")));
+  await assertFails(setDoc(doc(db, "inventario-hostnames", "NB-7777"), { equipamento: "e1" }));
+  await assertFails(deleteDoc(doc(db, "inventario-dnas", "DNA1001")));
+  await assertSucceeds(deleteDoc(doc(admin(), "inventario-hostnames", "NB-0001")));
 });
 test("HOSTNAME fora do formato (minúsculas/espaço): recusa", async () => {
   const db = await equipeDavi();
@@ -230,53 +232,31 @@ test("gestor NÃO altera HOSTNAME nem DNA depois de criado (travado após criar)
   await assertFails(editar(db, "pc-gestora", "e1", { dna: "DNA2002" }, g));
   await assertFails(editar(db, "pc-gestora", "e1", { hostname: "NB-0002" }, { ...g, extra: { numero: "NB-0002" } }));
 });
-/* Time N2 troca o HOSTNAME/DNA como o app faz: célula + chave + índice novo + apaga o antigo, no mesmo lote */
-function trocarChave(db, uid, { col = "hostname", campo = "numero", colecao = "inventario-hostnames", antigo = "NB-0001", novo = "NB-0002", apagar = true, criar = true, chave = novo, nome = "Davi Santos", email = DAVI } = {}) {
-  const b = writeBatch(db);
-  b.update(doc(db, "inventario", "e1"), { [`campos.${col}`]: novo, [campo]: chave, atualizadoPor: uid, atualizadoPorNome: nome, atualizadoPorEmail: email, atualizadoEm: serverTimestamp() });
-  if (criar && novo) b.set(doc(db, colecao, novo), { equipamento: "e1" });
-  if (apagar) b.delete(doc(db, colecao, antigo));
-  return b.commit();
-}
-test("Time N2 altera HOSTNAME e DNA depois de criado (com a troca do índice)", async () => {
+/* Time N2 troca o HOSTNAME/DNA como o app faz: célula + chave (numero/dna) na mesma gravação */
+const trocarChave = (db, uid, { col = "hostname", campo = "numero", novo = "NB-0002", chave = novo, nome = "Davi Santos", email = DAVI } = {}) =>
+  updateDoc(doc(db, "inventario", "e1"), { [`campos.${col}`]: novo, [campo]: chave, atualizadoPor: uid, atualizadoPorNome: nome, atualizadoPorEmail: email, atualizadoEm: serverTimestamp() });
+test("Time N2 altera HOSTNAME e DNA depois de criado, inclusive para valor já usado", async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), "inventario", "e9"), { campos: { hostname: "NB-0009", dna: "DNA9" }, numero: "NB-0009", dna: "DNA9", criadoPor: "uid-a", criadoPorNome: "Davi Santos", criadoPorEmail: DAVI, criadoEm: antes(2), atualizadoPor: "uid-a", atualizadoPorNome: "Davi Santos", atualizadoPorEmail: DAVI, atualizadoEm: antes(2), exclusao: null });
+  });
   const db = await equipeDavi();
   await assertSucceeds(trocarChave(db, "pc-davi"));
-  await assertSucceeds(trocarChave(db, "pc-davi", { col: "dna", campo: "dna", colecao: "inventario-dnas", antigo: "DNA1001", novo: "DNA2002" }));
-  await env.withSecurityRulesDisabled(async (ctx) => {
-    const f = ctx.firestore();
-    if ((await getDoc(doc(f, "inventario-hostnames", "NB-0001"))).exists()) throw new Error("o índice antigo ficou");
-    if ((await getDoc(doc(f, "inventario-hostnames", "NB-0002"))).data().equipamento !== "e1") throw new Error("índice novo errado");
-  });
+  await assertSucceeds(trocarChave(db, "pc-davi", { col: "dna", campo: "dna", novo: "DNA2002" }));
+  await assertSucceeds(trocarChave(db, "pc-davi", { novo: "NB-0009" }));
+  await assertSucceeds(trocarChave(db, "pc-davi", { col: "dna", campo: "dna", novo: "DNA9" }));
 });
-test("Time N2: troca de HOSTNAME sem a chave, sem o índice novo, com chave diferente ou para valor já usado: recusa", async () => {
-  await env.withSecurityRulesDisabled(async (ctx) => { await setDoc(doc(ctx.firestore(), "inventario-hostnames", "NB-USADO"), { equipamento: "outro" }); });
+test("Time N2: troca de HOSTNAME sem atualizar a chave, com chave diferente ou fora do formato: recusa", async () => {
   const db = await equipeDavi();
   await assertFails(editar(db, "pc-davi", "e1", { hostname: "NB-0002" }));
-  await assertFails(trocarChave(db, "pc-davi", { criar: false }));
   await assertFails(trocarChave(db, "pc-davi", { chave: "NB-0003" }));
-  await assertFails(trocarChave(db, "pc-davi", { novo: "NB-USADO", criar: false }));
   await assertFails(trocarChave(db, "pc-davi", { novo: "nb 0002" }));
+  await assertFails(trocarChave(db, "pc-davi", { col: "dna", campo: "dna", novo: "DNA2002", chave: "DNA1001" }));
 });
-test("Time N2 não apaga índice que ainda está em uso nem de outro equipamento", async () => {
-  await env.withSecurityRulesDisabled(async (ctx) => {
-    await setDoc(doc(ctx.firestore(), "inventario", "e9"), { campos: { hostname: "NB-0009" }, numero: "NB-0009", dna: "", criadoPor: "uid-a", criadoPorNome: "Davi Santos", criadoPorEmail: DAVI, criadoEm: antes(2), atualizadoPor: "uid-a", atualizadoPorNome: "Davi Santos", atualizadoPorEmail: DAVI, atualizadoEm: antes(2), exclusao: null });
-    await setDoc(doc(ctx.firestore(), "inventario-hostnames", "NB-0009"), { equipamento: "e9" });
-  });
-  const db = await equipeDavi();
-  await assertFails(deleteDoc(doc(db, "inventario-hostnames", "NB-0001")));
-  await assertFails(trocarChave(db, "pc-davi", { antigo: "NB-0009" }));
-  const b = writeBatch(db);
-  b.update(doc(db, "inventario", "e1"), { "campos.status": "disponivel", atualizadoPor: "pc-davi", atualizadoPorNome: "Davi Santos", atualizadoPorEmail: DAVI, atualizadoEm: serverTimestamp() });
-  b.delete(doc(db, "inventario-hostnames", "NB-0001"));
-  await assertFails(b.commit());
-});
-/* Preencher em massa / aplicar a várias células: o app manda lotes de registros inteiros (com índices) */
+/* Preencher em massa / aplicar a várias células: o app manda lotes de registros inteiros */
 function loteEmMassa(db, uid, registros, { nome = "Davi Santos", email = DAVI } = {}) {
   const b = writeBatch(db);
   registros.forEach(([id, campos]) => {
     b.set(doc(db, "inventario", id), { campos, numero: campos.hostname ?? "", dna: campos.dna ?? "", ...autoria("criado", uid, nome, email), ...autoria("atualizado", uid, nome, email), exclusao: null });
-    if (campos.hostname) b.set(doc(db, "inventario-hostnames", campos.hostname), { equipamento: id });
-    if (campos.dna) b.set(doc(db, "inventario-dnas", campos.dna), { equipamento: id });
   });
   return b.commit();
 }
@@ -311,12 +291,9 @@ test("aplicar a várias células: STATUS passa; coluna BLOQUEADA recusa para o g
 test("Time N2 cadastra e edita linha do arquivo (parcial) com coluna BLOQUEADA e TRAVADA", async () => {
   const db = await equipeDavi();
   await assertSucceeds(criarEquipamento(db, "pc-davi", "n11", { hostname: "NB-1100", bloqueado: "x" }));
-  const b = writeBatch(db);
-  b.set(doc(db, "inventario", "arq1"), { campos: { hostname: "NB-ARQ1" }, numero: "NB-ARQ1", dna: "", parcial: true, ...autoria("criado", "pc-davi", "Davi Santos", DAVI), ...autoria("atualizado", "pc-davi", "Davi Santos", DAVI), exclusao: null });
-  b.set(doc(db, "inventario-hostnames", "NB-ARQ1"), { equipamento: "arq1" });
-  await assertSucceeds(b.commit());
+  await assertSucceeds(setDoc(doc(db, "inventario", "arq1"), { campos: { hostname: "NB-ARQ1" }, numero: "NB-ARQ1", dna: "", parcial: true, ...autoria("criado", "pc-davi", "Davi Santos", DAVI), ...autoria("atualizado", "pc-davi", "Davi Santos", DAVI), exclusao: null }));
 });
-test("Time N2: lote grande (30 linhas editadas com coluna BLOQUEADA; 10 criadas com índices) passa", async () => {
+test("Time N2: lote grande (30 linhas editadas com coluna BLOQUEADA; 10 criadas com HOSTNAME repetido) passa", async () => {
   await env.withSecurityRulesDisabled(async (ctx) => {
     const b = writeBatch(ctx.firestore());
     for (let i = 0; i < 30; i++) b.set(doc(ctx.firestore(), "inventario", `g${i}`), { campos: { hostname: `NB-G${i}`, status: "em-uso" }, numero: `NB-G${i}`, dna: "", criadoPor: "uid-a", criadoPorNome: "Davi Santos", criadoPorEmail: DAVI, criadoEm: antes(2), atualizadoPor: "uid-a", atualizadoPorNome: "Davi Santos", atualizadoPorEmail: DAVI, atualizadoEm: antes(2), exclusao: null });
@@ -326,20 +303,15 @@ test("Time N2: lote grande (30 linhas editadas com coluna BLOQUEADA; 10 criadas 
   const b = writeBatch(db);
   for (let i = 0; i < 30; i++) b.update(doc(db, "inventario", `g${i}`), { "campos.bloqueado": "x", "campos.status": "disponivel", atualizadoPor: "pc-davi", atualizadoPorNome: "Davi Santos", atualizadoPorEmail: DAVI, atualizadoEm: serverTimestamp() });
   await assertSucceeds(b.commit());
-  await assertSucceeds(loteEmMassa(db, "pc-davi", Array.from({ length: 10 }, (_, i) => [`c${i}`, { hostname: `NB-C${i}`, dna: `DNC${i}`, bloqueado: "y" }])));
+  await assertSucceeds(loteEmMassa(db, "pc-davi", Array.from({ length: 10 }, (_, i) => [`c${i}`, { hostname: "NB-G1", dna: "DNC", bloqueado: "y" }])));
 });
 test("leitura não altera coluna BLOQUEADA", async () => {
   const db = anonimo("pc-leitura2");
   await vincular(db, "pc-leitura2", "leitura@valid.com", "Pessoa Leitura");
   await assertFails(editar(db, "pc-leitura2", "e1", { bloqueado: "x" }, { nome: "Pessoa Leitura", email: "leitura@valid.com" }));
 });
-test("administradora altera HOSTNAME (com a troca do índice)", async () => {
-  const db = admin();
-  const b = writeBatch(db);
-  b.update(doc(db, "inventario", "e1"), { "campos.hostname": "NB-0002", numero: "NB-0002", atualizadoPor: "lays.almeida@valid.com", atualizadoEm: serverTimestamp() });
-  b.delete(doc(db, "inventario-hostnames", "NB-0001"));
-  b.set(doc(db, "inventario-hostnames", "NB-0002"), { equipamento: "e1" });
-  await assertSucceeds(b.commit());
+test("administradora altera HOSTNAME", async () => {
+  await assertSucceeds(updateDoc(doc(admin(), "inventario", "e1"), { "campos.hostname": "NB-0002", numero: "NB-0002", atualizadoPor: "lays.almeida@valid.com", atualizadoEm: serverTimestamp() }));
 });
 test("valor fora da lista: recusa (STATUS, TÉCNICO, ÁREA, AUDITORIA e GESTOR sem opções)", async () => {
   const db = await equipeDavi();
@@ -355,7 +327,7 @@ test("equipe não grava em nome de outra pessoa", async () => {
   const db = await equipeDavi();
   await assertFails(editar(db, "pc-davi", "e1", { status: "disponivel" }, { nome: "José Antônio Çaçapava", email: "jose@valid.com" }));
 });
-test("equipe NÃO exclui (nem o equipamento nem o índice); só solicita exclusão", async () => {
+test("equipe NÃO exclui (nem o equipamento nem o antigo índice); só solicita exclusão", async () => {
   const db = await equipeDavi();
   await assertFails(deleteDoc(doc(db, "inventario", "e1")));
   await assertFails(deleteDoc(doc(db, "inventario-hostnames", "NB-0001")));
