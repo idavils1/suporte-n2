@@ -7,7 +7,7 @@
  *
  *  Papéis: administradora (tudo, inclusive estrutura), gestor (alimenta e edita qualquer
  *  linha, também nas planilhas VCORP/VCERT; sem estrutura, backups nem excluir de vez),
- *  equipe "Equipe N2" (vê, pesquisa e alimenta), leitura (só vê e pesquisa).
+ *  equipe "Time N2" (o mesmo que o gestor, também nas colunas BLOQUEADO e TRAVADO), leitura (só vê e pesquisa).
  *  As mesmas permissões estão no firestore.rules (vale o que está lá).
  *
  *  Firestore (prefixo "inventario"):
@@ -63,7 +63,7 @@ const CHAVE_ATIVIDADE = "inventario-ultima-atividade";
 const CHAVE_COPIA = "inventario-copia";
 const CHAVE_MARCADOR = "inventario-marcador-removidas";
 /* Planilhas do INVENTÁRIO / AUDITORIA. O id do Inventário de Equipamentos continua "inventario" (visões e
-   rascunhos já salvos usam esse id). As de VCORP/VCERT só as administradoras editam (soAdmin; as regras do
+   rascunhos já salvos usam esse id). As de VCORP/VCERT só as administradoras, gestores e o Time N2 editam (soAdmin; as regras do
    Firestore garantem). Só o Inventário de Equipamentos tem índices de HOSTNAME/DNA, ciclo de auditoria e
    arquivo compactado. "estrutura": onde ficam as colunas; "chave" = nome no endereço (?inv=…&aba=…). */
 const PLANILHAS = [
@@ -85,7 +85,7 @@ const planilhaDe = (grupo, aba) => PLANILHAS.find((p) => p.grupo === grupo && p.
 const planilhaAtual = () => PLANILHAS.find((p) => p.id === estado.planilha) || PLANILHAS[0];
 const caminhoEstrutura = (pl = planilhaAtual()) => pl.estrutura;
 const termo = () => planilhaAtual().termo;
-const somenteAdminEdita = () => !!planilhaAtual().soAdmin && !(estado.usuario && estado.usuario.papel === "gestor");
+const somenteAdminEdita = () => !!planilhaAtual().soAdmin && !(estado.usuario && ["gestor", "equipe"].includes(estado.usuario.papel));
 const nomeCompletoPlanilha = (pl) => (pl.grupo ? `Inventário ${GRUPOS_INVENTARIO[pl.grupo]} · ${pl.curto}` : pl.curto);
 /* Lixeira, backups e auditoria são das quatro… cinco planilhas juntas (o campo "planilha" diz de qual é) */
 const COL_LIXEIRA = "inventario-lixeira", COL_BACKUPS = "inventario-backups", COL_AUDITORIA = "inventario-auditoria";
@@ -245,15 +245,15 @@ const EQUIPE_EDITA = [
   { id: "nenhuma", nome: "Nenhuma (a equipe só adiciona)" }
 ];
 /* Quem altera cada coluna. "lista": a equipe só escolhe uma opção existente.
-   "travado": a equipe preenche ao cadastrar o equipamento; depois, só as administradoras alteram. */
+   "travado": a equipe preenche ao cadastrar o equipamento; depois, só as administradoras e o Time N2 alteram. */
 const ACESSOS = [
-  { id: "bloqueado", nome: "BLOQUEADO (só administradoras)" },
+  { id: "bloqueado", nome: "BLOQUEADO (só administradoras e Time N2)" },
   { id: "livre", nome: "LIVRE (toda a equipe)" },
   { id: "lista", nome: "LISTA (a equipe escolhe uma opção)" },
   { id: "travado", nome: "TRAVADO APÓS CRIAR (a equipe preenche só ao cadastrar)" }
 ];
 const NOME_ACESSO_CURTO = { bloqueado: "BLOQUEADO", livre: "LIVRE", lista: "LISTA", travado: "TRAVADO APÓS CRIAR" };
-const TEXTO_BLOQUEADO = "Só as administradoras alteram este campo";
+const TEXTO_BLOQUEADO = "Só as administradoras e o Time N2 alteram este campo";
 const TEXTO_TRAVADO = "Para corrigir, fale com a Lays ou a Paula";
 function acessoDe(c) {
   if (c.tipo && TIPOS_SEM_EDICAO.includes(c.tipo)) return "livre";
@@ -265,7 +265,7 @@ function acessoDe(c) {
 }
 /* Texto do cadeado (cabeçalho, célula e formulário) para quem não pode alterar a coluna */
 function textoTrava(col) {
-  if (!col || ehAdmin()) return "";
+  if (!col || ehAdmin() || ehTimeN2()) return "";
   if (col.somenteAdmin) return TEXTO_BLOQUEADO;
   if (col.acesso === "travado") return TEXTO_TRAVADO;
   return "";
@@ -499,16 +499,18 @@ const SEM_APARENCIA = { l: "", c: {} };
 /* Papéis de quem entra sem senha (o "papel" da identidade); as administradoras são fixas (ADMINS) */
 const PAPEIS_PESSOA = [
   { id: "gestor", nome: "Gestor", ajuda: "Adiciona e edita em todas as planilhas (inclusive VCORP/VCERT). Não mexe na estrutura nem nos backups e não exclui de vez." },
-  { id: "equipe", nome: "Equipe N2", ajuda: "Vê, pesquisa e alimenta o Inventário de Equipamentos. VCORP/VCERT: só visualiza." },
+  { id: "equipe", nome: "Time N2", ajuda: "Adiciona e edita em todas as planilhas (inclusive VCORP/VCERT), também nas colunas bloqueadas e travadas. Não mexe na estrutura nem nos backups e não exclui de vez." },
   { id: "leitura", nome: "Leitura", ajuda: "Só vê e pesquisa." }
 ];
 const papelPessoa = (v) => (PAPEIS_PESSOA.some((p) => p.id === v) ? v : "equipe");
-const NOME_PAPEL = { admin: "Administradora", gestor: "Gestor", equipe: "Equipe N2", leitura: "Leitura" };
+const NOME_PAPEL = { admin: "Administradora", gestor: "Gestor", equipe: "Time N2", leitura: "Leitura" };
 const papel = () => (estado.usuario ? estado.usuario.papel : "");
 const ehAdmin = () => papel() === "admin";
 const ehGestor = () => papel() === "gestor";
-/* Quem alimenta (Equipe N2 e Gestor); o Gestor também edita qualquer linha e grava nas planilhas VCORP/VCERT */
-const ehEquipe = () => papel() === "equipe" || ehGestor();
+/* Time N2 (papel "equipe"): também altera as colunas BLOQUEADO e TRAVADO APÓS CRIAR */
+const ehTimeN2 = () => papel() === "equipe";
+/* Quem alimenta (Time N2 e Gestor), também nas planilhas VCORP/VCERT; o Gestor edita qualquer linha */
+const ehEquipe = () => ehTimeN2() || ehGestor();
 const conectado = () => !!estado.api && !estado.offline;
 const podeAlimentar = () => conectado() && !!estado.estrutura && (ehAdmin() || (ehEquipe() && !somenteAdminEdita()));
 /* Exportar: administradoras sempre; VCORP/VCERT, todo mundo; Inventário de Equipamentos, conforme a regra da estrutura */
@@ -882,7 +884,7 @@ function conferirRegistro(campos, ignorar) {
   colunasAtivas().forEach((c) => {
     if (TIPOS_SEM_EDICAO.includes(c.tipo)) return;
     const v = campos[c.id];
-    if (c.obrigatoria && estaVazio(v) && !(c.somenteAdmin && !ehAdmin())) erros[c.id] = `${c.nome} é obrigatório.`;
+    if (c.obrigatoria && estaVazio(v) && !(c.somenteAdmin && !podeNaLinhaNova(c))) erros[c.id] = `${c.nome} é obrigatório.`;
     else if (c.unica && !estaVazio(v)) {
       const ehChave = c.id === idChave();
       const chave = ehChave || ehColunaIndice(c) ? chaveNumero(v) : normalizar(v);
@@ -962,16 +964,16 @@ function podeEditarLinha(t) {
   if (regra === "proprias") return registradoPorMim(t) && dentroDaJanela(t);
   return false;
 }
-/* Coluna "travado após criar": a equipe preenche no cadastro; depois, só as administradoras alteram */
-const podeEditarColuna = (col) => !!col && !TIPOS_SEM_EDICAO.includes(col.tipo) && (ehAdmin() || (!col.somenteAdmin && col.acesso !== "travado"));
+/* Coluna "travado após criar": a equipe preenche no cadastro; depois, só as administradoras e o Time N2 alteram */
+const podeEditarColuna = (col) => !!col && !TIPOS_SEM_EDICAO.includes(col.tipo) && (ehAdmin() || ehTimeN2() || (!col.somenteAdmin && col.acesso !== "travado"));
 const podeEditarCelula = (t, col) => podeEditarLinha(t) && podeEditarColuna(col);
 const podePedirExclusao = (t) => conectado() && ehEquipe() && !planilhaAtual().soAdmin && !!t && !t.exclusao && !t.arquivo;
 function motivoSemEdicao(t, col) {
   if (!conectado()) return "Sem conexão: a edição está bloqueada.";
-  if (somenteAdminEdita() && !ehAdmin()) return `Somente visualização: só a Lays, a Paula e os gestores editam o ${nomeCompletoPlanilha(planilhaAtual())}.`;
+  if (somenteAdminEdita() && !ehAdmin()) return `Somente visualização: só a Lays, a Paula, os gestores e o Time N2 editam o ${nomeCompletoPlanilha(planilhaAtual())}.`;
   if (col && TIPOS_SEM_EDICAO.includes(col.tipo)) return `“${col.nome}” é preenchido automaticamente.`;
-  if (col && col.somenteAdmin && !ehAdmin()) return `${TEXTO_BLOQUEADO}: “${col.nome}”.`;
-  if (col && col.acesso === "travado" && !ehAdmin()) return `“${col.nome}” não muda depois do cadastro. ${TEXTO_TRAVADO}.`;
+  if (col && col.somenteAdmin && !podeEditarColuna(col)) return `${TEXTO_BLOQUEADO}: “${col.nome}”.`;
+  if (col && col.acesso === "travado" && !podeEditarColuna(col)) return `“${col.nome}” não muda depois do cadastro. ${TEXTO_TRAVADO}.`;
   if (papel() === "leitura") return "Seu acesso é só de leitura.";
   const regra = estado.estrutura && estado.estrutura.regras.equipeEdita;
   if (regra === "nenhuma") return "A equipe só adiciona registros; para corrigir, fale com a Lays ou a Paula.";
@@ -1554,7 +1556,7 @@ function pintarLinhas(forcar) {
 const celulaEl = (id, col) => $(`.linha[data-id="${CSS.escape(id)}"] .celula[data-col="${CSS.escape(col)}"]`);
 
 /* Linha nova fixa no fim da grade: digite e aperte Enter para registrar (e já começar a próxima) */
-const podeNaLinhaNova = (col) => !TIPOS_SEM_EDICAO.includes(col.tipo) && (ehAdmin() || !col.somenteAdmin);
+const podeNaLinhaNova = (col) => !TIPOS_SEM_EDICAO.includes(col.tipo) && (ehAdmin() || ehTimeN2() || !col.somenteAdmin);
 function lerLinhaNova() {
   const r = {};
   $$("#planilha .linha-nova [data-nova]").forEach((el) => { r[el.dataset.nova] = el.value; });
@@ -3177,7 +3179,7 @@ const TEXTO_CONFIRA_TRAVADO = "Confira antes de registrar: depois, só a Lays ou
 function campoFormulario(c, valores) {
   const id = `f-${c.id}`;
   const largo = ["textoLongo", "etiquetas"].includes(c.tipo) || c.id === "resumo";
-  const trava = c.somenteAdmin ? TEXTO_BLOQUEADO : c.acesso === "travado" && !ehAdmin() ? TEXTO_CONFIRA_TRAVADO : "";
+  const trava = ehAdmin() || ehTimeN2() ? "" : c.somenteAdmin ? TEXTO_BLOQUEADO : c.acesso === "travado" ? TEXTO_CONFIRA_TRAVADO : "";
   const ajuda = [c.ajuda, trava].filter(Boolean).join(" ");
   const idAjuda = `ajuda-${id}`, idErro = `erro-${id}`;
   const atributos = `name="${escapar(c.id)}" id="${escapar(id)}" aria-describedby="${escapar(ajuda ? `${idAjuda} ${idErro}` : idErro)}"`
@@ -4610,7 +4612,7 @@ function abrirEstrutura() {
         <div class="campos-linha" style="margin-top:8px">
           <label class="check" style="align-self:start"><input type="checkbox" data-registro="aberto"${r.regras.registro.aberto ? " checked" : ""}> Permitir novos registros</label>
           <label class="check" style="align-self:start"><input type="checkbox" data-registro="aprovacao"${r.regras.registro.aprovacao ? " checked" : ""}> Novos registros só entram depois de liberados em Pessoas</label>
-          <label class="campo"><span class="rotulo">Papel de quem se registra</span><select data-registro="papelPadrao"><option value="equipe"${r.regras.registro.papelPadrao === "equipe" ? " selected" : ""}>Equipe N2 (vê, pesquisa e alimenta)</option><option value="leitura"${r.regras.registro.papelPadrao === "leitura" ? " selected" : ""}>Leitura (só vê e pesquisa)</option></select></label>
+          <label class="campo"><span class="rotulo">Papel de quem se registra</span><select data-registro="papelPadrao"><option value="equipe"${r.regras.registro.papelPadrao === "equipe" ? " selected" : ""}>Time N2 (adiciona e edita, também nas colunas bloqueadas)</option><option value="leitura"${r.regras.registro.papelPadrao === "leitura" ? " selected" : ""}>Leitura (só vê e pesquisa)</option></select></label>
           <label class="campo"><span class="rotulo">Domínios de e-mail permitidos (um por linha)</span><textarea data-registro="dominios" rows="3" placeholder="valid.com&#10;empresa-parceira.com.br">${escapar(r.regras.registro.dominios.join("\n"))}</textarea><span class="ajuda">Vazio = qualquer domínio. Quem já se registrou não é afetado; para tirar alguém, bloqueie em Pessoas.</span></label>
         </div>`;
     }
@@ -4756,7 +4758,7 @@ function abrirEstrutura() {
           <label class="check"><input type="checkbox" name="unica"${base.unica ? " checked" : ""}> Valor único (não pode repetir)</label>
         </div>
         <label class="campo"><span class="rotulo">Acesso</span><select name="acesso"></select>
-          <span class="ajuda">BLOQUEADO: só a Lays e a Paula alteram (a equipe vê com cadeado). LIVRE: toda a equipe edita, em qualquer linha. LISTA: a equipe só escolhe uma opção (não cria nem renomeia). TRAVADO APÓS CRIAR: a equipe preenche ao cadastrar; depois, só a Lays e a Paula alteram.</span></label>
+          <span class="ajuda">BLOQUEADO: só a Lays, a Paula e o Time N2 alteram (os gestores veem com cadeado). LIVRE: toda a equipe edita, em qualquer linha. LISTA: a equipe só escolhe uma opção (não cria nem renomeia). TRAVADO APÓS CRIAR: a equipe preenche ao cadastrar; depois, só a Lays, a Paula e o Time N2 alteram.</span></label>
         <div id="col-extra"></div>
         <div id="col-conversao"></div>
         <p class="form-erro" role="alert"></p>
@@ -5002,7 +5004,7 @@ function abrirEstrutura() {
     original.colunas.forEach((a) => { if (!r.colunas.some((c) => c.id === a.id)) itens.push(`Coluna “${a.nome}” excluída de vez`); });
     if (JSON.stringify(original.gruposColunas) !== JSON.stringify(r.gruposColunas)) itens.push("Grupos de colunas alterados");
     if (original.titulo !== r.titulo) itens.push(`Título: “${original.titulo}” → “${r.titulo}”`);
-    if (JSON.stringify(original.regras) !== JSON.stringify(r.regras)) itens.push(`Regras da equipe: edita ${EQUIPE_EDITA.find((x) => x.id === r.regras.equipeEdita).nome.toLowerCase()}; janela ${r.regras.janelaEdicaoHoras || "sem limite"}${r.regras.janelaEdicaoHoras ? " h" : ""}; exportação ${r.regras.exportacao ? "liberada" : "desligada"}; novos registros ${r.regras.registro.aberto ? "permitidos" : "fechados"}${r.regras.registro.dominios.length ? ` (só ${r.regras.registro.dominios.join(", ")})` : ""}${r.regras.registro.aprovacao ? ", com liberação" : ", sem liberação"}, como ${r.regras.registro.papelPadrao === "leitura" ? "Leitura" : "Equipe N2"}`);
+    if (JSON.stringify(original.regras) !== JSON.stringify(r.regras)) itens.push(`Regras da equipe: edita ${EQUIPE_EDITA.find((x) => x.id === r.regras.equipeEdita).nome.toLowerCase()}; janela ${r.regras.janelaEdicaoHoras || "sem limite"}${r.regras.janelaEdicaoHoras ? " h" : ""}; exportação ${r.regras.exportacao ? "liberada" : "desligada"}; novos registros ${r.regras.registro.aberto ? "permitidos" : "fechados"}${r.regras.registro.dominios.length ? ` (só ${r.regras.registro.dominios.join(", ")})` : ""}${r.regras.registro.aprovacao ? ", com liberação" : ", sem liberação"}, como ${r.regras.registro.papelPadrao === "leitura" ? "Leitura" : "Time N2"}`);
     return [...new Set(itens)];
   }
   /* Escritas de dados que as migrações pedem (só registros que mudam) */

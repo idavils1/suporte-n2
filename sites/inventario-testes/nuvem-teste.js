@@ -138,21 +138,27 @@
     if (!equipe(antes, u)) return false;
     const cfg = config(antes) || {};
     const gestor = (perfil(antes, u) || {}).papel === "gestor";
-    /* VCORP/VCERT: só o gestor cria e edita (colunas liberadas da planilha, assinando com o próprio perfil); ninguém exclui */
+    const timeN2 = !gestor;
+    /* VCORP/VCERT: gestor (colunas liberadas da planilha) e Time N2 (todas) criam e editam, assinando com o próprio perfil; ninguém exclui */
     if (/^inventario-vc(orp|ert)-(hw|sw)$/.test(col)) {
-      if (!gestor) return false;
       if (partes.length > 2) return true;
       if (o.op === "delete") return false;
       const cp = antes[`inventario-colunas/${col.replace(/^inventario-/, "")}`] || {};
       const alteradas = velho ? mudancas(velho.campos, novo.campos) : Object.keys(novo.campos || {});
-      if (Array.isArray(cp.colunasEquipe) && alteradas.some((c) => !cp.colunasEquipe.includes(c))) return false;
+      if (!timeN2 && Array.isArray(cp.colunasEquipe) && alteradas.some((c) => !cp.colunasEquipe.includes(c))) return false;
       const pf = perfil(antes, u);
       return novo.atualizadoPor === u.uid && novo.atualizadoPorNome === pf.nome && novo.atualizadoPorEmail === pf.email;
     }
-    /* Índices de HOSTNAME e DNA: a equipe só cria (valor repetido = o índice já existe = recusa) e nunca apaga */
+    /* Índices de HOSTNAME e DNA: a equipe só cria (valor repetido = o índice já existe = recusa). O Time N2 apaga
+       o índice antigo no mesmo lote em que o próprio equipamento deixa de usar o valor. */
     if (col === "inventario-hostnames" || col === "inventario-dnas") {
-      if (o.op === "delete" || velho) return false;
       const campo = col === "inventario-hostnames" ? "numero" : "dna";
+      if (o.op === "delete") {
+        const eq = velho && depois[`inventario/${velho.equipamento}`];
+        return timeN2 && !!eq && eq.atualizadoPor === u.uid && eq[campo] !== id
+          && (eq.campos || {})[campo === "numero" ? "hostname" : "dna"] !== id;
+      }
+      if (velho) return false;
       const eq = depois[`inventario/${novo.equipamento}`];
       return !!eq && eq[campo] === id;
     }
@@ -165,14 +171,21 @@
       if (regra === "nenhuma") return false;
       if (regra === "proprias" && (!velho.criadoPorEmail || velho.criadoPorEmail !== pf.email)) return false;
       const alteradas = mudancas(velho.campos, novo.campos);
-      if (alteradas.some((c) => !(cfg.colunasEquipe || []).includes(c) || (cfg.colunasTravadas || []).includes(c))) return false;
-      if (mudancas(velho, novo).some((k) => !["campos", "atualizadoPor", "atualizadoPorNome", "atualizadoPorEmail", "atualizadoEm", "exclusao"].includes(k))) return false;
+      if (!timeN2 && alteradas.some((c) => !(cfg.colunasEquipe || []).includes(c) || (cfg.colunasTravadas || []).includes(c))) return false;
+      const chavesDoc = mudancas(velho, novo);
+      const permitidas = ["campos", "atualizadoPor", "atualizadoPorNome", "atualizadoPorEmail", "atualizadoEm", "exclusao", ...(timeN2 ? ["numero", "dna"] : [])];
+      if (chavesDoc.some((k) => !permitidas.includes(k))) return false;
+      const c = novo.campos || {};
+      if ((chavesDoc.includes("numero") || alteradas.includes("hostname"))
+        && ((novo.numero || "") !== (c.hostname || "") || (novo.numero && (depois[`inventario-hostnames/${novo.numero}`] || {}).equipamento !== id))) return false;
+      if ((chavesDoc.includes("dna") || alteradas.includes("dna"))
+        && ((novo.dna || "") !== (c.dna || "") || (novo.dna && (depois[`inventario-dnas/${novo.dna}`] || {}).equipamento !== id))) return false;
       if (!listasOk(cfg, novo.campos || {}, alteradas, velho.campos || {})) return false;
     }
     if (!velho) {
       const chaves = Object.keys(novo.campos || {});
-      if (chaves.some((c) => !(cfg.colunasEquipe || []).includes(c))) return false;
-      if (novo.parcial && chaves.some((c) => (cfg.colunasTravadas || []).includes(c))) return false;
+      if (!timeN2 && chaves.some((c) => !(cfg.colunasEquipe || []).includes(c))) return false;
+      if (!timeN2 && novo.parcial && chaves.some((c) => (cfg.colunasTravadas || []).includes(c))) return false;
       if (!listasOk(cfg, novo.campos || {}, chaves)) return false;
       if ((novo.numero || "") !== ((novo.campos || {}).hostname || "") || (novo.dna || "") !== ((novo.campos || {}).dna || "")) return false;
       if (novo.numero && (depois[`inventario-hostnames/${novo.numero}`] || {}).equipamento !== id) return false;

@@ -1329,9 +1329,11 @@ service cloud.firestore {
     function noInventario() {
       return request.auth != null && (adminInventario() || naListaInventario());
     }
-    // "admin" | "gestor" | "equipe" (Equipe N2) | "leitura"
+    // "admin" | "gestor" | "equipe" (Time N2) | "leitura"
     // Gestor: tudo o que a equipe faz, em qualquer linha (sem "só as próprias"), e também cria e edita nas
     // planilhas VCORP/VCERT. Não mexe em estrutura, backups, lixeira, índices nem exclui de vez.
+    // Time N2: cria e edita também nas colunas BLOQUEADO e TRAVADO APÓS CRIAR (trocando o índice de HOSTNAME/DNA)
+    // e nas planilhas VCORP/VCERT. Também não mexe em estrutura, backups e lixeira nem exclui de vez.
     function papelInventario() {
       return adminInventario() ? 'admin' : perfilInventario().papel;
     }
@@ -1340,6 +1342,9 @@ service cloud.firestore {
     }
     function gestorInventario() {
       return naListaInventario() && papelInventario() == 'gestor';
+    }
+    function timeN2Inventario() {
+      return naListaInventario() && papelInventario() == 'equipe';
     }
     // Quem grava: e-mail da administradora ou uid da pessoa da equipe
     function autorInventario() {
@@ -1466,10 +1471,11 @@ service cloud.firestore {
     function equipeCriaEquipamento(id) {
       let d = request.resource.data;
       let cfg = configInventario();
+      let timeN2 = timeN2Inventario();
       return equipeInventario()
         && formatoEquipamento(d)
-        && d.campos.keys().hasOnly(cfg.colunasEquipe)
-        && (d.get('parcial', false) == false || !d.campos.keys().hasAny(cfg.get('colunasTravadas', [])))
+        && (timeN2 || d.campos.keys().hasOnly(cfg.colunasEquipe))
+        && (timeN2 || d.get('parcial', false) == false || !d.campos.keys().hasAny(cfg.get('colunasTravadas', [])))
         && listasInventarioValidas(cfg, d.campos, {}, d.campos.keys())
         && autoriaInventario(d.criadoPor, d.criadoPorNome, d.criadoPorEmail) && d.criadoEm == request.time
         && autoriaInventario(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time
@@ -1480,20 +1486,27 @@ service cloud.firestore {
     }
     // equipeEdita: "todas" (padrão do Inventário), "proprias" ou "nenhuma". Na edição, as colunas
     // "travado após criar" não podem estar entre as alteradas, e numero/dna não mudam.
-    function equipeEditaEquipamento() {
+    function equipeEditaEquipamento(id) {
       let cfg = configInventario();
       let regras = cfg.regras;
       let d = request.resource.data;
       let alteradas = d.campos.diff(resource.data.campos).affectedKeys();
-      return d.diff(resource.data).affectedKeys().hasOnly(['campos', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm'])
+      let chaves = d.diff(resource.data).affectedKeys();
+      let timeN2 = timeN2Inventario();
+      return chaves.hasOnly(['campos', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm', 'numero', 'dna'])
+        && (timeN2 || !chaves.hasAny(['numero', 'dna']))
+        && (!('numero' in chaves || 'hostname' in alteradas) || (chaveInventarioValida(d.get('numero', ''))
+          && d.get('numero', '') == d.campos.get('hostname', '') && indiceInventario('inventario-hostnames', d.get('numero', ''), id)))
+        && (!('dna' in chaves || 'dna' in alteradas) || (chaveInventarioValida(d.get('dna', ''))
+          && d.get('dna', '') == d.campos.get('dna', '') && indiceInventario('inventario-dnas', d.get('dna', ''), id)))
         && equipeInventario()
         && (papelInventario() == 'gestor' || (regras.equipeEdita != 'nenhuma'
           && (regras.equipeEdita == 'todas'
             || (resource.data.get('criadoPorEmail', '') != '' && resource.data.get('criadoPorEmail', '') == perfilInventario().email
               && (regras.janelaEdicaoHoras == 0 || request.time < resource.data.criadoEm + duration.value(regras.janelaEdicaoHoras, 'h'))))))
         && d.campos is map && d.campos.size() <= 80
-        && alteradas.hasOnly(cfg.colunasEquipe)
-        && !alteradas.hasAny(cfg.get('colunasTravadas', []))
+        && (timeN2 || alteradas.hasOnly(cfg.colunasEquipe))
+        && (timeN2 || !alteradas.hasAny(cfg.get('colunasTravadas', [])))
         && listasInventarioValidas(cfg, d.campos, resource.data.campos, alteradas)
         && autoriaInventario(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time;
     }
@@ -1576,6 +1589,14 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['equipamento'])
         && getAfter(/databases/$(database)/documents/inventario/$(request.resource.data.equipamento)).data.get(campo, '') == valor);
     }
+    // Time N2 trocando o HOSTNAME/DNA: apaga o índice antigo só no mesmo lote em que o próprio equipamento
+    // deixa de usar o valor (o equipamento é gravado por ela agora e já não tem o valor nem na chave nem na célula)
+    function timeN2ApagaIndiceInventario(campo, valor) {
+      let e = getAfter(/databases/$(database)/documents/inventario/$(resource.data.equipamento)).data;
+      return timeN2Inventario()
+        && e.atualizadoPor == request.auth.uid && e.atualizadoEm == request.time
+        && e.get(campo, '') != valor && e.campos.get(campo == 'numero' ? 'hostname' : 'dna', '') != valor;
+    }
     // Trilha de auditoria (inventario-auditoria): só inclusão. Administradora assina com o e-mail; quem está
     // no Inventário assina com o uid e só registra a própria atividade (entrar e exportar; a equipe também as
     // próprias edições no Inventário de Equipamentos). "mudancas" = [{ coluna, antes, depois }] da edição.
@@ -1609,7 +1630,7 @@ service cloud.firestore {
     match /inventario/{equipamentoId} {
       allow read: if noInventario();
       allow create: if adminInventario() || equipeCriaEquipamento(equipamentoId);
-      allow update: if adminInventario() || equipeEditaEquipamento() || equipePedeExclusaoInventario();
+      allow update: if adminInventario() || equipeEditaEquipamento(equipamentoId) || equipePedeExclusaoInventario();
       allow delete: if adminInventario();
       match /historico/{evento} {
         allow read: if noInventario();
@@ -1625,12 +1646,14 @@ service cloud.firestore {
     match /inventario-hostnames/{valor} {
       allow read: if noInventario();
       allow create: if criaIndiceInventario('numero', valor);
-      allow update, delete: if adminInventario();
+      allow update: if adminInventario();
+      allow delete: if adminInventario() || timeN2ApagaIndiceInventario('numero', valor);
     }
     match /inventario-dnas/{valor} {
       allow read: if noInventario();
       allow create: if criaIndiceInventario('dna', valor);
-      allow update, delete: if adminInventario();
+      allow update: if adminInventario();
+      allow delete: if adminInventario() || timeN2ApagaIndiceInventario('dna', valor);
     }
     // Aparelho (o id do documento é o uid do login anônimo deste navegador): { email, nomeChave, vinculadoEm, ultimoAcesso }
     match /inventario-pessoas/{uid} {
@@ -1686,8 +1709,8 @@ service cloud.firestore {
     }
 
     // ---------- INVENTÁRIO VCORP e VCERT (Hardware e Software) ----------
-    // Quem está no Inventário (administradora, gestor, equipe ou leitura) vê; administradoras e gestores gravam
-    // (gestor: só cria e edita, nas colunas liberadas da planilha, assinando com o próprio perfil; não exclui).
+    // Quem está no Inventário (administradora, gestor, Time N2 ou leitura) vê; administradoras, gestores e Time N2 gravam
+    // (gestor e Time N2: só criam e editam, assinando com o próprio perfil; não excluem).
     // Registro: { campos: { idColuna: valor }, criadoPor, criadoPorNome, criadoPorEmail, criadoEm, atualizadoPor... }.
     // Software: NOME DA APLICAÇÃO (nomeAplicacao), VERSÃO (versao), HOSTNAME (hostname) e MÊS/ANO (mesAno) obrigatórios.
     // As colunas extras ficam no mesmo mapa "campos" (até 80 chaves; o tamanho de cada uma é conferido no app).
@@ -1722,30 +1745,30 @@ service cloud.firestore {
         && (colecao.matches('.*-sw$') ? softwareValido(d.campos) : hardwareValido(d.campos));
     }
     // Gestor: as colunas alteradas têm de estar entre as liberadas (colunasEquipe de inventario-colunas/{planilha});
-    // na criação assina criadoPor e atualizadoPor; na edição só mudam campos e atualizadoPor.
+    // o Time N2 grava em todas. Na criação assina criadoPor e atualizadoPor; na edição só mudam campos e atualizadoPor.
     function gestorGravaPerfil(colecao, criando) {
       let d = request.resource.data;
       let cfg = get(/databases/$(database)/documents/inventario-colunas/$(colecao.replace('^inventario-', ''))).data;
       let alteradas = criando ? d.campos.keys().toSet() : d.campos.diff(resource.data.campos).affectedKeys();
-      return gestorInventario()
+      return equipeInventario()
         && d.keys().hasOnly(['campos', 'criadoPor', 'criadoPorNome', 'criadoPorEmail', 'criadoEm',
           'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm', 'exclusao'])
         && d.campos is map && d.campos.size() <= 80
-        && (!('colunasEquipe' in cfg) || alteradas.hasOnly(cfg.colunasEquipe))
+        && (timeN2Inventario() || !('colunasEquipe' in cfg) || alteradas.hasOnly(cfg.colunasEquipe))
         && ((criando && d.get('exclusao', null) == null
             && autoriaInventario(d.criadoPor, d.criadoPorNome, d.criadoPorEmail) && d.criadoEm == request.time)
           || (!criando && d.diff(resource.data).affectedKeys().hasOnly(['campos', 'atualizadoPor', 'atualizadoPorNome', 'atualizadoPorEmail', 'atualizadoEm'])))
         && autoriaInventario(d.atualizadoPor, d.atualizadoPorNome, d.atualizadoPorEmail) && d.atualizadoEm == request.time
         && (colecao.matches('.*-sw$') ? softwareValido(d.campos) : hardwareValido(d.campos));
     }
-    // Histórico de uma linha VCORP/VCERT: administradora assina com o e-mail; gestor com o uid, junto da própria mudança
+    // Histórico de uma linha VCORP/VCERT: administradora assina com o e-mail; gestor e Time N2 com o uid, junto da própria mudança
     function historicoPerfilValido(colecao, registro) {
       let h = request.resource.data;
       return h.keys().hasOnly(['acao', 'coluna', 'colunaNome', 'antes', 'depois', 'por', 'porNome', 'porEmail', 'em'])
         && textoAte(h.acao, 30) && textoAte(h.coluna, 40) && textoAte(h.colunaNome, 60)
         && textoAte(h.antes, 500) && textoAte(h.depois, 500) && h.em == request.time
         && ((adminInventario() && h.por == emailInventario())
-          || (gestorInventario() && h.por == request.auth.uid
+          || (equipeInventario() && h.por == request.auth.uid
             && autoriaInventario(h.por, h.porNome, h.porEmail)
             && getAfter(/databases/$(database)/documents/$(colecao)/$(registro)).data.atualizadoPor == request.auth.uid
             && getAfter(/databases/$(database)/documents/$(colecao)/$(registro)).data.atualizadoEm == request.time));
